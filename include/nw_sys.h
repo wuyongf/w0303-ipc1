@@ -431,7 +431,6 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
         // (1) Initial check
         //
 
-
         // All devices should be idle. Otherwise we should keep checking for 3 minutes.. and then alter user.
         auto time_now = sql_ptr_->TimeNow();
         auto time_countdown = sql_ptr_->CountdownTime(time_now, 3);
