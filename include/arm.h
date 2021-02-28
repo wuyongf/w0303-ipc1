@@ -76,7 +76,7 @@ namespace yf
             yf::modbus::tm_modbus tm_modbus;
 
             // Arm Status
-            bool  arm_mission_flag_ = false;
+            bool  arm_mission_continue_flag_ = false;
 
             // Net
             //
@@ -150,6 +150,9 @@ void yf::arm::tm::Close()
     tm_modbus.Close();
 }
 
+// Only check the following status:
+//   (1) Error (2) TMProjectRunning (3) EStop
+//
 void yf::arm::tm::ModbusCheckArmStatus()
 {
     if(tm_modbus.read_isError())
@@ -173,7 +176,6 @@ void yf::arm::tm::ModbusCheckArmStatus()
             // Update nw_sys arm_connection_status
             GetConnectionStatus();
         }
-
     }
 
     if(tm_modbus.read_isEStop())
@@ -199,23 +201,30 @@ void yf::arm::tm::ModbusCheckArmStatus()
         }
     }
 
+    //
+    if(!tm_modbus.read_isProjectRunning())
+    {
+        LOG(INFO) << "robotic arm project is not running!";
+
+        // (1) Update nw_sys arm_mission_status
+        nw_status_ptr_->arm_mission_status = yf::data::common::MissionStatus::Error;
+
+        // (2) Update nw_sys arm_connection_status
+        if(nw_status_ptr_->arm_connection_status == yf::data::common::ConnectionStatus::Connected)
+        {
+            // Notify ipc_sever that the arm client has disconnected.
+            NetMessageArm("Get Status");
+            // Update nw_sys arm_connection_status
+            GetConnectionStatus();
+        }
+    }
+
+    #if 0 //tm_modbus.read_isPause()
     if(tm_modbus.read_isPause())
     {
         nw_status_ptr_->arm_mission_status = yf::data::common::MissionStatus::Pause;
     }
-
-    if(!tm_modbus.read_isProjectRunning())
-    {
-        LOG(INFO) << "robotic arm project is not starting!";
-
-        // Can also set arm_connection_status = yf::data::common:ConnectionStatus::Disconnected;
-
-    }
-    else
-    {
-        // project is running!!!
-        // if recorded as disconnected, should I notice the server to wait for new arm connection????
-    }
+    #endif
 }
 
 void yf::arm::tm::WaitForConnection()
@@ -262,7 +271,7 @@ void yf::arm::tm::CheckArmInitMssionStaus()
                 LOG(INFO) << "todo: update database(task,schedule)...";
 
                 // The Arm is Error!
-                arm_mission_flag_ = false;
+                arm_mission_continue_flag_ = false;
 
                 return;
             }
@@ -274,7 +283,7 @@ void yf::arm::tm::CheckArmInitMssionStaus()
                 LOG(INFO) << "todo: wait 3-min for resume!";
 
                 // The Arm is E-Stop!
-                arm_mission_flag_ = false;
+                arm_mission_continue_flag_ = false;
 
                 return;
             }
@@ -288,7 +297,7 @@ void yf::arm::tm::CheckArmInitMssionStaus()
             case yf::data::common::MissionStatus::Idle:
             {
                 // Everything is fine. The arm is waiting any mission to do. Enjoy.
-                arm_mission_flag_ = true;
+                arm_mission_continue_flag_ = true;
 
                 // No need to check again, break
                 check_flag = false;
@@ -307,7 +316,7 @@ void yf::arm::tm::CheckArmInitMssionStaus()
 void yf::arm::tm::AssignArmMission(const std::string &arm_command_str)
 {
     // todo: check the mission flag,
-    if(arm_mission_flag_)
+    if(arm_mission_continue_flag_)
     {
         // For listen node --- motion control
         // todo: hard code ---> soft code
@@ -379,18 +388,20 @@ void yf::arm::tm::UpdateArmCurMissionStatus()
         {
             case yf::data::common::MissionStatus::Error:
             {
-                // todo: close arm ???? here???
-
                 LOG(INFO) << "ipc knows robotic arm is error!";
-                LOG(INFO) << "todo: update database(task,schedule)...";
+
+                LOG(INFO) << "arm mission aborted";
+                nw_status_ptr_->cur_task_continue_flag = false;
+
                 return;
             }
 
             case yf::data::common::MissionStatus::EStop:
             {
                 LOG(INFO) << "robotic arm has been e-stopped!";
-                LOG(INFO) << "todo: update database(task,schedule)...";
-                LOG(INFO) << "todo: wait 3-min for resume!";
+
+                LOG(INFO) << "arm mission aborted";
+                nw_status_ptr_->cur_task_continue_flag = false;
 
                 return;
             }
@@ -405,9 +416,38 @@ void yf::arm::tm::UpdateArmCurMissionStatus()
         {
             case yf::data::common::MissionStatus::Pause:
             {
-                // arm has been paused.
-                // loop...
+
                 LOG(INFO) << "arm has been Paused.";
+                sql_ptr_->UpdateDeviceMissionStatusLog("arm", 4);
+                sql_ptr_->UpdateDeviceMissionStatus("arm", 4);
+                sql_ptr_->UpdateTaskData(nw_status_ptr_->db_cur_task_id, 6);
+                sql_ptr_->UpdateTaskLog(nw_status_ptr_->db_cur_task_id, 6);
+
+                // start counting 5 minutes
+                std::string countdown_time = sql_ptr_->CountdownTime(sql_ptr_->TimeNow(),5);
+
+                // counting...
+                while(sql_ptr_->isFutureTime(countdown_time, sql_ptr_->TimeNow()))
+                {
+                    ModbusCheckArmStatus();
+                    RetrieveArmCurrentMissionStatus();
+                    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+                    if(nw_status_ptr_->arm_mission_status != data::common::MissionStatus::Pause)
+                    {
+                        break;
+                    }
+                }
+
+                // if wait too long
+                if(!sql_ptr_->isFutureTime(countdown_time, sql_ptr_->TimeNow()))
+                {
+                    LOG(INFO) << "robotic arm has been paused for 5 minutes. arm mission aborted";
+                    nw_status_ptr_->cur_task_continue_flag = false;
+                    nw_status_ptr_->arm_mission_status = data::common::MissionStatus::Error;
+                    return;
+                }
+
                 break;
             }
                 // exit safely
@@ -422,7 +462,9 @@ void yf::arm::tm::UpdateArmCurMissionStatus()
                 // todo:
                 //  3. Current arm_task will be regarded as success. just record and finish it.
                 update_flag = false;
-                arm_mission_flag_ = false;
+
+                nw_status_ptr_->cur_task_continue_flag = true;
+
                 break;
             }
 
@@ -434,7 +476,9 @@ void yf::arm::tm::UpdateArmCurMissionStatus()
                 // todo:
                 //  3. Current arm_task will be regarded as success. just (record and) finish it.
                 update_flag = false;
-                arm_mission_flag_ = false;   // cur_task_fail_flag
+
+                nw_status_ptr_->cur_task_continue_flag = true;
+
                 break;
             }
 

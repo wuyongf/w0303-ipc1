@@ -49,7 +49,7 @@ namespace yf
 
             std::vector<float> Time_str2vector(std::string str);
 
-            bool isLatestSchedule(std::string time_from_database, std::string time_now);
+            bool isFutureTime(std::string time_from_database, std::string time_now);
 
             std::string CountdownTime(const std::string& time_now, const int& countdown_min);
 
@@ -84,12 +84,16 @@ namespace yf
             int GetTaskMode(const int& cur_task_id);
             int GetTaskCommand(const int& cur_task_id);
 
+            void UpdateTaskData(const int& cur_task_id, const int& task_status);
             void UpdateTaskLog(const int& cur_task_id, const int& task_status);
 
             // Device Status
             //
             void UpdateDeviceConnectionStatus(const std::string& device_name, const int& connection_status);
+
+            void UpdateDeviceMissionStatusLog(const std::string& device_name, const int& mission_status);
             void UpdateDeviceMissionStatus(const std::string& device_name, const int& mission_status);
+
             void UpdateDeviceBatteryCapacity(const std::string& device_name, const float& battery_capacity);
 
         private:
@@ -608,7 +612,7 @@ std::vector<float> yf::sql::sql_server::Time_str2vector(std::string str)
     return time;
 }
 
-bool yf::sql::sql_server::isLatestSchedule(std::string time_from_database, std::string time_now)
+bool yf::sql::sql_server::isFutureTime(std::string time_from_database, std::string time_now)
 {
     std::vector<float> time_db;
     std::vector<float> time_current;
@@ -683,7 +687,7 @@ void yf::sql::sql_server::WaitForExecute(const std::string &execute_time)
     auto time_scheduled = execute_time;
 
     // wait for execute time..
-    while (isLatestSchedule(time_scheduled, time_temp))
+    while (isFutureTime(time_scheduled, time_temp))
     {
         time_temp = TimeNow();
         std::this_thread::sleep_for(std::chrono::milliseconds(2000));
@@ -812,6 +816,116 @@ std::string yf::sql::sql_server::CountdownTime(const std::string& time_now, cons
                             std::to_string((int)v_time[4]+countdown_min) + ":" +
                             std::to_string((int)v_time[5]) + ".000";
     return time_countdown;
+}
+
+void yf::sql::sql_server::UpdateTaskData(const int &cur_task_id, const int &task_status)
+{
+    std::string status_str = std::to_string(task_status);
+    std::string id_str = std::to_string(cur_task_id);
+    std::string query_update;
+
+    try
+    {
+        Connect();
+
+        switch (task_status)
+        {
+            case 2: // in processing
+            {
+                query_update = "UPDATE sys_schedule_job_task SET status = " + status_str + ", actual_start='"+TimeNow()+"' WHERE ID = "+ id_str;
+                break;
+            }
+
+            case 3: // finish
+            {
+                query_update = "UPDATE sys_schedule_job_task SET status = " + status_str + ", actual_end='"+TimeNow()+"' WHERE ID = "+ id_str;
+                break;
+            }
+
+            case 4: // cancel
+            {
+                query_update = "UPDATE sys_schedule_job_task SET status = " + status_str + ", actual_end='"+TimeNow()+"' WHERE ID = "+ id_str;
+                break;
+            }
+
+            case 5: // error
+            {
+                query_update = "UPDATE sys_schedule_job_task SET status = " + status_str + ", actual_end='"+TimeNow()+"' WHERE ID = "+ id_str;
+                break;
+            }
+
+            case 6: // pause
+            {
+                query_update = "UPDATE sys_schedule_job_task SET status = " + status_str + ", actual_end='"+TimeNow()+"' WHERE ID = "+ id_str;
+                break;
+            }
+
+        }
+
+        nanodbc::execute(conn_,query_update);
+
+        Disconnect();
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+    }
+}
+
+void yf::sql::sql_server::UpdateDeviceMissionStatusLog(const std::string &device_name, const int &mission_status)
+{
+    // (1) get current device mission status : std::string original_mission_status
+    std::string query_update_1;
+
+    std::string original_mission_status;
+
+    //"SELECT ID FROM schedule_table where status=1 AND planned_start > '2021-02-06 11:10:08.000'"
+    try
+    {
+        Connect();
+
+        query_update_1 = "SELECT mission_status FROM sys_status_device where device = '"+ device_name +"'";
+
+
+
+        auto result = nanodbc::execute(conn_,query_update_1);
+
+        while(result.next())
+        {
+            original_mission_status = result.get<std::string>(0, "null");
+        };
+
+        Disconnect();
+
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+    }
+
+    // (2) update to status log
+
+    std::string new_mission_status = std::to_string(mission_status);
+    std::string query_update_2;
+
+    try
+    {
+        Connect();
+
+        query_update_2 = "INSERT INTO sys_status_device_log(device_name, original_mission_status, new_mission_status, "
+                         "created_time) VALUES ('" + device_name + "'," + original_mission_status +"," + new_mission_status +",'"+ TimeNow() + "'";
+
+        nanodbc::execute(conn_,query_update_2);
+
+        Disconnect();
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+    }
 }
 
 

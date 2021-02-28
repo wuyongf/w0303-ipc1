@@ -35,11 +35,16 @@ namespace yf
             // schedule status
             // database - Schedule - Job - Task current status
             yf::data::common::MissionStatus db_cur_schedule_status_;
+
             yf::data::common::MissionStatus db_cur_job_status_;
 
-            yf::data::common::MissionStatus db_cur_task_status_;
+            yf::data::common::MissionStatus db_cur_task_status;
 
-            bool cur_task_fail_flag = true;
+            // db current id
+
+            int db_cur_task_id;
+
+            bool cur_task_continue_flag = false;
 
         public:
 

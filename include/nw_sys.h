@@ -73,6 +73,13 @@ namespace yf
             void UpdateDbDeviceStatusBeforeTask (const int& cur_job_id);
             void UpdateDbDeviceStatusAfterTask (const int& cur_job_id);
 
+        protected: // SQL
+
+            void UpdateDbDeviceArmConnectionStatusAfterTask();
+            void UpdateDbDeviceArmMissionStatusAfterTask();
+
+            void UpdateDbCurTaskStatusAndLog();
+
         private:
 
             // SYS
@@ -316,7 +323,7 @@ void yf::sys::nw_sys::thread_DoSchedules()
 
             while (nw_status_ptr_->arm_mission_status != yf::data::common::MissionStatus::Idle)
             {
-                if(!sql_ptr_->isLatestSchedule(time_countdown,time_now))
+                if(!sql_ptr_->isFutureTime(time_countdown, time_now))
                 {
                     LOG(INFO) << "The Arm has not responded for 3 minutes.";
                     //
@@ -428,7 +435,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
     //
     while (q_task_ids.size() != 0)
     {
-        // (1) Initial check
+        // TODO: (1) Initial check
         //
 
         // All devices should be idle. Otherwise we should keep checking for 3 minutes.. and then alter user.
@@ -437,7 +444,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
 
         while (nw_status_ptr_->arm_mission_status != yf::data::common::MissionStatus::Idle)
         {
-            if(!sql_ptr_->isLatestSchedule(time_countdown,time_now))
+            if(!sql_ptr_->isFutureTime(time_countdown, time_now))
             {
                 LOG(INFO) << "The Arm has not responded for 3 minutes.";
                 //
@@ -452,36 +459,52 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
         }
 
 
-        // (2) Do each Task
+        // TODO: (2) Do each Task
 
         if(nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::Idle)
         {
             auto cur_task_id = q_task_ids.front();
             q_task_ids.pop_front();
 
-            // TODO: Update Task Status before task
+            nw_status_ptr_->db_cur_task_id = cur_task_id;
+
+            // TODO: Update Task Status before task, 2 --- in process
+            sql_ptr_->UpdateTaskData(cur_task_id, 2);
             sql_ptr_->UpdateTaskLog(cur_task_id, 2);
 
             // TODO: Execute the task!
             DoTask(cur_task_id);
-
-            // TODO: Update Task Status after task
-
-            if(nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::Idle)
-            {
-                sql_ptr_->UpdateTaskLog(cur_task_id, 3);
-            }
-
-            if(nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::Error)
-            {
-                sql_ptr_->UpdateTaskLog(cur_task_id, 5);
-            }
         }
         else
         {
             LOG(INFO) << "abort current tasks...";
             q_task_ids.clear();
         }
+
+        // TODO: (3)
+        //  a. break the task loop or not?
+        //  b. Update Task Status after task. Record status and update to SQL Server
+
+        // For Arm
+
+        // (0) break the task loop or not?
+
+        if( nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Disconnected ||
+            nw_status_ptr_->arm_mission_status != data::common::MissionStatus::Idle ||
+            nw_status_ptr_->arm_mission_status != data::common::MissionStatus::Finish)
+        {
+            LOG(INFO) << "abort current tasks...";
+            q_task_ids.clear();
+        }
+
+        // (1) record and update arm connection status
+        UpdateDbDeviceArmConnectionStatusAfterTask();
+
+        // (2) record and update arm mission status   // todo:(Log) UpdateDbDeviceArmMissionStatusLogAfterTask();
+        UpdateDbDeviceArmMissionStatusAfterTask();
+
+        // (3) record and update current task status
+        UpdateDbCurTaskStatusAndLog();                // todo: what about cancel Status?
 
     }
 
@@ -645,6 +668,85 @@ void yf::sys::nw_sys::UpdateDbScheduleBeforeTask(const int &cur_schedule_id)
 
     sql_ptr_->UpdateScheduleData(cur_schedule_id, schedule_status);
     sql_ptr_->UpdateScheduleLog(cur_schedule_id, schedule_status);
+
+}
+
+void yf::sys::nw_sys::UpdateDbDeviceArmConnectionStatusAfterTask()
+{
+    if(nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Connected)
+    {
+        sql_ptr_->UpdateDeviceConnectionStatus("arm", 1);
+    }
+    else
+    {
+        sql_ptr_->UpdateDeviceConnectionStatus("arm", 0);
+    }
+    return;
+}
+
+void yf::sys::nw_sys::UpdateDbDeviceArmMissionStatusAfterTask()
+{
+    switch (nw_status_ptr_->arm_mission_status)
+    {
+        case data::common::MissionStatus::Idle:
+        {
+            sql_ptr_->UpdateDeviceMissionStatus("arm", 1);
+            break;
+        }
+        case data::common::MissionStatus::Running:
+        {
+            sql_ptr_->UpdateDeviceMissionStatus("arm", 2);
+            break;
+        }
+        case data::common::MissionStatus::Finish:
+        {
+            sql_ptr_->UpdateDeviceMissionStatus("arm", 3);
+            break;
+        }
+        case data::common::MissionStatus::Pause:
+        {
+            sql_ptr_->UpdateDeviceMissionStatus("arm", 4);
+            break;
+        }
+        case data::common::MissionStatus::Cancel:
+        {
+            sql_ptr_->UpdateDeviceMissionStatus("arm", 5);
+
+            break;
+        }
+        case data::common::MissionStatus::Error:
+        {
+            sql_ptr_->UpdateDeviceMissionStatus("arm", 6);
+
+            break;
+        }
+        case data::common::MissionStatus::EStop:
+        {
+            sql_ptr_->UpdateDeviceMissionStatus("arm", 7);
+
+            break;
+        }
+    }
+}
+
+void yf::sys::nw_sys::UpdateDbCurTaskStatusAndLog()
+{
+    // currently, only consider arm mission status.
+    if( nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::Idle ||
+        nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::Finish)
+    {
+        sql_ptr_->UpdateTaskData(nw_status_ptr_->db_cur_task_id, 3);
+        sql_ptr_->UpdateTaskLog(nw_status_ptr_->db_cur_task_id, 3);
+    }
+
+    if( nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::Error ||
+        nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::EStop)
+    {
+        sql_ptr_->UpdateTaskData(nw_status_ptr_->db_cur_task_id, 5);
+        sql_ptr_->UpdateTaskLog(nw_status_ptr_->db_cur_task_id, 5);
+    }
+
+    // todo: what about Cancel?
 
 }
 

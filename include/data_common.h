@@ -25,7 +25,7 @@ namespace yf
             // for: schedule, arm task, mir task, vision task...
             enum class MissionStatus
             {
-                Null    = 0,
+                Null    = 0,       // nw_sys initialization
                 Idle    = 1,       // No mission				 //waiting	    // Normal status
                 Running = 2,       // Executing a mission        //running
                 Finish  = 3,       // Pause the current mission  //       // Pause the project/robotic arm
