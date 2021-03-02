@@ -36,6 +36,10 @@ namespace yf
 
             void GetConnectionStatus();
 
+            void GetMissionStatus();
+
+            bool TryReconnectArm();
+
             //todo: Arm --- --- Check function 1.
             // function: Initial check the status of Arm.
             void CheckArmInitMssionStaus();
@@ -59,6 +63,7 @@ namespace yf
             std::string RetrieveRealPath(const std::string& str);
 
         private:
+
             // properties
             const char* tm_ip_address_ = "192.168.2.29";
             int   network_port_no_;
@@ -160,15 +165,7 @@ void yf::arm::tm::ModbusCheckArmStatus()
         // (1) Update nw_sys arm_mission_status
         nw_status_ptr_->arm_mission_status = yf::data::common::MissionStatus::Error;
 
-        // Can also set arm_connection_status = yf::data::common:ConnectionStatus::Disconnected;
-        // however, I need to let ipc_sever know cliet arm is disconnected also!
-        // how? by sending random msg!
-        // after that, there is no arm_connection_id. need to reconnect!
-
         // (2) Update nw_sys arm_connection_status
-        //
-        // if still record connected, should update the connection status
-        // if not, do nothing...
         if(nw_status_ptr_->arm_connection_status == yf::data::common::ConnectionStatus::Connected)
         {
             // Notify ipc_sever that the arm client has disconnected.
@@ -176,6 +173,7 @@ void yf::arm::tm::ModbusCheckArmStatus()
             // Update nw_sys arm_connection_status
             GetConnectionStatus();
         }
+
     }
 
     if(tm_modbus.read_isEStop())
@@ -227,6 +225,8 @@ void yf::arm::tm::ModbusCheckArmStatus()
     #endif
 }
 
+// todo: 2021/3/1 wait for reconnection
+
 void yf::arm::tm::WaitForConnection()
 {
 
@@ -238,6 +238,9 @@ void yf::arm::tm::WaitForConnection()
     nw_status_ptr_->arm_connection_status = yf::data::common::ConnectionStatus::Connected;
 
     ModbusCheckArmStatus();
+
+
+
 }
 
 void yf::arm::tm::GetConnectionStatus()
@@ -424,10 +427,10 @@ void yf::arm::tm::UpdateArmCurMissionStatus()
                 sql_ptr_->UpdateTaskLog(nw_status_ptr_->db_cur_task_id, 6);
 
                 // start counting 5 minutes
-                std::string countdown_time = sql_ptr_->CountdownTime(sql_ptr_->TimeNow(),5);
+                std::string time_future = sql_ptr_->CountdownTime(sql_ptr_->TimeNow(),5);
 
                 // counting...
-                while(sql_ptr_->isFutureTime(countdown_time, sql_ptr_->TimeNow()))
+                while(sql_ptr_->isFutureTime(time_future, sql_ptr_->TimeNow()))
                 {
                     ModbusCheckArmStatus();
                     RetrieveArmCurrentMissionStatus();
@@ -440,7 +443,7 @@ void yf::arm::tm::UpdateArmCurMissionStatus()
                 }
 
                 // if wait too long
-                if(!sql_ptr_->isFutureTime(countdown_time, sql_ptr_->TimeNow()))
+                if(!sql_ptr_->isFutureTime(time_future, sql_ptr_->TimeNow()))
                 {
                     LOG(INFO) << "robotic arm has been paused for 5 minutes. arm mission aborted";
                     nw_status_ptr_->cur_task_continue_flag = false;
@@ -450,21 +453,14 @@ void yf::arm::tm::UpdateArmCurMissionStatus()
 
                 break;
             }
-                // exit safely
+                // just wait for Idle
             case yf::data::common::MissionStatus::Finish:
             {
                 LOG(INFO) << "arm has finished.";
 
-                // todo:
-                //  1. Need to record current job, task, etc...
-                //  2. Report to database....
-
-                // todo:
-                //  3. Current arm_task will be regarded as success. just record and finish it.
-                update_flag = false;
-
-                nw_status_ptr_->cur_task_continue_flag = true;
-
+                // arm is working well, just keep checking
+                // wait 500ms and loop...
+                std::this_thread::sleep_for(std::chrono::milliseconds(500));
                 break;
             }
 
@@ -599,6 +595,44 @@ std::string yf::arm::tm::RetrieveRealPath(const std::string &str)
                             "float[] targetP1= {-20,-4,72,14,86,-1}\r\n"
                             "PTP(\"JPP\",targetP1,10,200,0,false),*6b\r\n";
     return real_path;
+}
+
+bool yf::arm::tm::TryReconnectArm()
+{
+    ipc_server_ptr_->ClearArmConnection();
+
+    NetMessageArm("Get Status");
+
+    if(nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Connected)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void yf::arm::tm::GetMissionStatus()
+{
+    if(nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Connected)
+    {
+        yf::net::message<CustomMsgTypes> msg;
+        std::string str = "Get Status";
+
+        msg.body.resize(str.size());
+        msg.body.assign(str.begin(),str.end());
+
+        ipc_server_ptr_->MessageClient(ipc_server_ptr_->GetArmClient(), msg);
+
+        // lock the thread.
+        // get status and preserve the status in arm_mission_status_
+        nw_status_ptr_->arm_mission_status = ipc_server_ptr_->GetArmMissionStatus();
+    }
+    else
+    {
+        LOG(INFO) << "Arm is not connected, GetMissionStatus() fail!";
+    }
 }
 
 

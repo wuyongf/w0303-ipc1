@@ -61,11 +61,8 @@ namespace yf
             //
             // Schedules
             // dataReader
-            void RetrieveAllAvailableScheduleId();
 
-            void WaitAvailableSchedules();
-
-            std::deque<int> GetSchedulesId();
+            std::deque<int> GetAvailableScheuldesId();
 
             std::deque<int> GetJobsId(const int& cur_schedule_id);
 
@@ -78,6 +75,11 @@ namespace yf
             void UpdateScheduleData(const int& schedule_id, const int& schedule_status);
 
             void UpdateScheduleLog(const int& schedule_id, const int& schedule_status);
+
+            // Job
+            //
+            void UpdateJobData(const int& cur_job_id, const int& job_status);
+            void UpdateJobLog(const int& cur_job_id, const int& job_status);
 
             // Task
             //
@@ -96,6 +98,13 @@ namespace yf
 
             void UpdateDeviceBatteryCapacity(const std::string& device_name, const float& battery_capacity);
 
+            // Sys Status
+            //
+            // sys control status
+            int GetSysControlMode();
+
+
+
         private:
 
             nanodbc::connection conn_;
@@ -111,7 +120,7 @@ namespace yf
             // properties
             std::string time_now_;
 
-            std::deque<int> available_schedules;
+
             std::deque<int> available_jobs;
             std::deque<int> available_tasks;
 
@@ -339,59 +348,6 @@ void yf::sql::sql_server::UpdateScheduleLog(const int &schedule_id, const int &s
         std::cerr << e.what() << std::endl;
         std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
     }
-}
-
-void yf::sql::sql_server::RetrieveAllAvailableScheduleId()
-{
-    std::string query_update;
-
-    //"SELECT ID FROM schedule_table where status=1 AND planned_start > '2021-02-06 11:10:08.000'"
-    try
-    {
-        Connect();
-
-        query_update = "SELECT ID FROM sys_schedule where status=1 AND planned_start > '"+ TimeNow() +"'";
-
-        auto result = nanodbc::execute(conn_,query_update);
-
-        // if there are new schedules available, sql module will mark down all the available schedule ids
-        while(result.next())
-        {
-            std::string id_str = result.get<std::string>(0, "null");
-
-            int id = std::stoi(id_str);
-
-            available_schedules.push_back(id);
-        };
-
-        Disconnect();
-    }
-    catch (std::exception& e)
-    {
-        std::cerr << e.what() << std::endl;
-        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
-    }
-}
-
-void yf::sql::sql_server::WaitAvailableSchedules()
-{
-    while (available_schedules.empty())
-    {
-        RetrieveAllAvailableScheduleId();
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-    }
-
-    LOG(INFO) <<  "New schedules available!";
-}
-
-std::deque<int> yf::sql::sql_server::GetSchedulesId() {
-
-    std::deque<int> q_schedules_id = available_schedules;
-
-    available_schedules.clear();
-
-    return q_schedules_id;
 }
 
 std::deque<int> yf::sql::sql_server::GetJobsId(const int& cur_schedule_id)
@@ -703,7 +659,7 @@ int yf::sql::sql_server::GetTaskMode(const int &cur_task_id)
     {
         Connect();
 
-        query_update = "SELECT task_mode FROM sys_schedule_job_task where ID = "+std::to_string(cur_task_id)+" AND status=1 ";
+        query_update = "SELECT task_mode FROM sys_schedule_job_task where ID = "+std::to_string(cur_task_id)+" AND status=2 ";
 
         std::string task_mode;
 
@@ -715,6 +671,8 @@ int yf::sql::sql_server::GetTaskMode(const int &cur_task_id)
         };
 
         Disconnect();
+
+        std::cout << "task_mode: " << task_mode << std::endl;
 
         return std::stoi(task_mode);
     }
@@ -734,7 +692,7 @@ int yf::sql::sql_server::GetTaskCommand(const int &cur_task_id)
     {
         Connect();
 
-        query_update = "SELECT command FROM sys_schedule_job_task where ID = "+std::to_string(cur_task_id)+" AND status=1 ";
+        query_update = "SELECT command FROM sys_schedule_job_task where ID = "+std::to_string(cur_task_id)+" AND status=2 ";
 
         std::string task_command;
 
@@ -925,6 +883,192 @@ void yf::sql::sql_server::UpdateDeviceMissionStatusLog(const std::string &device
     {
         std::cerr << e.what() << std::endl;
         std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+    }
+}
+
+void yf::sql::sql_server::UpdateJobData(const int &cur_job_id, const int &job_status)
+{
+    std::string status_str = std::to_string(job_status);
+    std::string id_str = std::to_string(cur_job_id);
+    std::string query_update;
+
+    try
+    {
+        Connect();
+
+        switch (job_status)
+        {
+            case 2: // in processing
+            {
+                query_update = "UPDATE sys_schedule_job SET status = " + status_str + ", actual_start='"+TimeNow()+"' WHERE job_id = "+ id_str;
+                break;
+            }
+
+            case 3: // finish
+            {
+                query_update = "UPDATE sys_schedule_job SET status = " + status_str + ", actual_end='"+TimeNow()+"' WHERE job_id = "+ id_str;
+                break;
+            }
+
+            case 4: // cancel
+            {
+                query_update = "UPDATE sys_schedule_job SET status = " + status_str + ", actual_end='"+TimeNow()+"' WHERE job_id = "+ id_str;
+                break;
+            }
+
+            case 5: // error
+            {
+                query_update = "UPDATE sys_schedule_job SET status = " + status_str + ", actual_end='"+TimeNow()+"' WHERE job_id = "+ id_str;
+                break;
+            }
+
+            case 6: // pause
+            {
+                query_update = "UPDATE sys_schedule_job SET status = " + status_str + ", actual_end='"+TimeNow()+"' WHERE job_id = "+ id_str;
+                break;
+            }
+
+        }
+
+        nanodbc::execute(conn_,query_update);
+
+        Disconnect();
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+    }
+}
+
+void yf::sql::sql_server::UpdateJobLog(const int &cur_job_id, const int &job_status)
+{
+    std::string status_str = std::to_string(job_status);
+    std::string job_id_str = std::to_string(cur_job_id);
+    std::string query_update;
+
+    try
+    {
+        Connect();
+
+        switch (job_status) {
+            case 2: // in processing
+            {
+                query_update = "INSERT INTO sys_schedule_job_log(job_id, actual_start, status) VALUES (" +
+                               job_id_str + ",'" + TimeNow() + "'," + status_str + ")";
+                break;
+            }
+
+            case 3: // finish
+            {
+                query_update =
+                        "UPDATE sys_schedule_job_log SET status = " + status_str + ", actual_end='" + TimeNow() +
+                        "' WHERE job_id = " + job_id_str + " AND status=2";
+                break;
+            }
+
+            case 4: // cancel
+            {
+                query_update =
+                        "UPDATE sys_schedule_job_log SET status = " + status_str + ", actual_end='" + TimeNow() +
+                        "' WHERE job_id = " + job_id_str + " AND status=2";
+                break;
+            }
+
+            case 5: // error
+            {
+                query_update = "UPDATE sys_schedule_job_log SET status = " + status_str + ", actual_end='" + TimeNow() +
+                               "' WHERE job_id = " + job_id_str ;
+                break;
+            }
+
+            case 6: // pause
+            {
+                query_update = query_update = "UPDATE sys_schedule_job_log SET status = " + status_str + ", actual_end='" + TimeNow() +
+                                              "' WHERE job_id = " + job_id_str ;
+                break;
+            }
+        }
+
+        nanodbc::execute(conn_,query_update);
+
+        Disconnect();
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+    }
+}
+
+int yf::sql::sql_server::GetSysControlMode()
+{
+    std::string query_update;
+
+    //"SELECT ID FROM schedule_table where status=1 AND planned_start > '2021-02-06 11:10:08.000'"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT control_mode FROM sys_status where ID = 1 AND name = 'nw_sys' ";
+
+        std::string sys_control_mode;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        while(result.next())
+        {
+            sys_control_mode = result.get<std::string>(0, "null");
+        };
+
+        Disconnect();
+
+        return std::stoi(sys_control_mode);
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return -999;
+    }
+}
+
+std::deque<int> yf::sql::sql_server::GetAvailableScheuldesId()
+{
+    std::string query_update;
+
+    std::deque<int> available_schedules;
+
+    //"SELECT ID FROM schedule_table where status=1 AND planned_start > '2021-02-06 11:10:08.000'"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT ID FROM sys_schedule where status=1 AND planned_start > '"+ TimeNow() +"'";
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            std::string id_str = result.get<std::string>(0, "null");
+
+            int id = std::stoi(id_str);
+
+            available_schedules.push_back(id);
+        };
+
+        Disconnect();
+
+        return available_schedules;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return available_schedules;
     }
 }
 

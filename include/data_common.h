@@ -45,7 +45,10 @@ namespace yf
             {
                 Auto    = 0,
                 Manual  = 1,
-                ManualSetting = 2
+                ManualSetting = 2,
+                Recovery = 3
+                // ArmInitPosition
+                // UgvDockingPosition
             };
         }
     }

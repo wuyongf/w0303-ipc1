@@ -75,10 +75,14 @@ namespace yf
 
         protected: // SQL
 
-            void UpdateDbDeviceArmConnectionStatusAfterTask();
-            void UpdateDbDeviceArmMissionStatusAfterTask();
+            void UpdateDbDeviceArmConnectionStatus();
+            void UpdateDbDeviceArmMissionStatus();
 
             void UpdateDbCurTaskStatusAndLog();
+
+            void UpdateDbCurJobStatusAndLog();
+
+            void GetSysControlMode();
 
         private:
 
@@ -236,29 +240,126 @@ void yf::sys::nw_sys::ArmTask(const std::string &arm_command)
 
 void yf::sys::nw_sys::thread_WaitSchedules()
 {
-
     while (schedule_flag_)
     {
         while (wait_schedule_flag)
         {
-            // Check whether all device is idle
-            // Check whether arm is idle
-            while (nw_status_ptr_->arm_mission_status != yf::data::common::MissionStatus::Idle)
+            LOG(INFO) << "[thread_wait_schedules]: unlock!";
+
+            LOG(INFO) << "[thread_wait_schedules]: stage 0 --- Initial Check";
+
+            bool initial_check_flag = true;
+
+            // TODO: (0) Initial Check Loop.
+            while (initial_check_flag)
             {
+
+                LOG(INFO) << "1. update sys control mode";
+
+                // 1. update sys control mode
+                //
+                GetSysControlMode();
+
+                LOG(INFO) << "2. updated all devices status";
+
+                // 2. updated all devices status
+                //
+                //  2.1 for arm
                 tm5.UpdateArmCurMissionStatus();
-                LOG(INFO) << "wait for arm is idle";
-                std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+
+                LOG(INFO) << "3. check function";
+                // 3. check function
+                //
+                //  3.0 recovery mode
+                //
+                if( nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Disconnected)
+                {
+                    if(nw_status_ptr_->sys_control_mode_ == data::common::SystemMode::Recovery)
+                    {
+                        ///   3.0.1 Arm
+                        tm5.WaitForConnection();
+
+                        // Get Status and update to SQL
+                        tm5.GetConnectionStatus();
+                        tm5.GetMissionStatus();
+                    }
+                }
+                
+                //  3.1 if manual mode, wait until auto mode
+                if( nw_status_ptr_->sys_control_mode_ == data::common::SystemMode::Manual ||
+                    nw_status_ptr_->sys_control_mode_ == data::common::SystemMode::ManualSetting)
+                {
+                    // wait for auto mode.
+                    while (nw_status_ptr_->sys_control_mode_ != data::common::SystemMode::Auto)
+                    {
+                        LOG(INFO) << "sys is not in auto mode, keep waiting...";
+
+                        // update sys control mode
+                        GetSysControlMode();
+
+                        // sleep 2s and then keep checking
+                        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+                    }
+                }
+                //
+                LOG(INFO) << "3.1 check function --- Sys_Control_Mode: Auto";
+
+                LOG(INFO) << "3.2 check function --- wait for all devices idle";
+                //  3.2 wait for all devices idle
+                //
+                //  3.2.1 For Arm
+                // if not normal
+                if (nw_status_ptr_->arm_connection_status != data::common::ConnectionStatus::Connected ||
+                    nw_status_ptr_->arm_mission_status != data::common::MissionStatus::Idle)
+                {
+                    // do nothing , wait 2s and then check once more.
+                    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+                }
+                else
+                {
+                    LOG(INFO) << "3.3 check function --- check all device initialized";
+                    // 3.3 if all device initialized?
+                    //
+                    // 3.3.1 check arm initial position.
+
+                    // default success for now.
+                    initial_check_flag = false;
+                }
+
+                LOG(INFO) << "4. Update Status to SQL";
+
+                // 4.1 For Arm
+                UpdateDbDeviceArmConnectionStatus();
+                UpdateDbDeviceArmMissionStatus();
+
             }
 
+            LOG(INFO) << "[thread_wait_schedules]: stage 1 --- Wait for Schedules";
+
+            /// prerequisite for front-end. If Devices connection are not all IDLE. Do not Publish Schedule.
             while (schedule_number == 0)
             {
                 LOG(INFO) << "wait for incoming schedules";
 
-                //todo: retrieve schedule number from database...
-                sql_ptr_->WaitAvailableSchedules();
+                // (1) retrieve schedule number from database...
+                q_schedule_ids   = sql_ptr_->GetAvailableScheuldesId();
 
-                q_schedule_ids = sql_ptr_->GetSchedulesId();
-                schedule_number = q_schedule_ids.size();
+                schedule_number  = q_schedule_ids.size();
+
+                // (2) update sys control mode
+                GetSysControlMode();
+
+                // wait for auto mode.
+                while (nw_status_ptr_->sys_control_mode_ != data::common::SystemMode::Auto)
+                {
+                    LOG(INFO) << "sys is not in auto mode, keep waiting...";
+
+                    // update sys control mode
+                    GetSysControlMode();
+
+                    // sleep 2s and then keep checking
+                    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                }
 
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));
             }
@@ -268,31 +369,30 @@ void yf::sys::nw_sys::thread_WaitSchedules()
 
             // notify thread: wait schedule
             do_schedule_flag = true;
-            std::this_thread::sleep_for(std::chrono::milliseconds(50));
-
             std::unique_lock<std::mutex> ul(mux_Blocking_do_schedule);
             cv_Blocking_do_schedule.notify_one();
 
-            LOG(INFO) << "unlock thread: do schedule";
+            LOG(INFO) << "[thread_wait_schedules]: unlock thread: do schedule";
 
         }
+
         // (1) option 1 -- keep looping
         //std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
         // (2) option 2 -- mutex lock
         //
         // lock and wait for notify.
-        LOG(INFO) << "lock thread: wait schedule";
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+        LOG(INFO) << "[thread_wait_schedules]: lock thread: wait schedule";
 
         std::unique_lock<std::mutex> ul_wait(mux_Blocking_wait_schedule);
         cv_Blocking_wait_schedule.wait(ul_wait);
 
-        LOG(INFO) << "thread: wait schedule has been unlocked";
-
+        LOG(INFO) << "[thread_wait_schedules]: unlock!";
     }
 
     LOG(INFO) << "schedule flag is false, thread: wait schedules should be shut down...";
-
 }
 
 void yf::sys::nw_sys::thread_DoSchedules()
@@ -303,11 +403,14 @@ void yf::sys::nw_sys::thread_DoSchedules()
         // Default status is locking....
         while (do_schedule_flag == false)
         {
-            LOG(INFO) << "lock thread: do schedule";
+            LOG(INFO) << "[thread_do_schedules]: lock!";
 
             std::unique_lock<std::mutex> ul(mux_Blocking_do_schedule);
             cv_Blocking_do_schedule.wait(ul);
+
+            LOG(INFO) << "[thread_do_schedules]: unlock!";
         }
+
         LOG(INFO) << "thread: do schedule has been unlocked";
 
         // if there is schedule
@@ -316,7 +419,7 @@ void yf::sys::nw_sys::thread_DoSchedules()
         {
             // (1) Initial check
             //
-
+            ///TIME
             // All devices should be idle. Otherwise we should keep checking for 3 minutes.. and then alter user.
             auto time_now = sql_ptr_->TimeNow();
             auto time_countdown = sql_ptr_->CountdownTime(time_now, 3);
@@ -325,27 +428,31 @@ void yf::sys::nw_sys::thread_DoSchedules()
             {
                 if(!sql_ptr_->isFutureTime(time_countdown, time_now))
                 {
+
                     LOG(INFO) << "The Arm has not responded for 3 minutes.";
+                    LOG(INFO) << "The Schedule failed at the initial check stage.";
                     //
-                    // alert the user...
-                    sql_ptr_->UpdateDeviceMissionStatus("arm", nw_status_ptr_->ArmMissionStatus());
+                    // todo: alert the user... No need, stage 3 will do the job.
 
                     break;
                 }
+
                 time_now = sql_ptr_->TimeNow();
 
                 tm5.UpdateArmCurMissionStatus();
-                LOG(INFO) << "wait for arm is idle";
+                LOG(INFO) << "schedule initial check: wait for arm is idle";
                 std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
             }
 
-            // (2) Do Schedule
+            // (2) Do Each Schedule
 
             if(nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::Idle)
             {
                 auto cur_schedule_id = q_schedule_ids.front();
                 q_schedule_ids.pop_front();
+
+                nw_status_ptr_->db_cur_schedule_id = cur_schedule_id;
 
                 // get current id execute time..
                 sql_ptr_->GetScheduleExecTime(cur_schedule_id);
@@ -367,12 +474,43 @@ void yf::sys::nw_sys::thread_DoSchedules()
                 LOG(INFO) << "abort current schedules...";
                 q_schedule_ids.clear();
             }
+
+            // TODO: (3)
+            //  a. break the shcedule loop or not?
+            //  b. (done above) Update Schedule Status after job. Record status and update to SQL Server
+
+            // For Arm
+
+            // (0) break the task loop or not?
+
+            bool arm_mission_failed_status = nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::Error ||
+                                             nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::EStop;
+
+            if( nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Disconnected || arm_mission_failed_status )
+            {
+                LOG(INFO) << "abort current schedules...";
+                q_schedule_ids.clear();
+            }
         }
 
         // No more schedules
         //
+        // if done successfully
+        if(nw_status_ptr_->arm_mission_status == data::common::MissionStatus::Idle)
+        {
+            LOG(INFO) << "All schedules are done";
+
+            LOG(INFO) << "current time: " << sql_ptr_->TimeNow() << std::endl;
+        }
+        else
+        {
+            LOG(INFO) << "Cancel the rest of schedules...";
+        }
+
+        // Any way
+        //
         // reset do schedule thread to lock
-        // wait for nitified by wait schedule thread
+        // wait for notified by wait schedule thread
         do_schedule_flag = false;
 
         // trigger thread: wait schedule
@@ -382,7 +520,6 @@ void yf::sys::nw_sys::thread_DoSchedules()
         cv_Blocking_wait_schedule.notify_one();
 
         LOG(INFO) << "unlock thread: wait schedule";
-        LOG(INFO) << "All schedules are done";
 
         // record the end time
         // update the schedule status to database
@@ -401,26 +538,57 @@ void yf::sys::nw_sys::DoJobs(const int &cur_schedule_id)
 
     // if there is any Job
     //
-    while (q_job_ids.size() != 0) {
+    while (q_job_ids.size() != 0)
+    {
 
         auto cur_job_id = q_job_ids.front();
         q_job_ids.pop_front();
 
-        // TODO: Execute the job!
+        nw_status_ptr_->db_cur_job_id = cur_job_id;
+
+        // record the job status
+        // TODO: (1) Update Job Log
+        sql_ptr_->UpdateJobData(cur_job_id, 2);
+        sql_ptr_->UpdateJobLog(cur_job_id, 2);
+
+        // TODO: (2) Execute the job!
         DoTasks(cur_job_id);
 
-        // TODO: Record Each Job STATUS.
+        // TODO: (3)
+        //  a. Break the loop or not?
+        //  b. Record Each Job STATUS.
+        bool arm_mission_failed_status = nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::Error ||
+                                         nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::EStop;
+
+        if( nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Disconnected || arm_mission_failed_status )
+        {
+            LOG(INFO) << "abort current jobs...";
+            q_job_ids.clear();
+        }
+
+        // record and update current job status
+        LOG(INFO) << "update current jobs status and log...";
+        UpdateDbCurJobStatusAndLog();                  // todo: what about cancel Status?
 
     }
 
     // No more jobs
+    //
+    // Cout the result
 
-    LOG(INFO) << "All Jobs are done";
+    if(nw_status_ptr_->arm_mission_status == data::common::MissionStatus::Idle)
+    {
+        LOG(INFO) << "All Jobs are done";
 
-    auto time_now = sql_ptr_->TimeNow();
+        auto time_now = sql_ptr_->TimeNow();
 
-    std::cout << "no job now!" << std::endl;
-    std::cout << "current time: " << time_now << std::endl;
+        std::cout << "no job now!" << std::endl;
+        std::cout << "current time: " << time_now << std::endl;
+    }
+    else
+    {
+        LOG(INFO) << "Cancel the rest of jobs...";
+    }
 
 }
 
@@ -435,35 +603,45 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
     //
     while (q_task_ids.size() != 0)
     {
+        LOG(INFO) << "[Do Tasks]: (1) Initial check, all devices should be idle...";
+
         // TODO: (1) Initial check
         //
-
         // All devices should be idle. Otherwise we should keep checking for 3 minutes.. and then alter user.
         auto time_now = sql_ptr_->TimeNow();
-        auto time_countdown = sql_ptr_->CountdownTime(time_now, 3);
+        auto time_future = sql_ptr_->CountdownTime(time_now, 3);
 
         while (nw_status_ptr_->arm_mission_status != yf::data::common::MissionStatus::Idle)
         {
-            if(!sql_ptr_->isFutureTime(time_countdown, time_now))
+            if(!sql_ptr_->isFutureTime(time_future, time_now))
             {
                 LOG(INFO) << "The Arm has not responded for 3 minutes.";
+                LOG(INFO) << "The Task failed at the initial check stage.";
                 //
-                // alert the user...
-                sql_ptr_->UpdateDeviceMissionStatus("arm", nw_status_ptr_->ArmMissionStatus());
+                // todo: alert the user... No need, stage 3 will do the job.
+                break;
             }
+
             time_now = sql_ptr_->TimeNow();
 
             tm5.UpdateArmCurMissionStatus();
-            LOG(INFO) << "wait for arm is idle";
+
+            LOG(INFO) << "task initial check: wait for arm is idle";
             std::this_thread::sleep_for(std::chrono::milliseconds(2000));
         }
 
 
-        // TODO: (2) Do each Task
+        LOG(INFO) << "[Do Tasks]: (2) Do each task...";
 
+        // TODO: (2) Do each Task
+        // if all devices are idle...
+        //
         if(nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::Idle)
         {
             auto cur_task_id = q_task_ids.front();
+
+            std::cout << "cur_task_id: "<< cur_task_id << std::endl;
+
             q_task_ids.pop_front();
 
             nw_status_ptr_->db_cur_task_id = cur_task_id;
@@ -481,6 +659,8 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
             q_task_ids.clear();
         }
 
+        LOG(INFO) << "[Do Tasks]: (3) break the task loop or not?";
+
         // TODO: (3)
         //  a. break the task loop or not?
         //  b. Update Task Status after task. Record status and update to SQL Server
@@ -489,36 +669,48 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
 
         // (0) break the task loop or not?
 
-        if( nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Disconnected ||
-            nw_status_ptr_->arm_mission_status != data::common::MissionStatus::Idle ||
-            nw_status_ptr_->arm_mission_status != data::common::MissionStatus::Finish)
+        bool arm_mission_failed_status = nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::Error ||
+                                         nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::EStop;
+
+        if( nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Disconnected || arm_mission_failed_status )
         {
             LOG(INFO) << "abort current tasks...";
             q_task_ids.clear();
         }
 
         // (1) record and update arm connection status
-        UpdateDbDeviceArmConnectionStatusAfterTask();
+        UpdateDbDeviceArmConnectionStatus();
 
-        // (2) record and update arm mission status   // todo:(Log) UpdateDbDeviceArmMissionStatusLogAfterTask();
-        UpdateDbDeviceArmMissionStatusAfterTask();
+        // (2) record and update arm mission status     // todo:(Log) UpdateDbDeviceArmMissionStatusLogAfterTask();
+        UpdateDbDeviceArmMissionStatus();
 
         // (3) record and update current task status
-        UpdateDbCurTaskStatusAndLog();                // todo: what about cancel Status?
+        UpdateDbCurTaskStatusAndLog();                  // todo: what about cancel Status?
 
     }
 
-    // No more jobs
-    LOG(INFO) << "All Tasks are done";
+    // todo: (4)
+    //  cout the result.
+    //
+    if(nw_status_ptr_->arm_mission_status == data::common::MissionStatus::Idle)
+    {
+        // No more jobs
+        LOG(INFO) << "All Tasks are done";
 
-    auto time_now = sql_ptr_->TimeNow();
+        auto time_now = sql_ptr_->TimeNow();
 
-    LOG(INFO) << "no more tasks for job: " << cur_job_id << "now!" << std::endl;
-    LOG(INFO) << "current time: " << time_now << std::endl;
+        LOG(INFO) << "no more tasks for job: " << cur_job_id << "now!" << std::endl;
+        LOG(INFO) << "current time: " << time_now << std::endl;
+    }
+    else
+    {
+        LOG(INFO) << "Cancel the rest of tasks...";
+    }
 }
 
 void yf::sys::nw_sys::DoTask(const int& cur_task_id)
 {
+    std::cout << "[cur_task_id]: " << cur_task_id << std::endl;
 
     // Initialization
     // (1) sql status
@@ -566,7 +758,6 @@ void yf::sys::nw_sys::DoTask(const int& cur_task_id)
             break;
         }
     }
-
 }
 
 void yf::sys::nw_sys::UpdateDbScheduleAfterTask(const int& cur_schedule_id)
@@ -671,7 +862,7 @@ void yf::sys::nw_sys::UpdateDbScheduleBeforeTask(const int &cur_schedule_id)
 
 }
 
-void yf::sys::nw_sys::UpdateDbDeviceArmConnectionStatusAfterTask()
+void yf::sys::nw_sys::UpdateDbDeviceArmConnectionStatus()
 {
     if(nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Connected)
     {
@@ -684,7 +875,7 @@ void yf::sys::nw_sys::UpdateDbDeviceArmConnectionStatusAfterTask()
     return;
 }
 
-void yf::sys::nw_sys::UpdateDbDeviceArmMissionStatusAfterTask()
+void yf::sys::nw_sys::UpdateDbDeviceArmMissionStatus()
 {
     switch (nw_status_ptr_->arm_mission_status)
     {
@@ -748,6 +939,57 @@ void yf::sys::nw_sys::UpdateDbCurTaskStatusAndLog()
 
     // todo: what about Cancel?
 
+}
+
+void yf::sys::nw_sys::UpdateDbCurJobStatusAndLog()
+{
+    // currently, only consider arm mission status.
+    if( nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::Idle ||
+        nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::Finish)
+    {
+        sql_ptr_->UpdateJobData(nw_status_ptr_->db_cur_job_id, 3);
+        sql_ptr_->UpdateJobLog(nw_status_ptr_->db_cur_job_id, 3);
+    }
+
+    if( nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::Error ||
+        nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::EStop)
+    {
+        // error
+        //
+        sql_ptr_->UpdateJobData(nw_status_ptr_->db_cur_job_id, 5);
+        sql_ptr_->UpdateJobLog(nw_status_ptr_->db_cur_job_id, 5);
+    }
+}
+
+void yf::sys::nw_sys::GetSysControlMode()
+{
+    switch (sql_ptr_->GetSysControlMode())
+    {
+        case 0:
+        {
+            nw_status_ptr_->sys_control_mode_ = data::common::SystemMode::Auto;
+            break;
+        }
+
+        case 1:
+        {
+            nw_status_ptr_->sys_control_mode_ = data::common::SystemMode::Manual;
+            break;
+        }
+
+        case 2:
+        {
+            nw_status_ptr_->sys_control_mode_ = data::common::SystemMode::ManualSetting;
+            break;
+        }
+
+        case 3:
+        {
+            nw_status_ptr_->sys_control_mode_ = data::common::SystemMode::Recovery;
+            break;
+        }
+
+    }
 }
 
 

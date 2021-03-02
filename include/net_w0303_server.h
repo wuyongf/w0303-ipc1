@@ -83,6 +83,19 @@ public:
         }
     }
 
+    void ClearArmConnection()
+    {
+        int pre_arm_connection_id = arm_connection_id;
+
+        // clear connection id, client ptr, arm net status, arm mission status.
+        arm_connection_id = 0;
+        client_arm = nullptr;
+        arm_connection_status = yf::data::common::ConnectionStatus::Disconnected;
+        arm_mission_status = yf::data::common::MissionStatus::Error;
+        std::cout << "Removing Arm. client [" << pre_arm_connection_id << "]\n";
+        LOG(INFO) << "Removing Arm. client [" << pre_arm_connection_id << "]";
+    }
+
 //IPC2 Methods
 //
 //

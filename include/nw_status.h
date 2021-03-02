@@ -42,19 +42,25 @@ namespace yf
 
             // db current id
 
+            int db_cur_schedule_id;
+
+            int db_cur_job_id;
+
             int db_cur_task_id;
 
             bool cur_task_continue_flag = false;
 
         public:
 
-            int ArmMissionStatus();
+            int ArmMissionStatusForSQL();
+
+            int ArmConnectionStatusForSQL();
 
         };
     }
 }
 
-int yf::status::nw_status::ArmMissionStatus()
+int yf::status::nw_status::ArmMissionStatusForSQL()
 {
     switch (arm_mission_status)
     {
@@ -91,6 +97,21 @@ int yf::status::nw_status::ArmMissionStatus()
         case yf::data::common::MissionStatus::EStop:
         {
             return 7;
+        }
+    }
+}
+
+int yf::status::nw_status::ArmConnectionStatusForSQL()
+{
+    switch (arm_connection_status)
+    {
+        case data::common::ConnectionStatus::Connected:
+        {
+            return 1;
+        }
+        case data::common::ConnectionStatus::Disconnected:
+        {
+            return 0;
         }
     }
 }
