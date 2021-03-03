@@ -14,9 +14,13 @@ int main(int argc, char *argv[])
 
     nw_sys.Start();
 
+//    std::cout << "sleep 10s... " << std::endl;
+//    std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+
     std::cout << "sleep 300s... " << std::endl;
     std::this_thread::sleep_for(std::chrono::milliseconds(300000));
 
+    std::cout << "sys shut down... " << std::endl;
     nw_sys.Close();
 
     return 1;

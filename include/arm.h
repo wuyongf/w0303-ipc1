@@ -173,7 +173,6 @@ void yf::arm::tm::ModbusCheckArmStatus()
             // Update nw_sys arm_connection_status
             GetConnectionStatus();
         }
-
     }
 
     if(tm_modbus.read_isEStop())
@@ -426,15 +425,18 @@ void yf::arm::tm::UpdateArmCurMissionStatus()
                 sql_ptr_->UpdateTaskData(nw_status_ptr_->db_cur_task_id, 6);
                 sql_ptr_->UpdateTaskLog(nw_status_ptr_->db_cur_task_id, 6);
 
-                // start counting 5 minutes
-                std::string time_future = sql_ptr_->CountdownTime(sql_ptr_->TimeNow(),5);
+                // start counting 10 minutes
+                LOG(INFO) << "wait 10 minute for arm to resume its mission.";
+                std::string time_future = sql_ptr_->CountdownTime(sql_ptr_->TimeNow(),10);
 
                 // counting...
                 while(sql_ptr_->isFutureTime(time_future, sql_ptr_->TimeNow()))
                 {
+
                     ModbusCheckArmStatus();
                     RetrieveArmCurrentMissionStatus();
-                    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                    ///TIME
+                    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
                     if(nw_status_ptr_->arm_mission_status != data::common::MissionStatus::Pause)
                     {
@@ -445,7 +447,7 @@ void yf::arm::tm::UpdateArmCurMissionStatus()
                 // if wait too long
                 if(!sql_ptr_->isFutureTime(time_future, sql_ptr_->TimeNow()))
                 {
-                    LOG(INFO) << "robotic arm has been paused for 5 minutes. arm mission aborted";
+                    LOG(INFO) << "robotic arm has been paused for 10 minutes. arm mission aborted";
                     nw_status_ptr_->cur_task_continue_flag = false;
                     nw_status_ptr_->arm_mission_status = data::common::MissionStatus::Error;
                     return;

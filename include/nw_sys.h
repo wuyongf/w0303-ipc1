@@ -51,6 +51,10 @@ namespace yf
 
         public:
 
+            void WaitSchedulesInitialCheck();
+
+        public:
+
             void UpdateArmCommand();     // for each arm_config_id
             void ArmTask(const std::string& arm_command);
             void CheckDevicesStatus();
@@ -203,18 +207,30 @@ void yf::sys::nw_sys::Start()
 
 void yf::sys::nw_sys::Close()
 {
-    // close arm
-    tm5.Close();
-
-    // close thread ipc_server
-    ipc_server_flag_ = false;
-    th_ipc_server_.join();
-
     // close thread do_schedule, wait_schedule
     schedule_flag_ = false;
 
+    schedule_number = -999;        // for thread_WaitSchedules to join.
+                                   // search:  For sys to shut down
+    wait_schedule_flag = false;
+
+    // close arm
+    tm5.Close();
+
     th_wait_schedules_.join();
     th_do_schedules_.join();
+
+    // close thread ipc_server
+    // todo: 2021/03/03
+    //  (Undone)Fine tune the process.
+    //  Problem:
+    //  ipc_sever doesn't know whether the connection is close.
+    //  needs: 1. establish a new connection. or
+    //         2. pause the arm
+    //  to let th_ipc_server_ to join.
+    ipc_server_flag_ = false;
+    th_ipc_server_.join();
+
 }
 
 void yf::sys::nw_sys::thread_IPCServerStartup(std::shared_ptr<IPCServer>& server_ptr, bool& server_flag)
@@ -246,8 +262,12 @@ void yf::sys::nw_sys::thread_WaitSchedules()
         {
             LOG(INFO) << "[thread_wait_schedules]: unlock!";
 
-            LOG(INFO) << "[thread_wait_schedules]: stage 0 --- Initial Check";
+            LOG(INFO) << "[thread_wait_schedules]: stage 0 --- Initial Check [Start]";
 
+            WaitSchedulesInitialCheck();
+
+            LOG(INFO) << "[thread_wait_schedules]: stage 0 --- Initial Check [Complete]";
+            #if 0
             bool initial_check_flag = true;
 
             // TODO: (0) Initial Check Loop.
@@ -270,10 +290,15 @@ void yf::sys::nw_sys::thread_WaitSchedules()
                 LOG(INFO) << "3. check function";
                 // 3. check function
                 //
-                //  3.0 recovery mode
+                //  3.0 if recovery mode, try to recover all devices.
                 //
+                ///  Check whether arm connected or not
+                ///  3.0.1 if disconnected, ask for recovery mode
                 if( nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Disconnected)
                 {
+                    LOG(INFO) << "Arm disconnected...";
+                    LOG(INFO) << "Please switch to Recovery Mode...";
+
                     if(nw_status_ptr_->sys_control_mode_ == data::common::SystemMode::Recovery)
                     {
                         ///   3.0.1 Arm
@@ -283,6 +308,13 @@ void yf::sys::nw_sys::thread_WaitSchedules()
                         tm5.GetConnectionStatus();
                         tm5.GetMissionStatus();
                     }
+                }
+
+                ///  3.0.2 if connected but mission_status == Error
+                if ( nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Connected &&
+                     nw_status_ptr_->arm_mission_status == data::common::MissionStatus::Error)
+                {
+                    LOG(INFO) << "Please stop robotic arm project...";
                 }
                 
                 //  3.1 if manual mode, wait until auto mode
@@ -297,21 +329,27 @@ void yf::sys::nw_sys::thread_WaitSchedules()
                         // update sys control mode
                         GetSysControlMode();
 
+                        ///TIME
                         // sleep 2s and then keep checking
                         std::this_thread::sleep_for(std::chrono::milliseconds(2000));
                     }
                 }
                 //
-                LOG(INFO) << "3.1 check function --- Sys_Control_Mode: Auto";
+                LOG(INFO) << "3.1 check function --- [Sys_Control_Mode]: Auto";
 
-                LOG(INFO) << "3.2 check function --- wait for all devices idle";
-                //  3.2 wait for all devices idle
+
+
+                //  3.2 wait for all devices idle, both connection status and mission status.
                 //
+                LOG(INFO) << "3.2 check function --- wait for all devices idle";
+
                 //  3.2.1 For Arm
                 // if not normal
+                //
                 if (nw_status_ptr_->arm_connection_status != data::common::ConnectionStatus::Connected ||
                     nw_status_ptr_->arm_mission_status != data::common::MissionStatus::Idle)
                 {
+                    ///TIME
                     // do nothing , wait 2s and then check once more.
                     std::this_thread::sleep_for(std::chrono::milliseconds(2000));
                 }
@@ -327,18 +365,21 @@ void yf::sys::nw_sys::thread_WaitSchedules()
                 }
 
                 LOG(INFO) << "4. Update Status to SQL";
-
                 // 4.1 For Arm
+                //
                 UpdateDbDeviceArmConnectionStatus();
                 UpdateDbDeviceArmMissionStatus();
 
             }
+            #endif
 
-            LOG(INFO) << "[thread_wait_schedules]: stage 1 --- Wait for Schedules";
+            LOG(INFO) << "[thread_wait_schedules]: stage 1 --- Wait for Database Available Schedules";
 
             /// prerequisite for front-end. If Devices connection are not all IDLE. Do not Publish Schedule.
-            while (schedule_number == 0)
+            //
+            while (schedule_number == 0 )
             {
+
                 LOG(INFO) << "wait for incoming schedules";
 
                 // (1) retrieve schedule number from database...
@@ -357,10 +398,12 @@ void yf::sys::nw_sys::thread_WaitSchedules()
                     // update sys control mode
                     GetSysControlMode();
 
+                    ///TIME
                     // sleep 2s and then keep checking
                     std::this_thread::sleep_for(std::chrono::milliseconds(500));
                 }
 
+                ///TIME
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));
             }
 
@@ -374,6 +417,11 @@ void yf::sys::nw_sys::thread_WaitSchedules()
 
             LOG(INFO) << "[thread_wait_schedules]: unlock thread: do schedule";
 
+            // For sys to shut down
+            if(schedule_flag_ == false)
+            {
+                return;
+            }
         }
 
         // (1) option 1 -- keep looping
@@ -412,6 +460,13 @@ void yf::sys::nw_sys::thread_DoSchedules()
         }
 
         LOG(INFO) << "thread: do schedule has been unlocked";
+
+        // For sys to shut down
+        // (1) Check whether the sys is shutting down.
+        if(schedule_flag_ == false)
+        {
+            return;
+        }
 
         // if there is schedule
         //
@@ -989,6 +1044,162 @@ void yf::sys::nw_sys::GetSysControlMode()
             break;
         }
 
+    }
+}
+
+void yf::sys::nw_sys::WaitSchedulesInitialCheck()
+{
+    bool init_check_continue_flag = true;
+
+    bool sys_init_check_continue_flag = true;
+    bool ugv_init_check_continue_flag = true;
+
+    bool arm_init_check_continue_flag = true;
+    bool arm_init_status_check_continue_flag = true;
+    bool arm_init_position_check_continue_flag = true;
+
+
+    // Initial Check Loop.
+    //
+    while (init_check_continue_flag)
+    {
+        LOG(INFO) << "1. update sys control mode";
+
+        GetSysControlMode();
+
+        LOG(INFO) << "2. updated all devices status";
+        LOG(INFO) << "2.1 request arm_connection_status and arm_mission_status from arm";
+
+        tm5.UpdateArmCurMissionStatus();
+
+        LOG(INFO) << "3. check function";
+
+        LOG(INFO) << "3.0 check function: sys_status   [Start]";
+
+        switch (nw_status_ptr_->sys_control_mode_)
+        {
+            case data::common::SystemMode::Auto:
+            {
+                LOG(INFO) << "sys_control_mode: Auto";
+                sys_init_check_continue_flag = false;
+                break;
+            }
+
+            case data::common::SystemMode::Manual:
+            {
+                LOG(INFO) << "sys_control_mode: Manual";
+                LOG(INFO) << "wait for Auto Mode";
+                while (nw_status_ptr_->sys_control_mode_ != data::common::SystemMode::Auto)
+                {
+                    // update sys control mode
+                    GetSysControlMode();
+
+                    ///TIME
+                    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+                }
+                break;
+            }
+
+            case data::common::SystemMode::ManualSetting:
+            {
+                LOG(INFO) << "sys_control_mode: ManualSetting";
+                LOG(INFO) << "wait for Auto Mode";
+                while (nw_status_ptr_->sys_control_mode_ != data::common::SystemMode::Auto)
+                {
+                    // update sys control mode
+                    GetSysControlMode();
+
+                    ///TIME
+                    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+                }
+                break;
+            }
+
+        }
+
+        LOG(INFO) << "3.1 check function: arm   [Start]";
+
+        if(arm_init_check_continue_flag)
+        {
+            /// for arm_init_status_check_continue_flag
+
+            if( nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Connected &&
+                nw_status_ptr_->arm_mission_status    == data::common::MissionStatus::Idle)
+            {
+                LOG(INFO) << "3.1 check function: arm   [Complete]";
+                arm_init_status_check_continue_flag = false;
+            }
+            else
+            {
+                // For Arm Paused too long situation
+                //
+                if ( nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Connected &&
+                     nw_status_ptr_->arm_mission_status == data::common::MissionStatus::Error)
+                {
+                    LOG(INFO) << "Please stop robotic arm project...";
+                }
+
+                // For Arm Disconnected situation
+                //
+                if( nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Disconnected)
+                {
+                    LOG(INFO) << "Arm disconnected...";
+                    LOG(INFO) << "Please switch to Recovery Mode..."; // Ask for recovery mode
+
+                    if(nw_status_ptr_->sys_control_mode_ == data::common::SystemMode::Recovery)
+                    {
+                        LOG(INFO) << "Please play arm project..."; // Ask for recovery mode
+
+                        tm5.WaitForConnection();
+                        // Get Status and update to SQL
+                        tm5.GetConnectionStatus();
+                        tm5.GetMissionStatus();
+                    }
+                }
+            }
+
+            /// for arm_init_position_check_continue_flag
+
+            arm_init_position_check_continue_flag = false;
+
+            /// overall arm flag checking
+
+            if(arm_init_status_check_continue_flag == false &&
+               arm_init_position_check_continue_flag == false)
+            {
+                arm_init_check_continue_flag = false;
+            }
+            else
+            {
+                arm_init_check_continue_flag = true;
+            }
+        }
+
+        LOG(INFO) << "3.2 check function: ugv   [Start]";
+        bool ugv_init_check_continue_flag = false;
+        LOG(INFO) << "3.2 check function: ugv   [Complete]";
+
+        // check the initial_check_flag
+
+        if(sys_init_check_continue_flag == false &&
+           arm_init_check_continue_flag == false &&
+           ugv_init_check_continue_flag == false )
+        {
+            init_check_continue_flag = false;
+        }
+        else
+        {
+            init_check_continue_flag = true;
+        }
+
+        LOG(INFO) << "4. Update Status to SQL";
+        LOG(INFO) << "4.1 Update Status to SQL: Arm";
+
+        UpdateDbDeviceArmConnectionStatus();
+        UpdateDbDeviceArmMissionStatus();
+
+        ///TIME
+        std::this_thread::sleep_for(std::chrono::milliseconds(1500));
     }
 }
 
