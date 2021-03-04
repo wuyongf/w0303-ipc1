@@ -50,6 +50,20 @@ namespace yf
                 // ArmInitPosition
                 // UgvDockingPosition
             };
+
+            enum class MirState
+            {
+                Starting        = 1,        // connected
+                ShuttingDown    = 2,        // disconnected
+                Ready           = 3,        // idle
+                Pause           = 4,        // pasue
+                Executing       = 5,        // running
+                Aborted         = 6,        //
+                Completed       = 7,        // finished
+                EmergencyStop   = 10,       // EStop
+                ManualControl   = 11,       // manual_control
+                Error           = 12        // error
+            };
         }
     }
 

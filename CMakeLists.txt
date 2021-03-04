@@ -18,7 +18,7 @@ set(GLOG_LIBRARY_DIR D:/software/include/glog_x64-windows/lib)
 
 find_package(glog 0.4.0 REQUIRED)
 find_package(libmodbus CONFIG REQUIRED)
-find_package(Poco CONFIG REQUIRED Net XML Zip Data)
+find_package(Poco CONFIG REQUIRED Foundation Net XML Zip Data JSON)
 
 include_directories(${GLOG_INCLUDE_DIR})
 link_directories(${GLOG_LIBRARY_DIR})
@@ -134,8 +134,10 @@ add_executable(w0303_main_test1 "src/w0303_main_test1.cpp" "include/net_w0303_se
 target_link_libraries(w0303_main_test1 PUBLIC glog::glog nanodbc modbus)
 
 add_executable(mir_poco "src/mir_poco.cpp" )
-target_link_libraries(mir_poco PUBLIC glog::glog nanodbc modbus Poco::Net Poco::XML Poco::Zip Poco::Data)
+target_link_libraries(mir_poco PUBLIC glog::glog nanodbc modbus Poco::Foundation Poco::Net Poco::XML Poco::Zip Poco::Data)
 
+add_executable(map "useful-functions/map.cpp" )
+target_link_libraries(map PUBLIC glog::glog nanodbc modbus Poco::Foundation Poco::Net Poco::XML Poco::Zip Poco::Data Poco::JSON)
 
 add_executable(hex2float "useful-functions/hex2float.cpp")
 
