@@ -9,7 +9,11 @@ project (w0303)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# opencv, for image processing
+find_package(OpenCV CONFIG REQUIRED)
 
+# nanodbc, for sql
+find_package(nanodbc CONFIG REQUIRED)
 
 ## glog
 ##
@@ -105,7 +109,7 @@ add_executable (checksum_dec_to_hex "useful-functions/w0303_checksum_dec_to_hex.
 add_executable (w03003_cur_time "useful-functions/w03003_cur_time.cpp" )
 
 
-## database
+## database. how to include .dll file
 #d:/nw_sys/nw_sql_application_dll.dll
 link_directories(lib)
 
@@ -116,9 +120,7 @@ add_executable(dll_libhallo "useful-functions/dll.cpp")
 target_link_libraries(dll_libhallo liblibhallo.dll)
 
 
-find_package(nanodbc CONFIG REQUIRED)
-#add_executable(sql "useful-functions/sql.cpp")
-#target_link_libraries(sql PRIVATE nanodbc)
+##
 
 add_executable(sql_testing "useful-functions/sql_testing.cpp")
 target_link_libraries(sql_testing PRIVATE nanodbc)
@@ -136,6 +138,7 @@ target_link_libraries(w0303_main_test1 PUBLIC glog::glog nanodbc modbus)
 add_executable(mir_poco "src/mir_poco.cpp" )
 target_link_libraries(mir_poco PUBLIC glog::glog nanodbc modbus Poco::Foundation Poco::Net Poco::XML Poco::Zip Poco::Data)
 
+# for mir testing
 add_executable(map "useful-functions/map.cpp" )
 target_link_libraries(map PUBLIC glog::glog nanodbc modbus Poco::Foundation Poco::Net Poco::XML Poco::Zip Poco::Data Poco::JSON)
 

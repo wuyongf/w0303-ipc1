@@ -107,9 +107,7 @@ namespace yf
             std::string api_credentials_authentication_ = "ZGlzdHJpYnV0b3I6NjJmMmYwZjFlZmYxMGQzMTUyYzk1ZjZmMDU5NjU3NmU0ODJiYjhlNDQ4MDY0MzNmNGNmOTI5NzkyODM0YjAxNA==";
 
             // for rest api result
-            std::string get_request_result_;
-            std::string put_request_result_;
-            std::string post_request_result_;
+            std::string request_result_;
 
             int         respond_status_;
             std::string respond_reason_;
@@ -152,15 +150,19 @@ void yf::ugv::mir::SetAuthentication(const std::string &auth_info)
 
 std::string yf::ugv::mir::GetRequestResult()
 {
-    auto result = get_request_result_;
-    get_request_result_.clear();
-    return result;
+//    auto result = request_result_;
+//    request_result_.clear();
+//    return result;
+
+    return  request_result_;
 }
 
 bool yf::ugv::mir::doRequest(HTTPClientSession &session,
                              HTTPRequest &request,
                              HTTPResponse &response)
 {
+//    request_result_.clear();
+
     session.sendRequest(request);
     std::istream& rs = session.receiveResponse(response);
 
@@ -171,8 +173,10 @@ bool yf::ugv::mir::doRequest(HTTPClientSession &session,
 
     if (response.getStatus() != Poco::Net::HTTPResponse::HTTP_UNAUTHORIZED)
     {
-        StreamCopier::copyToString(rs, get_request_result_);
-        std::cout << "result: " << get_request_result_ << std::endl;
+        request_result_.clear();
+
+        StreamCopier::copyToString(rs, request_result_);
+        std::cout << "result: " << request_result_ << std::endl;
         return true;
     }
     else
@@ -217,6 +221,7 @@ void yf::ugv::mir::Start(const std::string& ip_addr)
 
     URI uri_origin(uri_address_);
     uri_ = uri_origin;
+
     return;
 
 }
@@ -268,9 +273,10 @@ bool yf::ugv::mir::PutMethod(const std::string &sub_path,const Poco::JSON::Objec
         std::cout << respond_status_ << " " << respond_reason_ << std::endl;   // 200 OK.
 
         std::istream& is = session.receiveResponse(res);
-        std::string result;
-        StreamCopier::copyToString(is, put_request_result_);
-        std::cout << put_request_result_ << std::endl;
+
+        request_result_.clear();
+        StreamCopier::copyToString(is, request_result_);
+        std::cout << request_result_ << std::endl;
 
         return true;
     }
@@ -331,9 +337,10 @@ bool yf::ugv::mir::PostMethod(const std::string &sub_path, const Poco::JSON::Obj
         std::cout << respond_status_ << " " << respond_reason_ << std::endl;   // 200 OK.
 
         std::istream& is = session.receiveResponse(res);
-        std::string result;
-        StreamCopier::copyToString(is, post_request_result_);
-        std::cout << post_request_result_ << std::endl;
+
+        request_result_.clear();
+        StreamCopier::copyToString(is, request_result_);
+        std::cout << request_result_ << std::endl;
 
         return true;
     }
@@ -391,16 +398,42 @@ int yf::ugv::mir::GetState()
     return state;
 }
 
+//todo: fine tune......
+//  can not use for now.
+//  use modbus?
 bool yf::ugv::mir::IsConnected()
 {
+    uri_.setPath("/api/v2.0.0/registers/102");
+
     std::string path(uri_.getPathAndQuery());
     if (path.empty()) path = "/";
 
     HTTPClientSession session(uri_.getHost(), uri_.getPort());
+    session.setKeepAlive(true);
+    session.setKeepAliveTimeout(3000);
+    std::cout << "time out: " << session.getTimeout().totalSeconds() << std::endl;
+    std::cout << "connection time out: " <<session.getKeepAliveTimeout().totalSeconds()<< std::endl;
 
-    return session.connected();
+    HTTPRequest request(HTTPRequest::HTTP_GET, path, HTTPMessage::HTTP_1_1);
+    request.setContentType(api_content_type_);
+    request.setCredentials(api_credentials_scheme_, api_credentials_authentication_);
+
+    HTTPResponse response;
+
+    session.sendRequest(request);
+    std::istream& rs = session.receiveResponse(response);
+
+    respond_status_ = response.getStatus();
+
+    if(respond_status_ == 200)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
-
 
 
 

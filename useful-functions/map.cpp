@@ -11,20 +11,33 @@ int main()
 
     std::cout << "IsConnected? " << mir100.IsConnected() << std::endl;
 
-    std::cout << mir100.GetIpAddress() << std::endl;
-    std::cout << mir100.GetAuthentication() << std::endl;
+    std::cout << "----------------------" << std::endl;
 
     Poco::JSON::Object Register;
-    float value = 1024.4f;
+    float value = 2014.1f;
     Register.set("value", value);
 
     Poco::JSON::Object Register1;
-    float value1 = 1024.9f;
+    float value1 = 2025.9f;
     Register1.set("value", value1);
     Register1.set("label", "string");
 
-    int state = mir100.GetState();
+    mir100.PutMethod("/api/v2.0.0/registers/101", Register);
+    mir100.PutMethod("/api/v2.0.0/registers/102", Register);
+    mir100.PutMethod("/api/v2.0.0/registers/102", Register1);
+    mir100.PutMethod("/api/v2.0.0/registers/103", Register);
+    mir100.PutMethod("/api/v2.0.0/registers/104", Register);
+    mir100.PutMethod("/api/v2.0.0/registers/104", Register1);
+    mir100.PostMethod("/api/v2.0.0/registers/105", Register1);
 
+
+
+
+    int state = mir100.GetState();
+    int state1 = mir100.GetState();
+    int state2 = mir100.GetState();
+
+#if 0
     // isConnected? === get
 
     // get_status === get
@@ -55,5 +68,6 @@ int main()
 
 //    mir100.UpdatePositionOnMap(19.048f, 31.291f, 27.605f);
 
+#endif
     return 1;
 }
