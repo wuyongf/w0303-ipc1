@@ -116,11 +116,11 @@ add_executable (w03003_cur_time "useful-functions/w03003_cur_time.cpp" )
 #d:/nw_sys/nw_sql_application_dll.dll
 link_directories(lib)
 
-add_executable(c_testing "useful-functions/c_testing.cpp")
+add_executable(c_testing "useful-functions/chiu_c_testing.cpp")
 target_link_libraries(c_testing "d:/nw_sys/nw_sql_application_dll.dll")
 
-add_executable(dll_libhallo "useful-functions/dll.cpp")
-target_link_libraries(dll_libhallo liblibhallo.dll)
+#add_executable(dll_libhallo "useful-functions/dll.cpp")
+#target_link_libraries(dll_libhallo liblibhallo.dll)
 
 
 ##

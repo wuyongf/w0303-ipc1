@@ -72,17 +72,20 @@ void onMouse(int event, int x, int y, int flags, void* param)
     else if (event == EVENT_LBUTTONUP)
     {
         x_end = x;
-        y_end = y_for_mir;
+    y_end = y_for_mir;
 
+    if (x_end != x_start || y_end != y_start)
+    {
         delta_x = x_end - x_start;
-        delta_y = std::abs(y_end - y_start);
+        delta_y = y_end - y_start;
 
-        theta =  std::atan(delta_y/delta_x)* 180 / 3.1415926;
+        theta =  std::atan2(delta_y,delta_x) * 180 / 3.1415926;
 
         std::cout << "theta: " << theta << std::endl;
     }
-    else
-        sprintf(text, "x=%d, y=%d", x, y_for_mir);
+}
+else
+sprintf(text, "x=%d, y=%d", x, y_for_mir);
 
     putText(img2, text, Point(5,15), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0));
     imshow("image", img2);
