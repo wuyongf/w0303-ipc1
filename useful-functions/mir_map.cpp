@@ -86,6 +86,7 @@ void onMouse(int event, int x, int y, int flags, void* param)
 
     putText(img2, text, Point(5,15), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0));
     imshow("image", img2);
+
 }
 
 int main(int argc, char** argv)
