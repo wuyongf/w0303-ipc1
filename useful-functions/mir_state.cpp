@@ -1,5 +1,4 @@
 #include <iostream>
-#include <map>
 
 #include "../include/ugv.h"
 
@@ -29,9 +28,6 @@ int main()
     mir100.PutMethod("/api/v2.0.0/registers/104", Register);
     mir100.PutMethod("/api/v2.0.0/registers/104", Register1);
     mir100.PostMethod("/api/v2.0.0/registers/105", Register1);
-
-
-
 
     int state = mir100.GetState();
     int state1 = mir100.GetState();

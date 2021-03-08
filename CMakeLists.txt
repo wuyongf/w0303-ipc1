@@ -10,7 +10,10 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # opencv, for image processing
-find_package(OpenCV CONFIG REQUIRED)
+
+find_package(OpenCV REQUIRED)
+
+include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 # nanodbc, for sql
 find_package(nanodbc CONFIG REQUIRED)
@@ -97,7 +100,7 @@ add_executable (z_boost_chat_client "useful-functions/boost_chat_client.cpp" )
 #target_link_libraries(z_boost_chat_client ${Boost_LIBRARY_DIR})
 
 add_executable (z_boost_server_tutorial "useful-functions/boost_server_tutorial.cpp" )
-add_executable (mat_tutorial "useful-functions/mat_tutorial.cpp" )
+add_executable (mat_tutorial "useful-functions/eigen_mat_tutorial.cpp" )
 
 add_executable (ln_command "useful-functions/w03003_ln_command.cpp" )
 target_link_libraries(ln_command PRIVATE glog::glog)
@@ -139,8 +142,11 @@ add_executable(mir_poco "src/mir_poco.cpp" )
 target_link_libraries(mir_poco PUBLIC glog::glog nanodbc modbus Poco::Foundation Poco::Net Poco::XML Poco::Zip Poco::Data)
 
 # for mir testing
-add_executable(map "useful-functions/map.cpp" )
-target_link_libraries(map PUBLIC glog::glog nanodbc modbus Poco::Foundation Poco::Net Poco::XML Poco::Zip Poco::Data Poco::JSON)
+add_executable(mir_state "useful-functions/mir_state.cpp" )
+target_link_libraries(mir_state PUBLIC glog::glog nanodbc modbus Poco::Foundation Poco::Net Poco::XML Poco::Zip Poco::Data Poco::JSON)
+
+add_executable(mir_map "useful-functions/mir_map.cpp" )
+target_link_libraries(mir_map PUBLIC glog::glog nanodbc modbus Poco::Foundation Poco::Net Poco::XML Poco::Zip Poco::Data Poco::JSON  ${OpenCV_LIBS})
 
 add_executable(hex2float "useful-functions/hex2float.cpp")
 
