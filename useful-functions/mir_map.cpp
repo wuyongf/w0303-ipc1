@@ -102,7 +102,8 @@ int main(int argc, char** argv)
     if (img.empty())
         return -1;
 
-    std::cout << "image column [x]: " << img.cols << "image row [y]: " << img.rows << std::endl;
+    std::cout << "image column [x]: " << img.cols << std::endl;
+    std::cout << "image row [y]: " << img.rows << std::endl;
 
     namedWindow("image");
     setMouseCallback("image", onMouse, 0);

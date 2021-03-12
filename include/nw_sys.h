@@ -649,6 +649,10 @@ void yf::sys::nw_sys::DoJobs(const int &cur_schedule_id)
 
 void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
 {
+    /// 1. Assign Tasks.
+
+    /// 2. Do Tasks.
+
     LOG(INFO) << "Do Tasks...";
 
     q_task_ids = sql_ptr_->GetTasksId(cur_job_id);

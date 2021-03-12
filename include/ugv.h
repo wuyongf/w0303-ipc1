@@ -2,6 +2,8 @@
 
 #include "data.h"
 
+#include <stdio.h>
+#include <time.h>
 #include <iostream>
 #include <string>
 #include <map>
@@ -24,6 +26,7 @@
 #include "Poco/Net/HTTPMessage.h"
 #include "Poco/Net/NetException.h"
 #include "Poco/Net/HTMLForm.h"
+#include "Poco/Net/ICMPClient.h"
 
 #include "Poco/JSON/JSON.h"
 #include "Poco/JSON/Stringifier.h"
@@ -36,6 +39,7 @@ using Poco::Net::HTTPClientSession;
 using Poco::Net::HTTPRequest;
 using Poco::Net::HTTPResponse;
 using Poco::Net::HTTPMessage;
+using Poco::Net::ICMPClient;
 using Poco::StreamCopier;
 using Poco::Path;
 using Poco::URI;
@@ -97,7 +101,7 @@ namespace yf
             std::string model_name_ = "mir100";
 
             // for rest api
-            std::string ip_address_ = "192.168.2.111";
+            std::string ip_address_ = "192.168.2.113";
             std::string uri_address_ = "http://" + ip_address_;
 
             URI uri_;
@@ -399,39 +403,30 @@ int yf::ugv::mir::GetState()
 }
 
 //todo: fine tune......
-//  can not use for now.
-//  use modbus?
+//  (1) cout problem...
+//  (2) database?
+
 bool yf::ugv::mir::IsConnected()
 {
-    uri_.setPath("/api/v2.0.0/registers/102");
+    //By using ping method.
 
-    std::string path(uri_.getPathAndQuery());
-    if (path.empty()) path = "/";
+    int ping_request_no = 1;
 
-    HTTPClientSession session(uri_.getHost(), uri_.getPort());
-    session.setKeepAlive(true);
-    session.setKeepAliveTimeout(3000);
-    std::cout << "time out: " << session.getTimeout().totalSeconds() << std::endl;
-    std::cout << "connection time out: " <<session.getKeepAliveTimeout().totalSeconds()<< std::endl;
+    int ping_timeout = 800; //ms
 
-    HTTPRequest request(HTTPRequest::HTTP_GET, path, HTTPMessage::HTTP_1_1);
-    request.setContentType(api_content_type_);
-    request.setCredentials(api_credentials_scheme_, api_credentials_authentication_);
+    std::string ping_command =  "ping " + ip_address_ +
+                                " -n " + std::to_string(ping_request_no) +
+                                " -w " + std::to_string(ping_timeout);
 
-    HTTPResponse response;
+    const char* cstr_ping_command = ping_command.c_str();
 
-    session.sendRequest(request);
-    std::istream& rs = session.receiveResponse(response);
-
-    respond_status_ = response.getStatus();
-
-    if(respond_status_ == 200)
+    if (system( cstr_ping_command ) )
     {
-        return true;
+        return false;
     }
     else
     {
-        return false;
+        return true;
     }
 }
 

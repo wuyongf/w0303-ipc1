@@ -10,11 +10,15 @@ int main()
 {
     yf::ugv::mir mir100;
 
-    mir100.Start("192.168.2.111");
+    mir100.Start("192.168.2.113");
 
-    std::cout << "IsConnected? " << mir100.IsConnected() << std::endl;
+    auto connection_result = mir100.IsConnected();
+
+    std::cout << "IsConnected? " << connection_result << std::endl;
 
     std::cout << "----------------------" << std::endl;
+
+#if 0
 
     Poco::JSON::Object Register;
     float value = 2014.1f;
@@ -23,7 +27,6 @@ int main()
     Poco::JSON::Object Register1;
     float value1 = 2025.9f;
     Register1.set("value", value1);
-    Register1.set("label", "string");
 
     mir100.PutMethod("/api/v2.0.0/registers/101", Register);
     mir100.PutMethod("/api/v2.0.0/registers/102", Register);
@@ -36,6 +39,8 @@ int main()
     int state = mir100.GetState();
     int state1 = mir100.GetState();
     int state2 = mir100.GetState();
+
+#endif
 
 #if 0
     // isConnected? === get

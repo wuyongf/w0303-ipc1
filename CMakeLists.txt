@@ -148,6 +148,10 @@ target_link_libraries(mir_state PUBLIC glog::glog nanodbc modbus Poco::Foundatio
 add_executable(mir_map "useful-functions/mir_map.cpp" )
 target_link_libraries(mir_map PUBLIC glog::glog nanodbc modbus Poco::Foundation Poco::Net Poco::XML Poco::Zip Poco::Data Poco::JSON  ${OpenCV_LIBS})
 
+add_executable(poco_ping_testing "useful-functions/poco_ping_testing.cpp" )
+target_link_libraries(poco_ping_testing PUBLIC glog::glog nanodbc modbus Poco::Foundation Poco::Net Poco::XML Poco::Zip Poco::Data Poco::JSON  ${OpenCV_LIBS})
+
+
 add_executable(hex2float "useful-functions/hex2float.cpp")
 
 # TODO: Add tests and install targets if needed.
