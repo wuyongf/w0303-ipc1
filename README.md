@@ -15,8 +15,19 @@
 
 2021/03/15
 
-1. 
+1. for mir: how to create a mission based on database.
 
+2. for arm: need to assign a mission in sequence.
+
+         workflow
+
+         a. preparation
+   
+            |.   move to <vision_init_positon>
+            ||.  execute vision job. 
+            |||. update ref-points.
+   
+         b. execute the mission
 ***
 **TM-Flow Related**
 

@@ -90,7 +90,6 @@ sprintf(text, "x=%d, y=%d", x, y_for_mir);
     putText(img2, text, Point(5,15), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0));
     imshow("image", img2);
 
-
 }
 
 int main(int argc, char** argv)
