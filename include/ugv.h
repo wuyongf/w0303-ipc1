@@ -1,6 +1,6 @@
-#pragma once
+// latest update: 2021/03/12 23:02
 
-#include "data.h"
+#pragma once
 
 #include <stdio.h>
 #include <time.h>
@@ -44,6 +44,12 @@ using Poco::StreamCopier;
 using Poco::Path;
 using Poco::URI;
 using Poco::Exception;
+
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
+static const std::string slash="\\";
+#else
+static const std::string slash="/";
+#endif
 
 namespace yf
 {
@@ -408,15 +414,27 @@ int yf::ugv::mir::GetState()
 
 bool yf::ugv::mir::IsConnected()
 {
-    //By using ping method.
+    std::string ping_command;
 
-    int ping_request_no = 1;
+    // check whether it is on Windows or Linux
 
-    int ping_timeout = 800; //ms
+    if(slash == "/")    // linux
+    {
+        //ping -c1 -s1 -w1 192.168.2.113
+        ping_command = "ping -c1 -s1 -w1 " + ip_address_;
+    }
+    else                // windows
+    {
+        //By using win ping method.
 
-    std::string ping_command =  "ping " + ip_address_ +
-                                " -n " + std::to_string(ping_request_no) +
-                                " -w " + std::to_string(ping_timeout);
+        int ping_request_no = 1;
+
+        int ping_timeout = 800; //ms
+
+        ping_command =  "ping " + ip_address_ +
+                        " -n " + std::to_string(ping_request_no) +
+                        " -w " + std::to_string(ping_timeout);
+    }
 
     const char* cstr_ping_command = ping_command.c_str();
 
@@ -429,6 +447,16 @@ bool yf::ugv::mir::IsConnected()
         return true;
     }
 }
+
+
+
+
+
+
+
+
+
+
 
 
 
