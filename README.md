@@ -12,6 +12,45 @@
 3. For IPC1 program, the "Get/Post/Put Method" will cout the result. Need to fine tune.
 
 ***
+2021/03/16
+
+HA Onsite Setting
+
+1. handle_01, handle_02, handle_03, handle_04.
+
+2. handrail_01
+         
+         handrail_01_a
+         handrail_01_b
+   
+3. protection_panel_01
+      
+         protection_panel_01_a
+         protection_panel_01_b
+
+4. handrail_02
+   
+         handrail_02_a
+         handrail_02_b1
+         handrail_02_b2
+         handrail_02_b3
+         handrail_02_c
+   
+5. protection_panel_02
+
+         protection_panel_02_a
+         protection_panel_02_b1
+         protection_panel_02_b2
+         protection_panel_02_b3
+         protection_panel_02_c
+
+6. foot_pedal_01
+
+7. foot_pedal_02
+
+8. basin_01
+
+9. 
 
 2021/03/15
 
@@ -21,13 +60,15 @@
 
          workflow
 
-         a. preparation
+         (1) preparation
    
-            |.   move to <vision_init_positon>
-            ||.  execute vision job. 
-            |||. update ref-points.
+            a.   move to <vision_init_positon>
+            b.  execute vision job. 
+            c. update ref-points.
    
-         b. execute the mission
+         (2) execute the mission
+
+
 ***
 **TM-Flow Related**
 

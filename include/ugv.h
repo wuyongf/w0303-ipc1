@@ -2,6 +2,10 @@
 
 #pragma once
 
+#include "nw_status.h"
+#include "sql.h"
+
+
 #include <stdio.h>
 #include <time.h>
 #include <iostream>
@@ -62,6 +66,7 @@ namespace yf
             virtual ~mir(){};
 
         public:
+
             /// Setter
             void SetIpAddress(const std::string& ip_addr);
             void SetUriAddress();
@@ -87,14 +92,37 @@ namespace yf
 
         public:
 
-            void Start(const std::string& ip_addr);
+            void Start(const std::string& ip_addr, std::shared_ptr<yf::status::nw_status> status_ptr, std::shared_ptr<yf::sql::sql_server> sql_ptr);
             void Close();
 
-        public:
+        public: /// layer 1: basic GET/POST/PUT/Delete Method
 
+            // (1) done: Get Connection Status
+            // (2) todo: update to nw_status
+            // (3) todo: update to database
             bool IsConnected();
 
-            int GetState();
+            // (1) done: Get State
+            // (2) todo: update to nw_status
+            // (3) todo: update to database
+            int  GetState();
+
+            bool PostMission(const std::string& mission_name, const std::string& session_name);
+
+            bool PostActions(const std::string& mission_name);
+
+
+        public: ///  layer2: interaction with nw_status, database
+
+            // (1) todo: update to nw_status
+            // (2) todo: update to database
+            void UpdateUgvCurState();
+
+            // (1) check whether
+            bool ClearErrorState();
+
+            // (1) For Different Areas Initialization
+            //
             bool UpdatePositionOnMap(const float& pos_x, const float& pos_y, const float& pos_theta);
 
         private:
@@ -103,17 +131,23 @@ namespace yf
 
         private:
 
+            // shared status
+            std::shared_ptr<yf::status::nw_status> nw_status_ptr_;
+
+            // shared database
+            std::shared_ptr<yf::sql::sql_server> sql_ptr_;
+
             // for model info
             std::string model_name_ = "mir100";
 
             // for rest api
-            std::string ip_address_ = "192.168.2.113";
-            std::string uri_address_ = "http://" + ip_address_;
+            std::string ip_address_     = "192.168.2.113";
+            std::string uri_address_    = "http://" + ip_address_;
 
             URI uri_;
 
-            std::string api_content_type_ = "application/json";
-            std::string api_credentials_scheme_ = "Basic";
+            std::string api_content_type_               = "application/json";
+            std::string api_credentials_scheme_         = "Basic";
             std::string api_credentials_authentication_ = "ZGlzdHJpYnV0b3I6NjJmMmYwZjFlZmYxMGQzMTUyYzk1ZjZmMDU5NjU3NmU0ODJiYjhlNDQ4MDY0MzNmNGNmOTI5NzkyODM0YjAxNA==";
 
             // for rest api result
@@ -121,6 +155,14 @@ namespace yf
 
             int         respond_status_;
             std::string respond_reason_;
+
+            // for mir missions
+            std::string session_guid_HKSTP_ = "7aa0de9c-8579-11eb-9840-00012978eb45";
+            std::string session_guid_EMSD_  = "7f708490-8579-11eb-9840-00012978eb45";
+            std::string session_guid_HA_    = "84c07703-8579-11eb-9840-00012978eb45";
+
+            std::string group_id_           = "mirconst-guid-0000-0011-missiongroup";   // default group: mission group
+
         };
     }
 }
@@ -222,15 +264,21 @@ bool yf::ugv::mir::GetMethod(const std::string &sub_path)
     }
 }
 
-void yf::ugv::mir::Start(const std::string& ip_addr)
+void yf::ugv::mir::Start(const std::string& ip_addr, std::shared_ptr<yf::status::nw_status> status_ptr, std::shared_ptr<yf::sql::sql_server> sql_ptr)
 {
-    // Initial setup
+
+    /// Initial setup for REST API
     //
     SetIpAddress(ip_addr);
     SetUriAddress();
 
     URI uri_origin(uri_address_);
     uri_ = uri_origin;
+
+    /// Initial setup for SQL
+    //
+    nw_status_ptr_  = status_ptr;
+    sql_ptr_ = sql_ptr;
 
     return;
 
@@ -447,6 +495,69 @@ bool yf::ugv::mir::IsConnected()
         return true;
     }
 }
+// session_name: HKSTP || EMSD || HA
+//
+bool yf::ugv::mir::PostMission(const std::string& mission_name, const std::string& session_name)
+{
+    // session_id
+    // (1) session --- where
+
+    std::string session_id = "";
+
+    if(session_name == "HKSTP")
+    {
+        session_id = session_guid_HKSTP_;
+    }
+    else if(session_name == "EMSD")
+    {
+        session_id = session_guid_EMSD_;
+    }
+    else if(session_name == "HA")
+    {
+        session_id = session_guid_HA_;
+    }
+
+    // mission name
+    //
+    // (2) block_name --- which block
+    // (3) floor_no --- which floor
+    // (4) Area --- which Area
+    // (4) Area2 --- sub area
+    // (5) Mission_id --- 001,002,...
+    // (6) Description of Mission_id. --- which object
+
+    // assign
+    Poco::JSON::Object mission;
+
+    mission.set("session_id",session_id);
+    mission.set("name",mission_name);
+
+    mission.set("hidden", false);
+    mission.set("group_id", group_id_);
+
+    return PostMethod("http://192.168.2.111/api/v2.0.0/missions", mission);
+}
+
+bool yf::ugv::mir::PostActions(const std::string &mission_name)
+{
+    return false;
+}
+
+// post mission actions
+//
+// @@ input: mission_id
+//
+// mission name: 12w_2/F_corridor_handrail_001
+// guid: fa1868c9-8dd8-11eb-a5e3-00012978eb45
+//
+
+// 1. Get map_id based on ugv_config_id.
+
+// 2. Get position_name in order.
+
+// 3. Get position guid in order.
+
+// 4. post a list of new actions.
 
 
 

@@ -15,6 +15,8 @@
 
 #include <nanodbc/nanodbc.h>
 
+#include "data.h"
+
 namespace yf
 {
     namespace sql
@@ -103,6 +105,21 @@ namespace yf
             // sys control status
             int GetSysControlMode();
 
+            // Model_config
+            int GetModelConfigId(const int& cur_job_id);
+
+            int GetModelConfigElement(const int& model_config_id, const std::string& element);
+
+            // Arm_mission_config
+            //
+            std::deque<int> GetArmMissionConfigIds(const int& arm_config_id);
+
+            int GetArmPointId(const int& arm_mission_config_id, const std::string& arm_point_name);
+
+            int GetArmMotionType(const int& arm_mission_config_id);
+
+            yf::data::arm::Point3d GetArmPoint(const int& point_id);
+            float GetArmPointElement(const int &point_id, const std::string &point_element);
 
 
         private:
@@ -133,14 +150,14 @@ namespace yf
 yf::sql::sql_server::sql_server()
 {
     //"Driver={SQL Server};Server=192.168.0.8;Database=NW_mobile_robot_system;Uid=sa;Pwd=Willsonic2010"
-    ODBCConnectionStr_ = "Driver={"+driver_+"};Server="+server_+";Database="+database_+";Uid="+Uid_+";Pwd="+Pwd_;
+    ODBCConnectionStr_ = "Driver={"+driver_+"};Server="+server_+";Port=1433;Database="+database_+";Uid="+Uid_+";Pwd="+Pwd_;
 }
 
 yf::sql::sql_server::sql_server(const std::string &driver, const std::string &server, const std::string &database,
                                 const std::string &Uid, const std::string &Pwd)
         : driver_(driver),  server_(server), database_(database), Uid_(Uid), Pwd_(Pwd)
 {
-    ODBCConnectionStr_ = "Driver={"+driver_+"};Server="+server_+";Database="+database_+";Uid="+Uid_+";Pwd="+Pwd_;
+    ODBCConnectionStr_ = "Driver={"+driver_+"};Server="+server_+";Port=1433;Database="+database_+";Uid="+Uid_+";Pwd="+Pwd_;
 }
 
 yf::sql::sql_server::~sql_server()
@@ -1071,6 +1088,246 @@ std::deque<int> yf::sql::sql_server::GetAvailableScheuldesId()
         return available_schedules;
     }
 }
+
+int yf::sql::sql_server::GetArmMotionType(const int& arm_mission_config_id)
+{
+    std::string mission_id_str = std::to_string(arm_mission_config_id);
+
+    //motion types
+    std::string query_motion_type;
+
+    int motion_type;
+
+    try
+    {
+        Connect();
+
+        query_motion_type = "SELECT motion_type FROM data_arm_mission_config where ID = " + mission_id_str;
+
+        auto result = nanodbc::execute(conn_, query_motion_type);
+
+        while(result.next())
+        {
+            motion_type = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return motion_type;
+
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return 0;
+    }
+
+}
+
+int yf::sql::sql_server::GetArmPointId(const int &arm_mission_config_id, const std::string &arm_point_name)
+{
+    std::string mission_id_str = std::to_string(arm_mission_config_id);
+
+    //motion types
+    std::string query;
+
+    int point_id;
+
+    try
+    {
+        Connect();
+
+        query = "SELECT " + arm_point_name + " FROM data_arm_mission_config where ID = " + mission_id_str;
+
+        auto result = nanodbc::execute(conn_, query);
+
+        while(result.next())
+        {
+            point_id = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return point_id;
+
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return 1;
+    }
+
+}
+
+yf::data::arm::Point3d yf::sql::sql_server::GetArmPoint(const int &point_id)
+{
+
+    yf::data::arm::Point3d point3d;
+
+    point3d.x = this->GetArmPointElement(point_id,"x");
+    point3d.y = this->GetArmPointElement(point_id,"y");
+    point3d.z = this->GetArmPointElement(point_id,"z");
+    point3d.rx = this->GetArmPointElement(point_id,"rx");
+    point3d.ry = this->GetArmPointElement(point_id,"ry");
+    point3d.rz = this->GetArmPointElement(point_id,"rz");
+
+    return point3d;
+}
+
+float yf::sql::sql_server::GetArmPointElement(const int &point_id, const std::string &point_element)
+{
+    std::string query_update;
+
+    std::string point_id_str = std::to_string(point_id);
+
+    float element_value;
+
+    //"SELECT ID FROM schedule_table where status=1 AND planned_start > '2021-02-06 11:10:08.000'"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT " + point_element + " FROM data_arm_points where ID = " + point_id_str;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            element_value = result.get<float>(point_element);
+        };
+
+        Disconnect();
+
+        return element_value;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return 0;
+    };
+}
+
+int yf::sql::sql_server::GetModelConfigId(const int &cur_job_id)
+{
+    std::string query_update;
+
+    std::string cur_job_id_str = std::to_string(cur_job_id);
+
+    int model_config_id;
+
+    //"SELECT ID FROM schedule_table where status=1 AND planned_start > '2021-02-06 11:10:08.000'"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT model_config_id FROM sys_schedule_job where job_id = " + cur_job_id_str;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            model_config_id = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return model_config_id;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return 0;
+    };
+}
+
+int yf::sql::sql_server::GetModelConfigElement(const int &model_config_id, const std::string &element)
+{
+    std::string query_update;
+
+    std::string model_config_id_str = std::to_string(model_config_id);
+
+    int element_value;
+
+    //"SELECT ID FROM schedule_table where status=1 AND planned_start > '2021-02-06 11:10:08.000'"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT " + element + " FROM data_model_config where ID = " + model_config_id_str;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            element_value = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return element_value;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return 0;
+    };
+}
+
+std::deque<int> yf::sql::sql_server::GetArmMissionConfigIds(const int &arm_config_id)
+{
+    // query string
+    std::string query_update;
+
+    // input
+    std::string arm_config_id_str = std::to_string(arm_config_id);
+
+    // output
+    std::deque<int> arm_mission_config_ids;
+
+    //"SELECT ID FROM schedule_table where status=1 AND planned_start > '2021-02-06 11:10:08.000'"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT ID FROM data_arm_mission_config where arm_config_id = " + arm_config_id_str + " ORDER BY mission_order";
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            auto mission_config_id = result.get<int>(0);
+
+            arm_mission_config_ids.push_back(mission_config_id);
+        };
+
+        Disconnect();
+
+        return arm_mission_config_ids;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return arm_mission_config_ids;
+    };
+}
+
+
 
 
 

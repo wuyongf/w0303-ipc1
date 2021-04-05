@@ -5,18 +5,38 @@
 #include <iostream>
 
 #include "../include/ugv.h"
+#include "../include/sql.h"
+#include "../include/nw_status.h"
 
 int main()
 {
+    std::shared_ptr<yf::status::nw_status> nw_status_ptr = std::make_shared<yf::status::nw_status>();
+    std::shared_ptr<yf::sql::sql_server> sql_ptr = std::make_shared<yf::sql::sql_server>();
+
+
     yf::ugv::mir mir100;
 
-    mir100.Start("192.168.2.113");
+    mir100.Start("192.168.2.113", nw_status_ptr, sql_ptr);
 
     auto connection_result = mir100.IsConnected();
 
     std::cout << "IsConnected? " << connection_result << std::endl;
 
     std::cout << "----------------------" << std::endl;
+
+    auto state_result = mir100.GetState();
+
+    std::cout << "State " << state_result << std::endl;
+
+    std::cout << "----------------------" << std::endl;
+
+    auto post_mission_result = mir100.PostMission("12w_2/F_corridor_handrail_002","HKSTP");
+
+    std::cout << "post_mission_result " << post_mission_result << std::endl;
+
+    std::cout << "----------------------" << std::endl;
+
+
 
 #if 0
 
@@ -43,6 +63,7 @@ int main()
 #endif
 
 #if 0
+
     // isConnected? === get
 
     // get_status === get

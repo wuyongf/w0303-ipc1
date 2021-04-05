@@ -34,8 +34,17 @@ namespace yf
 
             void WaitForConnection();
 
+            /// Modbus Method
+            // (~) todo: ipc1 check Arm Connection Status via Modbus
+            // (2) ipc1 updates arm connection status from net_server to nw_sys
+            // (3) ipc1 updates arm connection status from nw_sys to Database
             void GetConnectionStatus();
 
+            /// Net Method
+            // (1) ipc1(net_server) ---> arm: ipc1(net sever) requests "Get Status"
+            // (2) ipc1(net_server) <--- arm: arm return current status to ipc1(net_server)
+            // (3) ipc1 updates arm connection status from net_server to nw_sys
+            // (4) ipc1 updates arm connection status from nw_sys to Database
             void GetMissionStatus();
 
             bool TryReconnectArm();
@@ -237,8 +246,6 @@ void yf::arm::tm::WaitForConnection()
     nw_status_ptr_->arm_connection_status = yf::data::common::ConnectionStatus::Connected;
 
     ModbusCheckArmStatus();
-
-
 
 }
 

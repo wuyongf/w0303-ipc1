@@ -17,7 +17,7 @@ throw error;
 }
 
 /**
-* Convert a base64 string in a Blob according to the data and contentType.
+* Convert a base64 string i a Blob according to the data and contentType.n
 *
 * @param b64Data {String} Pure base64 string without contentType
 * @param contentType {String} the content type of the file i.e (image/jpeg - image/png - text/plain)

@@ -179,14 +179,17 @@ yf::sys::nw_sys::nw_sys(const int &ipc_port)
 
 void yf::sys::nw_sys::Start()
 {
-    // (0) Initialization
+    /// 0. Initialization
     //
+    // (0) nw_status and sql
     nw_status_ptr_ = std::make_shared<yf::status::nw_status>();
-    sql_ptr_       = std::make_shared<yf::sql::sql_server>();
+    sql_ptr_       = std::make_shared<yf::sql::sql_server>("ODBC Driver 17 for SQL Server","localhost","NW_mobile_robot_sys","sa","wuyongfeng1334");
 
     // (1) thread ipc_server, establish server and keep updating, keep waiting for devices connection.
     th_ipc_server_ = std::thread(&nw_sys::thread_IPCServerStartup, this, std::ref(ipc_server_ptr_), std::ref(ipc_server_flag_));
 
+    /// 1. Initialization --- arm
+    //
     // (2) startup tm5 control module and pass <1> ipc_server_ptr, <2> nw_status_ptr <3> sql_ptr
     tm5.Start(ipc_server_ptr_,nw_status_ptr_,sql_ptr_);
 
@@ -196,6 +199,10 @@ void yf::sys::nw_sys::Start()
 
     // update the connection status to sys_status & database ;
     tm5.GetConnectionStatus();
+
+    /// 2. Initialization --- ugv
+    //
+
 
     th_do_schedules_ = std::thread(&nw_sys::thread_DoSchedules, this);
 

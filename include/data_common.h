@@ -51,7 +51,7 @@ namespace yf
                 // UgvDockingPosition
             };
 
-            enum class MirState
+            enum class UgvState
             {
                 Starting        = 1,        // connected
                 ShuttingDown    = 2,        // disconnected

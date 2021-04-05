@@ -26,7 +26,7 @@ namespace yf
 
             // ugv status
             yf::data::common::ConnectionStatus      ugv_connection_status_;
-            yf::data::common::MissionStatus         ugv_mission_status_;
+            yf::data::common::UgvState              ugv_mission_status_;
 
             // ipc2--pi4 status
             yf::data::common::ConnectionStatus      ipc2_connection_status_;

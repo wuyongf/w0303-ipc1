@@ -136,7 +136,7 @@ target_link_libraries(modbus_test PRIVATE modbus)
 
 
 add_executable(w0303_main_test1 "src/w0303_main_test1.cpp" "include/net_w0303_server.h")
-target_link_libraries(w0303_main_test1 PUBLIC glog::glog nanodbc modbus)
+target_link_libraries(w0303_main_test1 PUBLIC glog::glog nanodbc modbus Poco::Foundation Poco::Net Poco::XML Poco::Zip Poco::Data Poco::JSON)
 
 add_executable(mir_poco "src/mir_poco.cpp" )
 target_link_libraries(mir_poco PUBLIC glog::glog nanodbc modbus Poco::Foundation Poco::Net Poco::XML Poco::Zip Poco::Data)
