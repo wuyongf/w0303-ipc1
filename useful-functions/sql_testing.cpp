@@ -3,6 +3,9 @@
 
 #include "../include/al.h"
 
+using std::cout;
+using std::endl;
+
 int main()
 {
 //    yf::sql::sql_server sql("SQL Server","192.168.7.84","NW_mobile_robot_sys","sa","wuyongfeng1334");
@@ -36,6 +39,57 @@ int main()
 //
 //    std::cout << "model_config_id: " << model_config_id << std::endl;
 
+    std::cout << "mission_config_num: " << sql->GetUgvMissionConfigNum(1) << std::endl;
+
+    // get arm_config_id based on model_config_id and plc_001
+    //
+    std::cout << "arm_config_id: " <<sql->GetArmConfigId(2,2) << std::endl;
+
+    // get position names
+    auto position_names = sql->GetUgvMissionConfigPositionNames(1);
+
+    std::cout << position_names.size() << std::endl;
+
+    std::cout << position_names[0] << std::endl;
+    std::cout << position_names[1] << std::endl;
+    std::cout << position_names[2] << std::endl;
+    std::cout << position_names[3] << std::endl;
+
+    // get model_id
+    auto model_id = sql->GetModelId(3);
+    std::cout << "model_id: " << model_id << std::endl;
+
+    // get map_id
+    auto map_id = sql->GetMapId(7);
+    std::cout << "map_id: " << map_id << std::endl;
+
+    // get map_element
+    // a. map_guid
+    // b. location_site_id
+    // c. location_building_id
+    // d. location_floor_id
+    auto map_guid = sql->GetMapElement(1,"map_guid");
+    cout << "map_guid: " << map_guid << endl;
+
+    auto site_info = sql->GetSiteInfo(3);
+    cout << "site: " << site_info << std::endl;
+
+    auto building_info = sql->GetBuildingInfo(3);
+    cout << "building_info: " << building_info << std::endl;
+
+    auto floor_info = sql->GetFloorInfo(1);
+    cout << "floor_info: " << floor_info << std::endl;
+
+    sql->UpdateTime();
+    auto time_year = sql->get_time_element("year");
+    auto time_month = sql->get_time_element("month");
+    auto time_day = sql->get_time_element("day");
+    auto time_hour = sql->get_time_element("hour");
+    auto time_min = sql->get_time_element("min");
+
+    auto time = time_year + time_month + time_day + "_" + time_hour + time_min;
+
+    cout << "time: " << time << endl;
     /// workflow
 
     /// 0. get cur_job_id
@@ -44,17 +98,30 @@ int main()
     /// 1. get model_config_id
     auto model_config_id = sql->GetModelConfigId(cur_job_id);
 
-    /// 2. based on model_config_id, get task_mode, arm_config_id, ugv_config_id.
+    /// 2. based on model_config_id, get task_mode, ugv_config_id.
     //
     // 2.1 task_mode
     auto task_mode = sql->GetModelConfigElement(model_config_id, "task_mode");
-    // 2.2 arm_config_id
-    auto arm_config_id = sql->GetModelConfigElement(model_config_id, "arm_config_id");
-    // 2.3 ugv_config_id
+    // 2.2 ugv_config_id
     auto ugv_config_id = sql->GetModelConfigElement(model_config_id, "ugv_config_id");
+
+    // 2.3 arm_config_id
+    // get arm_config_id based on model_config_id and plc_001
+    //
+    // 2021/04/05
+    //todo:
+    // (0) get total ugv_mission_config_num.  4
+    // (1) wait for plc_001 = 1;
+    // (2) check current plc_001 value.
+    // (3) get current arm_config_id, based on model_config_id and plc_002
+    // (4) ....
+    std::cout << "arm_config_id: " <<sql->GetArmConfigId(model_config_id,2) << std::endl;
+
+    auto  arm_config_id = sql->GetArmConfigId(model_config_id,2);
 
     /// 3. based on task_mode, change the tool.
 
+    /// 3.1 based on model_config_id, mission_order, position_name, create a ugv mission.
 
     /// 4. based on arm_config_id, select a list of arm_missions.
     auto arm_mission_config_ids = sql->GetArmMissionConfigIds(arm_config_id);

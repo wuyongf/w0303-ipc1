@@ -11,32 +11,43 @@
 int main()
 {
     std::shared_ptr<yf::status::nw_status> nw_status_ptr = std::make_shared<yf::status::nw_status>();
-    std::shared_ptr<yf::sql::sql_server> sql_ptr = std::make_shared<yf::sql::sql_server>();
+    std::shared_ptr<yf::sql::sql_server> sql_ptr = std::make_shared<yf::sql::sql_server>("ODBC Driver 17 for SQL Server","localhost","NW_mobile_robot_sys","sa","wuyongfeng1334");
 
 
     yf::ugv::mir mir100;
 
-    mir100.Start("192.168.2.113", nw_status_ptr, sql_ptr);
+    mir100.Start("192.168.7.34", nw_status_ptr, sql_ptr);
 
-    auto connection_result = mir100.IsConnected();
+//    auto connection_result = mir100.IsConnected();
+//
+//    std::cout << "IsConnected? " << connection_result << std::endl;
+//
+//    std::cout << "----------------------" << std::endl;
+//
+//    auto state_result = mir100.GetState();
+//
+//    std::cout << "State " << state_result << std::endl;
+//
+//    std::cout << "----------------------" << std::endl;
 
-    std::cout << "IsConnected? " << connection_result << std::endl;
+//    auto post_mission_result = mir100.PostMission(1);
+//
+//    std::cout << "post_mission_result " << post_mission_result << std::endl;
+//
+//    std::cout << "----------------------" << std::endl;
 
-    std::cout << "----------------------" << std::endl;
+int current_mission_order;
 
-    auto state_result = mir100.GetState();
+/// move to point_name, based on mission_order.
 
-    std::cout << "State " << state_result << std::endl;
+/// set PLC002 = 1,2,3,4,5, based on mission_order
+//    mir100.PostActionSetPLC(2,2, "1fe736a6-96a4-11eb-b10a-00012978eb45",1);
 
-    std::cout << "----------------------" << std::endl;
+/// set PLC001 = 1
+    mir100.PostActionSetPLC(1,1, "1fe736a6-96a4-11eb-b10a-00012978eb45",1);
 
-    auto post_mission_result = mir100.PostMission("12w_2/F_corridor_handrail_002","HKSTP");
-
-    std::cout << "post_mission_result " << post_mission_result << std::endl;
-
-    std::cout << "----------------------" << std::endl;
-
-
+/// wait for PLC001 = 0
+    mir100.PostActionWaitPLC(1,0,"1fe736a6-96a4-11eb-b10a-00012978eb45",1);
 
 #if 0
 

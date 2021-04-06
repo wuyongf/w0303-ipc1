@@ -107,10 +107,9 @@ namespace yf
             // (3) todo: update to database
             int  GetState();
 
-            bool PostMission(const std::string& mission_name, const std::string& session_name);
-
-            bool PostActions(const std::string& mission_name);
-
+            bool PostActions();
+            bool PostActionSetPLC(const int& plc_register, const float& value, const std::string& mission_id, const int& priority);
+            bool PostActionWaitPLC(const int& plc_register, const float& value, const std::string& mission_id, const int& priority);
 
         public: ///  layer2: interaction with nw_status, database
 
@@ -124,6 +123,16 @@ namespace yf
             // (1) For Different Areas Initialization
             //
             bool UpdatePositionOnMap(const float& pos_x, const float& pos_y, const float& pos_theta);
+
+        public: /// layer3: create a mission
+
+            ///3.1 based on model_config_id, mission_order, position_name, create a ugv mission.
+
+            // name protocal:
+            // building_floor_ModelName_time
+            // 12w_2f_handrail_001_202104061026
+            bool PostMission(const int& model_config_id);
+
 
         private:
 
@@ -162,6 +171,9 @@ namespace yf
             std::string session_guid_HA_    = "84c07703-8579-11eb-9840-00012978eb45";
 
             std::string group_id_           = "mirconst-guid-0000-0011-missiongroup";   // default group: mission group
+            bool hidden_flag_    = false;
+
+            std::string cur_mission_name_;
 
         };
     }
@@ -436,7 +448,7 @@ bool yf::ugv::mir::UpdatePositionOnMap(const float &pos_x, const float &pos_y, c
 
     Position.set("position", pos_json);
 
-    return PutMethod("http://192.168.2.111/api/v2.0.0/status", Position);
+    return PutMethod("/api/v2.0.0/status", Position);
 }
 
 int yf::ugv::mir::GetState()
@@ -495,52 +507,239 @@ bool yf::ugv::mir::IsConnected()
         return true;
     }
 }
-// session_name: HKSTP || EMSD || HA
-//
-bool yf::ugv::mir::PostMission(const std::string& mission_name, const std::string& session_name)
+
+bool yf::ugv::mir::PostMission(const int& model_config_id)
 {
-    // session_id
-    // (1) session --- where
+    /// based on model_config_id, mission_order, position_name, create a ugv mission.
 
-    std::string session_id = "";
+    // name protocol:
+    // building_floor_ModelName_time
+    // 12w_2f_handrail_001_202104061026
+    // 12w_2f_handrail_001_20210406_1020
 
-    if(session_name == "HKSTP")
+    /// 1. get positions.
+    auto position_names = sql_ptr_->GetUgvMissionConfigPositionNames(model_config_id);
+
+    /// 2. get session.
+    auto session_info = sql_ptr_->GetSiteInfo(model_config_id);
+
+    /// 3. get building---floor info--model name---time
+    auto building_info = sql_ptr_->GetBuildingInfo(model_config_id);
+    auto floor_info = sql_ptr_->GetFloorInfo(model_config_id);
+    auto model_name = sql_ptr_->GetModelName(model_config_id);
+
+    // time
+    sql_ptr_->UpdateTime();
+    auto time_year = sql_ptr_->get_time_element("year");
+    auto time_month = sql_ptr_->get_time_element("month");
+    auto time_day = sql_ptr_->get_time_element("day");
+    auto time_hour = sql_ptr_->get_time_element("hour");
+    auto time_min = sql_ptr_->get_time_element("min");
+
+    auto time = time_year + time_month + time_day + "_" + time_hour + time_min;
+
+    /// (1) set cur_mission_name
+    cur_mission_name_ = building_info + "_" + floor_info + "/F_" + model_name + "_" + time;
+
+    /// (2) get session_id
+    std::string session_id;
+
+    if(session_info == "hkstp")
     {
         session_id = session_guid_HKSTP_;
     }
-    else if(session_name == "EMSD")
+    else if(session_info == "emsd")
     {
         session_id = session_guid_EMSD_;
     }
-    else if(session_name == "HA")
+    else if(session_info == "ha")
     {
         session_id = session_guid_HA_;
     }
 
-    // mission name
-    //
-    // (2) block_name --- which block
-    // (3) floor_no --- which floor
-    // (4) Area --- which Area
-    // (4) Area2 --- sub area
-    // (5) Mission_id --- 001,002,...
-    // (6) Description of Mission_id. --- which object
+    /// (3) mission creation
+    //@@ input:
+    //   (1) name,       done    12w_2f_handrail_001_20210406_1020
+    //   (2) session_id, done    hkstp  guid: 7aa0de9c-8579-11eb-9840-00012978eb45
+    //   (3) hidden,     done    false
+    //   (4) group_id,   done    Missions guid: mirconst-guid-0000-0011-missiongroup
 
-    // assign
     Poco::JSON::Object mission;
 
     mission.set("session_id",session_id);
-    mission.set("name",mission_name);
+    mission.set("name",cur_mission_name_);
 
-    mission.set("hidden", false);
+    mission.set("hidden", hidden_flag_);
     mission.set("group_id", group_id_);
 
-    return PostMethod("http://192.168.2.111/api/v2.0.0/missions", mission);
+    return PostMethod("/api/v2.0.0/missions", mission);
+
 }
 
-bool yf::ugv::mir::PostActions(const std::string &mission_name)
+bool yf::ugv::mir::PostActions()
 {
+    // (1) move to p1            based on mission_order.
+    // (2) set plc002 = 1,2,3... based on mission_order.
+    // (3) set plc001 = 1.
+
+    // (4) count the priority.
+
+    /// @@ input: current mission_name.
+    /// @@ output: actions
+    ///
+    /// how to post an action?
+
+    // mission_id
+    // action_type
+    // parameters
+    // priority
+
+    /// (1) mission_id:         mission_name: 0326-test ---> mission_guid: 4d3dcb5f-8dd9-11eb-a5e3-00012978eb45
+    ///                         mission_name: 12w_2/F_handle_003_20210406_1449 ---> mission_guid: 1fe736a6-96a4-11eb-b10a-00012978eb45
+    /// (2) action_type:        wait_for_plc_register, set_plc_register, move
+
+//    PostActionMove(1);
+//    PostActionSetPLC(2);
+//    PostActionWaitPLC(3);
+
+
     return false;
+}
+
+bool yf::ugv::mir::PostActionSetPLC(const int &plc_register, const float &value, const std::string& mission_id, const int& priority)
+{
+    int value_i = static_cast<int>(value);
+
+    if (plc_register <= 100)
+    {
+        // mission_id (done)
+        // action_type (done)
+        // parameters (?)  2 set 1  "register" "action" "value"
+        // priority (1)
+
+        Poco::JSON::Object action_set_plc;
+
+        Poco::JSON::Object registry_json;
+        Poco::JSON::Object action_json;
+        Poco::JSON::Object value_json;
+
+        registry_json.set("value",plc_register);
+        registry_json.set("id","register");
+
+        action_json.set("value","set");
+        action_json.set("id","action");
+
+        value_json.set("value",value_i);
+        value_json.set("id","value");
+
+        Poco::JSON::Array parameters_array;
+        parameters_array.set(0,registry_json);
+        parameters_array.set(1,action_json);
+        parameters_array.set(2,value_json);
+
+        action_set_plc.set("parameters", parameters_array);
+        action_set_plc.set("priority",priority);
+        action_set_plc.set("mission_id", mission_id);
+        action_set_plc.set("action_type", "set_plc_register");
+
+        /// (4) fine tune the sub_path
+
+        std::string sub_path = "/api/v2.0.0/missions/" + mission_id + "/actions";
+
+        return PostMethod(sub_path, action_set_plc);
+    }
+    else
+    {
+        // mission_id (done)
+        // action_type (done)
+        // parameters (?)  2 set 1  "register" "action" "value"
+        // priority (1)
+
+
+        std::string action_type =  "set_plc_register";
+
+        Poco::JSON::Object action_set_plc;
+
+        Poco::JSON::Object registry_json;
+        Poco::JSON::Object action_json;
+        Poco::JSON::Object value_json;
+
+        registry_json.set("value",plc_register);
+        registry_json.set("id","register");
+
+        action_json.set("value","set");
+        action_json.set("id","action");
+
+        value_json.set("value",value);
+        value_json.set("id","value");
+
+        Poco::JSON::Array parameters_array;
+        parameters_array.set(0,registry_json);
+        parameters_array.set(1,action_json);
+        parameters_array.set(2,value_json);
+
+        action_set_plc.set("parameters", parameters_array);
+        action_set_plc.set("priority",priority);
+        action_set_plc.set("mission_id", mission_id);
+        action_set_plc.set("action_type", "set_plc_register");
+
+        /// (4) fine tune the sub_path
+
+        std::string sub_path = "/api/v2.0.0/missions/" + mission_id + "/actions";
+
+        return PostMethod(sub_path, action_set_plc);
+    }
+
+}
+
+bool yf::ugv::mir::PostActionWaitPLC(const int &plc_register, const float &value, const std::string &mission_id,
+                                     const int &priority)
+{
+    int value_i = static_cast<int>(value);
+
+    if (plc_register <= 100)
+    {
+        // mission_id (done)
+        // action_type (done)
+        // parameters (?)  2 set 1  "register" "action" "value"
+        // priority (1)
+
+        Poco::JSON::Object action_set_plc;
+
+        Poco::JSON::Object registry_json;
+        Poco::JSON::Object value_json;
+        Poco::JSON::Object timeout_json;
+
+        registry_json.set("value",plc_register);
+        registry_json.set("id","register");
+
+        value_json.set("value",value_i);
+        value_json.set("id","value");
+
+        timeout_json.set("value", {});
+        timeout_json.set("id","timeout");
+
+        Poco::JSON::Array parameters_array;
+        parameters_array.set(0,registry_json);
+        parameters_array.set(1,value_json);
+        parameters_array.set(2,timeout_json);
+
+        action_set_plc.set("parameters", parameters_array);
+        action_set_plc.set("priority",priority);
+        action_set_plc.set("mission_id", mission_id);
+        action_set_plc.set("action_type", "wait_for_plc_register");
+
+        /// (4) fine tune the sub_path
+
+        std::string sub_path = "/api/v2.0.0/missions/" + mission_id + "/actions";
+
+        return PostMethod(sub_path, action_set_plc);
+    }
+    else
+    {
+
+    }
+
 }
 
 // post mission actions
@@ -558,6 +757,8 @@ bool yf::ugv::mir::PostActions(const std::string &mission_name)
 // 3. Get position guid in order.
 
 // 4. post a list of new actions.
+
+
 
 
 
