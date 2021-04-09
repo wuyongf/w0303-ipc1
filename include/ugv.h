@@ -1,10 +1,7 @@
-// latest update: 2021/03/12 23:02
-
 #pragma once
 
 #include "nw_status.h"
 #include "sql.h"
-
 
 #include <stdio.h>
 #include <time.h>
@@ -12,7 +9,7 @@
 #include <string>
 #include <map>
 
-// for time control
+// time control
 #include <chrono>
 #include <thread>
 
@@ -107,9 +104,6 @@ namespace yf
             // (3) todo: update to database
             int  GetState();
 
-            bool PostActions();
-            bool PostActionSetPLC(const int& plc_register, const float& value, const std::string& mission_id, const int& priority);
-            bool PostActionWaitPLC(const int& plc_register, const float& value, const std::string& mission_id, const int& priority);
 
         public: ///  layer2: interaction with nw_status, database
 
@@ -132,7 +126,15 @@ namespace yf
             // building_floor_ModelName_time
             // 12w_2f_handrail_001_202104061026
             bool PostMission(const int& model_config_id);
+            void PostActions(const int& model_config_id);
 
+            bool PostActionSetPLC(const int& plc_register, const float& value, const std::string& mission_guid, const int& priority);
+            bool PostActionWaitPLC(const int& plc_register, const float& value, const std::string& mission_guid, const int& priority);
+            bool PostActionMove(const std::string& position_guid, const std::string &mission_guid, const int &priority);
+
+            std::string GetPositionGUID(const std::string& map_guid, const std::string& position_name);
+            std::string GetCurMissionGUID();
+            std::string GetMapGUID(const std::string& map_name);
 
         private:
 
@@ -146,7 +148,7 @@ namespace yf
             // shared database
             std::shared_ptr<yf::sql::sql_server> sql_ptr_;
 
-            // for model info
+            // ugv info
             std::string model_name_ = "mir100";
 
             // for rest api
@@ -174,6 +176,8 @@ namespace yf
             bool hidden_flag_    = false;
 
             std::string cur_mission_name_;
+            std::string cur_session_guid_;
+            std::deque<std::string> cur_position_names_;
 
         };
     }
@@ -512,13 +516,17 @@ bool yf::ugv::mir::PostMission(const int& model_config_id)
 {
     /// based on model_config_id, mission_order, position_name, create a ugv mission.
 
+    // will store:
+    // cur_mission_name_
+    // cur_session_guid_
+
     // name protocol:
     // building_floor_ModelName_time
     // 12w_2f_handrail_001_202104061026
     // 12w_2f_handrail_001_20210406_1020
 
     /// 1. get positions.
-    auto position_names = sql_ptr_->GetUgvMissionConfigPositionNames(model_config_id);
+//    auto position_names = sql_ptr_->GetUgvMissionConfigPositionNames(model_config_id);
 
     /// 2. get session.
     auto session_info = sql_ptr_->GetSiteInfo(model_config_id);
@@ -542,19 +550,18 @@ bool yf::ugv::mir::PostMission(const int& model_config_id)
     cur_mission_name_ = building_info + "_" + floor_info + "/F_" + model_name + "_" + time;
 
     /// (2) get session_id
-    std::string session_id;
 
     if(session_info == "hkstp")
     {
-        session_id = session_guid_HKSTP_;
+        cur_session_guid_ = session_guid_HKSTP_;
     }
     else if(session_info == "emsd")
     {
-        session_id = session_guid_EMSD_;
+        cur_session_guid_ = session_guid_EMSD_;
     }
     else if(session_info == "ha")
     {
-        session_id = session_guid_HA_;
+        cur_session_guid_ = session_guid_HA_;
     }
 
     /// (3) mission creation
@@ -566,7 +573,7 @@ bool yf::ugv::mir::PostMission(const int& model_config_id)
 
     Poco::JSON::Object mission;
 
-    mission.set("session_id",session_id);
+    mission.set("session_id",cur_session_guid_);
     mission.set("name",cur_mission_name_);
 
     mission.set("hidden", hidden_flag_);
@@ -576,48 +583,74 @@ bool yf::ugv::mir::PostMission(const int& model_config_id)
 
 }
 
-bool yf::ugv::mir::PostActions()
+//@@ input: model_config_id
+//@@
+//@@ output: a list of actions
+void yf::ugv::mir::PostActions(const int& model_config_id)
 {
-    // (1) move to p1            based on mission_order.
-    // (2) set plc002 = 1,2,3... based on mission_order.
-    // (3) set plc001 = 1.
+    /// 1.1 get mission_guid from REST
+    std::string mission_guid = this->GetCurMissionGUID();
 
-    // (4) count the priority.
+    /// 2. get position_names from DB, based on model_config_id
+    std::deque<std::string> position_names = sql_ptr_->GetUgvMissionConfigPositionNames(model_config_id);
 
-    /// @@ input: current mission_name.
-    /// @@ output: actions
-    ///
-    /// how to post an action?
+    /// 3.
+    /// a. get map name from db.
+    auto model_id = sql_ptr_->GetModelId(model_config_id);
+    auto map_id = sql_ptr_->GetMapId(model_id);
+    auto map_name = sql_ptr_->GetMapElement(map_id,"map_name");
+    /// b. based on map_name, retrieve map_guid from REST.
+    std::string map_guid = this->GetMapGUID(map_name);
 
-    // mission_id
-    // action_type
-    // parameters
-    // priority
+    // for loop
+    // get mission_name from REST. mission_order from db
+    //
+    int total_position_num = sql_ptr_->GetUgvMissionConfigNum(model_config_id);
+    int priority = 1;
 
-    /// (1) mission_id:         mission_name: 0326-test ---> mission_guid: 4d3dcb5f-8dd9-11eb-a5e3-00012978eb45
-    ///                         mission_name: 12w_2/F_handle_003_20210406_1449 ---> mission_guid: 1fe736a6-96a4-11eb-b10a-00012978eb45
-    /// (2) action_type:        wait_for_plc_register, set_plc_register, move
+    for (int mission_count = 1; mission_count <= total_position_num; mission_count++)
+    {
+        // get position name.
+        std::string position_name = position_names[mission_count-1];
 
-//    PostActionMove(1);
-//    PostActionSetPLC(2);
-//    PostActionWaitPLC(3);
+        //todo: get position_guid
 
+        /// b. position_guid
+        std::string position_guid = this->GetPositionGUID(map_guid,position_name);
 
-    return false;
+        //1. get ugv_mission_config_id, based on mission_count,
+        // prepare: mission_config_id
+
+        //@@ input: position_guid, mission_guid(done)
+        //
+        //
+        this->PostActionMove(position_guid, mission_guid, priority);
+        priority++;
+
+        this->PostActionSetPLC(2,mission_count,mission_guid,priority);
+        priority++;
+
+        this->PostActionSetPLC(1,1,mission_guid,priority);
+        priority++;
+
+        this->PostActionWaitPLC(1,0,mission_guid,priority);
+        priority++;
+
+    }
 }
 
-bool yf::ugv::mir::PostActionSetPLC(const int &plc_register, const float &value, const std::string& mission_id, const int& priority)
+bool yf::ugv::mir::PostActionSetPLC(const int &plc_register, const float &value, const std::string& mission_guid, const int& priority)
 {
     int value_i = static_cast<int>(value);
 
     if (plc_register <= 100)
     {
-        // mission_id (done)
+        // mission_guid (done)
         // action_type (done)
         // parameters (?)  2 set 1  "register" "action" "value"
         // priority (1)
 
-        Poco::JSON::Object action_set_plc;
+        Poco::JSON::Object action_plc_json;
 
         Poco::JSON::Object registry_json;
         Poco::JSON::Object action_json;
@@ -637,16 +670,16 @@ bool yf::ugv::mir::PostActionSetPLC(const int &plc_register, const float &value,
         parameters_array.set(1,action_json);
         parameters_array.set(2,value_json);
 
-        action_set_plc.set("parameters", parameters_array);
-        action_set_plc.set("priority",priority);
-        action_set_plc.set("mission_id", mission_id);
-        action_set_plc.set("action_type", "set_plc_register");
+        action_plc_json.set("parameters", parameters_array);
+        action_plc_json.set("priority", priority);
+        action_plc_json.set("mission_id", mission_guid);
+        action_plc_json.set("action_type", "set_plc_register");
 
         /// (4) fine tune the sub_path
 
-        std::string sub_path = "/api/v2.0.0/missions/" + mission_id + "/actions";
+        std::string sub_path = "/api/v2.0.0/missions/" + mission_guid + "/actions";
 
-        return PostMethod(sub_path, action_set_plc);
+        return PostMethod(sub_path, action_plc_json);
     }
     else
     {
@@ -658,7 +691,7 @@ bool yf::ugv::mir::PostActionSetPLC(const int &plc_register, const float &value,
 
         std::string action_type =  "set_plc_register";
 
-        Poco::JSON::Object action_set_plc;
+        Poco::JSON::Object action_plc_json;
 
         Poco::JSON::Object registry_json;
         Poco::JSON::Object action_json;
@@ -678,33 +711,33 @@ bool yf::ugv::mir::PostActionSetPLC(const int &plc_register, const float &value,
         parameters_array.set(1,action_json);
         parameters_array.set(2,value_json);
 
-        action_set_plc.set("parameters", parameters_array);
-        action_set_plc.set("priority",priority);
-        action_set_plc.set("mission_id", mission_id);
-        action_set_plc.set("action_type", "set_plc_register");
+        action_plc_json.set("parameters", parameters_array);
+        action_plc_json.set("priority", priority);
+        action_plc_json.set("mission_id", mission_guid);
+        action_plc_json.set("action_type", "set_plc_register");
 
         /// (4) fine tune the sub_path
 
-        std::string sub_path = "/api/v2.0.0/missions/" + mission_id + "/actions";
+        std::string sub_path = "/api/v2.0.0/missions/" + mission_guid + "/actions";
 
-        return PostMethod(sub_path, action_set_plc);
+        return PostMethod(sub_path, action_plc_json);
     }
 
 }
 
-bool yf::ugv::mir::PostActionWaitPLC(const int &plc_register, const float &value, const std::string &mission_id,
+bool yf::ugv::mir::PostActionWaitPLC(const int &plc_register, const float &value, const std::string &mission_guid,
                                      const int &priority)
 {
     int value_i = static_cast<int>(value);
 
     if (plc_register <= 100)
     {
-        // mission_id (done)
+        // mission_guid (done)
         // action_type (done)
-        // parameters (?)  2 set 1  "register" "action" "value"
+        // parameters (?)  2 waits 1  "register"  "value" "timeout"
         // priority (1)
 
-        Poco::JSON::Object action_set_plc;
+        Poco::JSON::Object action_plc_json;
 
         Poco::JSON::Object registry_json;
         Poco::JSON::Object value_json;
@@ -724,23 +757,317 @@ bool yf::ugv::mir::PostActionWaitPLC(const int &plc_register, const float &value
         parameters_array.set(1,value_json);
         parameters_array.set(2,timeout_json);
 
-        action_set_plc.set("parameters", parameters_array);
-        action_set_plc.set("priority",priority);
-        action_set_plc.set("mission_id", mission_id);
-        action_set_plc.set("action_type", "wait_for_plc_register");
+        action_plc_json.set("parameters", parameters_array);
+        action_plc_json.set("priority", priority);
+        action_plc_json.set("mission_id", mission_guid);
+        action_plc_json.set("action_type", "wait_for_plc_register");
 
         /// (4) fine tune the sub_path
 
-        std::string sub_path = "/api/v2.0.0/missions/" + mission_id + "/actions";
+        std::string sub_path = "/api/v2.0.0/missions/" + mission_guid + "/actions";
 
-        return PostMethod(sub_path, action_set_plc);
+        return PostMethod(sub_path, action_plc_json);
     }
     else
     {
+        // mission_id (done)
+        // action_type (done)
+        // parameters (?)  2 waits 1  "register"  "value" "timeout"
+        // priority (1)
 
+        Poco::JSON::Object action_plc_json;
+
+        Poco::JSON::Object registry_json;
+        Poco::JSON::Object value_json;
+        Poco::JSON::Object timeout_json;
+
+        registry_json.set("value",plc_register);
+        registry_json.set("id","register");
+
+        value_json.set("value",value);
+        value_json.set("id","value");
+
+        timeout_json.set("value", {});
+        timeout_json.set("id","timeout");
+
+        Poco::JSON::Array parameters_array;
+        parameters_array.set(0,registry_json);
+        parameters_array.set(1,value_json);
+        parameters_array.set(2,timeout_json);
+
+        action_plc_json.set("parameters", parameters_array);
+        action_plc_json.set("priority", priority);
+        action_plc_json.set("mission_id", mission_guid);
+        action_plc_json.set("action_type", "wait_for_plc_register");
+
+        /// (4) fine tune the sub_path
+
+        std::string sub_path = "/api/v2.0.0/missions/" + mission_guid + "/actions";
+
+        return PostMethod(sub_path, action_plc_json);
     }
 
 }
+
+
+// position_name.       from DB. [table: data_ugv_mission_config] // mission_order
+// map_id.              sql->GetModelId(model_config_id), sql->GetMapId(model_id)
+//
+// position_guid. this->GetPositionGUID(map_id, position_name);
+//
+//@@ input: position_guid, mission_id(guid), priority
+//
+bool yf::ugv::mir::PostActionMove(const std::string& position_guid, const std::string &mission_guid, const int &priority)
+{
+    // mission_guid (done)
+    // action_type (done)  "move"
+    // parameters (?)   {position}
+    //                  {cart_entry_position}
+    //                  {main_or_entry_position}
+    //                  {marker_entry_position}
+    //                  {retries}
+    //                  {distance_threshold}
+    // priority (1)
+    //
+    // {position}: value: “position_guid" id: "position"
+
+    /// prerequisite:
+    /// 1. get position guid... based on position_name, map_id
+
+    Poco::JSON::Object action_move_json;
+
+    Poco::JSON::Object position_json;
+    Poco::JSON::Object cart_entry_position_json;
+    Poco::JSON::Object main_or_entry_position_json;
+    Poco::JSON::Object marker_entry_position_json;
+    Poco::JSON::Object retries_json;
+    Poco::JSON::Object distance_threshold_json;
+
+
+    position_json.set("value", position_guid);
+    position_json.set("id", "position");
+
+    cart_entry_position_json.set("value", "main");
+    cart_entry_position_json.set("id", "cart_entry_position");
+
+    main_or_entry_position_json.set("value", "main");
+    main_or_entry_position_json.set("id", "main_or_entry_position");
+
+    marker_entry_position_json.set("value", "entry");
+    marker_entry_position_json.set("id", "marker_entry_position");
+
+    retries_json.set("value", 10);
+    retries_json.set("id", "retries");
+
+    distance_threshold_json.set("value", 0.1);
+    distance_threshold_json.set("id", "distance_threshold");
+
+    Poco::JSON::Array parameters_array;
+    parameters_array.set(0, position_json);
+    parameters_array.set(1, cart_entry_position_json);
+    parameters_array.set(2, main_or_entry_position_json);
+    parameters_array.set(3, marker_entry_position_json);
+    parameters_array.set(4, retries_json);
+    parameters_array.set(5, distance_threshold_json);
+
+    action_move_json.set("parameters", parameters_array);
+    action_move_json.set("priority", priority);
+    action_move_json.set("mission_id", mission_guid);
+    action_move_json.set("action_type", "move");
+
+    /// (4) fine tune the sub_path
+
+    std::string sub_path = "/api/v2.0.0/missions/" + mission_guid + "/actions";
+
+    return PostMethod(sub_path, action_move_json);
+
+}
+
+// position naming protocol: object_name_via001
+// handrail_001_via001
+// handrail_001_via002
+// handrail_001_via003
+// handrail_001_via004
+
+//@@ input: map_id: cb4cfe79-8dd6-11eb-a5e3-00012978eb45
+//          position_name: corridor_handrail_001_via001_front
+//
+std::string yf::ugv::mir::GetPositionGUID(const std::string &map_guid, const std::string& position_name)
+{
+    // /api/v2.0.0/maps/cb4cfe79-8dd6-11eb-a5e3-00012978eb45/positions
+
+    /// 0. prepare the position_guid
+    std::string position_guid;
+
+    /// 1. fine tune sub_path
+    std::string sub_path = "/api/v2.0.0/maps/" + map_guid + "/positions";
+
+    GetMethod(sub_path);
+
+    auto json_result = GetRequestResult();
+
+    Poco::JSON::Parser parser;
+
+    Poco::Dynamic::Var result = parser.parse(json_result);
+
+    Poco::JSON::Array::Ptr  array = result.extract<Poco::JSON::Array::Ptr>();
+
+    bool found_flag = false;
+
+    for (Poco::JSON::Array::ConstIterator it= array->begin(); it != array->end(); ++it)
+    {
+        if(found_flag == false)
+        {
+            // iteration, find the position_name here.
+            Poco::JSON::Object::Ptr obj = it->extract<Poco::JSON::Object::Ptr>();
+
+            std::string pos_name = obj->getValue<std::string>("name");
+
+            if(pos_name == position_name)
+            {
+                // 1. set found flag
+                found_flag = true;
+
+                // 2. get the position guid.
+                position_guid = obj->getValue<std::string>("guid");
+            }
+        }
+        else
+        {
+            // already found the position
+            // do nothing.
+            return position_guid;
+        }
+    }
+
+    if(found_flag == false)
+    {
+        std::cout << "didn't find the position_name in DB!" << std::endl;
+    }
+
+    return position_guid;
+
+}
+
+// must run PostMission() first
+std::string yf::ugv::mir::GetCurMissionGUID()
+{
+    // input
+    // cur_mission_name_;
+    // cur_session_guid_;
+
+    // output
+    std::string mission_guid;
+
+    // method
+
+    /// 1. fine tune sub_path
+    std::string sub_path = "/api/v2.0.0/sessions/" + cur_session_guid_ + "/missions";
+
+    GetMethod(sub_path);
+
+    auto json_result = GetRequestResult();
+
+    Poco::JSON::Parser parser;
+
+    Poco::Dynamic::Var result = parser.parse(json_result);
+
+    Poco::JSON::Array::Ptr array = result.extract<Poco::JSON::Array::Ptr>();
+
+    bool found_flag = false;
+
+    for (Poco::JSON::Array::ConstIterator it= array->begin(); it != array->end(); ++it)
+    {
+        if(found_flag == false)
+        {
+            // iteration, find the position_name here.
+            Poco::JSON::Object::Ptr obj = it->extract<Poco::JSON::Object::Ptr>();
+
+            std::string pos_name = obj->getValue<std::string>("name");
+
+            if(pos_name == cur_mission_name_)
+            {
+                // 1. set found flag
+                found_flag = true;
+
+                // 2. get the position guid.
+                mission_guid = obj->getValue<std::string>("guid");
+            }
+        }
+        else
+        {
+            // already found the position
+            // do nothing.
+            return mission_guid;
+        }
+    }
+
+    if(found_flag == false)
+    {
+        std::cout << "there is not such mission_name in MiR!" << std::endl;
+    }
+
+    return mission_guid;
+
+}
+
+std::string yf::ugv::mir::GetMapGUID(const std::string &map_name)
+{
+    // output
+    std::string map_guid;
+
+    // method
+
+    /// 1. fine tune sub_path
+    std::string sub_path = "/api/v2.0.0/sessions/" + cur_session_guid_ + "/maps";
+
+    GetMethod(sub_path);
+
+    auto json_result = GetRequestResult();
+
+    Poco::JSON::Parser parser;
+
+    Poco::Dynamic::Var result = parser.parse(json_result);
+
+    Poco::JSON::Array::Ptr array = result.extract<Poco::JSON::Array::Ptr>();
+
+    bool found_flag = false;
+
+    for (Poco::JSON::Array::ConstIterator it= array->begin(); it != array->end(); ++it)
+    {
+        if(found_flag == false)
+        {
+            // iteration, find the position_name here.
+            Poco::JSON::Object::Ptr obj = it->extract<Poco::JSON::Object::Ptr>();
+
+            std::string name = obj->getValue<std::string>("name");
+
+            if(name == map_name)
+            {
+                // 1. set found flag
+                found_flag = true;
+
+                // 2. get the position guid.
+                map_guid = obj->getValue<std::string>("guid");
+            }
+        }
+        else
+        {
+            // already found the map
+            // do nothing.
+            return map_guid;
+        }
+    }
+
+    if(found_flag == false)
+    {
+        std::cout << "there is not such map in MiR!" << std::endl;
+    }
+
+    return map_guid;
+}
+
+
 
 // post mission actions
 //

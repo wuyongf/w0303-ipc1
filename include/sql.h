@@ -128,11 +128,10 @@ namespace yf
             yf::data::arm::Point3d GetArmPoint(const int& point_id);
             float GetArmPointElement(const int &point_id, const std::string &point_element);
 
-            // Ugv_mission_config
+            /// Ugv_mission_config
             int GetUgvMissionConfigNum(const int& model_config_id);
 
             std::deque<std::string> GetUgvMissionConfigPositionNames(const int& model_config_id);
-
 
             int GetModelId(const int& model_config_id);
             std::string GetModelName(const int& model_config_id);
@@ -142,7 +141,6 @@ namespace yf
             std::string GetSiteInfo(const int& model_config_id);
             std::string GetBuildingInfo(const int& model_config_id);
             std::string GetFloorInfo(const int& model_config_id);
-
 
         private:
 

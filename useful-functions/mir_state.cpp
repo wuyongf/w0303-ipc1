@@ -39,15 +39,90 @@ int main()
 int current_mission_order;
 
 /// move to point_name, based on mission_order.
+////    mir100.GetPositionGUID();
+//    mir100.PostActionMove("870d9691-8dd7-11eb-a5e3-00012978eb45", "1fe736a6-96a4-11eb-b10a-00012978eb45", 1);
 
 /// set PLC002 = 1,2,3,4,5, based on mission_order
-//    mir100.PostActionSetPLC(2,2, "1fe736a6-96a4-11eb-b10a-00012978eb45",1);
+//    mir100.PostActionSetPLC(2,1, "1fe736a6-96a4-11eb-b10a-00012978eb45",1);
 
 /// set PLC001 = 1
-    mir100.PostActionSetPLC(1,1, "1fe736a6-96a4-11eb-b10a-00012978eb45",1);
+//    mir100.PostActionSetPLC(1,1, "1fe736a6-96a4-11eb-b10a-00012978eb45",1);
 
 /// wait for PLC001 = 0
-    mir100.PostActionWaitPLC(1,0,"1fe736a6-96a4-11eb-b10a-00012978eb45",1);
+//    mir100.PostActionWaitPLC(1,0,"1fe736a6-96a4-11eb-b10a-00012978eb45",1);
+
+/// get position guid
+//    auto position_guid = mir100.GetPositionGUID("cb4cfe79-8dd6-11eb-a5e3-00012978eb45","corridor_handrail_001_via001_front");
+//    std::cout << "position_guid: " << position_guid << std::endl;
+
+/// how to post a new mission.
+///
+/// @@ input: model_config_id
+
+    int model_config_id = 1;
+
+    /// 1. post a new mission
+    mir100.PostMission(model_config_id);
+    /// 2. post actions
+    mir100.PostActions(model_config_id);
+
+#if 0
+
+    /// 1.1 get mission_guid from REST
+    std::string mission_guid = mir100.GetCurMissionGUID();
+
+    /// 2. get position_names from DB, based on model_config_id
+    std::deque<std::string> position_names = sql_ptr->GetUgvMissionConfigPositionNames(model_config_id);
+
+    /// 3.
+    /// a. get map name from db.
+    auto model_id = sql_ptr->GetModelId(model_config_id);
+    auto map_id = sql_ptr->GetMapId(model_id);
+    auto map_name = sql_ptr->GetMapElement(map_id,"map_name");
+    /// b. based on map_name, retrieve map_guid from REST.
+    auto map_guid = mir100.GetMapGUID(map_name);
+
+    // for loop
+    // get mission_name from REST. mission_order from db
+    //
+    int total_position_num = sql_ptr->GetUgvMissionConfigNum(model_config_id);
+    int priority = 1;
+
+    for (int mission_count = 1; mission_count <= total_position_num; mission_count++)
+    {
+        // get position name.
+        std::string position_name = position_names[mission_count-1];
+
+        //todo: get position_guid
+
+
+
+        /// b. position_guid
+        std::string position_guid = mir100.GetPositionGUID(map_guid,position_name);
+
+        //1. get ugv_mission_config_id, based on mission_count,
+        // prepare: mission_config_id
+
+        //@@ input: position_guid, mission_guid(done)
+        //
+        //
+        mir100.PostActionMove(position_guid, mission_guid, priority);
+        priority++;
+
+        mir100.PostActionSetPLC(2,mission_count,mission_guid,priority);
+        priority++;
+
+        mir100.PostActionSetPLC(1,1,mission_guid,priority);
+        priority++;
+
+        mir100.PostActionWaitPLC(1,0,mission_guid,priority);
+        priority++;
+
+    }
+
+#endif
+
+
 
 #if 0
 
