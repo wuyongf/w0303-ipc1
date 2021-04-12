@@ -11,6 +11,7 @@ int main()
 //    yf::sql::sql_server sql("SQL Server","192.168.7.84","NW_mobile_robot_sys","sa","wuyongfeng1334");
 //    yf::sql::sql_server sql("ODBC Driver 17 for SQL Server","localhost","NW_mobile_robot_sys","sa","wuyongfeng1334");
 
+/// For localhost
     std::shared_ptr<yf::sql::sql_server> sql = std::make_shared<yf::sql::sql_server>("ODBC Driver 17 for SQL Server","localhost","NW_mobile_robot_sys","sa","wuyongfeng1334");
 //    yf::sql::sql_server sql("ODBC Driver 17 for SQL Server","192.168.0.8","NW_mobile_robot_sys","sa","Willsonic2010");
 
@@ -23,7 +24,7 @@ int main()
 
     std::cout << "mt: " << motion_type << std::endl;
 
-    auto plain_p2_id = sql->GetArmPointId(1,"plain_cleaning_p2");
+    auto plain_p2_id = sql->GetArmMissionPointId(1, "plain_cleaning_p2");
     std::cout << "plain_p2_id: " << plain_p2_id << std::endl;
 
     auto plain_p2 = sql->GetArmPoint(plain_p2_id);
@@ -144,10 +145,10 @@ int main()
             case 1: // plain_cleaning
             {
 
-                auto plain_p1_id = sql->GetArmPointId(1,"plain_cleaning_p1");
-                auto plain_p2_id = sql->GetArmPointId(1,"plain_cleaning_p2");
-                auto plain_p3_id = sql->GetArmPointId(1,"plain_cleaning_p3");
-                auto plain_p4_id = sql->GetArmPointId(1,"plain_cleaning_p4");
+                auto plain_p1_id = sql->GetArmMissionPointId(1, "plain_cleaning_p1");
+                auto plain_p2_id = sql->GetArmMissionPointId(1, "plain_cleaning_p2");
+                auto plain_p3_id = sql->GetArmMissionPointId(1, "plain_cleaning_p3");
+                auto plain_p4_id = sql->GetArmMissionPointId(1, "plain_cleaning_p4");
 
                 init_cleaning_points.push_back(sql->GetArmPoint(plain_p1_id));
                 init_cleaning_points.push_back(sql->GetArmPoint(plain_p2_id));
@@ -159,8 +160,8 @@ int main()
 
             case 2: // line_cleaning
             {
-                auto line_p1_id = sql->GetArmPointId(1,"line_cleaning_p1");
-                auto line_p2_id = sql->GetArmPointId(1,"line_cleaning_p2");
+                auto line_p1_id = sql->GetArmMissionPointId(1, "line_cleaning_p1");
+                auto line_p2_id = sql->GetArmMissionPointId(1, "line_cleaning_p2");
 
                 init_cleaning_points.push_back(sql->GetArmPoint(line_p1_id));
                 init_cleaning_points.push_back(sql->GetArmPoint(line_p2_id));

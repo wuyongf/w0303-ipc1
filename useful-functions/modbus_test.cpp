@@ -54,17 +54,50 @@ int main(void) {
 
     yf::modbus::tm_modbus tm_modbus;
 
-    const char* ip_address = "192.168.2.29";
+    const char* ip_address = "192.168.7.29";
 
     int port = 502;
 
     tm_modbus.Start(ip_address,port);
 
-    while(false)
-    {
-        std::cout << "isError?" << tm_modbus.read_isError() << std::endl;
-        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-    }
+//    auto DI_0 = tm_modbus.get_end_module_DI(1);
+
+//    std::cout << "DI_0: " << DI_0 << std::endl;
+
+#if 0
+
+/// For control box IO
+
+    /// get control box DI
+    auto DI_0 = tm_modbus.get_control_box_DI(3);
+    std::cout << "DO_0: " << DI_0 << std::endl;
+
+    /// get control box DO
+    auto DO_0 = tm_modbus.get_control_box_DO(0);
+    std::cout << "DO_0: " << DO_0 << std::endl;
+
+    /// set control box DO
+    tm_modbus.set_control_box_DO(0,0);
+
+#endif
+
+/// For end module IO
+
+    /// get end module DI
+    auto DI_0_end = tm_modbus.get_end_module_DI(2);
+    std::cout << "DI_2: " << DI_0_end << std::endl;
+
+    /// get end module DO
+    auto DO_0_end = tm_modbus.get_end_module_DO(3);
+    std::cout << "DO_3: " << DO_0_end << std::endl;
+
+    /// set end module DO
+    tm_modbus.set_end_module_DO(0,0);
+    tm_modbus.set_end_module_DO(1,0);
+
+
+
+//    tm_modbus.read_isProjectRunning();
 
     tm_modbus.Close();
 

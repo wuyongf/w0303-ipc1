@@ -104,8 +104,25 @@ namespace yf
             // (3) todo: update to database
             int  GetState();
 
+            int GetPLCRegisterIntValue(const int& plc_register);
+            float GetPLCRegisterFloatValue(const int& plc_register);
+
+            bool SetPLCRegisterIntValue(const int& plc_register, const int& value);
+            bool SetPLCRegisterfloatValue(const int& plc_register, const float& value);
+
 
         public: ///  layer2: interaction with nw_status, database
+
+            // methods for ipc1
+            //
+            // (1) check mission continue flag
+            bool InitMissionStatusCheck(const int& timeout_min);
+            
+            // (2) current ugv mission state
+            void RetrieveUgvCurrentMissionState();
+
+            // a. Initial status check for mission
+            bool InitialStatusCheckForMission(const int& timeout_min);
 
             // (1) todo: update to nw_status
             // (2) todo: update to database
@@ -118,7 +135,7 @@ namespace yf
             //
             bool UpdatePositionOnMap(const float& pos_x, const float& pos_y, const float& pos_theta);
 
-        public: /// layer3: create a mission
+        public: /// layer3: create a mission --- REST API
 
             ///3.1 based on model_config_id, mission_order, position_name, create a ugv mission.
 
@@ -135,6 +152,12 @@ namespace yf
             std::string GetPositionGUID(const std::string& map_guid, const std::string& position_name);
             std::string GetCurMissionGUID();
             std::string GetMapGUID(const std::string& map_name);
+
+            // MiR Control
+            bool Play();
+            bool Pause();
+
+            bool PostMissionQueue(const std::string& mission_guid);
 
         private:
 
@@ -588,29 +611,45 @@ bool yf::ugv::mir::PostMission(const int& model_config_id)
 //@@ output: a list of actions
 void yf::ugv::mir::PostActions(const int& model_config_id)
 {
-    /// 1.1 get mission_guid from REST
+    // 1. get mission_guid from REST
     std::string mission_guid = this->GetCurMissionGUID();
 
-    /// 2. get position_names from DB, based on model_config_id
+    // 2. get position_names from DB, based on model_config_id
     std::deque<std::string> position_names = sql_ptr_->GetUgvMissionConfigPositionNames(model_config_id);
 
-    /// 3.
-    /// a. get map name from db.
+    // 3.
+    // 3.a. get map name from db.
     auto model_id = sql_ptr_->GetModelId(model_config_id);
     auto map_id = sql_ptr_->GetMapId(model_id);
     auto map_name = sql_ptr_->GetMapElement(map_id,"map_name");
-    /// b. based on map_name, retrieve map_guid from REST.
+    // 3.b. based on map_name, retrieve map_guid from REST.
     std::string map_guid = this->GetMapGUID(map_name);
 
-    // for loop
-    // get mission_name from REST. mission_order from db
-    //
+    /// Actions detail
+    ///
     int total_position_num = sql_ptr_->GetUgvMissionConfigNum(model_config_id);
     int priority = 1;
 
+    /// (1) Set Ugv Mission Start Flag
+    this->PostActionSetPLC(4,1,mission_guid,priority);
+    priority++;
+
+    /// (2) Initialization Stage
+    this->PostActionSetPLC(1,0,mission_guid,priority);
+    priority++;
+    this->PostActionSetPLC(2,0,mission_guid,priority);
+    priority++;
+    this->PostActionSetPLC(3,0,mission_guid,priority);
+    priority++;
+
+    // todo: speed, footprint initialization
+
+    /// (3) For loop, mission details
+    //
+    // get mission_name from REST. mission_order from db
     for (int mission_count = 1; mission_count <= total_position_num; mission_count++)
     {
-        // get position name.
+        /// a. get position name.
         std::string position_name = position_names[mission_count-1];
 
         //todo: get position_guid
@@ -620,14 +659,16 @@ void yf::ugv::mir::PostActions(const int& model_config_id)
 
         //1. get ugv_mission_config_id, based on mission_count,
         // prepare: mission_config_id
-
+        //
         //@@ input: position_guid, mission_guid(done)
         //
-        //
-        this->PostActionMove(position_guid, mission_guid, priority);
+        this->PostActionSetPLC(2,mission_count,mission_guid,priority);
         priority++;
 
-        this->PostActionSetPLC(2,mission_count,mission_guid,priority);
+        this->PostActionSetPLC(3,1,mission_guid,priority);
+        priority++;
+
+        this->PostActionMove(position_guid, mission_guid, priority);
         priority++;
 
         this->PostActionSetPLC(1,1,mission_guid,priority);
@@ -637,6 +678,11 @@ void yf::ugv::mir::PostActions(const int& model_config_id)
         priority++;
 
     }
+
+    /// (4) Set Ugv Mission Finish Flag
+    //
+    this->PostActionSetPLC(4,2,mission_guid,priority);
+    priority++;
 }
 
 bool yf::ugv::mir::PostActionSetPLC(const int &plc_register, const float &value, const std::string& mission_guid, const int& priority)
@@ -1066,6 +1112,266 @@ std::string yf::ugv::mir::GetMapGUID(const std::string &map_name)
 
     return map_guid;
 }
+
+// @@ input: timeout. suggestion: 1 minute.
+//
+bool yf::ugv::mir::InitMissionStatusCheck(const int& timeout_min)
+{
+    // init
+    bool iner_mission_flag = false;
+
+    // initialization
+    bool update_flag = true;
+
+    std::string time_future = sql_ptr_->CountdownTime(sql_ptr_->TimeNow(),timeout_min);
+
+    while (update_flag)
+    {
+        // 1. check plc 004
+        int plc_004_value = this->GetPLCRegisterIntValue(4);
+
+        if(plc_004_value == 1)
+        {
+            iner_mission_flag = true;
+        }
+
+        // 2. get current state
+        this->RetrieveUgvCurrentMissionState();
+
+        // 3. set mission_continue_flag
+        if(iner_mission_flag == true && nw_status_ptr_->ugv_mission_status_ == data::common::UgvState::Executing)
+        {
+            update_flag = false;
+            break;
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+        /// wait too long.
+        if(!sql_ptr_->isFutureTime(time_future, sql_ptr_->TimeNow()))
+        {
+            update_flag = false;
+            return false;
+        }
+    }
+
+    return true;
+}
+
+//@@ input: plc register: 0-100
+//
+int yf::ugv::mir::GetPLCRegisterIntValue(const int &plc_register) {
+
+    if(plc_register > 100 || plc_register <= 0)
+    {
+        std::cerr << "wrong plc register!" << std::endl;
+        return 0;
+    }
+
+    std::string sub_path = "/api/v2.0.0/registers/"+ std::to_string(plc_register);
+
+    GetMethod(sub_path);
+
+    auto json_result = GetRequestResult();
+
+    Poco::JSON::Parser parser;
+
+    Poco::Dynamic::Var result = parser.parse(json_result);
+
+    Poco::JSON::Object::Ptr object = result.extract<Poco::JSON::Object::Ptr>();
+
+    int value = object->getValue<int>("value");
+
+    return value;
+
+}
+
+//@@ input: plc register: 101-200
+//
+float yf::ugv::mir::GetPLCRegisterFloatValue(const int &plc_register)
+{
+    if(plc_register <= 100 || plc_register >200)
+    {
+        std::cerr << "wrong plc register!" << std::endl;
+        return 0;
+    }
+
+    std::string sub_path = "/api/v2.0.0/registers/"+ std::to_string(plc_register);
+
+    GetMethod(sub_path);
+
+    auto json_result = GetRequestResult();
+
+    Poco::JSON::Parser parser;
+
+    Poco::Dynamic::Var result = parser.parse(json_result);
+
+    Poco::JSON::Object::Ptr object = result.extract<Poco::JSON::Object::Ptr>();
+
+    float value = object->getValue<float>("value");
+
+    return value;
+}
+
+void yf::ugv::mir::RetrieveUgvCurrentMissionState() 
+{
+    int state = this->GetState();
+
+    switch (state) 
+    {
+        case 1:
+        {
+            nw_status_ptr_->ugv_mission_status_ = yf::data::common::UgvState::Starting;
+            break;
+        }
+        case 2:
+        {
+            nw_status_ptr_->ugv_mission_status_ = yf::data::common::UgvState::ShuttingDown;
+            break;
+        }
+        case 3:
+        {
+            nw_status_ptr_->ugv_mission_status_ = yf::data::common::UgvState::Ready;
+            break;
+        }
+        case 4:
+        {
+            nw_status_ptr_->ugv_mission_status_ = yf::data::common::UgvState::Pause;
+            break;
+        }
+        case 5:
+        {
+            nw_status_ptr_->ugv_mission_status_ = yf::data::common::UgvState::Executing;
+            break;
+        }
+        case 6:
+        {
+            nw_status_ptr_->ugv_mission_status_ = yf::data::common::UgvState::Aborted;
+            break;
+        }
+        case 7:
+        {
+            nw_status_ptr_->ugv_mission_status_ = yf::data::common::UgvState::Completed;
+            break;
+        }
+        case 10:
+        {
+            nw_status_ptr_->ugv_mission_status_ = yf::data::common::UgvState::EmergencyStop;
+            break;
+        }
+        case 11:
+        {
+            nw_status_ptr_->ugv_mission_status_ = yf::data::common::UgvState::ManualControl;
+            break;
+        }
+        case 12:
+        {
+            nw_status_ptr_->ugv_mission_status_ = yf::data::common::UgvState::Error;
+            break;
+        }
+    }
+}
+
+bool yf::ugv::mir::SetPLCRegisterIntValue(const int &plc_register, const int &value)
+{
+    if(plc_register > 100 || plc_register < 0)
+    {
+        std::cerr << "wrong plc register!" << std::endl;
+        return false;
+    }
+
+    Poco::JSON::Object reg_json;
+
+    reg_json.set("value",value);
+
+    //  /api/v2.0.0/registers/1
+    std::string sub_path = "/api/v2.0.0/registers/" + std::to_string(plc_register);
+
+    return PostMethod(sub_path, reg_json);
+}
+
+bool yf::ugv::mir::SetPLCRegisterfloatValue(const int &plc_register, const float &value)
+{
+    if(plc_register <= 100 || plc_register >200)
+    {
+        std::cerr << "wrong plc register!" << std::endl;
+        return false;
+    }
+
+    Poco::JSON::Object reg_json;
+
+    reg_json.set("value",value);
+
+    //  /api/v2.0.0/registers/1
+    std::string sub_path = "/api/v2.0.0/registers/" + std::to_string(plc_register);
+
+    return PostMethod(sub_path, reg_json);
+}
+
+bool yf::ugv::mir::InitialStatusCheckForMission(const int &timeout_min)
+{
+    // initialization
+    bool update_flag = true;
+
+    std::string time_future = sql_ptr_->CountdownTime(sql_ptr_->TimeNow(),timeout_min);
+
+    while (update_flag)
+    {
+        // get current ugv status
+        this->RetrieveUgvCurrentMissionState();
+
+        if (nw_status_ptr_->ugv_mission_status_ != data::common::UgvState::Ready)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        }
+        else
+        {
+            // Ugv is ready
+            update_flag = false;
+            break;
+        }
+
+        /// IPC1 waits too long.
+        if(!sql_ptr_->isFutureTime(time_future, sql_ptr_->TimeNow()))
+        {
+            LOG(INFO) << "The Ugv is not ready.";
+            LOG(INFO) << "The Task failed at the initial status check stage.";
+
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool yf::ugv::mir::Play()
+{
+    Poco::JSON::Object State;
+
+    State.set("state_id", 3);
+
+    return PutMethod("/api/v2.0.0/status", State);
+}
+
+bool yf::ugv::mir::Pause()
+{
+    Poco::JSON::Object State;
+
+    State.set("state_id", 4);
+
+    return PutMethod("/api/v2.0.0/status", State);
+}
+
+bool yf::ugv::mir::PostMissionQueue(const std::string &mission_guid)
+{
+    Poco::JSON::Object MissionQueue;
+
+    MissionQueue.set("mission_id", mission_guid);
+
+    return PostMethod("/api/v2.0.0/mission_queue", MissionQueue);
+}
+
+
 
 
 

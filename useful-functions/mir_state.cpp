@@ -11,14 +11,16 @@
 int main()
 {
     std::shared_ptr<yf::status::nw_status> nw_status_ptr = std::make_shared<yf::status::nw_status>();
-    std::shared_ptr<yf::sql::sql_server> sql_ptr = std::make_shared<yf::sql::sql_server>("ODBC Driver 17 for SQL Server","localhost","NW_mobile_robot_sys","sa","wuyongfeng1334");
-
+//    std::shared_ptr<yf::sql::sql_server> sql_ptr = std::make_shared<yf::sql::sql_server>("SQL Server","192.168.7.84","NW_mobile_robot_sys","sa","wuyongfeng1334");
+    std::shared_ptr<yf::sql::sql_server> sql_ptr = std::make_shared<yf::sql::sql_server>("SQL Server","192.168.7.27","NW_mobile_robot_sys","sa","NWcadcam2021");
 
     yf::ugv::mir mir100;
 
     mir100.Start("192.168.7.34", nw_status_ptr, sql_ptr);
 
-//    auto connection_result = mir100.IsConnected();
+#if 0
+
+    //    auto connection_result = mir100.IsConnected();
 //
 //    std::cout << "IsConnected? " << connection_result << std::endl;
 //
@@ -35,6 +37,8 @@ int main()
 //    std::cout << "post_mission_result " << post_mission_result << std::endl;
 //
 //    std::cout << "----------------------" << std::endl;
+
+//// Method Testing
 
 int current_mission_order;
 
@@ -55,16 +59,100 @@ int current_mission_order;
 //    auto position_guid = mir100.GetPositionGUID("cb4cfe79-8dd6-11eb-a5e3-00012978eb45","corridor_handrail_001_via001_front");
 //    std::cout << "position_guid: " << position_guid << std::endl;
 
+
+//// STATUS Testing
+
+auto state_id = mir100.GetState();
+
+std::cout << "state_id: " << state_id << std::endl;
+
+#endif
+
+    mir100.PostMissionQueue("a099f581-9b33-11eb-a67a-00012978eb45");
+
+    mir100.Play();
+
+
+
 /// how to post a new mission.
 ///
 /// @@ input: model_config_id
 
     int model_config_id = 1;
 
+    bool ugv_mission_continue_flag = false;
+
+//    auto ugv_config_num2 = sql_ptr->GetUgvMissionConfigNum(model_config_id);
+
+//    std::cout << "ugv_config_num2: " << ugv_config_num2 << std::endl;
+
     /// 1. post a new mission
     mir100.PostMission(model_config_id);
     /// 2. post actions
     mir100.PostActions(model_config_id);
+
+    /// 3. post to mission_queue, set start flag.
+
+    /// 4. wait 500ms
+
+    /// 5. execute arm mission
+
+    auto ugv_config_num = sql_ptr->GetUgvMissionConfigNum(model_config_id);
+
+    for (int n = 1; n < ugv_config_num + 1 ; n++)
+    {
+        // if ugv is ready, we can start next step. or wait 2 minutes for ugv to resume.
+
+        // How to judge whether ugv is ready or not?
+        // 1. plc 004 == 1
+        // 2. get state, should equal to executing
+        // 3. mission_continue_flag
+        ugv_mission_continue_flag = mir100.InitMissionStatusCheck(2);
+
+        if(ugv_mission_continue_flag)
+        {
+            /// method: check_plc_003_flag
+            // wait for plc_003 == 1, timeout 2min.
+
+            bool check_plc_003_flag = true;
+
+            std::string time_future = sql_ptr->CountdownTime(sql_ptr->TimeNow(),5);
+
+            while (check_plc_003_flag)
+            {
+
+                int plc_003_value = mir100.GetPLCRegisterIntValue(3);
+
+                if(plc_003_value == 1)
+                {
+                    check_plc_003_flag = false;
+                }
+
+                /// if wait too long.
+                if(!sql_ptr->isFutureTime(time_future, sql_ptr->TimeNow()))
+                {
+                    check_plc_003_flag = false;
+                    ugv_mission_continue_flag = false;
+                    break;
+                }
+            }
+
+
+
+        }
+        else
+        {
+            // anyway, we should break the mission loop.
+            break;
+        }
+    }
+
+    /// finish the current job
+    // set
+    mir100.SetPLCRegisterIntValue(4,0);
+
+    /// check  status
+    // (1) get current ugv mission order.
 
 #if 0
 

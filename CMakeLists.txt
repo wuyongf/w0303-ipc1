@@ -154,4 +154,8 @@ target_link_libraries(poco_ping_testing PUBLIC glog::glog nanodbc modbus Poco::F
 
 add_executable(hex2float "useful-functions/hex2float.cpp")
 
+add_executable(arm_test "useful-functions/arm_test.cpp" "include/net_w0303_server.h")
+target_link_libraries(arm_test PUBLIC glog::glog nanodbc modbus Poco::Foundation Poco::Net Poco::XML Poco::Zip Poco::Data Poco::JSON)
+
+
 # TODO: Add tests and install targets if needed.

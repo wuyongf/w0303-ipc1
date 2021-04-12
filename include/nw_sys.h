@@ -53,17 +53,28 @@ namespace yf
 
             void WaitSchedulesInitialCheck();
 
-        public:
+        public: // layer 1
 
             void UpdateArmCommand();     // for each arm_config_id
             void ArmTask(const std::string& arm_command);
             void CheckDevicesStatus();
+
+        public: // layer 2
+
+            void ArmPickTool(const yf::data::arm::TaskMode& task_mode);
+            void ArmPlaceTool(const yf::data::arm::TaskMode& task_mode);
+            void ArmSetOperationArea(const yf::data::arm::OperationArea& operation_area);
+
 
         public:
 
             void DoJobs(const int& cur_schedule_id);
             void DoTasks(const int& cur_job_id);
             void DoTask(const int& cur_task_id);
+
+            bool WaitForUgvPLCRegisterInt(const int& plc_register, const int& value, const int& timeout_min);
+            bool WaitForUgvPLCRegisterFloat(const int& plc_register, const float& value, const int& timeout_min);
+
 
             void UpdateDbScheduleBeforeTask (const int& cur_schedule_id);
             void UpdateDbScheduleAfterTask (const int& cur_schedule_id);
@@ -165,6 +176,19 @@ namespace yf
             int task_number = 0;
 
             std::deque<int>  all_avaiable_schedule_ids;
+
+        private:
+
+            // sql
+            //
+            int cur_model_config_id_;
+
+            int cur_mission_num_;
+
+            yf::data::arm::TaskMode cur_task_mode_;
+
+            // REST
+            std::string cur_mission_guid_;
         };
     }
 }
@@ -183,7 +207,8 @@ void yf::sys::nw_sys::Start()
     //
     // (0) nw_status and sql
     nw_status_ptr_ = std::make_shared<yf::status::nw_status>();
-    sql_ptr_       = std::make_shared<yf::sql::sql_server>("ODBC Driver 17 for SQL Server","localhost","NW_mobile_robot_sys","sa","wuyongfeng1334");
+    //sql_ptr_       = std::make_shared<yf::sql::sql_server>("ODBC Driver 17 for SQL Server","localhost","NW_mobile_robot_sys","sa","wuyongfeng1334");
+    sql_ptr_       = std::make_shared<yf::sql::sql_server>("SQL Server","192.168.7.27","NW_mobile_robot_sys","sa","NWcadcam2021");
 
     // (1) thread ipc_server, establish server and keep updating, keep waiting for devices connection.
     th_ipc_server_ = std::thread(&nw_sys::thread_IPCServerStartup, this, std::ref(ipc_server_ptr_), std::ref(ipc_server_flag_));
@@ -201,8 +226,7 @@ void yf::sys::nw_sys::Start()
     tm5.GetConnectionStatus();
 
     /// 2. Initialization --- ugv
-    //
-
+    mir100.Start("192.168.7.34", nw_status_ptr_, sql_ptr_);
 
     th_do_schedules_ = std::thread(&nw_sys::thread_DoSchedules, this);
 
@@ -656,9 +680,210 @@ void yf::sys::nw_sys::DoJobs(const int &cur_schedule_id)
 
 void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
 {
-    /// 1. Assign Tasks.
+    /// 0. Initialization
+    //
+    bool ugv_mission_success_flag = false;
 
-    /// 2. Do Tasks.
+    bool arm_mission_success_flag = false;
+
+    bool arm_sub_mission_success_flag = false;
+
+    bool mission_success_flag = false;
+
+    /// 1. Get cur_model_config_id From DB
+    //
+    cur_model_config_id_ = sql_ptr_->GetModelConfigId(cur_job_id);
+
+    cur_mission_num_ = sql_ptr_->GetUgvMissionConfigNum(cur_model_config_id_);
+
+    // find task_mode. and then pick up the tool
+    cur_task_mode_ = tm5.GetTaskMode(cur_model_config_id_);
+
+    /// 2. Assign Ugv Mission
+    //
+    // 2.1. Ugv: post a new mission via REST
+    mir100.PostMission(cur_model_config_id_);
+    // 2.2. Ugv: post actions via REST
+    mir100.PostActions(cur_model_config_id_);
+    // 2.3  Ugv: get current mission_guid
+    cur_mission_guid_ = mir100.GetCurMissionGUID();
+
+    /// 3. Initial Status Checking
+    bool arm_init_status_check_success_flag = tm5.InitialStatusCheckForMission(2);
+    bool ugv_init_status_check_success_flag = mir100.InitialStatusCheckForMission(2);
+
+    if (arm_init_status_check_success_flag == true &&
+        ugv_init_status_check_success_flag == true)
+    {
+
+        /// a. kick start ugv mission
+        mir100.PostMissionQueue(cur_mission_guid_);
+
+        mir100.Play();
+
+        /// b. while ugv mission has not finished, keep assigning arm mission config and executing arm mission.
+        ///
+        /// for ugv mission finish info, please refer to PLC Register Assignment
+        bool mission_continue_flag = true;
+
+        while (mission_continue_flag)
+        {
+            while(mir100.GetPLCRegisterIntValue(4) != 2)
+            {
+                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+                /// b.1 Initialization
+
+                bool ugv_mission_continue_flag = false;
+
+                bool arm_mission_continue_flag = false;
+                bool arm_wait_plc003_success_flag = false;
+                bool arm_wait_plc001_success_flag = false;
+
+                /// b.2 ugv_init_mission_status_check
+                // wait plc004 == 1 and mir state is executing ;
+                ugv_mission_continue_flag = mir100.InitMissionStatusCheck(2);
+
+                if(ugv_mission_continue_flag == true)
+                {
+                    // stage 1: configure arm mission
+                    // stage 2: execute arm mission
+
+                    /// b.3 stage 1: configure arm mission.
+
+                    LOG(INFO) << "mission. stage 1: configure arm mission...";
+
+                    bool arm_config_stage_success_flag = false;
+
+                    arm_wait_plc003_success_flag = this->WaitForUgvPLCRegisterInt(3,1,2);
+
+                    if(arm_wait_plc003_success_flag == true)
+                    {
+                        auto cur_order = mir100.GetPLCRegisterIntValue(2);
+
+                        //todo:
+                        /// b.3.1 start configuring arm mission.
+                        auto arm_mission_configs = tm5.ConfigureArmMission(cur_model_config_id_, cur_order);
+
+                        // z. finish configure stage.
+                        mir100.SetPLCRegisterIntValue(3,0);
+                        arm_config_stage_success_flag = true;
+
+                        arm_wait_plc001_success_flag = this->WaitForUgvPLCRegisterInt(1,1,2);
+
+                        if(arm_wait_plc001_success_flag == true)
+                        {
+                            //todo:
+                            /// b.3.2 start executing arm mission
+
+
+                            // for first order
+                            if(cur_order == 1)
+                            {
+                                this->ArmPickTool(cur_task_mode_);
+                            }
+
+                            // 0. find which operation_area. move to relative safety position
+                            auto operation_area = arm_mission_configs[0].operation_area;
+                            this->ArmSetOperationArea(operation_area);
+                            this->ArmTask("Post arm_home_to_safety");
+
+                            // loop all the arm_mission_configs
+                            for (int n = 0; n < arm_mission_configs.size(); n++)
+                            {
+                                // 1. move to standby_position
+                                // 2. check landmark_or_not?
+                                //  2.1 move to init_vision_position.
+                                //  2.2 execute vision_job
+                                //  2.3 get real_landmark_pos
+                                //  2.4 post back_to_standby_position
+                                //  2.5 get TF
+                                // 3. check tool_angle
+                                // 4. check motion_type, decide which motion.
+                                // 5. assign via_points
+                                // 6. set via_points
+                                // 7. post approach_point
+                                // 8. post via_points
+                                // 9. post return standby_position
+                            }
+
+                            // 10. post return safety.
+                            this->ArmTask("Post arm_back_to_safety");
+                            //
+                            mir100.SetPLCRegisterIntValue(1,0);
+                            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+                            // for last order
+                            if(cur_order == cur_mission_num_)
+                            {
+                                /// arm motion
+
+                                // 1. place the tool
+                                this->ArmPlaceTool(cur_task_mode_);
+
+                                /// ipc1 loop
+                                // set arm_mission_success_flag
+                                arm_mission_success_flag = true;
+
+                                // set ugv_mission_success_flag
+                                if(mir100.GetPLCRegisterIntValue(4) == 2)
+                                {
+                                    ugv_mission_success_flag = true;
+                                    mission_continue_flag = false;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            LOG(INFO) << "mission failed at step 2: wait for plc001 == 1";
+
+                            arm_mission_success_flag = false;
+                            mission_continue_flag = false;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        LOG(INFO) << "mission failed at step 1: wait for plc003 == 1";
+
+                        arm_mission_success_flag = false;
+                        mission_continue_flag = false;
+                        break;
+                    }
+                }
+                else
+                {
+                    LOG(INFO) << "ugv mission failed.";
+
+                    ugv_mission_success_flag = false;
+                    mission_continue_flag = false;
+                    break;
+                }
+            }
+        }
+    }
+    else
+    {
+        LOG(INFO) << "mission failed at initial status check.";
+    }
+
+    if(arm_mission_success_flag == true && ugv_mission_success_flag == true)
+    {
+        mission_success_flag = true;
+
+        mir100.SetPLCRegisterIntValue(4,0);
+    }
+
+    mir100.Pause();
+
+    /// based on mission_success_flag, Update to DB.
+
+
+
+
+#if 0
+
+    // 2. Do Tasks.
 
     LOG(INFO) << "Do Tasks...";
 
@@ -772,8 +997,11 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
     {
         LOG(INFO) << "Cancel the rest of tasks...";
     }
+
+#endif
 }
 
+#if 0
 void yf::sys::nw_sys::DoTask(const int& cur_task_id)
 {
     std::cout << "[cur_task_id]: " << cur_task_id << std::endl;
@@ -825,6 +1053,7 @@ void yf::sys::nw_sys::DoTask(const int& cur_task_id)
         }
     }
 }
+#endif
 
 void yf::sys::nw_sys::UpdateDbScheduleAfterTask(const int& cur_schedule_id)
 {
@@ -1211,6 +1440,170 @@ void yf::sys::nw_sys::WaitSchedulesInitialCheck()
 
         ///TIME
         std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+    }
+}
+
+//@@ input: plc_register: 000-100
+//
+bool yf::sys::nw_sys::WaitForUgvPLCRegisterInt(const int &plc_register, const int &value, const int &timeout_min)
+{
+
+    if(plc_register > 100 || plc_register <= 0)
+    {
+        std::cerr << "wrong plc register!" << std::endl;
+        return false;
+    }
+
+    std::string time_future = sql_ptr_->CountdownTime(sql_ptr_->TimeNow(),timeout_min);
+
+    LOG(INFO) << "Wait for PLC Register " << plc_register << " == " << value;
+    while (true)
+    {
+        // get cur ugv plc register xx, value xxx.
+        auto result = mir100.GetPLCRegisterIntValue(plc_register);
+
+        if (value != result)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        }
+        else
+        {
+            break;
+        }
+
+        /// IPC1 waits too long.
+        if(!sql_ptr_->isFutureTime(time_future, sql_ptr_->TimeNow()))
+        {
+            LOG(INFO) << "The PLC Register has not changed.";
+
+            return false;
+        }
+    }
+
+    return true;
+
+}
+
+//@@ input: plc_register: 101-200
+//
+bool yf::sys::nw_sys::WaitForUgvPLCRegisterFloat(const int &plc_register, const float &value, const int &timeout_min)
+{
+
+    if(plc_register <= 100 || plc_register >200)
+    {
+        std::cerr << "wrong plc register!" << std::endl;
+        return false;
+    }
+
+    std::string time_future = sql_ptr_->CountdownTime(sql_ptr_->TimeNow(),timeout_min);
+
+    LOG(INFO) << "Wait for PLC Register " << plc_register << " == " << value;
+    while (true)
+    {
+        // get cur ugv plc register xx, value xxx.
+        auto result = mir100.GetPLCRegisterFloatValue(plc_register);
+
+        if (value != result)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        }
+        else
+        {
+            break;
+        }
+
+        /// IPC1 waits too long.
+        if(!sql_ptr_->isFutureTime(time_future, sql_ptr_->TimeNow()))
+        {
+            LOG(INFO) << "The PLC Register has not changed.";
+
+            return false;
+        }
+    }
+
+    return true;
+
+}
+
+void yf::sys::nw_sys::ArmPickTool(const yf::data::arm::TaskMode &task_mode)
+{
+    switch (task_mode)
+    {
+        case yf::data::arm::TaskMode::Mopping:
+        {
+            this->ArmTask("Post pick_mop");
+        }
+        case yf::data::arm::TaskMode::UVCScanning:
+        {
+            this->ArmTask("Post pick_uvc");
+        }
+    }
+}
+
+void yf::sys::nw_sys::ArmPlaceTool(const yf::data::arm::TaskMode &task_mode)
+{
+    switch (task_mode)
+    {
+        case yf::data::arm::TaskMode::Mopping:
+        {
+            this->ArmTask("Post place_mop");
+        }
+        case yf::data::arm::TaskMode::UVCScanning:
+        {
+            this->ArmTask("Post place_uvc");
+        }
+    }
+}
+
+void yf::sys::nw_sys::ArmSetOperationArea(const yf::data::arm::OperationArea &operation_area)
+{
+    switch (operation_area)
+    {
+        case data::arm::OperationArea::Rear:
+        {
+            this->ArmTask("Set operation_area = 0");
+            break;
+        }
+        case data::arm::OperationArea::Left:
+        {
+            this->ArmTask("Set operation_area = 1");
+            break;
+        }
+        case data::arm::OperationArea::Right:
+        {
+            this->ArmTask("Set operation_area = 2");
+            break;
+        }
+        case data::arm::OperationArea::RearRightCorner:
+        {
+            this->ArmTask("Set operation_area = 3");
+            break;
+        }
+        case data::arm::OperationArea::RightLower:
+        {
+            this->ArmTask("Set operation_area = 4");
+            break;
+        }
+        case data::arm::OperationArea::RightHigher:
+        {
+            this->ArmTask("Set operation_area = 5");
+            break;
+        }
+        case data::arm::OperationArea::RearLeftCorner:
+        {
+            this->ArmTask("Set operation_area = 6");
+            break;
+        }
+        case data::arm::OperationArea::LeftLower:
+        {
+            this->ArmTask("Set operation_area = 7");
+            break;
+        }
+        case data::arm::OperationArea::LeftHigher:
+        {
+            this->ArmTask("Set operation_area = 8");
+            break;
+        }
     }
 }
 

@@ -15,6 +15,9 @@
 //glog
 #include <glog/logging.h>
 
+//algorithm
+#include "../include/al.h"
+
 namespace yf
 {
     namespace arm
@@ -60,6 +63,38 @@ namespace yf
             // function: keep sending "Get Status" and check the stauts.
             void UpdateArmCurMissionStatus();
 
+        public: // for nw_sys: each mission
+
+            bool InitialStatusCheckForMission(const int& timeout_min);
+
+            std::deque<yf::data::arm::MissionConfig> ConfigureArmMission(const int& model_config_id, const int & order);
+
+            yf::data::arm::TaskMode GetTaskMode(const int& model_config_id);
+
+            yf::data::arm::OperationArea GetOperationArea(const int& arm_config_id);
+
+            yf::data::arm::Tool GetCurrentTool();
+
+            yf::data::arm::Tool GetMissionTool(const int& model_config_id);
+
+            yf::data::arm::ToolAngle GetToolAngle(const int& arm_mission_config_id);
+
+            yf::data::arm::MotionType GetMotionType(const int& arm_mission_config_id);
+
+            yf::data::arm::Point3d GetStandbyPosition(const int& arm_config_id);
+
+            bool GetLandmarkFlag(const int& arm_mission_config_id);
+
+            yf::data::arm::Point3d GetInitVisionPosition(const int& arm_mission_config_id);
+
+            yf::data::arm::Point3d GetRefLandmarkPosition(const int& arm_mission_config_id);
+
+            yf::data::arm::Point3d GetViaApproachPoint(const int& arm_mission_config_id);
+
+            std::deque<yf::data::arm::Point3d> GetViaPoints(const int& arm_mission_config_id, const yf::data::arm::MotionType& motion_type);
+
+
+
         protected:
 
             void UpdateSQLArmStatus();
@@ -74,7 +109,7 @@ namespace yf
         private:
 
             // properties
-            const char* tm_ip_address_ = "192.168.2.29";
+            const char* tm_ip_address_ = "192.168.7.29";
             int   network_port_no_;
             int   listen_node_port_no_;
             int   modbus_port_no_ = 502;
@@ -91,6 +126,9 @@ namespace yf
 
             // Arm Status
             bool  arm_mission_continue_flag_ = false;
+
+            // Algorithm -- Clean Motion
+            yf::algorithm::cleaning_motion al_clean_motion;
 
             // Net
             //
@@ -141,6 +179,10 @@ namespace yf
             int schedule_number = 0;
             std::deque<yf::data::schedule::Job> schedule{};
             std::deque<int>  all_avaiable_schedule_ids;
+
+        private:
+
+            // for arm task
 
         };
     }
@@ -289,7 +331,7 @@ void yf::arm::tm::CheckArmInitMssionStaus()
             {
                 LOG(INFO) << "robotic arm has been e-stopped!";
                 LOG(INFO) << "todo: update database(task,schedule)...";
-                LOG(INFO) << "todo: wait 3-min for resume!";
+                LOG(INFO) << "todo: wait 3 minutes for resume!";
 
                 // The Arm is E-Stop!
                 arm_mission_continue_flag_ = false;
@@ -642,6 +684,316 @@ void yf::arm::tm::GetMissionStatus()
     {
         LOG(INFO) << "Arm is not connected, GetMissionStatus() fail!";
     }
+}
+
+// check arm mission status
+//
+bool yf::arm::tm::InitialStatusCheckForMission(const int& timeout_min)
+{
+    // initialization
+    bool update_flag = true;
+
+    std::string time_future = sql_ptr_->CountdownTime(sql_ptr_->TimeNow(),timeout_min);
+
+    while (update_flag)
+    {
+        // get current arm status
+        this->UpdateArmCurMissionStatus();
+
+        if (nw_status_ptr_->arm_mission_status != yf::data::common::MissionStatus::Idle)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        }
+        else
+        {
+            // Arm is ready
+            update_flag = false;
+            break;
+        }
+
+        /// IPC1 waits too long.
+        if(!sql_ptr_->isFutureTime(time_future, sql_ptr_->TimeNow()))
+        {
+            LOG(INFO) << "The Arm is not ready.";
+            LOG(INFO) << "The Task failed at the initial status check stage.";
+
+            return false;
+        }
+    }
+
+    return true;
+
+}
+
+std::deque<yf::data::arm::MissionConfig> yf::arm::tm::ConfigureArmMission(const int& model_config_id, const int & order)
+{
+    std::deque<yf::data::arm::MissionConfig> arm_mission_configs;
+
+    int arm_config_id = sql_ptr_->GetArmConfigId(model_config_id, order);
+
+    // arm_mission_config_num
+    std::deque<int> arm_mission_config_ids = sql_ptr_->GetArmMissionConfigIds(arm_config_id);
+
+    int arm_mission_config_num = arm_mission_config_ids.size();
+
+    for (int n = 0; n < arm_mission_config_num; n++)
+    {
+        int arm_mission_config_id = arm_mission_config_ids[n];
+
+        // start config each arm_mission
+
+        data::arm::MissionConfig mission_config;
+        
+        /// 1. task_mode
+        mission_config.task_mode = this->GetTaskMode(model_config_id);
+
+        /// 2. operation_area
+        mission_config.operation_area = this->GetOperationArea(arm_config_id);
+
+        /// 3. current tool
+        mission_config.cur_tool = this->GetCurrentTool();
+
+        /// 4. mission_tool
+        mission_config.mission_tool = this->GetMissionTool(model_config_id);
+
+        /// 5. tool_angel
+        mission_config.tool_angle = this->GetToolAngle(arm_mission_config_id);
+
+        /// 6. motion_type
+        mission_config.motion_type = this->GetMotionType(arm_mission_config_id);
+
+        /// 7. standby_position
+        mission_config.standby_position = this->GetStandbyPosition(arm_config_id);
+
+        /// 8. landmark_flag
+        mission_config.landmark_flag = this->GetLandmarkFlag(arm_mission_config_id);
+
+        /// 9.(optional) init_vision_position
+        if(mission_config.landmark_flag == true)
+        {
+            mission_config.init_vision_pos = this->GetInitVisionPosition(arm_mission_config_id);
+        }
+
+        /// 10.(optional) ref_landmark_position
+        if(mission_config.landmark_flag == true)
+        {
+            mission_config.ref_landmark_pos = this->GetRefLandmarkPosition(arm_mission_config_id);
+        }
+
+        /// 11.(optional) via_approach_point
+        if(mission_config.task_mode == yf::data::arm::TaskMode::Mopping)
+        {
+            mission_config.via_approach_pos = this->GetViaApproachPoint(arm_mission_config_id);
+        }
+
+        /// 12. via_points.
+        mission_config.via_points = this->GetViaPoints(arm_mission_config_id,mission_config.motion_type);
+
+        /// 13. n_via_points
+        mission_config.n_via_points = mission_config.via_points.size();
+
+        /// 14. mission_order
+        mission_config.mission_order = n+1;
+
+        arm_mission_configs.push_back(mission_config);
+    }
+
+    return arm_mission_configs;
+}
+
+yf::data::arm::TaskMode yf::arm::tm::GetTaskMode(const int &model_config_id)
+{
+    auto task_mode = sql_ptr_->GetTaskMode(model_config_id);
+
+    switch (task_mode)
+    {
+        case 1:
+        {
+            return yf::data::arm::TaskMode::Mopping;
+        }
+
+        case 2:
+        {
+            return yf::data::arm::TaskMode::UVCScanning;
+        }
+    }
+}
+
+yf::data::arm::OperationArea yf::arm::tm::GetOperationArea(const int &arm_config_id)
+{
+    int operation_area = sql_ptr_->GetOperationArea(arm_config_id);
+
+    switch (operation_area)
+    {
+        case 0:
+        {
+            return yf::data::arm::OperationArea::Rear;
+        }
+        case 1:
+        {
+            return yf::data::arm::OperationArea::Left;
+        }
+        case 2:
+        {
+            return yf::data::arm::OperationArea::Right;
+        }
+        case 3:
+        {
+            return yf::data::arm::OperationArea::RearRightCorner;
+        }
+        case 4:
+        {
+            return yf::data::arm::OperationArea::RightLower;
+        }
+        case 5:
+        {
+            return yf::data::arm::OperationArea::RightHigher;
+        }
+        case 6:
+        {
+            return yf::data::arm::OperationArea::RearLeftCorner;
+        }
+        case 7:
+        {
+            return yf::data::arm::OperationArea::LeftLower;
+        }
+        case 8:
+        {
+            return yf::data::arm::OperationArea::LeftHigher;
+        }
+    }
+}
+
+yf::data::arm::Tool yf::arm::tm::GetCurrentTool()
+{
+    int is_uvc_tool = tm_modbus.get_control_box_DI(13);
+    int is_brush_tool = tm_modbus.get_control_box_DI(14);
+
+    if(is_uvc_tool == 1)
+    {
+        return yf::data::arm::Tool::UvcLed;
+    }
+    else if (is_brush_tool == 1)
+    {
+        return yf::data::arm::Tool::Brush;
+    }
+    else if (is_uvc_tool == 0 && is_brush_tool == 0)
+    {
+        return yf::data::arm::Tool::None;
+    }
+}
+
+yf::data::arm::Tool yf::arm::tm::GetMissionTool(const int& model_config_id)
+{
+    auto task_mode = this->GetTaskMode(model_config_id);
+
+    switch (task_mode)
+    {
+        case yf::data::arm::TaskMode::UVCScanning:
+        {
+            return yf::data::arm::Tool::UvcLed;
+        }
+        case yf::data::arm::TaskMode::Mopping:
+        {
+            return yf::data::arm::Tool::Brush;
+        }
+    }
+}
+
+yf::data::arm::ToolAngle yf::arm::tm::GetToolAngle(const int &arm_mission_config_id)
+{
+    int tool_angle = sql_ptr_->GetToolAngle(arm_mission_config_id);
+
+    switch (tool_angle)
+    {
+        case 0:
+        {
+            return yf::data::arm::ToolAngle::Zero;
+        }
+        case 45:
+        {
+            return yf::data::arm::ToolAngle::FortyFive;
+        }
+    }
+}
+
+yf::data::arm::MotionType yf::arm::tm::GetMotionType(const int &arm_mission_config_id)
+{
+    int motion_type = sql_ptr_->GetMotionType(arm_mission_config_id);
+
+    switch (motion_type)
+    {
+        case 1:
+        {
+            return yf::data::arm::MotionType::PlaneMotion;
+        }
+        case 2:
+        {
+            return yf::data::arm::MotionType::LineMotion;
+        }
+    }
+}
+
+yf::data::arm::Point3d yf::arm::tm::GetStandbyPosition(const int &arm_config_id)
+{
+    int standby_position_id = sql_ptr_->GetStandbyPositionId(arm_config_id);
+
+    yf::data::arm::Point3d standby_position = sql_ptr_->GetArmPoint(standby_position_id);
+
+    return standby_position;
+}
+
+bool yf::arm::tm::GetLandmarkFlag(const int &arm_mission_config_id)
+{
+    int landmark_flag = sql_ptr_->GetLandmarkFlag(arm_mission_config_id);
+
+    if(landmark_flag == 0)
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+yf::data::arm::Point3d yf::arm::tm::GetInitVisionPosition(const int &arm_mission_config_id)
+{
+    int init_vision_position_id = sql_ptr_->GetArmMissionPointId(arm_mission_config_id,"vision_p0");
+
+    yf::data::arm::Point3d init_vision_position = sql_ptr_->GetArmPoint(init_vision_position_id);
+
+    return init_vision_position;
+}
+
+yf::data::arm::Point3d yf::arm::tm::GetRefLandmarkPosition(const int &arm_mission_config_id)
+{
+    int ref_landmark_position_id = sql_ptr_->GetArmMissionPointId(arm_mission_config_id, "ref_landmark_pos");
+
+    yf::data::arm::Point3d ref_landmark_position = sql_ptr_->GetArmPoint(ref_landmark_position_id);
+
+    return ref_landmark_position;
+}
+
+yf::data::arm::Point3d yf::arm::tm::GetViaApproachPoint(const int &arm_mission_config_id)
+{
+    int via_approach_point_id = sql_ptr_->GetArmMissionPointId(arm_mission_config_id, "via_approach_point");
+
+    yf::data::arm::Point3d via_approach_point = sql_ptr_->GetArmPoint(via_approach_point_id);
+
+    return via_approach_point;
+}
+
+std::deque<yf::data::arm::Point3d>
+yf::arm::tm::GetViaPoints(const int &arm_mission_config_id, const yf::data::arm::MotionType &motion_type)
+{
+
+    std::deque<yf::data::arm::Point3d> init_cleaning_points = sql_ptr_->GetCleanPoints(arm_mission_config_id, motion_type);
+
+    std::deque<yf::data::arm::Point3d> via_points = al_clean_motion.get_via_points(motion_type, init_cleaning_points);
+
+    return via_points;
+
 }
 
 

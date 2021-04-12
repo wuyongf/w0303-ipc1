@@ -22,7 +22,7 @@ namespace yf
             void set_plain_edge_points(const data::arm::Point3d& p1, const data::arm::Point3d& p2,
                                        const data::arm::Point3d& p3, const data::arm::Point3d& p4);
 
-            std::deque<yf::data::arm::Point3d> get_via_points(const int& motion_type, std::deque<yf::data::arm::Point3d> init_cleaning_points);
+            std::deque<yf::data::arm::Point3d> get_via_points(const yf::data::arm::MotionType &motion_type, std::deque<yf::data::arm::Point3d> init_cleaning_points);
 
         private:
 
@@ -101,14 +101,14 @@ void yf::algorithm::cleaning_motion::set_plain_edge_points(const yf::data::arm::
 
 }
 
-std::deque<yf::data::arm::Point3d> yf::algorithm::cleaning_motion::get_via_points(const int &motion_type,
+std::deque<yf::data::arm::Point3d> yf::algorithm::cleaning_motion::get_via_points(const yf::data::arm::MotionType &motion_type,
                                                                                   std::deque<yf::data::arm::Point3d> init_cleaning_points)
 {
     std::deque<yf::data::arm::Point3d> via_points;
 
     switch (motion_type)
     {
-        case 1: // plain_cleaning
+        case yf::data::arm::MotionType::PlaneMotion: // plain_cleaning
         {
             /// 1. Initialization
             edge_p1_ = init_cleaning_points[0];
@@ -207,7 +207,7 @@ std::deque<yf::data::arm::Point3d> yf::algorithm::cleaning_motion::get_via_point
             break;
         }
 
-        case 2: // line_cleaning
+        case yf::data::arm::MotionType::LineMotion: // line_cleaning
         {
             /// 1. Initialization
             edge_p1_ = init_cleaning_points[0];

@@ -92,8 +92,8 @@ namespace yf
                     end_time.clear();
                 }
 
-// Time Function
-#if 0
+                // Time Function
+                #if 0
                 const std::string currentDateTime() {
                     time_t     now = time(0);
                     struct tm  tstruct;
@@ -105,16 +105,9 @@ namespace yf
 
                     return buf;
 }
-#endif
-
-
+                #endif
             };
 
-            // Job ---> Tasks
-            //                  Task   ---> sub_task
-            //                  ---> ugv config
-            //                  ---> arm config-1
-            //                  ---> arm config-2
 
         }
     }

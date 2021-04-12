@@ -90,7 +90,6 @@ namespace yf
 
             // Task
             //
-            int GetTaskMode(const int& cur_task_id);
             int GetTaskCommand(const int& cur_task_id);
 
             void UpdateTaskData(const int& cur_task_id, const int& task_status);
@@ -115,18 +114,28 @@ namespace yf
 
             int GetModelConfigElement(const int& model_config_id, const std::string& element);
 
-            // Arm_mission_config
+            /// Arm_mission_config
             //
-            int GetArmConfigId(const int& model_config_id, const int& plc_001_value);
+            int GetArmConfigId(const int& model_config_id, const int& cur_order);
 
             std::deque<int> GetArmMissionConfigIds(const int& arm_config_id);
 
-            int GetArmPointId(const int& arm_mission_config_id, const std::string& arm_point_name);
+            int GetArmMissionPointId(const int& arm_mission_config_id, const std::string& arm_point_name);
 
             int GetArmMotionType(const int& arm_mission_config_id);
 
+            int GetTaskMode(const int& model_config_id);
+            int GetOperationArea(const int &arm_config_id);
+            int GetToolAngle(const int& arm_mission_config_id);
+            int GetMotionType(const int& arm_mission_config_id);
+
+            int GetStandbyPositionId(const int& arm_config_id);
             yf::data::arm::Point3d GetArmPoint(const int& point_id);
             float GetArmPointElement(const int &point_id, const std::string &point_element);
+
+            int GetLandmarkFlag(const int &arm_mission_config_id);
+
+            std::deque<yf::data::arm::Point3d> GetCleanPoints(const int& arm_mission_config_id, const yf::data::arm::MotionType& motion_type);
 
             /// Ugv_mission_config
             int GetUgvMissionConfigNum(const int& model_config_id);
@@ -142,6 +151,8 @@ namespace yf
             std::string GetBuildingInfo(const int& model_config_id);
             std::string GetFloorInfo(const int& model_config_id);
 
+            /// Arm_mission
+
         private:
 
             nanodbc::connection conn_;
@@ -149,10 +160,10 @@ namespace yf
             // connection info
             std::string ODBCConnectionStr_ = "" ;
             std::string driver_ = "SQL Server" ;
-            std::string server_ = "192.168.0.8";
+            std::string server_ = "192.168.7.27";
             std::string database_ = "NW_mobile_robot_sys";
             std::string Uid_ = "sa";
-            std::string Pwd_ = "Willsonic2010";
+            std::string Pwd_ = "NWcadcam2021";
 
             // properties
             std::string time_now_;
@@ -778,7 +789,7 @@ void yf::sql::sql_server::WaitForExecute(const std::string &execute_time)
     }
 }
 
-int yf::sql::sql_server::GetTaskMode(const int &cur_task_id)
+int yf::sql::sql_server::GetTaskMode(const int &model_config_id)
 {
     std::string query_update;
 
@@ -787,27 +798,26 @@ int yf::sql::sql_server::GetTaskMode(const int &cur_task_id)
     {
         Connect();
 
-        query_update = "SELECT task_mode FROM sys_schedule_job_task where ID = "+std::to_string(cur_task_id)+" AND status=2 ";
+        query_update = "SELECT task_mode FROM data_model_config where ID = "+std::to_string(model_config_id);
 
-        std::string task_mode;
+        int task_mode;
 
         auto result = nanodbc::execute(conn_,query_update);
 
         while(result.next())
         {
-            task_mode = result.get<std::string>(0, "null");
+            task_mode = result.get<int>(0);
         };
 
         Disconnect();
 
-        std::cout << "task_mode: " << task_mode << std::endl;
-
-        return std::stoi(task_mode);
+        return task_mode;
     }
     catch (std::exception& e)
     {
         std::cerr << e.what() << std::endl;
         std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+        return 0;
     }
 }
 
@@ -1237,7 +1247,7 @@ int yf::sql::sql_server::GetArmMotionType(const int& arm_mission_config_id)
 
 }
 
-int yf::sql::sql_server::GetArmPointId(const int &arm_mission_config_id, const std::string &arm_point_name)
+int yf::sql::sql_server::GetArmMissionPointId(const int &arm_mission_config_id, const std::string &arm_point_name)
 {
     std::string mission_id_str = std::to_string(arm_mission_config_id);
 
@@ -1477,14 +1487,16 @@ int yf::sql::sql_server::GetUgvMissionConfigNum(const int &model_config_id)
     };
 }
 
-int yf::sql::sql_server::GetArmConfigId(const int &model_config_id, const int &plc_002_value)
+//@@ input: mission_order == plc_002_value
+//
+int yf::sql::sql_server::GetArmConfigId(const int &model_config_id, const int &cur_order)
 {
     // query string
     std::string query_update;
 
     // input
     std::string model_config_id_str = std::to_string(model_config_id);
-    std::string plc_002_value_str = std::to_string(plc_002_value);
+    std::string cur_order_str = std::to_string(cur_order);
 
     // output
     int arm_config_id;
@@ -1494,7 +1506,7 @@ int yf::sql::sql_server::GetArmConfigId(const int &model_config_id, const int &p
     {
         Connect();
 
-        query_update = "SELECT arm_config_id FROM data_ugv_mission_config where model_config_id = " + model_config_id_str + "AND mission_order = " + plc_002_value_str ;
+        query_update = "SELECT arm_config_id FROM data_ugv_mission_config where model_config_id = " + model_config_id_str + "AND mission_order = " + cur_order_str ;
 
         auto result = nanodbc::execute(conn_,query_update);
 
@@ -1870,6 +1882,213 @@ std::string yf::sql::sql_server::GetFloorInfo(const int &model_config_id)
 
         return floor_str;
     };
+}
+
+int yf::sql::sql_server::GetOperationArea(const int &arm_config_id)
+{
+    std::string query_update;
+
+    //"SELECT ID FROM schedule_table where status=1 AND planned_start > '2021-02-06 11:10:08.000'"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT operation_area FROM data_arm_config where ID = "+ std::to_string(arm_config_id);
+
+        int operation_area;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        while(result.next())
+        {
+            operation_area = result.get<int>(0);
+        };
+
+        Disconnect();
+
+
+        return operation_area;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+        return 0;
+    }
+}
+
+int yf::sql::sql_server::GetToolAngle(const int &arm_mission_config_id)
+{
+    std::string query_update;
+
+    //"SELECT ID FROM schedule_table where status=1 AND planned_start > '2021-02-06 11:10:08.000'"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT tool_angle FROM data_arm_mission_config where ID = "+ std::to_string(arm_mission_config_id);
+
+        int tool_angle;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        while(result.next())
+        {
+            tool_angle = result.get<int>(0);
+        };
+
+        Disconnect();
+
+
+        return tool_angle;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+        return 0;
+    }
+}
+
+int yf::sql::sql_server::GetMotionType(const int &arm_mission_config_id)
+{
+    std::string query_update;
+
+    //"SELECT ID FROM schedule_table where status=1 AND planned_start > '2021-02-06 11:10:08.000'"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT motion_type FROM data_arm_mission_config where ID = "+ std::to_string(arm_mission_config_id);
+
+        int motion_type;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        while(result.next())
+        {
+            motion_type = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return motion_type;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+        return 0;
+    }
+}
+
+int yf::sql::sql_server::GetStandbyPositionId(const int &arm_config_id)
+{
+    std::string query_update;
+
+    //"SELECT ID FROM schedule_table where status=1 AND planned_start > '2021-02-06 11:10:08.000'"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT standby_position_id FROM data_arm_config where ID = "+ std::to_string(arm_config_id);
+
+        int standby_position_id;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        while(result.next())
+        {
+            standby_position_id = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return standby_position_id;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+        return 0;
+    }
+}
+
+int yf::sql::sql_server::GetLandmarkFlag(const int &arm_mission_config_id)
+{
+    std::string query_update;
+
+    //"SELECT ID FROM schedule_table where status=1 AND planned_start > '2021-02-06 11:10:08.000'"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT landmark_flag FROM data_arm_mission_config where ID = "+ std::to_string(arm_mission_config_id);
+
+        int landmark_flag;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        while(result.next())
+        {
+            landmark_flag = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return landmark_flag;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+        return 0;
+    }
+}
+
+std::deque<yf::data::arm::Point3d>
+yf::sql::sql_server::GetCleanPoints(const int &arm_mission_config_id, const yf::data::arm::MotionType &motion_type)
+{
+    std::deque<yf::data::arm::Point3d> clean_points;
+
+    switch (motion_type)
+    {
+        case yf::data::arm::MotionType::PlaneMotion:
+        {
+            int plane_cleaning_p1_id = this->GetArmMissionPointId(arm_mission_config_id, "plane_cleaning_p1");
+            int plane_cleaning_p2_id = this->GetArmMissionPointId(arm_mission_config_id, "plane_cleaning_p2");
+            int plane_cleaning_p3_id = this->GetArmMissionPointId(arm_mission_config_id, "plane_cleaning_p3");
+            int plane_cleaning_p4_id = this->GetArmMissionPointId(arm_mission_config_id, "plane_cleaning_p4");
+
+            yf::data::arm::Point3d plane_cleaning_p1 = this->GetArmPoint(plane_cleaning_p1_id);
+            yf::data::arm::Point3d plane_cleaning_p2 = this->GetArmPoint(plane_cleaning_p2_id);
+            yf::data::arm::Point3d plane_cleaning_p3 = this->GetArmPoint(plane_cleaning_p3_id);
+            yf::data::arm::Point3d plane_cleaning_p4 = this->GetArmPoint(plane_cleaning_p4_id);
+
+            clean_points.push_back(plane_cleaning_p1);
+            clean_points.push_back(plane_cleaning_p2);
+            clean_points.push_back(plane_cleaning_p3);
+            clean_points.push_back(plane_cleaning_p4);
+
+            break;
+        }
+        case yf::data::arm::MotionType::LineMotion:
+        {
+            int line_cleaning_p1_id = this->GetArmMissionPointId(arm_mission_config_id, "line_cleaning_p1");
+            int line_cleaning_p2_id = this->GetArmMissionPointId(arm_mission_config_id, "line_cleaning_p2");
+
+            yf::data::arm::Point3d line_cleaning_p1 = this->GetArmPoint(line_cleaning_p1_id);
+            yf::data::arm::Point3d line_cleaning_p2 = this->GetArmPoint(line_cleaning_p2_id);
+
+            clean_points.push_back(line_cleaning_p1);
+            clean_points.push_back(line_cleaning_p2);
+
+            break;
+
+        }
+    }
+
+    return clean_points;
 }
 
 

@@ -77,16 +77,35 @@ namespace  yf
             enum class CleanType          // for end user choose
             {
                 Mopping     = 1,
-                UVCScanning = 2,
-                MoppingAndUVCScanning   = 3
+                UVCScanning = 2
+            };
+
+            enum class TaskMode          // for end user choose
+            {
+                Mopping     = 1,
+                UVCScanning = 2
+            };
+
+            enum class MotionType
+            {
+                LineMotion,     // 2 points
+                PlaneMotion,    // 4 points
             };
 
             // for operation area
             enum class OperationArea
             {
-                Rear    = 0,
-                Left    = 1,
-                Right   = 2
+                Rear            = 0,
+                Left            = 1,
+                Right           = 2,
+
+                RearRightCorner = 3,
+                RightLower      = 4,
+                RightHigher     = 5,
+
+                RearLeftCorner  = 6,
+                LeftLower       = 7,
+                LeftHigher      = 8
             };
 
             enum class MotionMode
@@ -127,6 +146,54 @@ namespace  yf
                 float                   ref_clean_step_distance;    //  cleaning task parameters
                 float                   ref_cover_range;            //  arm reachable range, for record
                 uint8_t                 clean_times = 0;            //  total clean times, based on the cover range
+            };
+
+            enum class Tool
+            {
+                None        = 0,
+                Brush       = 1,
+                UvcLed      = 2
+            };
+
+            enum class ToolAngle
+            {
+                Zero        =   0,
+                FortyFive   =   45
+            };
+
+            struct MissionConfig
+            {
+                TaskMode	            task_mode;	                //	cleaning motion type. e.g. Mopping == 1 UVCScanning == 2
+
+                OperationArea           operation_area;
+
+                Tool                    cur_tool;
+
+                Tool                    mission_tool;
+
+                ToolAngle               tool_angle = ToolAngle::Zero;
+
+                MotionType              motion_type;
+
+                Point3d                 standby_position;
+
+                bool                    landmark_flag;
+
+                Point3d                 init_vision_pos;
+
+                Point3d                 ref_landmark_pos;
+
+                Point3d                 real_landmark_pos;
+
+                Eigen::Matrix4f         Mat_TF;
+
+                Point3d                 via_approach_pos;
+
+                int                     n_via_points;
+
+                std::deque<Point3d>     via_points;
+
+                int                     mission_order;
 
             };
         }

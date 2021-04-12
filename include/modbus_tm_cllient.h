@@ -22,23 +22,38 @@ namespace yf
 
         public:
 
+            // Arm Status
+            //
             void read_robot_status();
             bool read_isError();
             bool read_isProjectRunning();
             bool read_isPause();
             bool read_isEStop();
 
-        public:
+            // Arm DI/O
+            int get_control_box_DO(const int& DO);
+            int get_control_box_DI(const int& DI);
 
-            void write_io(const int& io_port_no, const int& value);
+            int get_end_module_DO(const int& DO);
+            int get_end_module_DI(const int& DI);
+
+            bool set_control_box_DO(const int& DO, const int& value);
+            bool set_end_module_DO(const int& DO, const int& value);
 
         private:
 
             modbus_t*   mb;
-            const char*       tm_ip_address_ = "192.168.2.29";
+            const char*       tm_ip_address_ = "192.168.7.29";
             int         port_ = 502;
 
             uint8_t     reg_robot_status[8];
+
+            uint8_t     reg_control_box_DO[16];
+            uint8_t     reg_control_box_DI[16];
+
+            uint8_t     reg_end_module_DO[4];
+            uint8_t     reg_end_module_DI[3];
+
         };
     }
 }
@@ -101,6 +116,102 @@ bool yf::modbus::tm_modbus::read_isEStop()
     read_robot_status();
 
     return reg_robot_status[7];
+}
+
+//@@ input: 0,1,2,3
+//
+int yf::modbus::tm_modbus::get_control_box_DO(const int &DO)
+{
+    modbus_connect(mb);
+
+    modbus_read_bits(mb, 0000, 16, reg_control_box_DO);
+
+    int DO_value = reg_control_box_DO[DO];
+
+    modbus_close(mb);
+
+    return DO_value;
+}
+
+int yf::modbus::tm_modbus::get_control_box_DI(const int &DI)
+{
+    modbus_connect(mb);
+
+    modbus_read_input_bits(mb, 0000, 16, reg_control_box_DI);
+
+    int DI_value = reg_control_box_DI[DI];
+
+    modbus_close(mb);
+
+    return DI_value;
+}
+
+int yf::modbus::tm_modbus::get_end_module_DO(const int &DO)
+{
+    modbus_connect(mb);
+
+    modbus_read_bits(mb, 800, 4, reg_end_module_DO);
+
+    int DO_value = reg_end_module_DO[DO];
+
+    modbus_close(mb);
+
+    return DO_value;
+}
+
+//@@ input: 0,1,2
+//
+int yf::modbus::tm_modbus::get_end_module_DI(const int &DI)
+{
+    modbus_connect(mb);
+
+    modbus_read_input_bits(mb, 800, 3, reg_end_module_DI);
+
+    int DI_value = reg_end_module_DI[DI];
+
+    modbus_close(mb);
+
+    return DI_value;
+}
+
+bool yf::modbus::tm_modbus::set_control_box_DO(const int &DO, const int &value)
+{
+    try
+    {
+        modbus_connect(mb);
+
+        modbus_write_bit(mb,DO,value);
+
+        modbus_close(mb);
+
+        return true;
+    }
+    catch (std::error_code ec)
+    {
+        std::cerr << ec << std::endl;
+        return false;
+    }
+}
+
+bool yf::modbus::tm_modbus::set_end_module_DO(const int &DO, const int &value)
+{
+    auto DO_end = DO + 800;
+
+    try
+    {
+        modbus_connect(mb);
+
+        modbus_write_bit(mb,DO_end,value);
+
+        modbus_close(mb);
+
+        return true;
+    }
+    catch (std::error_code ec)
+    {
+        std::cerr << ec << std::endl;
+        return false;
+    }
 }
 
 
