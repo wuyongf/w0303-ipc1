@@ -65,6 +65,13 @@ namespace yf
             void ArmPlaceTool(const yf::data::arm::TaskMode& task_mode);
             void ArmSetOperationArea(const yf::data::arm::OperationArea& operation_area);
 
+            std::string ArmGetPointStr(const yf::data::arm::Point3d& point);
+            void ArmSetToolAngle(const yf::data::arm::TaskMode& task_mode ,const yf::data::arm::ToolAngle& tool_angle);
+
+            void ArmSetApproachPoint(const yf::data::arm::Point3d& approach_point,const yf::data::arm::ToolAngle& tool_angle);
+            void ArmSetViaPoints(const std::deque<yf::data::arm::Point3d> via_points, const yf::data::arm::ToolAngle& tool_angle);
+
+            void ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode, const yf::data::arm::ToolAngle& tool_angle);
 
         public:
 
@@ -792,19 +799,42 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
                             for (int n = 0; n < arm_mission_configs.size(); n++)
                             {
                                 // 1. move to standby_position
+                                //  1.1 get standby_point_str
+                                auto standby_point = arm_mission_configs[n].standby_position;
+                                std::string standby_point_str = this->ArmGetPointStr(standby_point);
+                                //  1.2 set standby_point
+                                this->ArmTask("Set standby_p0 = "+standby_point_str);
+                                //  1.3 move to standby_point
+                                this->ArmTask("Move_to standby_p0");
+
                                 // 2. check landmark_or_not?
-                                //  2.1 move to init_vision_position.
-                                //  2.2 execute vision_job
-                                //  2.3 get real_landmark_pos
-                                //  2.4 post back_to_standby_position
-                                //  2.5 get TF
-                                // 3. check tool_angle
+                                if(arm_mission_configs[n].landmark_flag == true)
+                                {
+                                    //  2.1 move to init_vision_position.
+                                    //  2.2 execute vision_job
+                                    //  2.3 get real_landmark_pos
+                                    //  2.4 post back_to_standby_position
+                                    //  2.5 get TF
+                                }
+
+                                // 3. check&set tool_angle
+                                this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
+
                                 // 4. check motion_type, decide which motion.
-                                // 5. assign via_points
-                                // 6. set via_points
-                                // 7. post approach_point
+                                // 5. assign n_via_points
+                                std::string n_via_points_str = std::to_string(arm_mission_configs[n].n_via_points);
+                                this->ArmTask("Set n_points = " + n_via_points_str);
+
+                                // 6. set approach_point
+                                this->ArmSetApproachPoint(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].tool_angle);
+                                // 7. set via_points
+                                this->ArmSetViaPoints(arm_mission_configs[n].via_points, arm_mission_configs[n].tool_angle);
+
                                 // 8. post via_points
+                                this->ArmPostViaPoints(arm_mission_configs[n].tool_angle);
+
                                 // 9. post return standby_position
+                                this->ArmTask("Move_to standby_p0");
                             }
 
                             // 10. post return safety.
@@ -1538,6 +1568,8 @@ void yf::sys::nw_sys::ArmPickTool(const yf::data::arm::TaskMode &task_mode)
             this->ArmTask("Post pick_uvc");
         }
     }
+
+    return;
 }
 
 void yf::sys::nw_sys::ArmPlaceTool(const yf::data::arm::TaskMode &task_mode)
@@ -1553,6 +1585,8 @@ void yf::sys::nw_sys::ArmPlaceTool(const yf::data::arm::TaskMode &task_mode)
             this->ArmTask("Post place_uvc");
         }
     }
+
+    return;
 }
 
 void yf::sys::nw_sys::ArmSetOperationArea(const yf::data::arm::OperationArea &operation_area)
@@ -1605,8 +1639,158 @@ void yf::sys::nw_sys::ArmSetOperationArea(const yf::data::arm::OperationArea &op
             break;
         }
     }
+
+    return;
 }
 
+std::string yf::sys::nw_sys::ArmGetPointStr(const yf::data::arm::Point3d &point)
+{
+    std::string x_str = std::to_string(point.x);
+    std::string y_str = std::to_string(point.y);
+    std::string z_str = std::to_string(point.z);
+    std::string rx_str = std::to_string(point.rx);
+    std::string ry_str = std::to_string(point.ry);
+    std::string rz_str = std::to_string(point.rz);
+
+    std::string point_str = x_str + "," + y_str + "," + z_str + "," + rx_str + "," + ry_str + "," + rz_str;
+
+    return point_str;
+}
+
+void
+yf::sys::nw_sys::ArmSetToolAngle(const yf::data::arm::TaskMode &task_mode, const yf::data::arm::ToolAngle &tool_angle)
+{
+    if(task_mode == data::arm::TaskMode::Mopping)
+    {
+        switch (tool_angle)
+        {
+            case data::arm::ToolAngle::Zero:
+            {
+                this->ArmTask("Post tool_angle_0");
+                break;
+            }
+            case data::arm::ToolAngle::FortyFive:
+            {
+                this->ArmTask("Post tool_angle_45");
+                break;
+            }
+        }
+    }
+
+    return;
+}
+
+void yf::sys::nw_sys::ArmSetViaPoints(const std::deque<yf::data::arm::Point3d> via_points,
+                                      const yf::data::arm::ToolAngle &tool_angle)
+{
+    switch (tool_angle)
+    {
+        case data::arm::ToolAngle::Zero:
+        {
+            for (int n = 0; n < via_points.size(); n ++)
+            {
+                auto via_point = via_points[n];
+
+                std::string via_point_str = this->ArmGetPointStr(via_point);
+
+                int via_num = n+1;
+                std::string via_num_str = std::to_string(via_num);
+
+                std::string command = "Set via0_" + via_num_str + " = " +via_point_str;
+
+                this->ArmTask(command);
+            }
+
+            break;
+        }
+        case data::arm::ToolAngle::FortyFive:
+        {
+            for (int n = 0; n < via_points.size(); n ++)
+            {
+                auto via_point = via_points[n];
+
+                std::string via_point_str = this->ArmGetPointStr(via_point);
+
+                int via_num = n+1;
+                std::string via_num_str = std::to_string(via_num);
+
+                std::string command = "Set via45_" + via_num_str + " = " +via_point_str;
+
+                this->ArmTask(command);
+            }
+
+            break;
+        }
+    }
+
+    return;
+}
+
+void yf::sys::nw_sys::ArmSetApproachPoint(const yf::data::arm::Point3d& approach_point, const yf::data::arm::ToolAngle &tool_angle)
+{
+    switch (tool_angle)
+    {
+        case data::arm::ToolAngle::Zero:
+        {
+            std::string approach_point_str = this->ArmGetPointStr(approach_point);
+
+            std::string command = "Set 0_approach_point = " + approach_point_str;
+
+            this->ArmTask(command);
+
+            break;
+        }
+        case data::arm::ToolAngle::FortyFive:
+        {
+            std::string approach_point_str = this->ArmGetPointStr(approach_point);
+
+            std::string command = "Set 45_approach_point = " + approach_point_str;
+
+            this->ArmTask(command);
+
+            break;
+        }
+    }
+
+    return;
+}
+
+void yf::sys::nw_sys::ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode, const yf::data::arm::ToolAngle &tool_angle)
+{
+    if(task_mode == data::arm::TaskMode::Mopping)
+    {
+        switch (tool_angle)
+        {
+            case data::arm::ToolAngle::Zero:
+            {
+
+                std::string command = "Post arm_via0_line";
+
+                this->ArmTask(command);
+
+                break;
+            }
+            case data::arm::ToolAngle::FortyFive:
+            {
+                std::string command = "Post arm_via45_line";
+
+                this->ArmTask(command);
+
+                break;
+            }
+        }
+    }
+    else
+        if(task_mode == data::arm::TaskMode::UVCScanning)
+        {
+            std::string command = "Post uvc_via0_p2p";
+
+            this->ArmTask(command);
+        }
+
+
+    return;
+}
 
 
 
