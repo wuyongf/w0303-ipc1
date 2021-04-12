@@ -24,6 +24,12 @@ namespace yf
 
             std::deque<yf::data::arm::Point3d> get_via_points(const yf::data::arm::MotionType &motion_type, std::deque<yf::data::arm::Point3d> init_cleaning_points);
 
+            std::deque<yf::data::arm::Point3d> get_dense_via_points(const yf::data::arm::MotionType &motion_type,
+                                                                    std::deque<yf::data::arm::Point3d> init_cleaning_points,
+                                                                    const int& layer,
+                                                                    const float& step_ratio_horizontal);
+
+
         private:
 
             // shared database
@@ -163,6 +169,140 @@ std::deque<yf::data::arm::Point3d> yf::algorithm::cleaning_motion::get_via_point
 
                 //
                 step_ratio_horizontal = 1.0;
+
+                for(float v = 0.0 ; v <= 1.0; v = v + step_ratio_horizontal)
+                {
+                    yf::data::arm::Point3d via_point;
+
+                    // count point_no.
+                    point_no ++;
+
+                    // current line point no.
+                    cur_line_point_no ++;
+
+                    via_point.x = (1-u)*(1-v)*edge_p1_.x + v*(1-u)*edge_p2_.x + u*v*edge_p3_.x + u*(1-v)*edge_p4_.x;
+                    via_point.y = (1-u)*(1-v)*edge_p1_.y + v*(1-u)*edge_p2_.y + u*v*edge_p3_.y + u*(1-v)*edge_p4_.y;
+                    via_point.z = (1-u)*(1-v)*edge_p1_.z + v*(1-u)*edge_p2_.z + u*v*edge_p3_.z + u*(1-v)*edge_p4_.z;
+                    via_point.rx = (1-u)*(1-v)*edge_p1_.rx + v*(1-u)*edge_p2_.rx + u*v*edge_p3_.rx + u*(1-v)*edge_p4_.rx;
+                    via_point.ry = (1-u)*(1-v)*edge_p1_.ry + v*(1-u)*edge_p2_.ry + u*v*edge_p3_.ry + u*(1-v)*edge_p4_.ry;
+                    via_point.rz = (1-u)*(1-v)*edge_p1_.rz + v*(1-u)*edge_p2_.rz + u*v*edge_p3_.rz + u*(1-v)*edge_p4_.rz;
+
+                    temp_points.push_back(via_point);
+                }
+
+                if(even_flag == true)
+                {
+                    for(int n = 0; n < temp_points.size(); n++)
+                    {
+                        via_points.push_back(temp_points[n]);
+                    }
+                }
+                else
+                {
+                    std::reverse(temp_points.begin(),temp_points.end());
+
+                    for(int n = 0; n < temp_points.size(); n++)
+                    {
+                        via_points.push_back(temp_points[n]);
+                    }
+                }
+
+                line_counter ++;
+            }
+
+            break;
+        }
+
+        case yf::data::arm::MotionType::LineMotion: // line_cleaning
+        {
+            /// 1. Initialization
+            edge_p1_ = init_cleaning_points[0];
+            edge_p2_ = init_cleaning_points[1];
+
+            via_points.push_back(edge_p1_);
+            via_points.push_back(edge_p2_);
+
+            break;
+        }
+    }
+
+    auto via_points_reverse = via_points;
+
+    std::reverse(via_points_reverse.begin(),via_points_reverse.end());
+
+    for(int n = 0 ; n < via_points_reverse.size() ; n++)
+    {
+        via_points.push_back(via_points_reverse[n]);
+    }
+
+    return via_points;
+}
+
+std::deque<yf::data::arm::Point3d>
+yf::algorithm::cleaning_motion::get_dense_via_points(const yf::data::arm::MotionType &motion_type,
+                                                     std::deque<yf::data::arm::Point3d> init_cleaning_points,
+                                                     const int& layer,
+                                                     const float& step_ratio_horizontal)
+{
+    std::deque<yf::data::arm::Point3d> via_points;
+
+    switch (motion_type)
+    {
+        case yf::data::arm::MotionType::PlaneMotion: // plain_cleaning
+        {
+            /// 1. Initialization
+            edge_p1_ = init_cleaning_points[0];
+            edge_p2_ = init_cleaning_points[1];
+            edge_p3_ = init_cleaning_points[2];
+            edge_p4_ = init_cleaning_points[3];
+
+
+            int motion_line = layer + 1;
+            int occupied_points = motion_line * 2;
+            int free_points = sample_points_ - occupied_points;
+            int points_no_each_line = std::floor(free_points/motion_line);
+            int totoal_points = occupied_points + motion_line * points_no_each_line;
+
+            float delta_x = abs(edge_p2_.x - edge_p1_.x);
+            float delta_z = abs(edge_p3_.z - edge_p2_.z);
+
+            float delta_x_each_point = delta_x / ( points_no_each_line + 1.0);
+            float delta_z_each_line = delta_z / layer;
+
+//            float step_ratio_horizontal = abs( delta_x_each_point / delta_x );
+            float step_ratio_vertical = 1.0 / layer;
+
+            bool even_flag = true;
+            int line_counter = 0;
+
+            int point_no = 0;
+
+            for (float u = 0.0; u <= 1.0; u = u + step_ratio_vertical)
+            {
+                // count no. func
+                // if the number is even, we should count the point from left to right
+                // for 1st line, line_counter == 0
+                //
+                if( line_counter % 2 == 0 )
+                {
+                    even_flag = true;
+                }
+                else
+                {
+                    even_flag = false;
+                }
+
+                // current line point no.
+                //
+                int cur_line_point_no = 0;
+
+                // temp deque for each line.
+                //
+                std::deque<yf::data::arm::Point3d> temp_points;
+                temp_points.clear();
+
+                //
+//                step_ratio_horizontal = 1.0;
 
                 for(float v = 0.0 ; v <= 1.0; v = v + step_ratio_horizontal)
                 {

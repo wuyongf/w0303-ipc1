@@ -831,7 +831,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
                                 this->ArmSetViaPoints(arm_mission_configs[n].via_points, arm_mission_configs[n].tool_angle);
 
                                 // 8. post via_points
-                                this->ArmPostViaPoints(arm_mission_configs[n].tool_angle);
+                                this->ArmPostViaPoints(cur_task_mode_, arm_mission_configs[n].tool_angle);
 
                                 // 9. post return standby_position
                                 this->ArmTask("Move_to standby_p0");

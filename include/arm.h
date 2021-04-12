@@ -91,7 +91,7 @@ namespace yf
 
             yf::data::arm::Point3d GetViaApproachPoint(const int& arm_mission_config_id);
 
-            std::deque<yf::data::arm::Point3d> GetViaPoints(const int& arm_mission_config_id, const yf::data::arm::MotionType& motion_type);
+            std::deque<yf::data::arm::Point3d> GetViaPoints(const yf::data::arm::TaskMode& task_mode, const int& arm_mission_config_id, const yf::data::arm::MotionType& motion_type);
 
 
 
@@ -985,21 +985,27 @@ yf::data::arm::Point3d yf::arm::tm::GetViaApproachPoint(const int &arm_mission_c
 }
 
 std::deque<yf::data::arm::Point3d>
-yf::arm::tm::GetViaPoints(const int &arm_mission_config_id, const yf::data::arm::MotionType &motion_type)
+yf::arm::tm::GetViaPoints(const yf::data::arm::TaskMode& task_mode, const int &arm_mission_config_id, const yf::data::arm::MotionType &motion_type)
 {
 
     std::deque<yf::data::arm::Point3d> init_cleaning_points = sql_ptr_->GetCleanPoints(arm_mission_config_id, motion_type);
 
-    std::deque<yf::data::arm::Point3d> via_points = al_clean_motion.get_via_points(motion_type, init_cleaning_points);
+    std::deque<yf::data::arm::Point3d> via_points;
+
+    switch (task_mode)
+    {
+        case data::arm::TaskMode::Mopping:
+        {
+            via_points = al_clean_motion.get_via_points(motion_type, init_cleaning_points);
+            break;
+        }
+        case data::arm::TaskMode::UVCScanning:
+        {
+            via_points = al_clean_motion.get_dense_via_points(motion_type, init_cleaning_points,2,0.25);
+            break;
+        }
+    }
 
     return via_points;
 
 }
-
-
-
-
-
-
-
-
