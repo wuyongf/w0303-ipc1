@@ -37,7 +37,7 @@ namespace yf
 
             // properties
 
-            int layer_          = 5; // at least 1
+            int layer_          = 1; // at least 1
             int sample_points_  = 40;
 
             data::arm::Point3d edge_p1_;
@@ -360,6 +360,8 @@ yf::algorithm::cleaning_motion::get_dense_via_points(const yf::data::arm::Motion
         }
     }
 
+#if 0
+
     auto via_points_reverse = via_points;
 
     std::reverse(via_points_reverse.begin(),via_points_reverse.end());
@@ -368,6 +370,8 @@ yf::algorithm::cleaning_motion::get_dense_via_points(const yf::data::arm::Motion
     {
         via_points.push_back(via_points_reverse[n]);
     }
+
+#endif
 
     return via_points;
 }

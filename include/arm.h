@@ -765,6 +765,13 @@ std::deque<yf::data::arm::MissionConfig> yf::arm::tm::ConfigureArmMission(const 
         /// 7. standby_position
         mission_config.standby_position = this->GetStandbyPosition(arm_config_id);
 
+        LOG(INFO) << "standby_position x: " << mission_config.standby_position.x ;
+        LOG(INFO) << "standby_position y: " << mission_config.standby_position.y ;
+        LOG(INFO) << "standby_position z: " << mission_config.standby_position.z ;
+        LOG(INFO) << "standby_position rx: " << mission_config.standby_position.rx ;
+        LOG(INFO) << "standby_position ry: " << mission_config.standby_position.ry ;
+        LOG(INFO) << "standby_position rz: " << mission_config.standby_position.rz;
+
         /// 8. landmark_flag
         mission_config.landmark_flag = this->GetLandmarkFlag(arm_mission_config_id);
 
@@ -784,10 +791,17 @@ std::deque<yf::data::arm::MissionConfig> yf::arm::tm::ConfigureArmMission(const 
         if(mission_config.task_mode == yf::data::arm::TaskMode::Mopping)
         {
             mission_config.via_approach_pos = this->GetViaApproachPoint(arm_mission_config_id);
+
+            LOG(INFO) << "via_approach_pos x: " << mission_config.via_approach_pos.x ;
+            LOG(INFO) << "via_approach_pos y: " << mission_config.via_approach_pos.y ;
+            LOG(INFO) << "via_approach_pos z: " << mission_config.via_approach_pos.z ;
+            LOG(INFO) << "via_approach_pos rx: " << mission_config.via_approach_pos.rx ;
+            LOG(INFO) << "via_approach_pos ry: " << mission_config.via_approach_pos.ry ;
+            LOG(INFO) << "via_approach_pos rz: " << mission_config.via_approach_pos.rz;
         }
 
         /// 12. via_points.
-        mission_config.via_points = this->GetViaPoints(arm_mission_config_id,mission_config.motion_type);
+        mission_config.via_points = this->GetViaPoints(mission_config.task_mode,arm_mission_config_id,mission_config.motion_type);
 
         /// 13. n_via_points
         mission_config.n_via_points = mission_config.via_points.size();
@@ -1001,7 +1015,7 @@ yf::arm::tm::GetViaPoints(const yf::data::arm::TaskMode& task_mode, const int &a
         }
         case data::arm::TaskMode::UVCScanning:
         {
-            via_points = al_clean_motion.get_dense_via_points(motion_type, init_cleaning_points,2,0.25);
+            via_points = al_clean_motion.get_dense_via_points(motion_type, init_cleaning_points,0,0.25);
             break;
         }
     }

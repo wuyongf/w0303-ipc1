@@ -69,7 +69,8 @@ namespace yf
             void ArmSetToolAngle(const yf::data::arm::TaskMode& task_mode ,const yf::data::arm::ToolAngle& tool_angle);
 
             void ArmSetApproachPoint(const yf::data::arm::Point3d& approach_point,const yf::data::arm::ToolAngle& tool_angle);
-            void ArmSetViaPoints(const std::deque<yf::data::arm::Point3d> via_points, const yf::data::arm::ToolAngle& tool_angle);
+
+            void ArmSetViaPoints(const std::deque<yf::data::arm::Point3d>& via_points, const yf::data::arm::ToolAngle& tool_angle);
 
             void ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode, const yf::data::arm::ToolAngle& tool_angle);
 
@@ -788,12 +789,12 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
                             if(cur_order == 1)
                             {
                                 this->ArmPickTool(cur_task_mode_);
-                            }
 
-                            // 0. find which operation_area. move to relative safety position
-                            auto operation_area = arm_mission_configs[0].operation_area;
-                            this->ArmSetOperationArea(operation_area);
-                            this->ArmTask("Post arm_home_to_safety");
+                                // 0. find which operation_area. move to relative safety position
+                                auto operation_area = arm_mission_configs[0].operation_area;
+                                this->ArmSetOperationArea(operation_area);
+                                this->ArmTask("Post arm_home_to_safety");
+                            }
 
                             // loop all the arm_mission_configs
                             for (int n = 0; n < arm_mission_configs.size(); n++)
@@ -802,6 +803,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
                                 //  1.1 get standby_point_str
                                 auto standby_point = arm_mission_configs[n].standby_position;
                                 std::string standby_point_str = this->ArmGetPointStr(standby_point);
+
                                 //  1.2 set standby_point
                                 this->ArmTask("Set standby_p0 = "+standby_point_str);
                                 //  1.3 move to standby_point
@@ -825,8 +827,12 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
                                 std::string n_via_points_str = std::to_string(arm_mission_configs[n].n_via_points);
                                 this->ArmTask("Set n_points = " + n_via_points_str);
 
-                                // 6. set approach_point
-                                this->ArmSetApproachPoint(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].tool_angle);
+                                // 6. set approach_point (optional)
+                                if(arm_mission_configs[n].task_mode == data::arm::TaskMode::Mopping)
+                                {
+                                    this->ArmSetApproachPoint(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].tool_angle);
+                                }
+
                                 // 7. set via_points
                                 this->ArmSetViaPoints(arm_mission_configs[n].via_points, arm_mission_configs[n].tool_angle);
 
@@ -839,6 +845,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
 
                             // 10. post return safety.
                             this->ArmTask("Post arm_back_to_safety");
+
                             //
                             mir100.SetPLCRegisterIntValue(1,0);
                             std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -847,7 +854,6 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
                             if(cur_order == cur_mission_num_)
                             {
                                 /// arm motion
-
                                 // 1. place the tool
                                 this->ArmPlaceTool(cur_task_mode_);
 
@@ -906,6 +912,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
 
     mir100.Pause();
 
+    //todo:
     /// based on mission_success_flag, Update to DB.
 
 
@@ -1562,10 +1569,12 @@ void yf::sys::nw_sys::ArmPickTool(const yf::data::arm::TaskMode &task_mode)
         case yf::data::arm::TaskMode::Mopping:
         {
             this->ArmTask("Post pick_mop");
+            break;
         }
         case yf::data::arm::TaskMode::UVCScanning:
         {
             this->ArmTask("Post pick_uvc");
+            break;
         }
     }
 
@@ -1680,7 +1689,7 @@ yf::sys::nw_sys::ArmSetToolAngle(const yf::data::arm::TaskMode &task_mode, const
     return;
 }
 
-void yf::sys::nw_sys::ArmSetViaPoints(const std::deque<yf::data::arm::Point3d> via_points,
+void yf::sys::nw_sys::ArmSetViaPoints(const std::deque<yf::data::arm::Point3d>& via_points,
                                       const yf::data::arm::ToolAngle &tool_angle)
 {
     switch (tool_angle)
