@@ -173,7 +173,8 @@ namespace  yf
                 FootPanel   = 9,
                 Windows     = 10,
                 ProtectiveWall = 11,
-                Sink        = 12
+                Sink        = 12,
+                NurseStation =13
             };
 
             struct MissionConfig

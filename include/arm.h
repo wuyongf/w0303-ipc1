@@ -463,7 +463,8 @@ void yf::arm::tm::UpdateArmCurMissionStatus()
         // if not Error
         // Send "Get Status" to update the mission status
         RetrieveArmCurrentMissionStatus();
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        ///TIME - 2021-04-16
+        //std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
         switch (nw_status_ptr_->arm_mission_status)
         {
@@ -513,7 +514,8 @@ void yf::arm::tm::UpdateArmCurMissionStatus()
 
                 // arm is working well, just keep checking
                 // wait 500ms and loop...
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                ///TIME - 2021-04-16
+                //std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 break;
             }
 
@@ -535,7 +537,8 @@ void yf::arm::tm::UpdateArmCurMissionStatus()
             {
                 // arm is working well, just keep checking
                 // wait 500ms and loop...
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                ///TIME - 2021-04-16
+                //std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 break;
             }
         }
@@ -1076,6 +1079,10 @@ yf::data::arm::ModelType yf::arm::tm::GetModelType(const int &model_config_id)
         case 12:
         {
             return data::arm::ModelType::Sink;
+        }
+        case 13:
+        {
+            return data::arm::ModelType::NurseStation;
         }
     }
 }

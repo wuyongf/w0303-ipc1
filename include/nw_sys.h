@@ -734,6 +734,8 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
 
         mir100.Play();
 
+        mir100.Play();
+
         /// b. while ugv mission has not finished, keep assigning arm mission config and executing arm mission.
         ///
         /// for ugv mission finish info, please refer to PLC Register Assignment
@@ -795,10 +797,27 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
                             {
                                 this->ArmPickTool(cur_task_mode_);
 
-//                                if(cur_task_mode_ == data::arm::TaskMode::Mopping)
-//                                {
-//                                    this->ArmTask("Post pick_small_pad");
-//                                }
+                                if(cur_task_mode_ == data::arm::TaskMode::Mopping)
+                                {
+                                    switch (arm_mission_configs[0].model_type)
+                                    {
+                                        case data::arm::ModelType::Handrail:
+                                        {
+                                            this->ArmTask("Post pick_small_pad");
+                                            break;
+                                        }
+                                        case data::arm::ModelType::Windows:
+                                        {
+                                            this->ArmTask("Post pick_large_pad");
+                                            break;
+                                        }
+                                        case data::arm::ModelType::NurseStation:
+                                        {
+                                            this->ArmTask("Post pick_large_pad");
+                                            break;
+                                        }
+                                    }
+                                }
 
                                 // 0. find which operation_area. move to relative safety position
                                 auto operation_area = arm_mission_configs[0].operation_area;
@@ -860,10 +879,31 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
                             // for last order
                             if(cur_order == cur_mission_num_)
                             {
-//                                if(cur_task_mode_ == data::arm::TaskMode::Mopping)
-//                                {
-//                                    this->ArmTask("Post remove_small_pad");
-//                                }
+                                if(cur_task_mode_ == data::arm::TaskMode::Mopping)
+                                {
+                                    this->ArmTask("Post tool_angle_0");
+
+                                    std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+
+                                    switch (arm_mission_configs[0].model_type)
+                                    {
+                                        case data::arm::ModelType::Handrail:
+                                        {
+                                            this->ArmTask("Post remove_small_pad");
+                                            break;
+                                        }
+                                        case data::arm::ModelType::Windows:
+                                        {
+                                            this->ArmTask("Post remove_large_pad");
+                                            break;
+                                        }
+                                        case data::arm::ModelType::NurseStation:
+                                        {
+                                            this->ArmTask("Post remove_large_pad");
+                                            break;
+                                        }
+                                    }
+                                }
 
                                 /// arm motion
                                 // 1. place the tool
