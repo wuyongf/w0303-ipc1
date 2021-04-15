@@ -85,7 +85,7 @@ namespace yf
             bool GetMethod(const std::string& sub_path);
             bool PutMethod(const std::string& sub_path,const Poco::JSON::Object& obj);
             bool PostMethod(const std::string& sub_path, const Poco::JSON::Object& obj);
-            bool DeleteMethod();
+            bool DeleteMethod(const std::string& sub_path);
 
         public:
 
@@ -158,6 +158,7 @@ namespace yf
             bool Pause();
 
             bool PostMissionQueue(const std::string& mission_guid);
+            bool DeleteMissionQueue();
 
         private:
 
@@ -1369,6 +1370,36 @@ bool yf::ugv::mir::PostMissionQueue(const std::string &mission_guid)
     MissionQueue.set("mission_id", mission_guid);
 
     return PostMethod("/api/v2.0.0/mission_queue", MissionQueue);
+}
+
+bool yf::ugv::mir::DeleteMissionQueue()
+{
+    return DeleteMethod("/api/v2.0.0/mission_queue");
+}
+
+bool yf::ugv::mir::DeleteMethod(const std::string& sub_path)
+{
+    try
+    {
+        uri_.setPath(sub_path);
+
+        std::string path(uri_.getPathAndQuery());
+        if (path.empty()) path = "/";
+
+        HTTPClientSession session(uri_.getHost(), uri_.getPort());
+        HTTPRequest request(HTTPRequest::HTTP_DELETE, path, HTTPMessage::HTTP_1_1);
+        request.setContentType(api_content_type_);
+        request.setCredentials(api_credentials_scheme_, api_credentials_authentication_);
+
+        HTTPResponse response;
+
+        doRequest(session, request, response);
+    }
+    catch (Exception& exc)
+    {
+        std::cerr << exc.displayText() << std::endl;
+        return false;
+    }
 }
 
 

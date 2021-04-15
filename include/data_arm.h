@@ -161,8 +161,26 @@ namespace  yf
                 FortyFive   =   45
             };
 
+            enum class ModelType
+            {
+                Handrail    = 1,
+                Chair       = 2,
+                Wall        = 4,
+                Handle      = 5,
+                LiftButton  = 6,
+                Desk        = 7,
+                Skirting    = 8,
+                FootPanel   = 9,
+                Windows     = 10,
+                ProtectiveWall = 11,
+                Sink        = 12
+            };
+
             struct MissionConfig
             {
+
+                ModelType               model_type;
+
                 TaskMode	            task_mode;	                //	cleaning motion type. e.g. Mopping == 1 UVCScanning == 2
 
                 OperationArea           operation_area;

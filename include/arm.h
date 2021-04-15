@@ -69,6 +69,8 @@ namespace yf
 
             std::deque<yf::data::arm::MissionConfig> ConfigureArmMission(const int& model_config_id, const int & order);
 
+            yf::data::arm::ModelType GetModelType(const int& model_config_id);
+
             yf::data::arm::TaskMode GetTaskMode(const int& model_config_id);
 
             yf::data::arm::OperationArea GetOperationArea(const int& arm_config_id);
@@ -357,7 +359,7 @@ void yf::arm::tm::CheckArmInitMssionStaus()
 
             default:
             {
-                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                std::this_thread::sleep_for(std::chrono::milliseconds(200));
                 break;
             }
         }
@@ -408,7 +410,7 @@ void yf::arm::tm::AssignArmMission(const std::string &arm_command_str)
         {
             // Normal Arm msg, just send it peacefully.
             NetMessageArm(arm_command_str);
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
     }
     else
@@ -511,7 +513,7 @@ void yf::arm::tm::UpdateArmCurMissionStatus()
 
                 // arm is working well, just keep checking
                 // wait 500ms and loop...
-                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 break;
             }
 
@@ -533,7 +535,7 @@ void yf::arm::tm::UpdateArmCurMissionStatus()
             {
                 // arm is working well, just keep checking
                 // wait 500ms and loop...
-                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 break;
             }
         }
@@ -743,7 +745,10 @@ std::deque<yf::data::arm::MissionConfig> yf::arm::tm::ConfigureArmMission(const 
         // start config each arm_mission
 
         data::arm::MissionConfig mission_config;
-        
+
+        /// 0. model_type
+        mission_config.model_type = this->GetModelType(model_config_id);
+
         /// 1. task_mode
         mission_config.task_mode = this->GetTaskMode(model_config_id);
 
@@ -788,17 +793,15 @@ std::deque<yf::data::arm::MissionConfig> yf::arm::tm::ConfigureArmMission(const 
         }
 
         /// 11.(optional) via_approach_point
-        if(mission_config.task_mode == yf::data::arm::TaskMode::Mopping)
-        {
-            mission_config.via_approach_pos = this->GetViaApproachPoint(arm_mission_config_id);
 
-            LOG(INFO) << "via_approach_pos x: " << mission_config.via_approach_pos.x ;
-            LOG(INFO) << "via_approach_pos y: " << mission_config.via_approach_pos.y ;
-            LOG(INFO) << "via_approach_pos z: " << mission_config.via_approach_pos.z ;
-            LOG(INFO) << "via_approach_pos rx: " << mission_config.via_approach_pos.rx ;
-            LOG(INFO) << "via_approach_pos ry: " << mission_config.via_approach_pos.ry ;
-            LOG(INFO) << "via_approach_pos rz: " << mission_config.via_approach_pos.rz;
-        }
+        mission_config.via_approach_pos = this->GetViaApproachPoint(arm_mission_config_id);
+
+        LOG(INFO) << "via_approach_pos x: " << mission_config.via_approach_pos.x ;
+        LOG(INFO) << "via_approach_pos y: " << mission_config.via_approach_pos.y ;
+        LOG(INFO) << "via_approach_pos z: " << mission_config.via_approach_pos.z ;
+        LOG(INFO) << "via_approach_pos rx: " << mission_config.via_approach_pos.rx ;
+        LOG(INFO) << "via_approach_pos ry: " << mission_config.via_approach_pos.ry ;
+        LOG(INFO) << "via_approach_pos rz: " << mission_config.via_approach_pos.rz;
 
         /// 12. via_points.
         mission_config.via_points = this->GetViaPoints(mission_config.task_mode,arm_mission_config_id,mission_config.motion_type);
@@ -1015,11 +1018,64 @@ yf::arm::tm::GetViaPoints(const yf::data::arm::TaskMode& task_mode, const int &a
         }
         case data::arm::TaskMode::UVCScanning:
         {
-            via_points = al_clean_motion.get_dense_via_points(motion_type, init_cleaning_points,0,0.25);
+            via_points = al_clean_motion.get_uvc_via_points(motion_type, init_cleaning_points, 0, 0.2);
             break;
         }
     }
 
     return via_points;
 
+}
+
+yf::data::arm::ModelType yf::arm::tm::GetModelType(const int &model_config_id)
+{
+    auto model_id = sql_ptr_->GetModelType(model_config_id);
+
+    switch (model_id)
+    {
+        case 1:
+        {
+            return data::arm::ModelType::Handrail;
+        }
+        case 2:
+        {
+            return data::arm::ModelType::Chair;
+        }
+        case 4:
+        {
+            return data::arm::ModelType::Wall;
+        }
+        case 5:
+        {
+            return data::arm::ModelType::Handle;
+        }
+        case 6:
+        {
+            return data::arm::ModelType::LiftButton;
+        }
+        case 7:
+        {
+            return data::arm::ModelType::Desk;
+        }
+        case 8:
+        {
+            return data::arm::ModelType::Skirting;
+        }
+        case 9:
+        {
+            return data::arm::ModelType::FootPanel;
+        }
+        case 10:
+        {
+            return data::arm::ModelType::Windows;
+        }
+        case 11:
+        {
+            return data::arm::ModelType::ProtectiveWall;
+        }
+        case 12:
+        {
+            return data::arm::ModelType::Sink;
+        }
+    }
 }

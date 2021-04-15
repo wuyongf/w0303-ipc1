@@ -67,10 +67,10 @@ auto state_id = mir100.GetState();
 std::cout << "state_id: " << state_id << std::endl;
 
 #endif
-
-    mir100.PostMissionQueue("a099f581-9b33-11eb-a67a-00012978eb45");
-
-    mir100.Play();
+//
+//    mir100.PostMissionQueue("a099f581-9b33-11eb-a67a-00012978eb45");
+//
+//    mir100.Play();
 
 
 
@@ -78,7 +78,7 @@ std::cout << "state_id: " << state_id << std::endl;
 ///
 /// @@ input: model_config_id
 
-    int model_config_id = 1;
+    int model_config_id = 8;
 
     bool ugv_mission_continue_flag = false;
 

@@ -9,6 +9,7 @@
 #include <chrono>
 #include <exception>
 #include <thread>
+#include <iomanip>
 
 //glog
 #include <glog/logging.h>
@@ -143,6 +144,7 @@ namespace yf
             std::deque<std::string> GetUgvMissionConfigPositionNames(const int& model_config_id);
 
             int GetModelId(const int& model_config_id);
+            int GetModelType(const int& model_config_id);
             std::string GetModelName(const int& model_config_id);
 
             int GetMapId(const int& model_id);
@@ -151,8 +153,26 @@ namespace yf
             std::string GetBuildingInfo(const int& model_config_id);
             std::string GetFloorInfo(const int& model_config_id);
 
-            /// Arm_mission
+        public:
 
+            /// Onsite setup
+            void OSGetScheduleReady(const int& schedule_id, const int& seconds_later_from_now);
+
+            // Onsite setup: method 1: stl time ---> db time
+        private:
+            std::string get_future_db_time(const int& seconds_later_from_now);
+
+            auto convert_to_timepoint(int years, int months, int days, int hours, int mins, int secs);
+            template <typename Clock, typename Duration>
+            auto add_seconds(const std::chrono::time_point<Clock, Duration>& timepoint, int seconds_to_add);
+            template <typename Clock, typename Duration>
+            std::string convert_to_db_time(const std::chrono::time_point<Clock, Duration>& timep);
+
+            // Onsite setup: method 2: set relevant job
+        private:
+
+
+            /// properties
         private:
 
             nanodbc::connection conn_;
@@ -172,6 +192,7 @@ namespace yf
             std::string time_day_;
             std::string time_hour_;
             std::string time_minute_;
+            std::string time_sec_;
 
             std::deque<int> available_jobs;
             std::deque<int> available_tasks;
@@ -358,6 +379,7 @@ void yf::sql::sql_server::UpdateTime()
     time_day_ = day;
     time_hour_ = hour;
     time_minute_ = min;
+    time_sec_ = sec;
 
     return ;
 }
@@ -384,6 +406,10 @@ std::string yf::sql::sql_server::get_time_element(const std::string &element)
     else if (element == "min")
     {
         return time_minute_;
+    }
+    else if (element == "sec")
+    {
+        return time_sec_;
     }
 }
 
@@ -2090,6 +2116,153 @@ yf::sql::sql_server::GetCleanPoints(const int &arm_mission_config_id, const yf::
 
     return clean_points;
 }
+
+void yf::sql::sql_server::OSGetScheduleReady(const int &schedule_id, const int &seconds_later_from_now)
+{
+    std::string query;
+
+    // 1. get schedule job ready
+    auto job_ids = this->GetJobsId(schedule_id);
+
+    for(int n = 0; n < job_ids.size() ; n++)
+    {
+        std::string job_id = std::to_string(job_ids[n]);
+
+        try
+        {
+            Connect();
+
+            query = "UPDATE sys_schedule_job SET status = 1 WHERE job_id = " + job_id ;
+
+            nanodbc::execute(conn_, query);
+
+            Disconnect();
+        }
+        catch (std::exception& e)
+        {
+            std::cerr << e.what() << std::endl;
+            std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+        }
+    }
+
+    // 2. get schedule ready
+
+    auto future_date = this->get_future_db_time(seconds_later_from_now);
+
+    try
+    {
+        Connect();
+
+        query = "UPDATE sys_schedule SET status = 1, planned_start='" + future_date + "' WHERE ID = " + std::to_string(schedule_id) ;
+
+        nanodbc::execute(conn_, query);
+
+        Disconnect();
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+    }
+}
+
+auto yf::sql::sql_server::convert_to_timepoint(int years, int months, int days, int hours, int mins, int secs)
+{
+    years -= 1900; //epoch
+    std::tm date = {};
+    date.tm_year = years;
+    date.tm_mon = months;
+    date.tm_mday = days;
+    date.tm_hour = hours;
+    date.tm_min = mins;
+    date.tm_sec = secs;
+
+    return std::chrono::system_clock::from_time_t(std::mktime(&date));
+}
+
+template<typename Clock, typename Duration>
+auto yf::sql::sql_server::add_seconds(const std::chrono::time_point<Clock, Duration> &timepoint, int seconds_to_add)
+{
+    std::time_t seconds =  seconds_to_add;
+    auto date = Clock::to_time_t(timepoint);
+    return Clock::from_time_t(date + seconds);
+}
+
+template<typename Clock, typename Duration>
+std::string yf::sql::sql_server::convert_to_db_time(const std::chrono::time_point<Clock, Duration> &timep)
+{
+    auto converted_timep = Clock::to_time_t(timep);
+
+    std::tm date = *std::localtime(&converted_timep);
+
+    std::string db_time =   std::to_string(date.tm_year + 1900) + "-" +
+                            std::to_string(date.tm_mon + 1) + "-" +
+                            std::to_string(date.tm_mday) + " " +
+                            std::to_string(date.tm_hour) + ":" +
+                            std::to_string(date.tm_min) + ":" +
+                            std::to_string(date.tm_sec) + ".000";
+
+    return db_time;
+}
+
+std::string yf::sql::sql_server::get_future_db_time(const int &seconds_later_from_now)
+{
+    this->UpdateTime();
+    auto year = this->get_time_element("year");
+    auto month = this->get_time_element("month");
+    auto day = this->get_time_element("day");
+    auto hour = this->get_time_element("hour");
+    auto min = this->get_time_element("min");
+    auto sec = this->get_time_element("sec");
+
+    auto date = convert_to_timepoint(std::stoi(year), std::stoi(month)-1, std::stoi(day),std::stoi(hour),std::stoi(min),std::stoi(sec));
+
+    auto date_future = add_seconds(date, seconds_later_from_now);
+
+    return convert_to_db_time(date_future);
+}
+
+int yf::sql::sql_server::GetModelType(const int &model_config_id)
+{
+    auto model_id = this->GetModelId(model_config_id);
+
+    // query string
+    std::string query_update;
+
+    // input
+    std::string model_id_str = std::to_string(model_id);
+
+    // output
+    int model_type;
+
+    //"SELECT position_name FROM data_ugv_mission_config where model_config_id = 1 ORDER BY mission_order"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT model_type FROM data_model where ID = " + model_id_str ;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            model_type = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return model_type;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return 0;
+    };
+}
+
 
 
 

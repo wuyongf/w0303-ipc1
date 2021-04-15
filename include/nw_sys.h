@@ -72,7 +72,7 @@ namespace yf
 
             void ArmSetViaPoints(const std::deque<yf::data::arm::Point3d>& via_points, const yf::data::arm::ToolAngle& tool_angle);
 
-            void ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode, const yf::data::arm::ToolAngle& tool_angle);
+            void ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode, const yf::data::arm::ToolAngle& tool_angle, const yf::data::arm::ModelType& model_type);
 
         public:
 
@@ -725,7 +725,12 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
     {
 
         /// a. kick start ugv mission
+
+        mir100.DeleteMissionQueue();
+
         mir100.PostMissionQueue(cur_mission_guid_);
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
         mir100.Play();
 
@@ -790,6 +795,11 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
                             {
                                 this->ArmPickTool(cur_task_mode_);
 
+//                                if(cur_task_mode_ == data::arm::TaskMode::Mopping)
+//                                {
+//                                    this->ArmTask("Post pick_small_pad");
+//                                }
+
                                 // 0. find which operation_area. move to relative safety position
                                 auto operation_area = arm_mission_configs[0].operation_area;
                                 this->ArmSetOperationArea(operation_area);
@@ -827,17 +837,14 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
                                 std::string n_via_points_str = std::to_string(arm_mission_configs[n].n_via_points);
                                 this->ArmTask("Set n_points = " + n_via_points_str);
 
-                                // 6. set approach_point (optional)
-                                if(arm_mission_configs[n].task_mode == data::arm::TaskMode::Mopping)
-                                {
-                                    this->ArmSetApproachPoint(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].tool_angle);
-                                }
+                                // 6. set approach_point
+                                this->ArmSetApproachPoint(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].tool_angle);
 
                                 // 7. set via_points
                                 this->ArmSetViaPoints(arm_mission_configs[n].via_points, arm_mission_configs[n].tool_angle);
 
                                 // 8. post via_points
-                                this->ArmPostViaPoints(cur_task_mode_, arm_mission_configs[n].tool_angle);
+                                this->ArmPostViaPoints(cur_task_mode_, arm_mission_configs[n].tool_angle, arm_mission_configs[n].model_type);
 
                                 // 9. post return standby_position
                                 this->ArmTask("Move_to standby_p0");
@@ -853,6 +860,11 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
                             // for last order
                             if(cur_order == cur_mission_num_)
                             {
+//                                if(cur_task_mode_ == data::arm::TaskMode::Mopping)
+//                                {
+//                                    this->ArmTask("Post remove_small_pad");
+//                                }
+
                                 /// arm motion
                                 // 1. place the tool
                                 this->ArmPlaceTool(cur_task_mode_);
@@ -914,8 +926,6 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
 
     //todo:
     /// based on mission_success_flag, Update to DB.
-
-
 
 
 #if 0
@@ -1036,6 +1046,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
     }
 
 #endif
+
 }
 
 #if 0
@@ -1588,10 +1599,12 @@ void yf::sys::nw_sys::ArmPlaceTool(const yf::data::arm::TaskMode &task_mode)
         case yf::data::arm::TaskMode::Mopping:
         {
             this->ArmTask("Post place_mop");
+            break;
         }
         case yf::data::arm::TaskMode::UVCScanning:
         {
             this->ArmTask("Post place_uvc");
+            break;
         }
     }
 
@@ -1764,7 +1777,9 @@ void yf::sys::nw_sys::ArmSetApproachPoint(const yf::data::arm::Point3d& approach
     return;
 }
 
-void yf::sys::nw_sys::ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode, const yf::data::arm::ToolAngle &tool_angle)
+void yf::sys::nw_sys::ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode,
+                                       const yf::data::arm::ToolAngle& tool_angle,
+                                       const yf::data::arm::ModelType& model_type)
 {
     if(task_mode == data::arm::TaskMode::Mopping)
     {
@@ -1781,18 +1796,41 @@ void yf::sys::nw_sys::ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode,
             }
             case data::arm::ToolAngle::FortyFive:
             {
-                std::string command = "Post arm_via45_line";
 
-                this->ArmTask(command);
+                switch (model_type)
+                {
+                    case data::arm::ModelType::Windows:
+                    {
+                        std::string command = "Post arm_via45_line_z";
 
-                break;
+                        this->ArmTask(command);
+
+                        break;
+                    }
+                    case data::arm::ModelType::Desk:
+                    {
+                        std::string command = "Post arm_via45_line_d";
+
+                        this->ArmTask(command);
+
+                        break;
+                    }
+                    default:
+                    {
+                        std::string command = "Post arm_via45_line_y";
+
+                        this->ArmTask(command);
+
+                        break;
+                    }
+                }
             }
         }
     }
     else
         if(task_mode == data::arm::TaskMode::UVCScanning)
         {
-            std::string command = "Post uvc_via0_p2p";
+            std::string command = "Post uvc_via0_line";
 
             this->ArmTask(command);
         }
