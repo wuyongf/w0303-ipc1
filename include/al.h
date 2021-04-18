@@ -29,6 +29,7 @@ namespace yf
                                                                   const int& layer,
                                                                   const float& step_ratio_horizontal);
 
+            void set_layer(const int& layer_no);
 
         private:
 
@@ -296,4 +297,10 @@ yf::algorithm::cleaning_motion::get_uvc_via_points(const yf::data::arm::MotionTy
 #endif
 
     return via_points;
+}
+
+void yf::algorithm::cleaning_motion::set_layer(const int &layer_no)
+{
+    layer_ = layer_no;
+    return;
 }

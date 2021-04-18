@@ -18,6 +18,8 @@ int main()
 
     mir100.Start("192.168.7.34", nw_status_ptr, sql_ptr);
 
+    mir100.DeleteMissionQueue();
+
 #if 0
 
     //    auto connection_result = mir100.IsConnected();
@@ -72,7 +74,7 @@ std::cout << "state_id: " << state_id << std::endl;
 //
 //    mir100.Play();
 
-
+#if 0
 
 /// how to post a new mission.
 ///
@@ -153,6 +155,8 @@ std::cout << "state_id: " << state_id << std::endl;
 
     /// check  status
     // (1) get current ugv mission order.
+
+#endif
 
 #if 0
 

@@ -78,11 +78,9 @@ namespace yf
 
             void DoJobs(const int& cur_schedule_id);
             void DoTasks(const int& cur_job_id);
-            void DoTask(const int& cur_task_id);
 
             bool WaitForUgvPLCRegisterInt(const int& plc_register, const int& value, const int& timeout_min);
             bool WaitForUgvPLCRegisterFloat(const int& plc_register, const float& value, const int& timeout_min);
-
 
             void UpdateDbScheduleBeforeTask (const int& cur_schedule_id);
             void UpdateDbScheduleAfterTask (const int& cur_schedule_id);
@@ -683,7 +681,6 @@ void yf::sys::nw_sys::DoJobs(const int &cur_schedule_id)
     {
         LOG(INFO) << "Cancel the rest of jobs...";
     }
-
 }
 
 void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
@@ -723,16 +720,19 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
     if (arm_init_status_check_success_flag == true &&
         ugv_init_status_check_success_flag == true)
     {
-
+#if 0
         /// a. kick start ugv mission
+        mir100.Pause();
 
-        mir100.DeleteMissionQueue();
-
-        mir100.PostMissionQueue(cur_mission_guid_);
+        LOG(INFO) << "mir100.Pause()" ;
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-        mir100.Play();
+        mir100.DeleteMissionQueue();
+#endif
+        mir100.PostMissionQueue(cur_mission_guid_);
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
         mir100.Play();
 
@@ -745,7 +745,8 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
         {
             while(mir100.GetPLCRegisterIntValue(4) != 2)
             {
-                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                ///TIME 2021-04-16 500ms
+                std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
                 /// b.1 Initialization
 

@@ -1323,7 +1323,11 @@ bool yf::ugv::mir::InitialStatusCheckForMission(const int &timeout_min)
 
         if (nw_status_ptr_->ugv_mission_status_ != data::common::UgvState::Ready)
         {
-            std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+            this->DeleteMissionQueue();
+
+            this->Play();
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         }
         else
         {

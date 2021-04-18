@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
 //    std::this_thread::sleep_for(std::chrono::milliseconds(10000));
 
     std::cout << "sleep 3000s... " << std::endl;
-    std::this_thread::sleep_for(std::chrono::milliseconds(3000000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(30000000));
 
     std::cout << "sys shut down... " << std::endl;
     nw_sys.Close();
