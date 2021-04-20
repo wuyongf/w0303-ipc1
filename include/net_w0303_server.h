@@ -96,6 +96,11 @@ public:
         LOG(INFO) << "Removing Arm. client [" << pre_arm_connection_id << "]";
     }
 
+private:
+
+      void parse_landmark_pos_str(std::string& msg);
+
+
 //IPC2 Methods
 //
 //
@@ -139,6 +144,9 @@ protected:
     yf::data::common::ConnectionStatus arm_connection_status;            // arm network connection status
     yf::data::common::MissionStatus    arm_mission_status;
     yf::data::common::ConnectionStatus arm_ln_status;             // arm listen node connection status
+
+    bool find_landmark_flag = false;
+    yf::data::arm::Point3d landmark_pos;
 
     //for ipc2
     std::shared_ptr<yf::net::connection<CustomMsgTypes>> client_ipc2;
@@ -254,16 +262,20 @@ protected:
             }
 
             // 2.
+            // 2.1 Status
             auto index_error    = latest_msg.find("Arm Error");
             auto index_running  = latest_msg.find("Arm Running");
             auto index_idle     = latest_msg.find("Arm Idle");
             auto index_pause    = latest_msg.find("Arm Pause");
             auto index_finish   = latest_msg.find("Arm Finish");
+            // 2.2 Arm Info
+            auto index_find_landmark_flag = latest_msg.find("find_landmark_flag = ");
+            auto index_landmark_pos_str = latest_msg.find("landmark_pos_str = ");
 
             std::this_thread::sleep_for(std::chrono::milliseconds(50)); // wait 50 ms
 
             // 3.
-            //
+            // 3.1 Status
             // for error status
             if (index_error != std::string::npos)
             {
@@ -330,6 +342,61 @@ protected:
                 cv_arm_Blocking.notify_one();
                 std::cout << "IPC know robot task has finished! " << std::endl;
             }
+
+            // 3.2 Arm Info
+            if (index_find_landmark_flag != std::string::npos)
+            {
+                auto index_true = latest_msg.find("true");
+
+                if (index_true != std::string::npos)
+                {
+                    find_landmark_flag = true;
+                } else
+                {
+                    find_landmark_flag = false;
+                }
+            }
+
+            if(index_landmark_pos_str != std::string::npos)
+            {
+                this->parse_landmark_pos_str(latest_msg);
+
+            }
         }
     }
 };
+
+
+void IPCServer::parse_landmark_pos_str(std::string &msg)
+{
+    {
+        std::deque<std::string> q_landmark_pos;
+
+        auto index_left_curly_bracket = msg.find("{");
+        auto index_right_curly_bracket = msg.find("}");
+
+        auto s = msg.substr(index_left_curly_bracket+1,index_right_curly_bracket-1 );
+
+        std::string delimiter = ",";
+
+        size_t pos = 0;
+        std::string token;
+        while ((pos = s.find(delimiter)) != std::string::npos) {
+            token = s.substr(0, pos);
+//              std::cout << token << std::endl;
+            q_landmark_pos.push_back(token);
+            s.erase(0, pos + delimiter.length());
+        }
+        // last token
+//          std::cout << s << std::endl;
+        q_landmark_pos.push_back(s);
+
+        landmark_pos.x = std::stof(q_landmark_pos[0]);
+        landmark_pos.y = std::stof(q_landmark_pos[1]);
+        landmark_pos.z = std::stof(q_landmark_pos[2]);
+        landmark_pos.rx = std::stof(q_landmark_pos[3]);
+        landmark_pos.ry = std::stof(q_landmark_pos[4]);
+        landmark_pos.rz = std::stof(q_landmark_pos[5]);
+
+    }
+}

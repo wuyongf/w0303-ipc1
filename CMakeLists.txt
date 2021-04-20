@@ -162,4 +162,8 @@ add_executable(arm_test "useful-functions/arm_test.cpp" "include/net_w0303_serve
 target_link_libraries(arm_test PUBLIC glog::glog nanodbc modbus Poco::Foundation Poco::Net Poco::XML Poco::Zip Poco::Data Poco::JSON)
 
 
+add_executable(str_parse_test1 "useful-functions/str_parse_test1.cpp" "include/net_w0303_server.h")
+target_link_libraries(str_parse_test1 PUBLIC glog::glog nanodbc modbus Poco::Foundation Poco::Net Poco::XML Poco::Zip Poco::Data Poco::JSON)
+
+
 # TODO: Add tests and install targets if needed.

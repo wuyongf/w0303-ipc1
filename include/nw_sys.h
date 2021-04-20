@@ -55,9 +55,7 @@ namespace yf
 
         public: // layer 1
 
-            void UpdateArmCommand();     // for each arm_config_id
             void ArmTask(const std::string& arm_command);
-            void CheckDevicesStatus();
 
         public: // layer 2
 
@@ -181,7 +179,7 @@ namespace yf
             std::deque<int> q_task_ids;
             int task_number = 0;
 
-            std::deque<int>  all_avaiable_schedule_ids;
+            std::deque<int>  all_available_schedule_ids;
 
         private:
 
