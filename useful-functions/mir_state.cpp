@@ -18,7 +18,26 @@ int main()
 
     mir100.Start("192.168.7.34", nw_status_ptr, sql_ptr);
 
-    mir100.DeleteMissionQueue();
+//    auto name_list = mir100.GetSessionNameList();
+//
+//    for (int n = 0; n < name_list.size(); n++)
+//    {
+//        std::cout << "name[" << n << "]: " << name_list[n] << std::endl;
+//    }
+//
+//    auto map_name_list = mir100.GetMapNameList("Default site");
+//
+//    for (int n = 0; n < map_name_list.size(); n++)
+//    {
+//        std::cout << "name[" << n << "]: " << map_name_list[n] << std::endl;
+//    }
+
+    auto pos_name_list = mir100.GetPositionNameList("HA","HA_MainBlock_3/F");
+
+    for (int n = 0; n < pos_name_list.size(); n++)
+    {
+        std::cout << "name[" << n << "]: " << pos_name_list[n] << std::endl;
+    }
 
 #if 0
 

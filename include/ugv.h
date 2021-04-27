@@ -153,6 +153,15 @@ namespace yf
             std::string GetCurMissionGUID();
             std::string GetMapGUID(const std::string& map_name);
 
+            std::deque<std::string> GetSessionNameList();
+            std::deque<std::string> GetMapNameList(const std::string& session_name);
+            std::deque<std::string> GetPositionNameList(const std::string& session_name, const std::string& map_name);
+
+        private:
+            std::string GetSessionGUID(const std::string& session_name);
+            std::string GetMapGUID(const std::string& session_name, const std::string& map_name);
+
+        public:
             // MiR Control
             bool Play();
             bool Pause();
@@ -1404,6 +1413,232 @@ bool yf::ugv::mir::DeleteMethod(const std::string& sub_path)
         std::cerr << exc.displayText() << std::endl;
         return false;
     }
+}
+
+std::deque<std::string> yf::ugv::mir::GetSessionNameList()
+{
+    // output
+    std::deque<std::string> session_name_list;
+
+    // method
+
+    /// 1. fine tune sub_path
+    std::string sub_path = "/api/v2.0.0/sessions";
+
+    GetMethod(sub_path);
+
+    auto json_result = GetRequestResult();
+
+    Poco::JSON::Parser parser;
+
+    Poco::Dynamic::Var result = parser.parse(json_result);
+
+    Poco::JSON::Array::Ptr array = result.extract<Poco::JSON::Array::Ptr>();
+
+    // iteration
+    for (Poco::JSON::Array::ConstIterator it= array->begin(); it != array->end(); ++it)
+    {
+
+        Poco::JSON::Object::Ptr obj = it->extract<Poco::JSON::Object::Ptr>();
+
+        std::string name = obj->getValue<std::string>("name");
+
+        session_name_list.push_back(name);
+    }
+
+    return session_name_list;
+}
+
+std::deque<std::string> yf::ugv::mir::GetMapNameList(const std::string &session_name)
+{
+    // output
+    std::deque<std::string> map_name_list;
+
+    // input
+    std::string session_guid = this->GetSessionGUID(session_name);
+
+    // method
+
+    /// 1. fine tune sub_path
+    // /api/v2.0.0/sessions/7aa0de9c-8579-11eb-9840-00012978eb45/maps
+    std::string sub_path = "/api/v2.0.0/sessions/" + session_guid + "/maps";
+
+    GetMethod(sub_path);
+
+    auto json_result = GetRequestResult();
+
+    Poco::JSON::Parser parser;
+
+    Poco::Dynamic::Var result = parser.parse(json_result);
+
+    Poco::JSON::Array::Ptr array = result.extract<Poco::JSON::Array::Ptr>();
+
+    // iteration
+    for (Poco::JSON::Array::ConstIterator it= array->begin(); it != array->end(); ++it)
+    {
+
+        Poco::JSON::Object::Ptr obj = it->extract<Poco::JSON::Object::Ptr>();
+
+        std::string name = obj->getValue<std::string>("name");
+
+        map_name_list.push_back(name);
+    }
+
+    return map_name_list;
+}
+
+std::string yf::ugv::mir::GetSessionGUID(const std::string &session_name)
+{
+    // output
+    std::string session_guid;
+
+    // method
+
+    /// 1. fine tune sub_path
+    std::string sub_path = "/api/v2.0.0/sessions";
+
+    GetMethod(sub_path);
+
+    auto json_result = GetRequestResult();
+
+    Poco::JSON::Parser parser;
+
+    Poco::Dynamic::Var result = parser.parse(json_result);
+
+    Poco::JSON::Array::Ptr array = result.extract<Poco::JSON::Array::Ptr>();
+
+    bool found_flag = false;
+
+    for (Poco::JSON::Array::ConstIterator it= array->begin(); it != array->end(); ++it)
+    {
+        if(found_flag == false)
+        {
+            // iteration, find the position_name here.
+            Poco::JSON::Object::Ptr obj = it->extract<Poco::JSON::Object::Ptr>();
+
+            std::string name = obj->getValue<std::string>("name");
+
+            if(name == session_name)
+            {
+                // 1. set found flag
+                found_flag = true;
+
+                // 2. get the position guid.
+                session_guid = obj->getValue<std::string>("guid");
+            }
+        }
+        else
+        {
+            // already found the map
+            // do nothing.
+            return session_guid;
+        }
+    }
+
+    if(found_flag == false)
+    {
+        std::cout << "there is not such session in MiR!" << std::endl;
+    }
+
+    return session_guid;
+}
+
+std::deque<std::string> yf::ugv::mir::GetPositionNameList(const std::string& session_name, const std::string& map_name)
+{
+    // output
+    std::deque<std::string> position_name_list;
+
+    // input
+    std::string map_guid = this->GetMapGUID(session_name,map_name);
+
+    // method
+
+    /// 1. fine tune sub_path
+    // /api/v2.0.0/maps/c9a8d3bf-8237-11eb-aa75-00012978eb45/positions
+    std::string sub_path = "/api/v2.0.0/maps/" + map_guid + "/positions";
+
+    GetMethod(sub_path);
+
+    auto json_result = GetRequestResult();
+
+    Poco::JSON::Parser parser;
+
+    Poco::Dynamic::Var result = parser.parse(json_result);
+
+    Poco::JSON::Array::Ptr array = result.extract<Poco::JSON::Array::Ptr>();
+
+    // iteration
+    for (Poco::JSON::Array::ConstIterator it= array->begin(); it != array->end(); ++it)
+    {
+
+        Poco::JSON::Object::Ptr obj = it->extract<Poco::JSON::Object::Ptr>();
+
+        std::string name = obj->getValue<std::string>("name");
+
+        position_name_list.push_back(name);
+    }
+
+    return position_name_list;
+}
+
+std::string yf::ugv::mir::GetMapGUID(const std::string &session_name, const std::string &map_name)
+{
+    // input
+    std::string session_guid_str = this->GetSessionGUID(session_name);
+
+    // output
+    std::string map_guid;
+
+    // method
+
+    /// 1. fine tune sub_path
+    // /api/v2.0.0/sessions/7aa0de9c-8579-11eb-9840-00012978eb45/maps
+    std::string sub_path = "/api/v2.0.0/sessions/" + session_guid_str + "/maps";
+
+    GetMethod(sub_path);
+
+    auto json_result = GetRequestResult();
+
+    Poco::JSON::Parser parser;
+
+    Poco::Dynamic::Var result = parser.parse(json_result);
+
+    Poco::JSON::Array::Ptr array = result.extract<Poco::JSON::Array::Ptr>();
+
+    bool found_flag = false;
+
+    for (Poco::JSON::Array::ConstIterator it= array->begin(); it != array->end(); ++it)
+    {
+        if(found_flag == false)
+        {
+            // iteration, find the position_name here.
+            Poco::JSON::Object::Ptr obj = it->extract<Poco::JSON::Object::Ptr>();
+
+            std::string name = obj->getValue<std::string>("name");
+
+            if(name == map_name)
+            {
+                // 1. set found flag
+                found_flag = true;
+
+                // 2. get the position guid.
+                map_guid = obj->getValue<std::string>("guid");
+            }
+        }
+        else
+        {
+            // already found the map
+            // do nothing.
+            return map_guid;
+        }
+    }
+
+    if(found_flag == false)
+    {
+        std::cout << "there is not such session in MiR!" << std::endl;
+    }
+
+    return map_guid;
 }
 
 

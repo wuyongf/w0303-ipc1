@@ -92,17 +92,21 @@ public:
         client_arm = nullptr;
         arm_connection_status = yf::data::common::ConnectionStatus::Disconnected;
         arm_mission_status = yf::data::common::MissionStatus::Error;
-        std::cout << "Removing Arm. client [" << pre_arm_connection_id << "]\n";
+
         LOG(INFO) << "Removing Arm. client [" << pre_arm_connection_id << "]";
     }
 
 private:
 
-      void parse_landmark_pos_str(std::string& msg);
+    void parse_landmark_pos_str(std::string& msg);
 
+public:
 
-//IPC2 Methods
-//
+    bool get_find_landmark_flag();
+
+    yf::data::arm::Point3d get_landmark_pos();
+
+/// IPC2 Methods
 //
 public:
 
@@ -190,7 +194,7 @@ protected:
             client_ipc2 = nullptr;
             ipc2_net_status = yf::data::common::ConnectionStatus::Disconnected;
             ipc2_mission_status = yf::data::common::MissionStatus::Error;
-            std::cout << "Removing IPC2. client [" << client->GetID() << "]\n";
+
             LOG(INFO) << "Removing IPC2. client [" << client->GetID() << "]";
         }
     }
@@ -217,7 +221,7 @@ protected:
         {
             if (index_arm != std::string::npos)
             {
-                // todo: not clear information about whether the connection are robust and stable or not.
+                // todo: not clear information about whether the connection is robust and stable or not.
                 //  (1) Need to check by experience.
                 // Assign client id to each device.
                 //
@@ -244,13 +248,13 @@ protected:
             }
         }
 
-        // Todo: Msg for Arm, Update Arm Status.
+        /// Msg for Arm, Update Arm Status.
         //  1. preserve latest no repeated Network msg in Q --- arm_net_recv_msgs
         //  2. Parse received msg
         //  3. Update the arm status...
         if(this->arm_connection_id == client->GetID())
         {
-            // 1.
+            // 1. Arm msg log
             if(pre_recv_msg != latest_msg)
             {
                 //  push back to msg deque
@@ -261,7 +265,7 @@ protected:
                 LOG(INFO) << "[IPC1 <--- Arm]: " << latest_msg ;
             }
 
-            // 2.
+            // 2. Arm msg flag
             // 2.1 Status
             auto index_error    = latest_msg.find("Arm Error");
             auto index_running  = latest_msg.find("Arm Running");
@@ -269,10 +273,11 @@ protected:
             auto index_pause    = latest_msg.find("Arm Pause");
             auto index_finish   = latest_msg.find("Arm Finish");
             // 2.2 Arm Info
-            auto index_find_landmark_flag = latest_msg.find("find_landmark_flag = ");
-            auto index_landmark_pos_str = latest_msg.find("landmark_pos_str = ");
+            auto index_find_landmark_flag   = latest_msg.find("find_landmark_flag = ");
+            auto index_landmark_pos_str     = latest_msg.find("landmark_pos_str = ");
 
-            std::this_thread::sleep_for(std::chrono::milliseconds(50)); // wait 50 ms
+//            ///TIME
+//            std::this_thread::sleep_for(std::chrono::milliseconds(50)); // wait 50 ms
 
             // 3.
             // 3.1 Status
@@ -311,6 +316,7 @@ protected:
                 arm_mission_status = yf::data::common::MissionStatus::Idle;
                 std::unique_lock<std::mutex> ul_arm_status(mux_arm_Blocking);
                 cv_arm_Blocking.notify_one();
+
                 std::cout << "IPC know robot is idle! " << std::endl;
             }
             // for pause status
@@ -360,7 +366,6 @@ protected:
             if(index_landmark_pos_str != std::string::npos)
             {
                 this->parse_landmark_pos_str(latest_msg);
-
             }
         }
     }
@@ -369,34 +374,43 @@ protected:
 
 void IPCServer::parse_landmark_pos_str(std::string &msg)
 {
-    {
-        std::deque<std::string> q_landmark_pos;
+    std::deque<std::string> q_landmark_pos;
 
-        auto index_left_curly_bracket = msg.find("{");
-        auto index_right_curly_bracket = msg.find("}");
+    auto index_left_curly_bracket = msg.find("{");
+    auto index_right_curly_bracket = msg.find("}");
 
-        auto s = msg.substr(index_left_curly_bracket+1,index_right_curly_bracket-1 );
+    auto s = msg.substr(index_left_curly_bracket+1,index_right_curly_bracket-1 );
 
-        std::string delimiter = ",";
+    std::string delimiter = ",";
 
-        size_t pos = 0;
-        std::string token;
-        while ((pos = s.find(delimiter)) != std::string::npos) {
-            token = s.substr(0, pos);
+    size_t pos = 0;
+    std::string token;
+    while ((pos = s.find(delimiter)) != std::string::npos) {
+        token = s.substr(0, pos);
 //              std::cout << token << std::endl;
-            q_landmark_pos.push_back(token);
-            s.erase(0, pos + delimiter.length());
-        }
-        // last token
-//          std::cout << s << std::endl;
-        q_landmark_pos.push_back(s);
-
-        landmark_pos.x = std::stof(q_landmark_pos[0]);
-        landmark_pos.y = std::stof(q_landmark_pos[1]);
-        landmark_pos.z = std::stof(q_landmark_pos[2]);
-        landmark_pos.rx = std::stof(q_landmark_pos[3]);
-        landmark_pos.ry = std::stof(q_landmark_pos[4]);
-        landmark_pos.rz = std::stof(q_landmark_pos[5]);
-
+        q_landmark_pos.push_back(token);
+        s.erase(0, pos + delimiter.length());
     }
+    // last token
+//          std::cout << s << std::endl;
+    q_landmark_pos.push_back(s);
+
+    landmark_pos.x = std::stof(q_landmark_pos[0]);
+    landmark_pos.y = std::stof(q_landmark_pos[1]);
+    landmark_pos.z = std::stof(q_landmark_pos[2]);
+    landmark_pos.rx = std::stof(q_landmark_pos[3]);
+    landmark_pos.ry = std::stof(q_landmark_pos[4]);
+    landmark_pos.rz = std::stof(q_landmark_pos[5]);
+
+    return;
+}
+
+bool IPCServer::get_find_landmark_flag()
+{
+    return find_landmark_flag;
+}
+
+yf::data::arm::Point3d IPCServer::get_landmark_pos()
+{
+    return landmark_pos;
 }

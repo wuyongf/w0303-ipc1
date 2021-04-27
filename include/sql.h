@@ -130,9 +130,17 @@ namespace yf
             int GetToolAngle(const int& arm_mission_config_id);
             int GetMotionType(const int& arm_mission_config_id);
 
+            // retrieve data from table "data_arm_points"
             int GetStandbyPositionId(const int& arm_config_id);
+            //
             yf::data::arm::Point3d GetArmPoint(const int& point_id);
             float GetArmPointElement(const int &point_id, const std::string &point_element);
+
+            // retrieve data from table "data_arm_mc_ref_landmark_pos"
+            int GetArmRefLMPosId(const int& arm_mission_config_id);
+            //
+            yf::data::arm::Point3d GetArmRefLMPos(const int& pos_id);
+            float GetArmRefLMPosElement(const int &pos_id, const std::string &pos_element);
 
             int GetLandmarkFlag(const int &arm_mission_config_id);
 
@@ -2261,6 +2269,95 @@ int yf::sql::sql_server::GetModelType(const int &model_config_id)
 
         return 0;
     };
+}
+
+int yf::sql::sql_server::GetArmRefLMPosId(const int &arm_mission_config_id)
+{
+    std::string mission_id_str = std::to_string(arm_mission_config_id);
+
+    //ref_landmark_pos_id
+    //
+    std::string query;
+
+    int point_id;
+
+    try
+    {
+        Connect();
+
+        query = "SELECT ID FROM data_arm_mc_ref_landmark_pos where arm_mission_config_id = " + mission_id_str;
+
+        auto result = nanodbc::execute(conn_, query);
+
+        while(result.next())
+        {
+            point_id = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return point_id;
+
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return 1;
+    }
+}
+
+float yf::sql::sql_server::GetArmRefLMPosElement(const int &pos_id, const std::string &pos_element)
+{
+    std::string query_update;
+
+    std::string pos_id_str = std::to_string(pos_id);
+
+    float element_value;
+
+    //"SELECT ID FROM schedule_table where status=1 AND planned_start > '2021-02-06 11:10:08.000'"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT " + pos_element + " FROM data_arm_mc_ref_landmark_pos where ID = " + pos_id_str;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            element_value = result.get<float>(pos_element);
+        };
+
+        Disconnect();
+
+        return element_value;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return 0;
+    };
+}
+
+yf::data::arm::Point3d yf::sql::sql_server::GetArmRefLMPos(const int &pos_id)
+{
+    yf::data::arm::Point3d point3d;
+
+    point3d.x = this->GetArmRefLMPosElement(pos_id, "x");
+    point3d.y = this->GetArmRefLMPosElement(pos_id, "y");
+    point3d.z = this->GetArmRefLMPosElement(pos_id, "z");
+    point3d.rx = this->GetArmRefLMPosElement(pos_id, "rx");
+    point3d.ry = this->GetArmRefLMPosElement(pos_id, "ry");
+    point3d.rz = this->GetArmRefLMPosElement(pos_id, "rz");
+
+    return point3d;
+
+    return yf::data::arm::Point3d();
 }
 
 

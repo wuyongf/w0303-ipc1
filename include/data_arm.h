@@ -198,7 +198,7 @@ namespace  yf
 
                 bool                    landmark_flag;
 
-                Point3d                 init_vision_pos;
+                Point3d                 ref_vision_lm_init_position;
 
                 Point3d                 ref_landmark_pos;
 

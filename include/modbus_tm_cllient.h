@@ -40,10 +40,16 @@ namespace yf
             bool set_control_box_DO(const int& DO, const int& value);
             bool set_end_module_DO(const int& DO, const int& value);
 
+            // Arm Coordinate
+            float get_robot_coordinate_param(const int& high_16, const int& low_16);
+
+            // Current Base
+            float get_current_base_param(const int& high_16, const int& low_16);
+
         private:
 
             modbus_t*   mb;
-            const char*       tm_ip_address_ = "192.168.7.29";
+            const char* tm_ip_address_ = "192.168.7.29";
             int         port_ = 502;
 
             uint8_t     reg_robot_status[8];
@@ -53,6 +59,8 @@ namespace yf
 
             uint8_t     reg_end_module_DO[4];
             uint8_t     reg_end_module_DI[3];
+
+            uint16_t       reg_robot_coordinate[60];
 
         };
     }
@@ -212,6 +220,45 @@ bool yf::modbus::tm_modbus::set_end_module_DO(const int &DO, const int &value)
         std::cerr << ec << std::endl;
         return false;
     }
+}
+
+
+#include "al_common.h"
+
+//@@ input: 0 - 59
+//
+float yf::modbus::tm_modbus::get_robot_coordinate_param(const int& high_16, const int& low_16)
+{
+
+    modbus_connect(mb);
+
+    modbus_read_input_registers (mb, 7001, 60, reg_robot_coordinate);
+
+    uint16_t high16 = reg_robot_coordinate[high_16 - 7001];
+    uint16_t low16 = reg_robot_coordinate[low_16 - 7001];
+
+    modbus_close(mb);
+
+    float x_f = unit32_to_float(high16,low16);
+
+    return x_f;
+}
+
+float yf::modbus::tm_modbus::get_current_base_param(const int &high_16, const int &low_16)
+{
+
+    modbus_connect(mb);
+
+    modbus_read_input_registers (mb, 8300, 60, reg_robot_coordinate);
+
+    uint16_t high16 = reg_robot_coordinate[high_16 - 8300];
+    uint16_t low16 = reg_robot_coordinate[low_16 - 8300];
+
+    modbus_close(mb);
+
+    float x_f = unit32_to_float(high16,low16);
+
+    return x_f;
 }
 
 

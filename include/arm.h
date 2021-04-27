@@ -63,7 +63,7 @@ namespace yf
             // function: keep sending "Get Status" and check the stauts.
             void UpdateArmCurMissionStatus();
 
-        public: // for nw_sys: each mission
+        public: // for nw_sys: each mission (retrieve data from DB)
 
             bool InitialStatusCheckForMission(const int& timeout_min);
 
@@ -87,14 +87,29 @@ namespace yf
 
             bool GetLandmarkFlag(const int& arm_mission_config_id);
 
-            yf::data::arm::Point3d GetInitVisionPosition(const int& arm_mission_config_id);
+            yf::data::arm::Point3d GetRefVisionLMInitPosition(const int& arm_mission_config_id);
 
-            yf::data::arm::Point3d GetRefLandmarkPosition(const int& arm_mission_config_id);
+            yf::data::arm::Point3d GetRefLandmarkPos(const int& arm_mission_config_id);
 
             yf::data::arm::Point3d GetViaApproachPoint(const int& arm_mission_config_id);
 
-            std::deque<yf::data::arm::Point3d> GetViaPoints(const yf::data::arm::ModelType& model_type, const yf::data::arm::TaskMode& task_mode, const int& arm_mission_config_id, const yf::data::arm::MotionType& motion_type);
+            std::deque<yf::data::arm::Point3d> GetRefViaPoints(const yf::data::arm::ModelType& model_type, const yf::data::arm::TaskMode& task_mode, const int& arm_mission_config_id, const yf::data::arm::MotionType& motion_type);
 
+        public: // for nw_sys: each mission // retrieve data from Arm(tm5)
+
+            bool GetFindLandmarkFlag();
+
+            yf::data::arm::Point3d GetRealLandmarkPos();
+
+        public: // algorithm
+
+            std::deque<yf::data::arm::Point3d> GetRealViaPoints(const std::deque<yf::data::arm::Point3d>& original_via_points,
+                                                                const yf::data::arm::Point3d& ref_landmark_pos,
+                                                                const yf::data::arm::Point3d& real_landmark_pos);
+
+            yf::data::arm::Point3d GetRealPointByLM(const yf::data::arm::Point3d& original_via_points,
+                                                    const yf::data::arm::Point3d& ref_landmark_pos,
+                                                    const yf::data::arm::Point3d& real_landmark_pos);
 
 
         protected:
@@ -130,7 +145,8 @@ namespace yf
             bool  arm_mission_continue_flag_ = false;
 
             // Algorithm -- Clean Motion
-            yf::algorithm::cleaning_motion al_clean_motion;
+            yf::algorithm::cleaning_motion  al_clean_motion;
+            yf::algorithm::arm_path         al_arm_path;
 
             // Net
             //
@@ -773,41 +789,28 @@ std::deque<yf::data::arm::MissionConfig> yf::arm::tm::ConfigureArmMission(const 
         /// 7. standby_position
         mission_config.standby_position = this->GetStandbyPosition(arm_config_id);
 
-        LOG(INFO) << "standby_position x: " << mission_config.standby_position.x ;
-        LOG(INFO) << "standby_position y: " << mission_config.standby_position.y ;
-        LOG(INFO) << "standby_position z: " << mission_config.standby_position.z ;
-        LOG(INFO) << "standby_position rx: " << mission_config.standby_position.rx ;
-        LOG(INFO) << "standby_position ry: " << mission_config.standby_position.ry ;
-        LOG(INFO) << "standby_position rz: " << mission_config.standby_position.rz;
-
         /// 8. landmark_flag
         mission_config.landmark_flag = this->GetLandmarkFlag(arm_mission_config_id);
 
-        /// 9.(optional) init_vision_position
+        /// 9.(optional) vision_lm_init__position
         if(mission_config.landmark_flag == true)
         {
-            mission_config.init_vision_pos = this->GetInitVisionPosition(arm_mission_config_id);
+            mission_config.ref_vision_lm_init_position = this->GetRefVisionLMInitPosition(arm_mission_config_id);
         }
 
-        /// 10.(optional) ref_landmark_position
+        /// 10.(optional) ref_landmark_pos
         if(mission_config.landmark_flag == true)
         {
-            mission_config.ref_landmark_pos = this->GetRefLandmarkPosition(arm_mission_config_id);
+            mission_config.ref_landmark_pos = this->GetRefLandmarkPos(arm_mission_config_id);
         }
 
         /// 11. (*required) via_approach_point
 
         mission_config.via_approach_pos = this->GetViaApproachPoint(arm_mission_config_id);
 
-        LOG(INFO) << "via_approach_pos x: " << mission_config.via_approach_pos.x ;
-        LOG(INFO) << "via_approach_pos y: " << mission_config.via_approach_pos.y ;
-        LOG(INFO) << "via_approach_pos z: " << mission_config.via_approach_pos.z ;
-        LOG(INFO) << "via_approach_pos rx: " << mission_config.via_approach_pos.rx ;
-        LOG(INFO) << "via_approach_pos ry: " << mission_config.via_approach_pos.ry ;
-        LOG(INFO) << "via_approach_pos rz: " << mission_config.via_approach_pos.rz;
-
         /// 12. via_points.
-        mission_config.via_points = this->GetViaPoints(mission_config.model_type,mission_config.task_mode,arm_mission_config_id,mission_config.motion_type);
+        mission_config.via_points = this->GetRefViaPoints(mission_config.model_type, mission_config.task_mode,
+                                                          arm_mission_config_id, mission_config.motion_type);
 
         /// 13. n_via_points
         mission_config.n_via_points = mission_config.via_points.size();
@@ -977,22 +980,22 @@ bool yf::arm::tm::GetLandmarkFlag(const int &arm_mission_config_id)
     }
 }
 
-yf::data::arm::Point3d yf::arm::tm::GetInitVisionPosition(const int &arm_mission_config_id)
+yf::data::arm::Point3d yf::arm::tm::GetRefVisionLMInitPosition(const int &arm_mission_config_id)
 {
-    int init_vision_position_id = sql_ptr_->GetArmMissionPointId(arm_mission_config_id,"vision_p0");
+    int init_vision_position_id = sql_ptr_->GetArmMissionPointId(arm_mission_config_id,"ref_vision_lm_init_point");
 
-    yf::data::arm::Point3d init_vision_position = sql_ptr_->GetArmPoint(init_vision_position_id);
+    yf::data::arm::Point3d ref_vision_lm_init_position = sql_ptr_->GetArmPoint(init_vision_position_id);
 
-    return init_vision_position;
+    return ref_vision_lm_init_position;
 }
 
-yf::data::arm::Point3d yf::arm::tm::GetRefLandmarkPosition(const int &arm_mission_config_id)
+yf::data::arm::Point3d yf::arm::tm::GetRefLandmarkPos(const int &arm_mission_config_id)
 {
-    int ref_landmark_position_id = sql_ptr_->GetArmMissionPointId(arm_mission_config_id, "ref_landmark_pos");
+    int ref_landmark_pos_id = sql_ptr_->GetArmRefLMPosId(arm_mission_config_id);
 
-    yf::data::arm::Point3d ref_landmark_position = sql_ptr_->GetArmPoint(ref_landmark_position_id);
+    yf::data::arm::Point3d ref_landmark_pos = sql_ptr_->GetArmRefLMPos(ref_landmark_pos_id);
 
-    return ref_landmark_position;
+    return ref_landmark_pos;
 }
 
 yf::data::arm::Point3d yf::arm::tm::GetViaApproachPoint(const int &arm_mission_config_id)
@@ -1005,7 +1008,7 @@ yf::data::arm::Point3d yf::arm::tm::GetViaApproachPoint(const int &arm_mission_c
 }
 
 std::deque<yf::data::arm::Point3d>
-yf::arm::tm::GetViaPoints(const yf::data::arm::ModelType& model_type, const yf::data::arm::TaskMode& task_mode, const int &arm_mission_config_id, const yf::data::arm::MotionType &motion_type)
+yf::arm::tm::GetRefViaPoints(const yf::data::arm::ModelType& model_type, const yf::data::arm::TaskMode& task_mode, const int &arm_mission_config_id, const yf::data::arm::MotionType &motion_type)
 {
 
     std::deque<yf::data::arm::Point3d> init_cleaning_points = sql_ptr_->GetCleanPoints(arm_mission_config_id, motion_type);
@@ -1106,4 +1109,29 @@ yf::data::arm::ModelType yf::arm::tm::GetModelType(const int &model_config_id)
             return data::arm::ModelType::NurseStation;
         }
     }
+}
+
+bool yf::arm::tm::GetFindLandmarkFlag()
+{
+    return ipc_server_ptr_->get_find_landmark_flag();
+}
+
+yf::data::arm::Point3d yf::arm::tm::GetRealLandmarkPos()
+{
+    return ipc_server_ptr_->get_landmark_pos();
+}
+
+std::deque<yf::data::arm::Point3d>
+yf::arm::tm::GetRealViaPoints(const std::deque<yf::data::arm::Point3d> &original_via_points,
+                              const yf::data::arm::Point3d &ref_landmark_pos,
+                              const yf::data::arm::Point3d &real_landmark_pos)
+{
+    return al_arm_path.ExportRealPathByLM(original_via_points, ref_landmark_pos, real_landmark_pos);
+}
+
+yf::data::arm::Point3d yf::arm::tm::GetRealPointByLM(const yf::data::arm::Point3d &original_via_points,
+                                                     const yf::data::arm::Point3d &ref_landmark_pos,
+                                                     const yf::data::arm::Point3d &real_landmark_pos)
+{
+    return al_arm_path.ExportRealPointByLM(original_via_points, ref_landmark_pos, real_landmark_pos);
 }

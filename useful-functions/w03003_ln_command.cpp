@@ -527,6 +527,18 @@ std::string ListenNodeDirectScript(const std::vector<std::vector<float>>& origin
 
 int main()
 {
+#if 1
+    std::vector<std::vector<float>> original_path2 = {{-358.8814,-73.76439,358.9901,-173.859,0.1401029,-87.89309}};
+
+    //  2. input "ref_landmark_position" and "real_landmark_position", convert it to real path, stored in vector.
+    std::vector<float> ref_tag_position = {-252.98,-1110.58,408.04,-88.66,-0.03,-172.24};
+    std::vector<float> real_tag_position = {-255.33,-1117.83,409.13,-88.66,-0.07,-171.59};
+
+    std::vector<std::vector<float>> real_path = Convert2RealPathByLM(original_path2, ref_tag_position, real_tag_position);
+
+#endif
+
+#if 0
     auto str = std::string("1,\r\nfloat[] targetP1= {-90,0,90,0,90,0}\r\nPTP(\"JPP\",targetP1,10,200,0,false)");
 
     std::cout << "str size is: " << str.size() << std::endl;
@@ -538,13 +550,14 @@ int main()
 
     //  1. read original path from .txt file.  the file should only consist of points..
     auto original_path = ReadOriginalPath("yf_20210118_landmark_ref-2021-01-22.log");
-    std::vector<std::vector<float>> original_path2 = {{-358.8814,-73.76439,358.9901,-173.859,0.1401029,-87.89309},{-523.3323,-132.1928,363.0237,-174.6929,-1.481504,-92.38377}};
+
+    std::vector<std::vector<float>> original_path2 = {{-358.8814,-73.76439,358.9901,-173.859,0.1401029,-87.89309}};
 
     //  2. input "ref_landmark_position" and "real_landmark_position", convert it to real path, stored in vector.
-    std::vector<float> ref_tag_position = {-443.66,-66.02,-15.34,179.67,0.33,90.87};
-    std::vector<float> real_tag_position = {-336.7,185.08,-15.37,-179.69,0.62,1.12};
+    std::vector<float> ref_tag_position = {-252.98,-1110.58,408.04,-88.66,-0.03,-172.24};
+    std::vector<float> real_tag_position = {-255.33,-1117.83,409.13,-88.66,-0.07,-171.59};
 
-    std::vector<std::vector<float>> real_path = Convert2RealPathByLM(original_path, ref_tag_position, real_tag_position);
+    std::vector<std::vector<float>> real_path = Convert2RealPathByLM(original_path2, ref_tag_position, real_tag_position);
 
     //  3. convert to listen node command.
 
@@ -569,4 +582,6 @@ int main()
     auto lines = ListenNodeDirectScript(real_path, motion_msg, ln_msg);
 
     std::cout << lines << std::endl;
+
+#endif
 }

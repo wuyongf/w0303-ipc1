@@ -61,6 +61,10 @@ namespace yf
 
             void ArmPickTool(const yf::data::arm::TaskMode& task_mode);
             void ArmPlaceTool(const yf::data::arm::TaskMode& task_mode);
+
+            void ArmPickPad();
+            void ArmRemovePad();
+
             void ArmSetOperationArea(const yf::data::arm::OperationArea& operation_area);
 
             std::string ArmGetPointStr(const yf::data::arm::Point3d& point);
@@ -182,16 +186,29 @@ namespace yf
             std::deque<int>  all_available_schedule_ids;
 
         private:
-
-            // sql
+            /// for current job.
             //
+            // db info
             int cur_model_config_id_;
 
             int cur_mission_num_;
 
             yf::data::arm::TaskMode cur_task_mode_;
 
-            // REST
+            yf::data::arm::ModelType cur_model_type_;
+
+            yf::data::arm::OperationArea cur_operation_area_;
+
+            yf::data::arm::ToolAngle cur_tool_angle_;
+
+            // for transformation.
+            bool cur_find_landmark_flag_ = false;
+
+            yf::data::arm::Point3d real_lm_pos_;
+
+            yf::data::arm::TransMatrixInfo trans_;
+
+            // REST info
             std::string cur_mission_guid_;
         };
     }
@@ -693,14 +710,14 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
 
     bool mission_success_flag = false;
 
-    /// 1. Get cur_model_config_id From DB
+    /// 1. Initialization
     //
-    cur_model_config_id_ = sql_ptr_->GetModelConfigId(cur_job_id);
+    //  1.1 Get cur_model_config_id From DB
+    cur_model_config_id_    = sql_ptr_->GetModelConfigId(cur_job_id);
+    cur_mission_num_        = sql_ptr_->GetUgvMissionConfigNum(cur_model_config_id_);
 
-    cur_mission_num_ = sql_ptr_->GetUgvMissionConfigNum(cur_model_config_id_);
-
-    // find task_mode. and then pick up the tool
-    cur_task_mode_ = tm5.GetTaskMode(cur_model_config_id_);
+    cur_model_type_         = tm5.GetModelType(cur_model_config_id_);
+    cur_task_mode_          = tm5.GetTaskMode(cur_model_config_id_);
 
     /// 2. Assign Ugv Mission
     //
@@ -712,6 +729,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
     cur_mission_guid_ = mir100.GetCurMissionGUID();
 
     /// 3. Initial Status Checking
+    //
     bool arm_init_status_check_success_flag = tm5.InitialStatusCheckForMission(2);
     bool ugv_init_status_check_success_flag = mir100.InitialStatusCheckForMission(2);
 
@@ -743,7 +761,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
         {
             while(mir100.GetPLCRegisterIntValue(4) != 2)
             {
-                ///TIME 2021-04-16 500ms
+                ///TIME 200ms
                 std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
                 /// b.1 Initialization
@@ -779,10 +797,14 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
                         /// b.3.1 start configuring arm mission.
                         auto arm_mission_configs = tm5.ConfigureArmMission(cur_model_config_id_, cur_order);
 
+                        cur_operation_area_ =  arm_mission_configs[cur_order-1].operation_area;
+                        cur_tool_angle_ = arm_mission_configs[cur_order-1].tool_angle;
+
                         // z. finish configure stage.
                         mir100.SetPLCRegisterIntValue(3,0);
                         arm_config_stage_success_flag = true;
 
+                        // wait for executing flag/signal.
                         arm_wait_plc001_success_flag = this->WaitForUgvPLCRegisterInt(1,1,2);
 
                         if(arm_wait_plc001_success_flag == true)
@@ -790,48 +812,43 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
                             //todo:
                             /// b.3.2 start executing arm mission
 
-
-                            // for first order
+                            /// First order, pick the pad
                             if(cur_order == 1)
                             {
                                 this->ArmPickTool(cur_task_mode_);
 
-                                if(cur_task_mode_ == data::arm::TaskMode::Mopping)
-                                {
-                                    switch (arm_mission_configs[0].model_type)
-                                    {
-                                        case data::arm::ModelType::Handrail:
-                                        {
-                                            this->ArmTask("Post pick_small_pad");
-                                            break;
-                                        }
-                                        case data::arm::ModelType::Windows:
-                                        {
-                                            this->ArmTask("Post pick_large_pad");
-                                            break;
-                                        }
-                                        case data::arm::ModelType::NurseStation:
-                                        {
-                                            this->ArmTask("Post pick_large_pad");
-                                            break;
-                                        }
-                                    }
-                                }
-
-                                // 0. find which operation_area. move to relative safety position
-                                auto operation_area = arm_mission_configs[0].operation_area;
-                                this->ArmSetOperationArea(operation_area);
-                                this->ArmTask("Post arm_home_to_safety");
+//                                if(cur_task_mode_ == data::arm::TaskMode::Mopping)
+//                                {
+//                                    this->ArmPickPad();
+//                                }
                             }
 
-                            // loop all the arm_mission_configs
+                            /// For each order, move to safety position first.
+                            //
+                            if(cur_order == 1)
+                            {
+                                this->ArmSetOperationArea(cur_operation_area_);
+                                this->ArmTask("Post arm_home_to_safety");
+                            }
+                            else
+                            {
+                                // if cur_operation_area is not equal to last one, move to safety position first.
+                                if(cur_operation_area_ != arm_mission_configs[cur_order-2].operation_area)
+                                {
+                                    this->ArmTask("Post arm_safety_to_home");
+
+                                    this->ArmSetOperationArea(cur_operation_area_);
+                                    this->ArmTask("Post arm_home_to_safety");
+                                }
+                            }
+
+                            /// Loop all the arm_mission_configs
                             for (int n = 0; n < arm_mission_configs.size(); n++)
                             {
                                 // 1. move to standby_position
                                 //  1.1 get standby_point_str
                                 auto standby_point = arm_mission_configs[n].standby_position;
                                 std::string standby_point_str = this->ArmGetPointStr(standby_point);
-
                                 //  1.2 set standby_point
                                 this->ArmTask("Set standby_p0 = "+standby_point_str);
                                 //  1.3 move to standby_point
@@ -840,18 +857,74 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
                                 // 2. check landmark_or_not?
                                 if(arm_mission_configs[n].landmark_flag == true)
                                 {
-                                    //  2.1 move to init_vision_position.
-                                    //  2.2 execute vision_job
-                                    //  2.3 get real_landmark_pos
-                                    //  2.4 post back_to_standby_position
-                                    //  2.5 get TF
+                                    // 2.1 init_lm_vision_position.
+                                    //  2.1.1 retrieve init_lm_vision_position_str
+                                    std::string ref_vision_lm_init_position_str = this->ArmGetPointStr(arm_mission_configs[n].ref_vision_lm_init_position);
+                                    //  2.1.2 set init_lm_vision_position
+                                    this->ArmTask("Set vision_lm_init_p0 = " + ref_vision_lm_init_position_str);
+                                    //  2.1.3 move_to init_lm_vision_position
+                                    this->ArmTask("Move_to vision_lm_init_p0");
+
+                                    // 2.2 execute vision_find_landmark
+                                    this->ArmTask("Post vision_find_landmark");
+
+                                    // 2.3 check find_landmark_flag
+                                    this->ArmTask("Post get_find_landmark_flag");
+
+                                    if(tm5.GetFindLandmarkFlag() == true)
+                                    {
+                                        LOG(INFO) << "Find Landmark!";
+
+                                        // 2.4 get real_landmark_pos
+                                        this->ArmTask("Post get_landmark_pos_str");
+                                        real_lm_pos_ = tm5.GetRealLandmarkPos();
+
+                                        // 2.5 post back_to_standby_position.
+                                        this->ArmTask("Move_to standby_p0");
+
+                                        // 2.6 get TF
+                                        // 2.7 calculate the new via_points
+
+                                        std::deque<yf::data::arm::Point3d> real_via_points;
+
+                                        real_via_points = tm5.GetRealViaPoints(arm_mission_configs[n].via_points, arm_mission_configs[n].ref_landmark_pos, real_lm_pos_);
+
+                                        arm_mission_configs[n].via_points.clear();
+
+                                        arm_mission_configs[n].via_points = real_via_points;
+
+                                        // 2.8 calculate the real approach point
+
+                                        yf::data::arm::Point3d real_via_approach_point;
+
+                                        real_via_approach_point = tm5.GetRealPointByLM(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].ref_landmark_pos, real_lm_pos_);
+
+                                        arm_mission_configs[n].via_approach_pos.x = real_via_approach_point.x;
+                                        arm_mission_configs[n].via_approach_pos.y = real_via_approach_point.y;
+                                        arm_mission_configs[n].via_approach_pos.z = real_via_approach_point.z;
+                                        arm_mission_configs[n].via_approach_pos.rx = real_via_approach_point.rx;
+                                        arm_mission_configs[n].via_approach_pos.ry = real_via_approach_point.ry;
+                                        arm_mission_configs[n].via_approach_pos.rz = real_via_approach_point.rz;
+                                    }
+                                    else
+                                    {
+                                        LOG(INFO) << "Cannot find Landmark! cur_arm_mission_config aborted!!";
+
+                                        // back to standby_point
+                                        this->ArmTask("Move_to standby_p0");
+                                        // back to safety position
+                                        this->ArmTask("Post arm_back_to_safety");
+
+                                        continue;
+                                    }
+
                                 }
 
                                 // 3. check&set tool_angle
                                 this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
 
                                 // 4. check motion_type, decide which motion.
-                                // 5. assign n_via_points
+                                // 5. assign n_via_points.
                                 std::string n_via_points_str = std::to_string(arm_mission_configs[n].n_via_points);
                                 this->ArmTask("Set n_points = " + n_via_points_str);
 
@@ -875,37 +948,26 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
                             mir100.SetPLCRegisterIntValue(1,0);
                             std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-                            // for last order
+                            /// Last order
                             if(cur_order == cur_mission_num_)
                             {
-                                if(cur_task_mode_ == data::arm::TaskMode::Mopping)
-                                {
-                                    this->ArmTask("Post tool_angle_0");
-
-                                    std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-
-                                    switch (arm_mission_configs[0].model_type)
-                                    {
-                                        case data::arm::ModelType::Handrail:
-                                        {
-                                            this->ArmTask("Post remove_small_pad");
-                                            break;
-                                        }
-                                        case data::arm::ModelType::Windows:
-                                        {
-                                            this->ArmTask("Post remove_large_pad");
-                                            break;
-                                        }
-                                        case data::arm::ModelType::NurseStation:
-                                        {
-                                            this->ArmTask("Post remove_large_pad");
-                                            break;
-                                        }
-                                    }
-                                }
-
                                 /// arm motion
-                                // 1. place the tool
+
+                                // back to home first
+                                this->ArmTask("Post arm_safety_to_home");
+
+                                // remove pad if its necessary
+//                                if(cur_task_mode_ == data::arm::TaskMode::Mopping)
+//                                {
+//                                    if(cur_tool_angle_ == data::arm::ToolAngle::FortyFive)
+//                                    {
+//                                        this->ArmTask("Post tool_angle_0");
+//                                    }
+//
+//                                    this->ArmRemovePad();
+//                                }
+
+                                // place the tool
                                 this->ArmPlaceTool(cur_task_mode_);
 
                                 /// ipc1 loop
@@ -915,8 +977,8 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
                                 // set ugv_mission_success_flag
                                 if(mir100.GetPLCRegisterIntValue(4) == 2)
                                 {
-                                    ugv_mission_success_flag = true;
-                                    mission_continue_flag = false;
+                                    ugv_mission_success_flag    = true;
+                                    mission_continue_flag       = false;
                                 }
                             }
                         }
@@ -1876,6 +1938,50 @@ void yf::sys::nw_sys::ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode,
 
 
     return;
+}
+
+void yf::sys::nw_sys::ArmPickPad()
+{
+    switch (cur_model_type_)
+    {
+        case data::arm::ModelType::Handrail:
+        {
+            this->ArmTask("Post pick_small_pad");
+            break;
+        }
+        case data::arm::ModelType::Windows:
+        {
+            this->ArmTask("Post pick_large_pad");
+            break;
+        }
+        case data::arm::ModelType::NurseStation:
+        {
+            this->ArmTask("Post pick_large_pad");
+            break;
+        }
+    }
+}
+
+void yf::sys::nw_sys::ArmRemovePad()
+{
+    switch (cur_model_type_)
+    {
+        case data::arm::ModelType::Handrail:
+        {
+            this->ArmTask("Post remove_small_pad");
+            break;
+        }
+        case data::arm::ModelType::Windows:
+        {
+            this->ArmTask("Post remove_large_pad");
+            break;
+        }
+        case data::arm::ModelType::NurseStation:
+        {
+            this->ArmTask("Post remove_large_pad");
+            break;
+        }
+    }
 }
 
 

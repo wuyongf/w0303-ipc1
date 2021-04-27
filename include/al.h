@@ -73,16 +73,30 @@ namespace yf
 
             void RecordRefPath();
 
-            void ExportRealPathByLM()
-            {
-                //todo: Find T6 = T4*inv(T1)*T3
-                // 1. retrieve T2
-                // 2. Find LM2 position. T4
-                // 3. calculate the real_path.
+            std::deque<yf::data::arm::Point3d> ExportRealPathByLM(  const std::deque<yf::data::arm::Point3d>& original_via_points,
+                                                                    const yf::data::arm::Point3d& ref_landmark_pos,
+                                                                    const yf::data::arm::Point3d& real_landmark_pos);
 
-            }
+            yf::data::arm::Point3d ExportRealPointByLM(  const yf::data::arm::Point3d& original_via_points,
+                                                         const yf::data::arm::Point3d& ref_landmark_pos,
+                                                         const yf::data::arm::Point3d& real_landmark_pos);
 
 
+        private:
+
+            float d2r(const float& degree);
+            float r2d(const float& radian);
+
+            Eigen::Matrix3f ryp2RMat(const float& roll, const float& pitch, const float& yaw);
+
+            Eigen::Matrix4f points2TMat(std::vector<float>& point);
+            Eigen::Matrix4f points2TMat(const yf::data::arm::Point3d& point);
+
+            std::vector<float> R2rpy(Eigen::Matrix3f& RMat);
+
+            std::vector<std::vector<float>> Convert2RealPathByLM(std::vector<std::vector<float>>& original_path,
+                                                                 std::vector<float>& ref_tag_position,
+                                                                 std::vector<float>& real_tag_positon);
         };
     }
 }
@@ -92,7 +106,330 @@ void yf::algorithm::arm_path::RecordRefPath()
     //todo:
     // 1. read ref_path from .txt file.
     // 2. record the LM1 position.
-    // 3. record the transformation T2. T3(ref_path to base) = T1(LM1 to base)* T2;
+    // 3. record the transformation T2. T3("ref_path" to base) = T1(LM1 to base)* T2;
+    return;
+}
+
+std::deque<yf::data::arm::Point3d>
+        yf::algorithm::arm_path::ExportRealPathByLM(const std::deque<yf::data::arm::Point3d>& original_via_points,
+                                                    const yf::data::arm::Point3d& ref_landmark_pos,
+                                                    const yf::data::arm::Point3d& real_landmark_pos)
+{
+    //todo: Find real_path T6 = T4*inv(T1)*T3
+    // T1: ref_landmark_pos
+    // T3: ref_path
+    // T4: real_landmark_pos
+
+    //@@ input:
+    // 1. via_points (original_path)
+    // 2. ref_landmark_pos(ref_TF)
+    // 3. real_landmark_pos(real_TF)
+    //@@ output:
+    // 1. new_via_points (real_path)
+
+    std::deque<yf::data::arm::Point3d> real_path;
+
+    Eigen::Matrix4f T_ref_tag;      //T1
+    Eigen::Matrix4f T_real_tag;     //T4
+
+    T_ref_tag.setZero();
+    T_real_tag.setZero();
+
+    T_ref_tag = points2TMat(ref_landmark_pos);      // T1
+    T_real_tag = points2TMat(real_landmark_pos);    // T4
+
+    for(int i = 0; i < original_via_points.size(); i++)
+    {
+        yf::data::arm::Point3d real_point;
+        std::vector<float> real_point_rpy;
+
+
+        auto T_n = points2TMat(original_via_points[i]);
+
+        Eigen::Matrix4f T_real = T_real_tag * T_ref_tag.inverse() * T_n;
+        Eigen::MatrixXf Translation_real = T_real.block(0,3 ,3,1);
+
+        Eigen::Matrix3f R_real = T_real.block(0,0 ,3,3);
+
+        real_point_rpy = R2rpy(R_real);
+
+        // x,y,z
+        real_point.x = Translation_real(0);
+        real_point.y = Translation_real(1);
+        real_point.z = Translation_real(2);
+        // rx,ry,rz
+        real_point.rx = real_point_rpy[0];
+        real_point.ry = real_point_rpy[1];
+        real_point.rz = real_point_rpy[2];
+
+        real_path.push_back(real_point);
+    }
+
+    return real_path;
+}
+
+float yf::algorithm::arm_path::d2r(const float &degree)
+{
+    float radian = PI/180* degree;
+    return radian;
+}
+
+float yf::algorithm::arm_path::r2d(const float &radian)
+{
+    return radian*180/PI;
+}
+
+Eigen::Matrix3f yf::algorithm::arm_path::ryp2RMat(const float &roll, const float &pitch, const float &yaw)
+{
+
+    // roll  -- x axis --- gamma
+    // yaw   -- y axis --- beta
+    // pitch -- z axis --- alpha
+
+    float gamma = d2r(roll);
+    float beta  = d2r(pitch);
+    float alpha = d2r(yaw);
+
+    auto ca = cos(alpha);
+    auto cb = cos(beta);
+    auto cg = cos(gamma);
+    auto sa = sin(alpha);
+    auto sb = sin(beta);
+    auto sg = sin(gamma);
+
+    // Rx -- Rg
+    Eigen::Matrix3f Rg;
+
+    Rg << 1,   0,    0,
+            0,  cg,  -sg,
+            0,  sg,   cg;
+
+    // Ry -- Rb
+    Eigen::Matrix3f Rb;
+
+    Rb << cb,  0,  sb,
+            0,  1,   0,
+            -sb,  0,  cb;
+
+    // Rz -- Ra
+    Eigen::Matrix3f Ra;
+
+    Ra << ca,  -sa,  0,
+            sa,   ca,  0,
+            0,    0,  1;
+
+    return Ra*Rb*Rg;
+
+}
+
+Eigen::Matrix4f yf::algorithm::arm_path::points2TMat(std::vector<float> &point)
+{
+
+    float arrMembers[16] = {};
+
+    Eigen::MatrixXf TMat =
+            Eigen::Map<Eigen::Matrix<float, 4, 4>>(arrMembers);
+
+    Eigen::RowVectorXf vpoint = Eigen::Map<Eigen::Matrix<float, 1, 6> >(point.data());;
+
+    TMat(0, 3) = vpoint(0);
+    TMat(1, 3) = vpoint(1);
+    TMat(2, 3) = vpoint(2);
+    TMat(3, 3) = 1;
+
+    auto RMat = ryp2RMat(vpoint(3), vpoint(4), vpoint(5));
+
+    TMat(0, 0) = RMat(0, 0);
+    TMat(0, 1) = RMat(0, 1);
+    TMat(0, 2) = RMat(0, 2);
+    TMat(1, 0) = RMat(1, 0);
+    TMat(1, 1) = RMat(1, 1);
+    TMat(1, 2) = RMat(1, 2);
+    TMat(2, 0) = RMat(2, 0);
+    TMat(2, 1) = RMat(2, 1);
+    TMat(2, 2) = RMat(2, 2);
+
+    return TMat;
+}
+
+std::vector<float> yf::algorithm::arm_path::R2rpy(Eigen::Matrix3f &RMat)
+{
+    std::vector<float> rpy;
+    rpy.clear();
+
+    float beta(0);
+    float alpha(0);
+    float gamma(0);
+
+    auto r11 = RMat(0, 0);
+    auto r12 = RMat(0, 1);
+    auto r13 = RMat(0, 2);
+    auto r21 = RMat(1, 0);
+    auto r22 = RMat(1, 1);
+    auto r23 = RMat(1, 2);
+    auto r31 = RMat(2, 0);
+    auto r32 = RMat(2, 1);
+    auto r33 = RMat(2, 2);
+
+    beta = atan2(-r31, sqrt(r11 * r11 + r21 * r21));
+
+    if (beta > d2r(89.99)) {
+        beta = d2r(89.99);
+        alpha = 0;
+        gamma = atan2(r12, r22);
+    } else if (beta < -d2r(89.99)) {
+        beta = -d2r(89.99);
+        alpha = 0;
+        gamma = -atan2(r12, r22);
+    } else {
+        auto cb = cos(beta);
+        alpha = atan2(r21 / cb, r11 / cb);
+        gamma = atan2(r32 / cb, r33 / cb);
+    }
+
+    rpy.push_back(r2d(gamma));
+    rpy.push_back(r2d(beta));
+    rpy.push_back(r2d(alpha));
+
+    return rpy;
+}
+
+std::vector<std::vector<float>>
+yf::algorithm::arm_path::Convert2RealPathByLM(std::vector<std::vector<float>> &original_path,
+                                              std::vector<float> &ref_tag_position,
+                                              std::vector<float> &real_tag_positon)
+{
+    std::vector<std::vector<float>> real_path;
+
+    real_path.clear();
+
+    Eigen::Matrix4f T_ref_tag;      //T1
+    Eigen::Matrix4f T_real_tag;     //T4
+
+    T_ref_tag.setZero();
+    T_real_tag.setZero();
+
+    T_ref_tag = points2TMat(ref_tag_position);    // T1
+    T_real_tag = points2TMat(real_tag_positon);    // T4
+
+    for(int i = 0; i < original_path.size(); i++)
+    {
+        std::vector<float> real_point;
+        std::vector<float> real_point_rpy;
+        real_point.clear();
+
+        auto T_n = points2TMat(original_path[i]);
+
+        Eigen::Matrix4f T_real = T_real_tag * T_ref_tag.inverse() * T_n;
+        Eigen::MatrixXf Translation_real = T_real.block(0,3 ,3,1);
+
+        Eigen::Matrix3f R_real = T_real.block(0,0 ,3,3);
+
+        real_point_rpy = R2rpy(R_real);
+
+        // x,y,z
+        real_point.push_back(Translation_real(0));
+        real_point.push_back(Translation_real(1));
+        real_point.push_back(Translation_real(2));
+        // rx,ry,rz
+        real_point.push_back(real_point_rpy[0]);
+        real_point.push_back(real_point_rpy[1]);
+        real_point.push_back(real_point_rpy[2]);
+
+        real_path.push_back(real_point);
+    }
+
+    return real_path;
+}
+
+Eigen::Matrix4f yf::algorithm::arm_path::points2TMat(const yf::data::arm::Point3d &point)
+{
+    std::vector<float> vec_point;
+
+    vec_point.clear();
+
+    vec_point.push_back(point.x);
+    vec_point.push_back(point.y);
+    vec_point.push_back(point.z);
+    vec_point.push_back(point.rx);
+    vec_point.push_back(point.ry);
+    vec_point.push_back(point.rz);
+
+    float arrMembers[16] = {};
+
+    Eigen::MatrixXf TMat =
+            Eigen::Map<Eigen::Matrix<float, 4, 4>>(arrMembers);
+
+    Eigen::RowVectorXf vpoint = Eigen::Map<Eigen::Matrix<float, 1, 6> >(vec_point.data());;
+
+    TMat(0, 3) = vpoint(0);
+    TMat(1, 3) = vpoint(1);
+    TMat(2, 3) = vpoint(2);
+    TMat(3, 3) = 1;
+
+    auto RMat = ryp2RMat(vpoint(3), vpoint(4), vpoint(5));
+
+    TMat(0, 0) = RMat(0, 0);
+    TMat(0, 1) = RMat(0, 1);
+    TMat(0, 2) = RMat(0, 2);
+    TMat(1, 0) = RMat(1, 0);
+    TMat(1, 1) = RMat(1, 1);
+    TMat(1, 2) = RMat(1, 2);
+    TMat(2, 0) = RMat(2, 0);
+    TMat(2, 1) = RMat(2, 1);
+    TMat(2, 2) = RMat(2, 2);
+
+    return TMat;
+}
+
+yf::data::arm::Point3d yf::algorithm::arm_path::ExportRealPointByLM(const yf::data::arm::Point3d &original_via_points,
+                                                                    const yf::data::arm::Point3d &ref_landmark_pos,
+                                                                    const yf::data::arm::Point3d &real_landmark_pos)
+{
+    //todo: Find real_path T6 = T4*inv(T1)*T3
+    // T1: ref_landmark_pos
+    // T3: ref_path
+    // T4: real_landmark_pos
+
+    //@@ input:
+    // 1. via_points (original_path)
+    // 2. ref_landmark_pos(ref_TF)
+    // 3. real_landmark_pos(real_TF)
+    //@@ output:
+    // 1. new_via_points (real_path)
+
+    yf::data::arm::Point3d real_point;
+
+    Eigen::Matrix4f T_ref_tag;      //T1
+    Eigen::Matrix4f T_real_tag;     //T4
+
+    T_ref_tag.setZero();
+    T_real_tag.setZero();
+
+    T_ref_tag = points2TMat(ref_landmark_pos);      // T1
+    T_real_tag = points2TMat(real_landmark_pos);    // T4
+
+    std::vector<float> real_point_rpy;
+
+    auto T_n = points2TMat(original_via_points);
+
+    Eigen::Matrix4f T_real = T_real_tag * T_ref_tag.inverse() * T_n;
+    Eigen::MatrixXf Translation_real = T_real.block(0,3 ,3,1);
+
+    Eigen::Matrix3f R_real = T_real.block(0,0 ,3,3);
+
+    real_point_rpy = R2rpy(R_real);
+
+    // x,y,z
+    real_point.x = Translation_real(0);
+    real_point.y = Translation_real(1);
+    real_point.z = Translation_real(2);
+    // rx,ry,rz
+    real_point.rx = real_point_rpy[0];
+    real_point.ry = real_point_rpy[1];
+    real_point.rz = real_point_rpy[2];
+
+    return real_point;
 }
 
 void yf::algorithm::cleaning_motion::Start(std::shared_ptr<yf::sql::sql_server> sql_ptr)

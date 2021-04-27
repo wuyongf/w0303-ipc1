@@ -166,4 +166,6 @@ add_executable(str_parse_test1 "useful-functions/str_parse_test1.cpp" "include/n
 target_link_libraries(str_parse_test1 PUBLIC glog::glog nanodbc modbus Poco::Foundation Poco::Net Poco::XML Poco::Zip Poco::Data Poco::JSON)
 
 
+
+
 # TODO: Add tests and install targets if needed.
