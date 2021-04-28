@@ -68,7 +68,7 @@ namespace yf
             bool InitialStatusCheckForMission(const int& timeout_min);
 
             std::deque<yf::data::arm::MissionConfig> ConfigureArmMission(const int& model_config_id, const int & order);
-
+//
             yf::data::arm::ModelType GetModelType(const int& model_config_id);
 
             yf::data::arm::TaskMode GetTaskMode(const int& model_config_id);
@@ -80,7 +80,7 @@ namespace yf
             yf::data::arm::Tool GetMissionTool(const int& model_config_id);
 
             yf::data::arm::ToolAngle GetToolAngle(const int& arm_mission_config_id);
-
+//
             yf::data::arm::MotionType GetMotionType(const int& arm_mission_config_id);
 
             yf::data::arm::Point3d GetStandbyPosition(const int& arm_config_id);
@@ -92,7 +92,7 @@ namespace yf
             yf::data::arm::Point3d GetRefLandmarkPos(const int& arm_mission_config_id);
 
             yf::data::arm::Point3d GetViaApproachPoint(const int& arm_mission_config_id);
-
+//
             std::deque<yf::data::arm::Point3d> GetRefViaPoints(const yf::data::arm::ModelType& model_type, const yf::data::arm::TaskMode& task_mode, const int& arm_mission_config_id, const yf::data::arm::MotionType& motion_type);
 
         public: // for nw_sys: each mission // retrieve data from Arm(tm5)
@@ -948,11 +948,27 @@ yf::data::arm::MotionType yf::arm::tm::GetMotionType(const int &arm_mission_conf
     {
         case 1:
         {
-            return yf::data::arm::MotionType::PlaneMotion;
+            return yf::data::arm::MotionType::Plane;
         }
         case 2:
         {
-            return yf::data::arm::MotionType::LineMotion;
+            return yf::data::arm::MotionType::Line;
+        }
+        case 3:
+        {
+            return data::arm::MotionType::CircleFull;
+        }
+        case 4:
+        {
+            return data::arm::MotionType::CircleHalf;
+        }
+        case 5:
+        {
+            return data::arm::MotionType::Curve;
+        }
+        case 6:
+        {
+            return data::arm::MotionType::Surface;
         }
     }
 }
@@ -1024,19 +1040,21 @@ yf::arm::tm::GetRefViaPoints(const yf::data::arm::ModelType& model_type, const y
                 case data::arm::ModelType::NurseStation:
                 {
                     al_clean_motion.set_layer(2);
-                    via_points = al_clean_motion.get_via_points(motion_type, init_cleaning_points);
+                    via_points = al_clean_motion.get_mop_via_points(motion_type, init_cleaning_points);
                     break;
                 }
                 case data::arm::ModelType::Handrail:
                 {
+                    // --->
+                    // <---
                     al_clean_motion.set_layer(1);
-                    via_points = al_clean_motion.get_via_points(motion_type, init_cleaning_points);
+                    via_points = al_clean_motion.get_mop_via_points(motion_type, init_cleaning_points);
                     break;
                 }
                 default:
                 {
                     al_clean_motion.set_layer(1);
-                    via_points = al_clean_motion.get_via_points(motion_type, init_cleaning_points);
+                    via_points = al_clean_motion.get_mop_via_points(motion_type, init_cleaning_points);
                     break;
                 }
             }
@@ -1082,7 +1100,7 @@ yf::data::arm::ModelType yf::arm::tm::GetModelType(const int &model_config_id)
         }
         case 7:
         {
-            return data::arm::ModelType::Desk;
+            return data::arm::ModelType::DeskRectangle;
         }
         case 8:
         {
@@ -1107,6 +1125,18 @@ yf::data::arm::ModelType yf::arm::tm::GetModelType(const int &model_config_id)
         case 13:
         {
             return data::arm::ModelType::NurseStation;
+        }
+        case 14:
+        {
+            return data::arm::ModelType::DeskCircle;
+        }
+        case 15:
+        {
+            return data::arm::ModelType::DeskPolygon;
+        }
+        case 16:
+        {
+            return data::arm::ModelType::HandleSurface;
         }
     }
 }

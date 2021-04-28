@@ -1,0 +1,848 @@
+Log file created at: 2021/04/27 13:52:29
+Running on machine: WUYONGF
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I0427 13:52:29.610168 17632 arm.h:301] wait for arm connection...
+I0427 13:52:32.519166  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: TM5-900
+I0427 13:52:32.519166 17632 arm.h:303] arm connected.
+I0427 13:52:32.909170 44640 nw_sys.h:506] [thread_do_schedules]: lock!
+I0427 13:52:33.419167 37976 nw_sys.h:315] [thread_wait_schedules]: unlock!
+I0427 13:52:33.419674 37976 nw_sys.h:317] [thread_wait_schedules]: stage 0 --- Initial Check [Start]
+I0427 13:52:33.420166 37976 nw_sys.h:1455] 1. update sys control mode
+I0427 13:52:33.467166 37976 nw_sys.h:1459] 2. updated all devices status
+I0427 13:52:33.467166 37976 nw_sys.h:1460] 2.1 request arm_connection_status and arm_mission_status from arm
+I0427 13:52:33.627171  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:52:33.627171 37976 arm.h:541] arm is idle.
+I0427 13:52:33.627171 37976 nw_sys.h:1464] 3. check function
+I0427 13:52:33.628167 37976 nw_sys.h:1466] 3.0 check function: sys_status   [Start]
+I0427 13:52:33.628167 37976 nw_sys.h:1472] sys_control_mode: Auto
+I0427 13:52:33.628167 37976 nw_sys.h:1509] 3.1 check function: arm   [Start]
+I0427 13:52:33.628167 37976 nw_sys.h:1518] 3.1 check function: arm   [Complete]
+I0427 13:52:33.628167 37976 nw_sys.h:1567] 3.2 check function: ugv   [Start]
+I0427 13:52:33.628167 37976 nw_sys.h:1569] 3.2 check function: ugv   [Complete]
+I0427 13:52:33.628167 37976 nw_sys.h:1584] 4. Update Status to SQL
+I0427 13:52:33.628167 37976 nw_sys.h:1585] 4.1 Update Status to SQL: Arm
+I0427 13:52:35.249168 37976 nw_sys.h:321] [thread_wait_schedules]: stage 0 --- Initial Check [Complete]
+I0427 13:52:35.249168 37976 nw_sys.h:428] [thread_wait_schedules]: stage 1 --- Wait for Database Available Schedules
+I0427 13:52:35.249168 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:52:35.864709 37976 nw_sys.h:470] [thread_wait_schedules]: unlock thread: do schedule
+I0427 13:52:35.864709 44640 nw_sys.h:511] [thread_do_schedules]: unlock!
+I0427 13:52:35.864709 44640 nw_sys.h:514] thread: do schedule has been unlocked
+I0427 13:52:36.020712 37976 nw_sys.h:487] [thread_wait_schedules]: lock thread: wait schedule
+I0427 13:52:42.203521 44640 nw_sys.h:641] Do Jobs...
+I0427 13:52:46.020143 44640 arm.h:541] arm is idle.
+I0427 13:52:50.047670 44640 nw_sys.h:786] mission. stage 1: configure arm mission...
+I0427 13:52:50.051671 44640 nw_sys.h:1608] Wait for PLC Register 3 == 1
+I0427 13:52:54.632627 44640 nw_sys.h:1608] Wait for PLC Register 1 == 1
+I0427 13:52:54.976918 44640 arm.h:658] [IPC1 ---> Arm]: Post pick_mop
+I0427 13:52:55.007570  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post pick_mop, Arm Running
+I0427 13:52:55.360601  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 13:53:24.492877  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post pick_mop, Arm Finish
+I0427 13:53:24.502975 44640 arm.h:529] arm has finished.
+I0427 13:53:24.568969  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:53:24.655100 44640 arm.h:541] arm is idle.
+I0427 13:53:24.870419 44640 arm.h:658] [IPC1 ---> Arm]: Set operation_area = 5
+I0427 13:53:24.890753  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set operation_area = 5, Arm Running
+I0427 13:53:24.949848  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set operation_area = 5, Arm Finish
+I0427 13:53:25.300062  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:53:25.301062 44640 arm.h:541] arm is idle.
+I0427 13:53:25.452759 44640 arm.h:658] [IPC1 ---> Arm]: Post arm_home_to_safety
+I0427 13:53:25.467357  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_home_to_safety, Arm Running
+I0427 13:53:25.789307  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 13:53:55.370409  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_home_to_safety, Arm Finish
+I0427 13:53:55.478003  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:53:55.480013 44640 arm.h:541] arm is idle.
+I0427 13:53:55.669829 44640 arm.h:658] [IPC1 ---> Arm]: Set standby_p0 = -116.384804,-453.296204,471.540588,92.088669,-2.570017,1.028367
+I0427 13:53:55.709465  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set standby_p0 = -116.384804,-453.296204,471.540588,92.088669,-2.570017,1.028367, Arm Running
+I0427 13:53:55.783612  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set standby_p0 = -116.384804,-453.296204,471.540588,92.088669,-2.570017,1.028367, Arm Finish
+I0427 13:53:56.041162  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:53:56.041162 44640 arm.h:541] arm is idle.
+I0427 13:53:56.205096 44640 arm.h:658] [IPC1 ---> Arm]: Move_to standby_p0
+I0427 13:53:56.236842  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Running
+I0427 13:53:56.572888  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 13:53:56.894825  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Finish
+I0427 13:53:56.986332  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:53:56.991333 44640 arm.h:541] arm is idle.
+I0427 13:53:57.265168 44640 arm.h:658] [IPC1 ---> Arm]: Set vision_lm_init_p0 = -273.993713,-554.900330,264.012909,91.592346,-3.281562,2.709627
+I0427 13:53:57.293747  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set vision_lm_init_p0 = -273.993713,-554.900330,264.012909,91.592346,-3.281562,2.709627, Arm Running
+I0427 13:53:57.342885  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set vision_lm_init_p0 = -273.993713,-554.900330,264.012909,91.592346,-3.281562,2.709627, Arm Finish
+I0427 13:53:57.567330  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:53:57.567330 44640 arm.h:541] arm is idle.
+I0427 13:53:57.716791 44640 arm.h:658] [IPC1 ---> Arm]: Move_to vision_lm_init_p0
+I0427 13:53:57.748782  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to vision_lm_init_p0, Arm Running
+I0427 13:53:58.093271  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 13:54:02.312839  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to vision_lm_init_p0, Arm Finish
+I0427 13:54:02.312839 44640 arm.h:529] arm has finished.
+I0427 13:54:02.378393  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:54:02.511494 44640 arm.h:541] arm is idle.
+I0427 13:54:02.724005 44640 arm.h:658] [IPC1 ---> Arm]: Post vision_find_landmark
+I0427 13:54:02.770994  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post vision_find_landmark, Arm Running
+I0427 13:54:03.342665  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post vision_find_landmark, Arm Finish
+I0427 13:54:03.343663 44640 arm.h:529] arm has finished.
+I0427 13:54:03.404146  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:54:03.717339 44640 arm.h:541] arm is idle.
+I0427 13:54:03.871626 44640 arm.h:658] [IPC1 ---> Arm]: Post get_find_landmark_flag
+I0427 13:54:03.888626  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_find_landmark_flag, Arm Running
+I0427 13:54:03.946830  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: find_landmark_flag = true
+I0427 13:54:04.029458  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_find_landmark_flag, Arm Finish
+I0427 13:54:04.308691  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:54:04.310693 44640 arm.h:541] arm is idle.
+I0427 13:54:04.311699 44640 nw_sys.h:876] Find Landmark!
+I0427 13:54:04.552450 44640 arm.h:658] [IPC1 ---> Arm]: Post get_landmark_pos_str
+I0427 13:54:04.581447  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_landmark_pos_str, Arm Running
+I0427 13:54:04.640450  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: landmark_pos_str = {-173.34,-1107.99,409.26,-87.52,0.15,-174.61}
+I0427 13:54:04.713411  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_landmark_pos_str, Arm Finish
+I0427 13:54:05.150588  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:54:05.150588 44640 arm.h:541] arm is idle.
+I0427 13:54:05.323864 44640 arm.h:658] [IPC1 ---> Arm]: Move_to standby_p0
+I0427 13:54:05.346869  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Running
+I0427 13:54:05.723891  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 13:54:09.926260  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Finish
+I0427 13:54:10.013852  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:54:10.014856 44640 arm.h:541] arm is idle.
+I0427 13:54:10.164497 44640 arm.h:658] [IPC1 ---> Arm]: Post tool_angle_0
+I0427 13:54:10.183497  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post tool_angle_0, Arm Running
+I0427 13:54:10.512691  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 13:54:13.275867  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post tool_angle_0, Arm Finish
+I0427 13:54:13.276868 44640 arm.h:529] arm has finished.
+I0427 13:54:13.335542  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:54:13.441982 44640 arm.h:541] arm is idle.
+I0427 13:54:13.599342 44640 arm.h:658] [IPC1 ---> Arm]: Set n_points = 4
+I0427 13:54:13.626430  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set n_points = 4, Arm Running
+I0427 13:54:13.669034  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set n_points = 4, Arm Finish
+I0427 13:54:13.966374  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:54:13.968379 44640 arm.h:541] arm is idle.
+I0427 13:54:14.143460 44640 arm.h:658] [IPC1 ---> Arm]: Set 0_approach_point = 201.266571,-616.263489,236.865753,88.201927,-3.172002,2.326908
+I0427 13:54:14.170461  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set 0_approach_point = 201.266571,-616.263489,236.865753,88.201927,-3.172002,2.326908, Arm Running
+I0427 13:54:14.226459  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set 0_approach_point = 201.266571,-616.263489,236.865753,88.201927,-3.172002,2.326908, Arm Finish
+I0427 13:54:14.509459  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:54:14.509459 44640 arm.h:541] arm is idle.
+I0427 13:54:14.667459 44640 arm.h:658] [IPC1 ---> Arm]: Set via0_1 = 214.324677,-648.065979,212.104721,87.856285,-3.302692,2.340499
+I0427 13:54:14.686460  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via0_1 = 214.324677,-648.065979,212.104721,87.856285,-3.302692,2.340499, Arm Running
+I0427 13:54:14.733461  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via0_1 = 214.324677,-648.065979,212.104721,87.856285,-3.302692,2.340499, Arm Finish
+I0427 13:54:15.135062  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:54:15.135062 44640 arm.h:541] arm is idle.
+I0427 13:54:15.472389 44640 arm.h:658] [IPC1 ---> Arm]: Set via0_2 = -26.282196,-651.204285,222.487671,89.145424,-2.957504,-0.626134
+I0427 13:54:15.492106  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via0_2 = -26.282196,-651.204285,222.487671,89.145424,-2.957504,-0.626134, Arm Running
+I0427 13:54:15.554802  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via0_2 = -26.282196,-651.204285,222.487671,89.145424,-2.957504,-0.626134, Arm Finish
+I0427 13:54:15.850733  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:54:15.851729 44640 arm.h:541] arm is idle.
+I0427 13:54:16.026729 44640 arm.h:658] [IPC1 ---> Arm]: Set via0_3 = -26.282196,-651.204285,222.487671,89.145424,-2.957504,-0.626134
+I0427 13:54:16.076148  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via0_3 = -26.282196,-651.204285,222.487671,89.145424,-2.957504,-0.626134, Arm Running
+I0427 13:54:16.132110  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via0_3 = -26.282196,-651.204285,222.487671,89.145424,-2.957504,-0.626134, Arm Finish
+I0427 13:54:16.426784  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:54:16.427796 44640 arm.h:541] arm is idle.
+I0427 13:54:16.590356 44640 arm.h:658] [IPC1 ---> Arm]: Set via0_4 = 214.324677,-648.065979,212.104721,87.856285,-3.302692,2.340499
+I0427 13:54:16.631906  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via0_4 = 214.324677,-648.065979,212.104721,87.856285,-3.302692,2.340499, Arm Running
+I0427 13:54:16.685894  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via0_4 = 214.324677,-648.065979,212.104721,87.856285,-3.302692,2.340499, Arm Finish
+I0427 13:54:17.207482  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:54:17.208480 44640 arm.h:541] arm is idle.
+I0427 13:54:17.398398 44640 arm.h:658] [IPC1 ---> Arm]: Post arm_via0_line
+I0427 13:54:17.427395  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_via0_line, Arm Running
+I0427 13:54:17.774089  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 13:54:45.603394  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_via0_line, Arm Finish
+I0427 13:54:45.710393  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:54:45.710393 44640 arm.h:541] arm is idle.
+I0427 13:54:45.862538 44640 arm.h:658] [IPC1 ---> Arm]: Move_to standby_p0
+I0427 13:54:45.882936  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Running
+I0427 13:54:46.257458  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 13:54:52.577538  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Finish
+I0427 13:54:52.579587 44640 arm.h:529] arm has finished.
+I0427 13:54:52.612846  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:54:52.709833 44640 arm.h:541] arm is idle.
+I0427 13:54:53.202332 44640 arm.h:658] [IPC1 ---> Arm]: Post arm_back_to_safety
+I0427 13:54:53.231221  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_back_to_safety, Arm Running
+I0427 13:54:53.586982  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 13:55:10.081269  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_back_to_safety, Arm Finish
+I0427 13:55:10.082413 44640 arm.h:529] arm has finished.
+I0427 13:55:10.148000  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:55:10.301004 44640 arm.h:541] arm is idle.
+I0427 13:55:11.151124 44640 arm.h:658] [IPC1 ---> Arm]: Post arm_safety_to_home
+I0427 13:55:11.185122  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_safety_to_home, Arm Running
+I0427 13:55:11.520227  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 13:55:43.149003  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_safety_to_home, Arm Finish
+I0427 13:55:43.149003 44640 arm.h:529] arm has finished.
+I0427 13:55:43.206111  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:55:43.339395 44640 arm.h:541] arm is idle.
+I0427 13:55:43.513346 44640 arm.h:658] [IPC1 ---> Arm]: Post place_mop
+I0427 13:55:43.534263  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post place_mop, Arm Running
+I0427 13:55:43.881577  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 13:56:30.085006  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post place_mop, Arm Finish
+I0427 13:56:30.086001 44640 arm.h:529] arm has finished.
+I0427 13:56:30.125938  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:56:30.256846 44640 arm.h:541] arm is idle.
+I0427 13:56:30.713618 44640 nw_sys.h:677] update current jobs status and log...
+I0427 13:56:30.939018 44640 nw_sys.h:688] All Jobs are done
+I0427 13:56:31.069080 44640 nw_sys.h:608] All schedules are done
+I0427 13:56:31.070132 44640 nw_sys.h:610] current time: 2021-04-27 13:56:31.000
+I0427 13:56:31.133514 44640 nw_sys.h:629] unlock thread: wait schedule
+I0427 13:56:31.133514 44640 nw_sys.h:506] [thread_do_schedules]: lock!
+I0427 13:56:31.133514 37976 nw_sys.h:492] [thread_wait_schedules]: unlock!
+I0427 13:56:31.134527 37976 nw_sys.h:315] [thread_wait_schedules]: unlock!
+I0427 13:56:31.135522 37976 nw_sys.h:317] [thread_wait_schedules]: stage 0 --- Initial Check [Start]
+I0427 13:56:31.135522 37976 nw_sys.h:1455] 1. update sys control mode
+I0427 13:56:31.203516 37976 nw_sys.h:1459] 2. updated all devices status
+I0427 13:56:31.203516 37976 nw_sys.h:1460] 2.1 request arm_connection_status and arm_mission_status from arm
+I0427 13:56:31.349735 37976 arm.h:541] arm is idle.
+I0427 13:56:31.350735 37976 nw_sys.h:1464] 3. check function
+I0427 13:56:31.350735 37976 nw_sys.h:1466] 3.0 check function: sys_status   [Start]
+I0427 13:56:31.351130 37976 nw_sys.h:1472] sys_control_mode: Auto
+I0427 13:56:31.351130 37976 nw_sys.h:1509] 3.1 check function: arm   [Start]
+I0427 13:56:31.351411 37976 nw_sys.h:1518] 3.1 check function: arm   [Complete]
+I0427 13:56:31.351411 37976 nw_sys.h:1567] 3.2 check function: ugv   [Start]
+I0427 13:56:31.351703 37976 nw_sys.h:1569] 3.2 check function: ugv   [Complete]
+I0427 13:56:31.351703 37976 nw_sys.h:1584] 4. Update Status to SQL
+I0427 13:56:31.351703 37976 nw_sys.h:1585] 4.1 Update Status to SQL: Arm
+I0427 13:56:33.003044 37976 nw_sys.h:321] [thread_wait_schedules]: stage 0 --- Initial Check [Complete]
+I0427 13:56:33.003044 37976 nw_sys.h:428] [thread_wait_schedules]: stage 1 --- Wait for Database Available Schedules
+I0427 13:56:33.004050 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:33.635185 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:34.286612 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:34.951975 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:35.588057 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:36.225332 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:36.878448 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:37.558768 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:38.163611 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:38.800490 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:39.529950 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:40.170482 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:40.804972 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:41.541752 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:42.146641 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:42.797421 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:43.526744 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:44.163060 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:44.812306 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:45.537966 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:46.188210 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:46.807416 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:47.512156 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:48.127822 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:48.768287 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:49.497005 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:50.147920 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:50.800176 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:51.546751 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:52.209488 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:52.860857 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:53.499802 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:54.169176 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:54.822134 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:55.534543 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:56.186168 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:56.850818 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:57.547355 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:58.212316 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:58.865124 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:56:59.580054 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:57:00.229327 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:57:00.850786 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:57:01.531877 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:57:02.212507 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:57:02.879498 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:57:03.559913 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:57:04.208859 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:57:04.860910 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:57:05.567644 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:57:06.216053 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:57:06.832242 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:57:07.526300 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:57:08.141299 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:57:08.803342 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:57:09.554466 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:57:10.186467 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:57:10.846468 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:57:11.589468 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:57:12.243468 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:57:12.873548 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:57:13.564548 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:57:14.194581 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:57:14.824638 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:57:15.530369 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:57:16.161312 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:57:16.793829 37976 nw_sys.h:470] [thread_wait_schedules]: unlock thread: do schedule
+I0427 13:57:16.793829 44640 nw_sys.h:511] [thread_do_schedules]: unlock!
+I0427 13:57:16.794829 44640 nw_sys.h:514] thread: do schedule has been unlocked
+I0427 13:57:16.854828 37976 nw_sys.h:487] [thread_wait_schedules]: lock thread: wait schedule
+I0427 13:57:39.267534 44640 nw_sys.h:641] Do Jobs...
+I0427 13:57:42.335572 44640 arm.h:541] arm is idle.
+I0427 13:57:46.069494 44640 nw_sys.h:786] mission. stage 1: configure arm mission...
+I0427 13:57:46.074477 44640 nw_sys.h:1608] Wait for PLC Register 3 == 1
+I0427 13:57:50.787169 44640 nw_sys.h:1608] Wait for PLC Register 1 == 1
+I0427 13:57:51.055369 44640 arm.h:658] [IPC1 ---> Arm]: Post pick_mop
+I0427 13:57:51.081286  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post pick_mop, Arm Running
+I0427 13:57:51.374444  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 13:58:29.846261  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post pick_mop, Arm Finish
+I0427 13:58:29.923807  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:58:29.923807 44640 arm.h:541] arm is idle.
+I0427 13:58:30.100864 44640 arm.h:658] [IPC1 ---> Arm]: Set operation_area = 5
+I0427 13:58:30.133023  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set operation_area = 5, Arm Running
+I0427 13:58:30.173414  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set operation_area = 5, Arm Finish
+I0427 13:58:30.474020  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:58:30.475014 44640 arm.h:541] arm is idle.
+I0427 13:58:30.696704 44640 arm.h:658] [IPC1 ---> Arm]: Post arm_home_to_safety
+I0427 13:58:30.721459  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_home_to_safety, Arm Running
+I0427 13:58:31.100894  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 13:58:42.298792  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_home_to_safety, Arm Finish
+I0427 13:58:42.395040  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:58:42.395794 44640 arm.h:541] arm is idle.
+I0427 13:58:42.536792 44640 arm.h:658] [IPC1 ---> Arm]: Set standby_p0 = -116.384804,-453.296204,471.540588,92.088669,-2.570017,1.028367
+I0427 13:58:42.553791  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set standby_p0 = -116.384804,-453.296204,471.540588,92.088669,-2.570017,1.028367, Arm Running
+I0427 13:58:42.691792  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set standby_p0 = -116.384804,-453.296204,471.540588,92.088669,-2.570017,1.028367, Arm Finish
+I0427 13:58:42.958345  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:58:42.959348 44640 arm.h:541] arm is idle.
+I0427 13:58:43.118567 44640 arm.h:658] [IPC1 ---> Arm]: Move_to standby_p0
+I0427 13:58:43.149958  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Running
+I0427 13:58:43.467280  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 13:58:43.707090  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Finish
+I0427 13:58:43.708088 44640 arm.h:529] arm has finished.
+I0427 13:58:43.772084  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:58:43.855278 44640 arm.h:541] arm is idle.
+I0427 13:58:44.052346 44640 arm.h:658] [IPC1 ---> Arm]: Set vision_lm_init_p0 = -273.993713,-554.900330,264.012909,91.592346,-3.281562,2.709627
+I0427 13:58:44.080366  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set vision_lm_init_p0 = -273.993713,-554.900330,264.012909,91.592346,-3.281562,2.709627, Arm Running
+I0427 13:58:44.155097  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set vision_lm_init_p0 = -273.993713,-554.900330,264.012909,91.592346,-3.281562,2.709627, Arm Finish
+I0427 13:58:44.399749  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:58:44.399749 44640 arm.h:541] arm is idle.
+I0427 13:58:44.557072 44640 arm.h:658] [IPC1 ---> Arm]: Move_to vision_lm_init_p0
+I0427 13:58:44.581228  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to vision_lm_init_p0, Arm Running
+I0427 13:58:44.988974  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 13:58:46.471592  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to vision_lm_init_p0, Arm Finish
+I0427 13:58:46.472589 44640 arm.h:529] arm has finished.
+I0427 13:58:46.530663  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:58:46.664249 44640 arm.h:541] arm is idle.
+I0427 13:58:46.873308 44640 arm.h:658] [IPC1 ---> Arm]: Post vision_find_landmark
+I0427 13:58:46.950867  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post vision_find_landmark, Arm Running
+I0427 13:58:47.317014  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 13:58:47.395612  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post vision_find_landmark, Arm Finish
+I0427 13:58:47.511019  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:58:47.512002 44640 arm.h:541] arm is idle.
+I0427 13:58:47.703583 44640 arm.h:658] [IPC1 ---> Arm]: Post get_find_landmark_flag
+I0427 13:58:47.731669  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_find_landmark_flag, Arm Running
+I0427 13:58:47.784950  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: find_landmark_flag = true
+I0427 13:58:47.827872  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_find_landmark_flag, Arm Finish
+I0427 13:58:48.068794  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:58:48.068794 44640 arm.h:541] arm is idle.
+I0427 13:58:48.068794 44640 nw_sys.h:876] Find Landmark!
+I0427 13:58:48.241767 44640 arm.h:658] [IPC1 ---> Arm]: Post get_landmark_pos_str
+I0427 13:58:48.278282  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_landmark_pos_str, Arm Running
+I0427 13:58:48.340291  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: landmark_pos_str = {-173.53,-1107.53,409.13,-87.64,0.22,-175.43}
+I0427 13:58:48.383158  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_landmark_pos_str, Arm Finish
+I0427 13:58:48.700163  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:58:48.701162 44640 arm.h:541] arm is idle.
+I0427 13:58:48.966881 44640 arm.h:658] [IPC1 ---> Arm]: Move_to standby_p0
+I0427 13:58:49.001883  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Running
+I0427 13:58:49.390743  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 13:58:50.973114  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Finish
+I0427 13:58:50.974113 44640 arm.h:529] arm has finished.
+I0427 13:58:51.038941  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:58:51.123554 44640 arm.h:541] arm is idle.
+I0427 13:58:51.300338 44640 arm.h:658] [IPC1 ---> Arm]: Post tool_angle_0
+I0427 13:58:51.330722  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post tool_angle_0, Arm Running
+I0427 13:58:51.669898  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 13:58:54.408643  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post tool_angle_0, Arm Finish
+I0427 13:58:54.410683 44640 arm.h:529] arm has finished.
+I0427 13:58:54.481732  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:58:54.585379 44640 arm.h:541] arm is idle.
+I0427 13:58:54.972273 44640 arm.h:658] [IPC1 ---> Arm]: Set n_points = 4
+I0427 13:58:54.999833  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set n_points = 4, Arm Running
+I0427 13:58:55.040699  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set n_points = 4, Arm Finish
+I0427 13:58:55.350448  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:58:55.352439 44640 arm.h:541] arm is idle.
+I0427 13:58:55.524893 44640 arm.h:658] [IPC1 ---> Arm]: Set 0_approach_point = 208.252426,-620.837219,238.200027,88.325706,-3.235482,1.500387
+I0427 13:58:55.584511  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set 0_approach_point = 208.252426,-620.837219,238.200027,88.325706,-3.235482,1.500387, Arm Running
+I0427 13:58:55.629506  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set 0_approach_point = 208.252426,-620.837219,238.200027,88.325706,-3.235482,1.500387, Arm Finish
+I0427 13:58:55.887499  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:58:55.888535 44640 arm.h:541] arm is idle.
+I0427 13:58:56.055552 44640 arm.h:658] [IPC1 ---> Arm]: Set via0_1 = 220.880325,-652.769043,213.382401,87.980064,-3.366201,1.513696
+I0427 13:58:56.100154  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via0_1 = 220.880325,-652.769043,213.382401,87.980064,-3.366201,1.513696, Arm Running
+I0427 13:58:56.126574  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via0_1 = 220.880325,-652.769043,213.382401,87.980064,-3.366201,1.513696, Arm Finish
+I0427 13:58:56.447260  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:58:56.449249 44640 arm.h:541] arm is idle.
+I0427 13:58:56.708021 44640 arm.h:658] [IPC1 ---> Arm]: Set via0_2 = -19.757599,-652.487793,223.513107,89.272285,-3.014533,-1.452346
+I0427 13:58:56.759006  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via0_2 = -19.757599,-652.487793,223.513107,89.272285,-3.014533,-1.452346, Arm Running
+I0427 13:58:56.810001  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via0_2 = -19.757599,-652.487793,223.513107,89.272285,-3.014533,-1.452346, Arm Finish
+I0427 13:58:57.118969  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:58:57.118969 44640 arm.h:541] arm is idle.
+I0427 13:58:57.261153 44640 arm.h:658] [IPC1 ---> Arm]: Set via0_3 = -19.757599,-652.487793,223.513107,89.272285,-3.014533,-1.452346
+I0427 13:58:57.312777  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via0_3 = -19.757599,-652.487793,223.513107,89.272285,-3.014533,-1.452346, Arm Running
+I0427 13:58:57.345582  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via0_3 = -19.757599,-652.487793,223.513107,89.272285,-3.014533,-1.452346, Arm Finish
+I0427 13:58:57.641547  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:58:57.643544 44640 arm.h:541] arm is idle.
+I0427 13:58:57.830194 44640 arm.h:658] [IPC1 ---> Arm]: Set via0_4 = 220.880325,-652.769043,213.382401,87.980064,-3.366201,1.513696
+I0427 13:58:57.882058  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via0_4 = 220.880325,-652.769043,213.382401,87.980064,-3.366201,1.513696, Arm Running
+I0427 13:58:57.927875  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via0_4 = 220.880325,-652.769043,213.382401,87.980064,-3.366201,1.513696, Arm Finish
+I0427 13:58:58.210302  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:58:58.212302 44640 arm.h:541] arm is idle.
+I0427 13:58:58.398465 44640 arm.h:658] [IPC1 ---> Arm]: Post arm_via0_line
+I0427 13:58:58.427116  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_via0_line, Arm Running
+I0427 13:58:58.845615  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 13:59:10.846833  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_via0_line, Arm Finish
+I0427 13:59:11.061467  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:59:11.062469 44640 arm.h:541] arm is idle.
+I0427 13:59:11.202816 44640 arm.h:658] [IPC1 ---> Arm]: Move_to standby_p0
+I0427 13:59:11.235886  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Running
+I0427 13:59:11.580574  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 13:59:13.904003  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Finish
+I0427 13:59:14.020398  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:59:14.021399 44640 arm.h:541] arm is idle.
+I0427 13:59:14.175494 44640 arm.h:658] [IPC1 ---> Arm]: Post arm_back_to_safety
+I0427 13:59:14.186955  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_back_to_safety, Arm Running
+I0427 13:59:14.556923  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 13:59:21.218786  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_back_to_safety, Arm Finish
+I0427 13:59:21.218786 44640 arm.h:529] arm has finished.
+I0427 13:59:21.280301  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:59:21.370304 44640 arm.h:541] arm is idle.
+I0427 13:59:22.117262 44640 arm.h:658] [IPC1 ---> Arm]: Post arm_safety_to_home
+I0427 13:59:22.145241  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_safety_to_home, Arm Running
+I0427 13:59:22.488153  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 13:59:33.013082  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_safety_to_home, Arm Finish
+I0427 13:59:33.085814  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:59:33.086809 44640 arm.h:541] arm is idle.
+I0427 13:59:33.254858 44640 arm.h:658] [IPC1 ---> Arm]: Post place_mop
+I0427 13:59:33.271852  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post place_mop, Arm Running
+I0427 13:59:33.639222  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 13:59:52.576519  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post place_mop, Arm Finish
+I0427 13:59:52.815603  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 13:59:52.816602 44640 arm.h:541] arm is idle.
+I0427 13:59:53.146927 44640 nw_sys.h:677] update current jobs status and log...
+I0427 13:59:53.279371 44640 nw_sys.h:688] All Jobs are done
+I0427 13:59:53.395764 44640 nw_sys.h:608] All schedules are done
+I0427 13:59:53.395764 44640 nw_sys.h:610] current time: 2021-04-27 13:59:53.000
+I0427 13:59:53.459323 44640 nw_sys.h:629] unlock thread: wait schedule
+I0427 13:59:53.459323 44640 nw_sys.h:506] [thread_do_schedules]: lock!
+I0427 13:59:53.459323 37976 nw_sys.h:492] [thread_wait_schedules]: unlock!
+I0427 13:59:53.459323 37976 nw_sys.h:315] [thread_wait_schedules]: unlock!
+I0427 13:59:53.460330 37976 nw_sys.h:317] [thread_wait_schedules]: stage 0 --- Initial Check [Start]
+I0427 13:59:53.460330 37976 nw_sys.h:1455] 1. update sys control mode
+I0427 13:59:53.515125 37976 nw_sys.h:1459] 2. updated all devices status
+I0427 13:59:53.516113 37976 nw_sys.h:1460] 2.1 request arm_connection_status and arm_mission_status from arm
+I0427 13:59:53.685101 37976 arm.h:541] arm is idle.
+I0427 13:59:53.685101 37976 nw_sys.h:1464] 3. check function
+I0427 13:59:53.685101 37976 nw_sys.h:1466] 3.0 check function: sys_status   [Start]
+I0427 13:59:53.685101 37976 nw_sys.h:1472] sys_control_mode: Auto
+I0427 13:59:53.685101 37976 nw_sys.h:1509] 3.1 check function: arm   [Start]
+I0427 13:59:53.685101 37976 nw_sys.h:1518] 3.1 check function: arm   [Complete]
+I0427 13:59:53.686105 37976 nw_sys.h:1567] 3.2 check function: ugv   [Start]
+I0427 13:59:53.686105 37976 nw_sys.h:1569] 3.2 check function: ugv   [Complete]
+I0427 13:59:53.686105 37976 nw_sys.h:1584] 4. Update Status to SQL
+I0427 13:59:53.686105 37976 nw_sys.h:1585] 4.1 Update Status to SQL: Arm
+I0427 13:59:55.313709 37976 nw_sys.h:321] [thread_wait_schedules]: stage 0 --- Initial Check [Complete]
+I0427 13:59:55.313709 37976 nw_sys.h:428] [thread_wait_schedules]: stage 1 --- Wait for Database Available Schedules
+I0427 13:59:55.313709 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:59:55.949054 37976 nw_sys.h:435] wait for incoming schedules
+I0427 13:59:56.599056 37976 nw_sys.h:470] [thread_wait_schedules]: unlock thread: do schedule
+I0427 13:59:56.600037 44640 nw_sys.h:511] [thread_do_schedules]: unlock!
+I0427 13:59:56.600037 44640 nw_sys.h:514] thread: do schedule has been unlocked
+I0427 13:59:56.658955 37976 nw_sys.h:487] [thread_wait_schedules]: lock thread: wait schedule
+I0427 14:00:19.093740 44640 nw_sys.h:641] Do Jobs...
+I0427 14:00:22.588143 44640 arm.h:541] arm is idle.
+I0427 14:00:24.600783 44640 nw_sys.h:786] mission. stage 1: configure arm mission...
+I0427 14:00:24.601779 44640 nw_sys.h:1608] Wait for PLC Register 3 == 1
+I0427 14:00:30.167907 44640 nw_sys.h:1608] Wait for PLC Register 1 == 1
+I0427 14:00:30.318022 44640 arm.h:658] [IPC1 ---> Arm]: Post pick_mop
+I0427 14:00:30.340072  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post pick_mop, Arm Running
+I0427 14:00:30.762672  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 14:00:43.222817  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post pick_mop, Arm Finish
+I0427 14:00:43.303048  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:00:43.303048 44640 arm.h:541] arm is idle.
+I0427 14:00:43.468050 44640 arm.h:658] [IPC1 ---> Arm]: Set operation_area = 5
+I0427 14:00:43.485051  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set operation_area = 5, Arm Running
+I0427 14:00:43.544049  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set operation_area = 5, Arm Finish
+I0427 14:00:43.817131  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:00:43.817131 44640 arm.h:541] arm is idle.
+I0427 14:00:43.948127 44640 arm.h:658] [IPC1 ---> Arm]: Post arm_home_to_safety
+I0427 14:00:43.965129  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_home_to_safety, Arm Running
+I0427 14:00:44.353052  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 14:00:53.262264  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_home_to_safety, Arm Finish
+I0427 14:00:53.262264 44640 arm.h:529] arm has finished.
+I0427 14:00:53.312278  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Finish
+I0427 14:00:53.418331  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:00:53.418331 44640 arm.h:541] arm is idle.
+I0427 14:00:53.575883 44640 arm.h:658] [IPC1 ---> Arm]: Set standby_p0 = -116.384804,-453.296204,471.540588,92.088669,-2.570017,1.028367
+I0427 14:00:53.634932  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set standby_p0 = -116.384804,-453.296204,471.540588,92.088669,-2.570017,1.028367, Arm Running
+I0427 14:00:53.694655  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set standby_p0 = -116.384804,-453.296204,471.540588,92.088669,-2.570017,1.028367, Arm Finish
+I0427 14:00:53.941857  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:00:53.942854 44640 arm.h:541] arm is idle.
+I0427 14:00:54.093585 44640 arm.h:658] [IPC1 ---> Arm]: Move_to standby_p0
+I0427 14:00:54.107580  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Running
+I0427 14:00:54.435457  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 14:00:54.782622  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Finish
+I0427 14:00:54.889432  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:00:54.889432 44640 arm.h:541] arm is idle.
+I0427 14:00:55.147154 44640 arm.h:658] [IPC1 ---> Arm]: Set vision_lm_init_p0 = -273.993713,-554.900330,264.012909,91.592346,-3.281562,2.709627
+I0427 14:00:55.196202  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set vision_lm_init_p0 = -273.993713,-554.900330,264.012909,91.592346,-3.281562,2.709627, Arm Running
+I0427 14:00:55.218179  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set vision_lm_init_p0 = -273.993713,-554.900330,264.012909,91.592346,-3.281562,2.709627, Arm Finish
+I0427 14:00:55.502009  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:00:55.502009 44640 arm.h:541] arm is idle.
+I0427 14:00:55.696127 44640 arm.h:658] [IPC1 ---> Arm]: Move_to vision_lm_init_p0
+I0427 14:00:55.719919  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to vision_lm_init_p0, Arm Running
+I0427 14:00:56.042317  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 14:00:57.282287  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to vision_lm_init_p0, Arm Finish
+I0427 14:00:57.282287 44640 arm.h:529] arm has finished.
+I0427 14:00:57.334571  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:00:57.435503 44640 arm.h:541] arm is idle.
+I0427 14:00:57.604593 44640 arm.h:658] [IPC1 ---> Arm]: Post vision_find_landmark
+I0427 14:00:57.630585  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post vision_find_landmark, Arm Running
+I0427 14:00:57.996167  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 14:00:58.140421  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post vision_find_landmark, Arm Finish
+I0427 14:00:58.141413 44640 arm.h:529] arm has finished.
+I0427 14:00:58.178156  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:00:58.405819 44640 arm.h:541] arm is idle.
+I0427 14:00:58.533808 44640 arm.h:658] [IPC1 ---> Arm]: Post get_find_landmark_flag
+I0427 14:00:58.550972  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_find_landmark_flag, Arm Running
+I0427 14:00:58.609202  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: find_landmark_flag = true
+I0427 14:00:58.775939  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_find_landmark_flag, Arm Finish
+I0427 14:00:58.960717  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:00:58.960717 44640 arm.h:541] arm is idle.
+I0427 14:00:58.960717 44640 nw_sys.h:876] Find Landmark!
+I0427 14:00:59.201491 44640 arm.h:658] [IPC1 ---> Arm]: Post get_landmark_pos_str
+I0427 14:00:59.227499  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_landmark_pos_str, Arm Running
+I0427 14:00:59.281486  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: landmark_pos_str = {-173.26,-1108.26,409.36,-88.23,0.13,-174.4}
+I0427 14:00:59.340529  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_landmark_pos_str, Arm Finish
+I0427 14:00:59.556746  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:00:59.557754 44640 arm.h:541] arm is idle.
+I0427 14:00:59.733419 44640 arm.h:658] [IPC1 ---> Arm]: Move_to standby_p0
+I0427 14:00:59.758672  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Running
+I0427 14:01:00.106932  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 14:01:01.325896  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Finish
+I0427 14:01:01.411980  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:01:01.412974 44640 arm.h:541] arm is idle.
+I0427 14:01:01.564769 44640 arm.h:658] [IPC1 ---> Arm]: Post tool_angle_0
+I0427 14:01:01.580866  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post tool_angle_0, Arm Running
+I0427 14:01:01.918367  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 14:01:04.766155  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post tool_angle_0, Arm Finish
+I0427 14:01:04.767168 44640 arm.h:529] arm has finished.
+I0427 14:01:04.821169  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:01:05.003250 44640 arm.h:541] arm is idle.
+I0427 14:01:05.184331 44640 arm.h:658] [IPC1 ---> Arm]: Set n_points = 4
+I0427 14:01:05.206863  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set n_points = 4, Arm Running
+I0427 14:01:05.276923  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set n_points = 4, Arm Finish
+I0427 14:01:05.561260  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:01:05.562270 44640 arm.h:541] arm is idle.
+I0427 14:01:05.732475 44640 arm.h:658] [IPC1 ---> Arm]: Set 0_approach_point = 199.262650,-613.065979,242.463043,88.910896,-3.113861,2.499787
+I0427 14:01:05.789759  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set 0_approach_point = 199.262650,-613.065979,242.463043,88.910896,-3.113861,2.499787, Arm Running
+I0427 14:01:05.834937  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set 0_approach_point = 199.262650,-613.065979,242.463043,88.910896,-3.113861,2.499787, Arm Finish
+I0427 14:01:06.096230  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:01:06.097239 44640 arm.h:541] arm is idle.
+I0427 14:01:06.284418 44640 arm.h:658] [IPC1 ---> Arm]: Set via0_1 = 212.399323,-644.512817,217.292862,88.565353,-3.244709,2.511755
+I0427 14:01:06.329640  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via0_1 = 212.399323,-644.512817,217.292862,88.565353,-3.244709,2.511755, Arm Running
+I0427 14:01:06.379640  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via0_1 = 212.399323,-644.512817,217.292862,88.565353,-3.244709,2.511755, Arm Finish
+I0427 14:01:06.792692  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:01:06.799686 44640 arm.h:541] arm is idle.
+I0427 14:01:07.030351 44640 arm.h:658] [IPC1 ---> Arm]: Set via0_2 = -28.177902,-648.670044,228.000046,89.850304,-2.862989,-0.450173
+I0427 14:01:07.082554  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via0_2 = -28.177902,-648.670044,228.000046,89.850304,-2.862989,-0.450173, Arm Running
+I0427 14:01:07.128535  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via0_2 = -28.177902,-648.670044,228.000046,89.850304,-2.862989,-0.450173, Arm Finish
+I0427 14:01:07.411528  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:01:07.412540 44640 arm.h:541] arm is idle.
+I0427 14:01:07.570912 44640 arm.h:658] [IPC1 ---> Arm]: Set via0_3 = -28.177902,-648.670044,228.000046,89.850304,-2.862989,-0.450173
+I0427 14:01:07.600296  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via0_3 = -28.177902,-648.670044,228.000046,89.850304,-2.862989,-0.450173, Arm Running
+I0427 14:01:07.681174  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via0_3 = -28.177902,-648.670044,228.000046,89.850304,-2.862989,-0.450173, Arm Finish
+I0427 14:01:07.970870  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:01:07.977865 44640 arm.h:541] arm is idle.
+I0427 14:01:08.138854 44640 arm.h:658] [IPC1 ---> Arm]: Set via0_4 = 212.399323,-644.512817,217.292862,88.565353,-3.244709,2.511755
+I0427 14:01:08.170892  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via0_4 = 212.399323,-644.512817,217.292862,88.565353,-3.244709,2.511755, Arm Running
+I0427 14:01:08.220170  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via0_4 = 212.399323,-644.512817,217.292862,88.565353,-3.244709,2.511755, Arm Finish
+I0427 14:01:08.532773  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:01:08.532773 44640 arm.h:541] arm is idle.
+I0427 14:01:08.698860 44640 arm.h:658] [IPC1 ---> Arm]: Post arm_via0_line
+I0427 14:01:08.785575  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_via0_line, Arm Running
+I0427 14:01:09.147228  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 14:01:19.398865  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_via0_line, Arm Finish
+I0427 14:01:19.399858 44640 arm.h:529] arm has finished.
+I0427 14:01:19.465306  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:01:19.467311 44640 arm.h:541] arm is idle.
+I0427 14:01:19.634085 44640 arm.h:658] [IPC1 ---> Arm]: Move_to standby_p0
+I0427 14:01:19.655102  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Running
+I0427 14:01:20.022485  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 14:01:21.746711  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Finish
+I0427 14:01:21.746711 44640 arm.h:529] arm has finished.
+I0427 14:01:21.803304  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:01:21.906879 44640 arm.h:541] arm is idle.
+I0427 14:01:22.067972 44640 arm.h:658] [IPC1 ---> Arm]: Post arm_back_to_safety
+I0427 14:01:22.084969  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_back_to_safety, Arm Running
+I0427 14:01:22.449151  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 14:01:27.894006  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_back_to_safety, Arm Finish
+I0427 14:01:27.985899  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:01:27.986899 44640 arm.h:541] arm is idle.
+I0427 14:01:28.832978 44640 arm.h:658] [IPC1 ---> Arm]: Post arm_safety_to_home
+I0427 14:01:28.845979  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_safety_to_home, Arm Running
+I0427 14:01:29.211071  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 14:01:41.357182  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_safety_to_home, Arm Finish
+I0427 14:01:41.452366  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:01:41.453366 44640 arm.h:541] arm is idle.
+I0427 14:01:41.646747 44640 arm.h:658] [IPC1 ---> Arm]: Post place_mop
+I0427 14:01:41.668731  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post place_mop, Arm Running
+I0427 14:01:42.045589  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 14:02:28.187376  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post place_mop, Arm Finish
+I0427 14:02:28.189375 44640 arm.h:529] arm has finished.
+I0427 14:02:28.232393  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:02:28.358700 44640 arm.h:541] arm is idle.
+I0427 14:02:28.582382 44640 nw_sys.h:677] update current jobs status and log...
+I0427 14:02:28.872145 44640 nw_sys.h:688] All Jobs are done
+I0427 14:02:29.089809 44640 nw_sys.h:608] All schedules are done
+I0427 14:02:29.089809 44640 nw_sys.h:610] current time: 2021-04-27 14:2:29.000
+I0427 14:02:29.141808 44640 nw_sys.h:629] unlock thread: wait schedule
+I0427 14:02:29.141808 44640 nw_sys.h:506] [thread_do_schedules]: lock!
+I0427 14:02:29.141808 37976 nw_sys.h:492] [thread_wait_schedules]: unlock!
+I0427 14:02:29.141808 37976 nw_sys.h:315] [thread_wait_schedules]: unlock!
+I0427 14:02:29.141808 37976 nw_sys.h:317] [thread_wait_schedules]: stage 0 --- Initial Check [Start]
+I0427 14:02:29.141808 37976 nw_sys.h:1455] 1. update sys control mode
+I0427 14:02:29.191538 37976 nw_sys.h:1459] 2. updated all devices status
+I0427 14:02:29.191538 37976 nw_sys.h:1460] 2.1 request arm_connection_status and arm_mission_status from arm
+I0427 14:02:29.350433 37976 arm.h:541] arm is idle.
+I0427 14:02:29.350433 37976 nw_sys.h:1464] 3. check function
+I0427 14:02:29.350433 37976 nw_sys.h:1466] 3.0 check function: sys_status   [Start]
+I0427 14:02:29.350433 37976 nw_sys.h:1472] sys_control_mode: Auto
+I0427 14:02:29.350433 37976 nw_sys.h:1509] 3.1 check function: arm   [Start]
+I0427 14:02:29.350433 37976 nw_sys.h:1518] 3.1 check function: arm   [Complete]
+I0427 14:02:29.350433 37976 nw_sys.h:1567] 3.2 check function: ugv   [Start]
+I0427 14:02:29.350433 37976 nw_sys.h:1569] 3.2 check function: ugv   [Complete]
+I0427 14:02:29.350433 37976 nw_sys.h:1584] 4. Update Status to SQL
+I0427 14:02:29.350433 37976 nw_sys.h:1585] 4.1 Update Status to SQL: Arm
+I0427 14:02:30.982437 37976 nw_sys.h:321] [thread_wait_schedules]: stage 0 --- Initial Check [Complete]
+I0427 14:02:30.982437 37976 nw_sys.h:428] [thread_wait_schedules]: stage 1 --- Wait for Database Available Schedules
+I0427 14:02:30.983433 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:02:31.709830 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:02:32.314692 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:02:32.996106 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:02:33.706827 37976 nw_sys.h:470] [thread_wait_schedules]: unlock thread: do schedule
+I0427 14:02:33.706827 44640 nw_sys.h:511] [thread_do_schedules]: unlock!
+I0427 14:02:33.707849 44640 nw_sys.h:514] thread: do schedule has been unlocked
+I0427 14:02:33.767191 37976 nw_sys.h:487] [thread_wait_schedules]: lock thread: wait schedule
+I0427 14:02:56.184623 44640 nw_sys.h:641] Do Jobs...
+I0427 14:02:59.889454 44640 arm.h:541] arm is idle.
+I0427 14:03:01.740285 44640 nw_sys.h:786] mission. stage 1: configure arm mission...
+I0427 14:03:01.741283 44640 nw_sys.h:1608] Wait for PLC Register 3 == 1
+I0427 14:03:07.811033 44640 nw_sys.h:1608] Wait for PLC Register 1 == 1
+I0427 14:03:08.025954 44640 arm.h:658] [IPC1 ---> Arm]: Post pick_mop
+I0427 14:03:08.049270  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post pick_mop, Arm Running
+I0427 14:03:08.390333  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 14:03:29.627470  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post pick_mop, Arm Finish
+I0427 14:03:29.628464 44640 arm.h:529] arm has finished.
+I0427 14:03:29.689455  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:03:29.783808 44640 arm.h:541] arm is idle.
+I0427 14:03:29.938819 44640 arm.h:658] [IPC1 ---> Arm]: Set operation_area = 5
+I0427 14:03:29.969453  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set operation_area = 5, Arm Running
+I0427 14:03:30.021366  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set operation_area = 5, Arm Finish
+I0427 14:03:30.323734  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:03:30.325770 44640 arm.h:541] arm is idle.
+I0427 14:03:30.487704 44640 arm.h:658] [IPC1 ---> Arm]: Post arm_home_to_safety
+I0427 14:03:30.522701  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_home_to_safety, Arm Running
+I0427 14:03:30.974566  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 14:03:42.093389  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_home_to_safety, Arm Finish
+I0427 14:03:42.094404 44640 arm.h:529] arm has finished.
+I0427 14:03:42.138731  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:03:42.281687 44640 arm.h:541] arm is idle.
+I0427 14:03:42.444767 44640 arm.h:658] [IPC1 ---> Arm]: Set standby_p0 = -116.384804,-453.296204,471.540588,92.088669,-2.570017,1.028367
+I0427 14:03:42.498152  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set standby_p0 = -116.384804,-453.296204,471.540588,92.088669,-2.570017,1.028367, Arm Running
+I0427 14:03:42.547339  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set standby_p0 = -116.384804,-453.296204,471.540588,92.088669,-2.570017,1.028367, Arm Finish
+I0427 14:03:42.926064  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:03:42.928076 44640 arm.h:541] arm is idle.
+I0427 14:03:43.194362 44640 arm.h:658] [IPC1 ---> Arm]: Move_to standby_p0
+I0427 14:03:43.217476  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Running
+I0427 14:03:43.631618  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 14:03:43.778225  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Finish
+I0427 14:03:43.778225 44640 arm.h:529] arm has finished.
+I0427 14:03:43.825579  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:03:43.943054 44640 arm.h:541] arm is idle.
+I0427 14:03:44.114640 44640 arm.h:658] [IPC1 ---> Arm]: Set vision_lm_init_p0 = -273.993713,-554.900330,264.012909,91.592346,-3.281562,2.709627
+I0427 14:03:44.171067  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set vision_lm_init_p0 = -273.993713,-554.900330,264.012909,91.592346,-3.281562,2.709627, Arm Running
+I0427 14:03:44.192984  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set vision_lm_init_p0 = -273.993713,-554.900330,264.012909,91.592346,-3.281562,2.709627, Arm Finish
+I0427 14:03:44.527294  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:03:44.527294 44640 arm.h:541] arm is idle.
+I0427 14:03:44.674511 44640 arm.h:658] [IPC1 ---> Arm]: Move_to vision_lm_init_p0
+I0427 14:03:44.691709  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to vision_lm_init_p0, Arm Running
+I0427 14:03:45.111851  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 14:03:46.655866  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to vision_lm_init_p0, Arm Finish
+I0427 14:03:46.794301  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:03:46.795302 44640 arm.h:541] arm is idle.
+I0427 14:03:47.109438 44640 arm.h:658] [IPC1 ---> Arm]: Post vision_find_landmark
+I0427 14:03:47.133464  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post vision_find_landmark, Arm Running
+I0427 14:03:47.593021  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 14:03:47.639109  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post vision_find_landmark, Arm Finish
+I0427 14:03:47.863130  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:03:47.864130 44640 arm.h:541] arm is idle.
+I0427 14:03:48.067595 44640 arm.h:658] [IPC1 ---> Arm]: Post get_find_landmark_flag
+I0427 14:03:48.090585  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_find_landmark_flag, Arm Running
+I0427 14:03:48.144582  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: find_landmark_flag = true
+I0427 14:03:48.204178  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_find_landmark_flag, Arm Finish
+I0427 14:03:48.426631  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:03:48.426631 44640 arm.h:541] arm is idle.
+I0427 14:03:48.427631 44640 nw_sys.h:876] Find Landmark!
+I0427 14:03:48.605787 44640 arm.h:658] [IPC1 ---> Arm]: Post get_landmark_pos_str
+I0427 14:03:48.631768  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_landmark_pos_str, Arm Running
+I0427 14:03:48.695175  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: landmark_pos_str = {-173.36,-1108.11,409.3,-87.85,0.15,-174.7}
+I0427 14:03:48.729424  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_landmark_pos_str, Arm Finish
+I0427 14:03:49.053895  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:03:49.054893 44640 arm.h:541] arm is idle.
+I0427 14:03:49.238181 44640 arm.h:658] [IPC1 ---> Arm]: Move_to standby_p0
+I0427 14:03:49.262760  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Running
+I0427 14:03:49.637790  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 14:03:51.178014  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Finish
+I0427 14:03:51.263861  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:03:51.264863 44640 arm.h:541] arm is idle.
+I0427 14:03:51.444233 44640 arm.h:658] [IPC1 ---> Arm]: Post tool_angle_0
+I0427 14:03:51.467236  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post tool_angle_0, Arm Running
+I0427 14:03:51.809341  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 14:03:54.688606  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post tool_angle_0, Arm Finish
+I0427 14:03:54.849463  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:03:54.850471 44640 arm.h:541] arm is idle.
+I0427 14:03:55.091887 44640 arm.h:658] [IPC1 ---> Arm]: Set n_points = 4
+I0427 14:03:55.130260  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set n_points = 4, Arm Running
+I0427 14:03:55.189399  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set n_points = 4, Arm Finish
+I0427 14:03:55.503214  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:03:55.503214 44640 arm.h:541] arm is idle.
+I0427 14:03:55.677212 44640 arm.h:658] [IPC1 ---> Arm]: Set 0_approach_point = 201.920013,-615.985779,239.525558,88.531967,-3.154319,2.219568
+I0427 14:03:55.704212  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set 0_approach_point = 201.920013,-615.985779,239.525558,88.531967,-3.154319,2.219568, Arm Running
+I0427 14:03:55.749213  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set 0_approach_point = 201.920013,-615.985779,239.525558,88.531967,-3.154319,2.219568, Arm Finish
+I0427 14:03:56.071210  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:03:56.072209 44640 arm.h:541] arm is idle.
+I0427 14:03:56.253211 44640 arm.h:658] [IPC1 ---> Arm]: Set via0_1 = 214.915405,-647.665955,214.575516,88.186356,-3.285085,2.232403
+I0427 14:03:56.278209  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via0_1 = 214.915405,-647.665955,214.575516,88.186356,-3.285085,2.232403, Arm Running
+I0427 14:03:56.338212  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via0_1 = 214.915405,-647.665955,214.575516,88.186356,-3.285085,2.232403, Arm Finish
+I0427 14:03:56.626044  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:03:56.628043 44640 arm.h:541] arm is idle.
+I0427 14:03:56.852432 44640 arm.h:658] [IPC1 ---> Arm]: Set via0_2 = -25.690521,-650.489807,225.070450,89.474030,-2.922871,-0.732119
+I0427 14:03:56.886425  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via0_2 = -25.690521,-650.489807,225.070450,89.474030,-2.922871,-0.732119, Arm Running
+I0427 14:03:56.921319  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via0_2 = -25.690521,-650.489807,225.070450,89.474030,-2.922871,-0.732119, Arm Finish
+I0427 14:03:57.371728  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:03:57.371728 44640 arm.h:541] arm is idle.
+I0427 14:03:57.549763 44640 arm.h:658] [IPC1 ---> Arm]: Set via0_3 = -25.690521,-650.489807,225.070450,89.474030,-2.922871,-0.732119
+I0427 14:03:57.605019  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via0_3 = -25.690521,-650.489807,225.070450,89.474030,-2.922871,-0.732119, Arm Running
+I0427 14:03:57.654822  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via0_3 = -25.690521,-650.489807,225.070450,89.474030,-2.922871,-0.732119, Arm Finish
+I0427 14:03:57.932667  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:03:57.933648 44640 arm.h:541] arm is idle.
+I0427 14:03:58.092403 44640 arm.h:658] [IPC1 ---> Arm]: Set via0_4 = 214.915405,-647.665955,214.575516,88.186356,-3.285085,2.232403
+I0427 14:03:58.137790  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via0_4 = 214.915405,-647.665955,214.575516,88.186356,-3.285085,2.232403, Arm Running
+I0427 14:03:58.182596  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via0_4 = 214.915405,-647.665955,214.575516,88.186356,-3.285085,2.232403, Arm Finish
+I0427 14:03:58.491109  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:03:58.493140 44640 arm.h:541] arm is idle.
+I0427 14:03:58.681835 44640 arm.h:658] [IPC1 ---> Arm]: Post arm_via0_line
+I0427 14:03:58.706367  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_via0_line, Arm Running
+I0427 14:03:59.115504  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 14:04:11.223673  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_via0_line, Arm Finish
+I0427 14:04:11.318316  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:04:11.320317 44640 arm.h:541] arm is idle.
+I0427 14:04:11.485855 44640 arm.h:658] [IPC1 ---> Arm]: Move_to standby_p0
+I0427 14:04:11.511864  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Running
+I0427 14:04:11.859148  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 14:04:14.109086  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Finish
+I0427 14:04:14.110085 44640 arm.h:529] arm has finished.
+I0427 14:04:14.183147  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:04:14.339620 44640 arm.h:541] arm is idle.
+I0427 14:04:14.500912 44640 arm.h:658] [IPC1 ---> Arm]: Post arm_back_to_safety
+I0427 14:04:14.516911  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_back_to_safety, Arm Running
+I0427 14:04:14.892087  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 14:04:21.561075  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_back_to_safety, Arm Finish
+I0427 14:04:21.683748  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:04:21.683748 44640 arm.h:541] arm is idle.
+I0427 14:04:22.438839 44640 arm.h:658] [IPC1 ---> Arm]: Post arm_safety_to_home
+I0427 14:04:22.481362  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_safety_to_home, Arm Running
+I0427 14:04:22.859059  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 14:04:33.371417  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_safety_to_home, Arm Finish
+I0427 14:04:33.500213  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:04:33.501219 44640 arm.h:541] arm is idle.
+I0427 14:04:33.665165 44640 arm.h:658] [IPC1 ---> Arm]: Post place_mop
+I0427 14:04:33.688508  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post place_mop, Arm Running
+I0427 14:04:34.060169  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0427 14:04:52.933066  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Post place_mop, Arm Finish
+I0427 14:04:52.934067 44640 arm.h:529] arm has finished.
+I0427 14:04:52.987640  4644 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0427 14:04:53.204548 44640 arm.h:541] arm is idle.
+I0427 14:04:53.485695 44640 nw_sys.h:677] update current jobs status and log...
+I0427 14:04:53.658282 44640 nw_sys.h:688] All Jobs are done
+I0427 14:04:53.837424 44640 nw_sys.h:608] All schedules are done
+I0427 14:04:53.837424 44640 nw_sys.h:610] current time: 2021-04-27 14:4:53.000
+I0427 14:04:53.896855 44640 nw_sys.h:629] unlock thread: wait schedule
+I0427 14:04:53.897841 44640 nw_sys.h:506] [thread_do_schedules]: lock!
+I0427 14:04:53.897841 37976 nw_sys.h:492] [thread_wait_schedules]: unlock!
+I0427 14:04:53.898860 37976 nw_sys.h:315] [thread_wait_schedules]: unlock!
+I0427 14:04:53.899849 37976 nw_sys.h:317] [thread_wait_schedules]: stage 0 --- Initial Check [Start]
+I0427 14:04:53.900849 37976 nw_sys.h:1455] 1. update sys control mode
+I0427 14:04:53.973726 37976 nw_sys.h:1459] 2. updated all devices status
+I0427 14:04:53.973726 37976 nw_sys.h:1460] 2.1 request arm_connection_status and arm_mission_status from arm
+I0427 14:04:54.155725 37976 arm.h:541] arm is idle.
+I0427 14:04:54.155725 37976 nw_sys.h:1464] 3. check function
+I0427 14:04:54.156713 37976 nw_sys.h:1466] 3.0 check function: sys_status   [Start]
+I0427 14:04:54.156713 37976 nw_sys.h:1472] sys_control_mode: Auto
+I0427 14:04:54.157675 37976 nw_sys.h:1509] 3.1 check function: arm   [Start]
+I0427 14:04:54.157675 37976 nw_sys.h:1518] 3.1 check function: arm   [Complete]
+I0427 14:04:54.158707 37976 nw_sys.h:1567] 3.2 check function: ugv   [Start]
+I0427 14:04:54.158707 37976 nw_sys.h:1569] 3.2 check function: ugv   [Complete]
+I0427 14:04:54.158707 37976 nw_sys.h:1584] 4. Update Status to SQL
+I0427 14:04:54.159709 37976 nw_sys.h:1585] 4.1 Update Status to SQL: Arm
+I0427 14:04:55.910209 37976 nw_sys.h:321] [thread_wait_schedules]: stage 0 --- Initial Check [Complete]
+I0427 14:04:55.910209 37976 nw_sys.h:428] [thread_wait_schedules]: stage 1 --- Wait for Database Available Schedules
+I0427 14:04:55.911195 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:04:56.591848 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:04:57.237064 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:04:57.882091 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:04:58.515200 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:04:59.181751 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:04:59.874226 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:00.512375 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:01.435448 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:02.086067 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:02.735030 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:03.673708 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:04.344318 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:05.024062 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:05.821856 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:06.440359 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:07.088436 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:07.768728 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:08.417683 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:09.055331 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:09.780750 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:10.384380 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:11.017096 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:11.737274 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:12.382072 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:13.049703 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:13.775018 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:14.411381 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:15.063077 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:15.819165 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:16.452977 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:17.165201 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:17.797825 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:18.417474 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:19.067580 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:19.775588 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:20.439460 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:21.103742 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:21.797938 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:22.419489 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:23.069999 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:23.810174 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:24.479378 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:25.148171 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:25.816253 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:26.451908 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:27.104640 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:27.781098 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:28.427109 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:29.168633 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:29.833102 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:30.467505 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:31.100641 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:31.765885 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:32.403172 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:33.054445 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:33.824977 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:34.492256 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:35.145300 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:35.823091 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:36.474470 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:37.121992 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:37.802589 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:38.472141 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:39.140353 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:39.837122 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:40.487094 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:41.122570 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:43.213032 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:43.953013 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:44.877017 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:45.907920 37976 nw_sys.h:435] wait for incoming schedules
+I0427 14:05:46.541347 37976 nw_sys.h:435] wait for incoming schedules

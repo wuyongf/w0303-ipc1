@@ -174,7 +174,7 @@ int main()
         //
         yf::algorithm::cleaning_motion al_cleaning_motion;
 
-        auto via_points = al_cleaning_motion.get_via_points(motion_type,init_cleaning_points);
+        auto via_points = al_cleaning_motion.get_mop_via_points(motion_type, init_cleaning_points);
 
         std::cout << "via_points' size: " << via_points.size() << std::endl;
 

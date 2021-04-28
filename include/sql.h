@@ -2087,7 +2087,7 @@ yf::sql::sql_server::GetCleanPoints(const int &arm_mission_config_id, const yf::
 
     switch (motion_type)
     {
-        case yf::data::arm::MotionType::PlaneMotion:
+        case yf::data::arm::MotionType::Plane:
         {
             int plane_cleaning_p1_id = this->GetArmMissionPointId(arm_mission_config_id, "plane_cleaning_p1");
             int plane_cleaning_p2_id = this->GetArmMissionPointId(arm_mission_config_id, "plane_cleaning_p2");
@@ -2106,7 +2106,7 @@ yf::sql::sql_server::GetCleanPoints(const int &arm_mission_config_id, const yf::
 
             break;
         }
-        case yf::data::arm::MotionType::LineMotion:
+        case yf::data::arm::MotionType::Line:
         {
             int line_cleaning_p1_id = this->GetArmMissionPointId(arm_mission_config_id, "line_cleaning_p1");
             int line_cleaning_p2_id = this->GetArmMissionPointId(arm_mission_config_id, "line_cleaning_p2");

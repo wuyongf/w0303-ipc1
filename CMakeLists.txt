@@ -165,6 +165,8 @@ target_link_libraries(arm_test PUBLIC glog::glog nanodbc modbus Poco::Foundation
 add_executable(str_parse_test1 "useful-functions/str_parse_test1.cpp" "include/net_w0303_server.h")
 target_link_libraries(str_parse_test1 PUBLIC glog::glog nanodbc modbus Poco::Foundation Poco::Net Poco::XML Poco::Zip Poco::Data Poco::JSON)
 
+add_executable(al_test "useful-functions/al_test.cpp")
+target_link_libraries(al_test PUBLIC glog::glog nanodbc modbus Poco::Foundation Poco::Net Poco::XML Poco::Zip Poco::Data Poco::JSON)
 
 
 

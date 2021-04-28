@@ -199,7 +199,7 @@ namespace yf
 
             yf::data::arm::OperationArea cur_operation_area_;
 
-            yf::data::arm::ToolAngle cur_tool_angle_;
+            yf::data::arm::ToolAngle cur_tool_angle_ = yf::data::arm::ToolAngle::Zero;
 
             // for transformation.
             bool cur_find_landmark_flag_ = false;
@@ -798,7 +798,6 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
                         auto arm_mission_configs = tm5.ConfigureArmMission(cur_model_config_id_, cur_order);
 
                         cur_operation_area_ =  arm_mission_configs[cur_order-1].operation_area;
-                        cur_tool_angle_ = arm_mission_configs[cur_order-1].tool_angle;
 
                         // z. finish configure stage.
                         mir100.SetPLCRegisterIntValue(3,0);
@@ -815,6 +814,8 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
                             /// First order, pick the pad
                             if(cur_order == 1)
                             {
+                                cur_tool_angle_ = data::arm::ToolAngle::Zero;
+
                                 this->ArmPickTool(cur_task_mode_);
 
 //                                if(cur_task_mode_ == data::arm::TaskMode::Mopping)
@@ -969,6 +970,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
 
                                 // place the tool
                                 this->ArmPlaceTool(cur_task_mode_);
+                                cur_tool_angle_ = data::arm::ToolAngle::Zero;
 
                                 /// ipc1 loop
                                 // set arm_mission_success_flag
@@ -1789,12 +1791,20 @@ yf::sys::nw_sys::ArmSetToolAngle(const yf::data::arm::TaskMode &task_mode, const
         {
             case data::arm::ToolAngle::Zero:
             {
-                this->ArmTask("Post tool_angle_0");
+                if(cur_tool_angle_ == data::arm::ToolAngle::FortyFive)
+                {
+                    this->ArmTask("Post tool_angle_0");
+                    cur_tool_angle_ = data::arm::ToolAngle::Zero;
+                }
                 break;
             }
             case data::arm::ToolAngle::FortyFive:
             {
-                this->ArmTask("Post tool_angle_45");
+                if(cur_tool_angle_ == data::arm::ToolAngle::Zero)
+                {
+                    this->ArmTask("Post tool_angle_45");
+                    cur_tool_angle_ = data::arm::ToolAngle::FortyFive;
+                }
                 break;
             }
         }
@@ -1908,7 +1918,7 @@ void yf::sys::nw_sys::ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode,
 
                         break;
                     }
-                    case data::arm::ModelType::Desk:
+                    case data::arm::ModelType::DeskRectangle:
                     {
                         std::string command = "Post arm_via45_line_d";
 

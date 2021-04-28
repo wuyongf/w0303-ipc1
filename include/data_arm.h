@@ -88,8 +88,12 @@ namespace  yf
 
             enum class MotionType
             {
-                LineMotion,     // 2 points
-                PlaneMotion,    // 4 points
+                Plane       = 1,        // 4 points
+                Line        = 2,        // 2 points
+                CircleFull  = 3,        // 3 points
+                CircleHalf  = 4,        // 3 points
+                Curve       = 5,        //
+                Surface     = 6
             };
 
             // for operation area
@@ -163,18 +167,23 @@ namespace  yf
 
             enum class ModelType
             {
-                Handrail    = 1,
-                Chair       = 2,
-                Wall        = 4,
-                Handle      = 5,
-                LiftButton  = 6,
-                Desk        = 7,
-                Skirting    = 8,
-                FootPanel   = 9,
-                Windows     = 10,
-                ProtectiveWall = 11,
-                Sink        = 12,
-                NurseStation =13
+                Handrail        = 1,
+                Chair           = 2,
+                Wall            = 4,
+                Handle          = 5,
+                LiftButton      = 6,
+                DeskRectangle   = 7,
+                Skirting        = 8,
+                FootPanel       = 9,
+                Windows         = 10,
+                ProtectiveWall  = 11,
+                Sink            = 12,
+                NurseStation    = 13,
+
+                DeskCircle      = 14,
+                DeskPolygon     = 15,
+
+                HandleSurface   = 16
             };
 
             struct MissionConfig

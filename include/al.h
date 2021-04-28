@@ -22,10 +22,11 @@ namespace yf
             void set_plain_edge_points(const data::arm::Point3d& p1, const data::arm::Point3d& p2,
                                        const data::arm::Point3d& p3, const data::arm::Point3d& p4);
 
-            std::deque<yf::data::arm::Point3d> get_via_points(const yf::data::arm::MotionType &motion_type, std::deque<yf::data::arm::Point3d> init_cleaning_points);
+            std::deque<yf::data::arm::Point3d> get_mop_via_points(const yf::data::arm::MotionType &motion_type,
+                                                                  const std::deque<yf::data::arm::Point3d>& init_cleaning_points);
 
-            std::deque<yf::data::arm::Point3d> get_uvc_via_points(const yf::data::arm::MotionType &motion_type,
-                                                                  std::deque<yf::data::arm::Point3d> init_cleaning_points,
+            std::deque<yf::data::arm::Point3d> get_uvc_via_points(const yf::data::arm::MotionType& motion_type,
+                                                                  const std::deque<yf::data::arm::Point3d>& init_cleaning_points,
                                                                   const int& layer,
                                                                   const float& step_ratio_horizontal);
 
@@ -37,17 +38,32 @@ namespace yf
             std::shared_ptr<yf::sql::sql_server> sql_ptr_;
 
             // properties
+            //
+            data::arm::Point3d init_p1_;
+            data::arm::Point3d init_p2_;
+            data::arm::Point3d init_p3_;
+            data::arm::Point3d init_p4_;
 
+            /// for motion type: Plane
             int layer_          = 1; // at least 1
             int sample_points_  = 40;
 
-            data::arm::Point3d edge_p1_;
-            data::arm::Point3d edge_p2_;
-            data::arm::Point3d edge_p3_;
-            data::arm::Point3d edge_p4_;
+            /// for motion type: Circle
+            yf::data::arm::Point3d center_point_;
+            float radius_;
 
-            std::vector<data::arm::Point3d> plain_clean_path_;
+            Eigen::RowVector3f v1_;
+            Eigen::RowVector3f v2_;
 
+            float offset_distance_;
+
+        public:
+
+            void CenterFit3d(const std::deque<yf::data::arm::Point3d>& init_cleaning_points);
+
+            std::vector<float> Point3d_2_Vector(const yf::data::arm::Point3d& point);
+
+            void set_offset_distance(const float& distance);
         };
 
         class degree_related
@@ -55,14 +71,6 @@ namespace yf
         public:
             degree_related(){}
             virtual ~degree_related(){}
-
-            float d2r(const float& degree);
-            float r2d(const float& radian);
-
-            Eigen::Matrix3f ryp2RMat(const float& roll, const float& pitch, const float& yaw);
-            Eigen::Matrix4f points2TMat(std::vector<float>& point);
-
-            std::vector<float> R2rpy(Eigen::Matrix3f& RMat);
         };
 
         class arm_path
@@ -445,21 +453,22 @@ void yf::algorithm::cleaning_motion::set_plain_edge_points(const yf::data::arm::
 
 }
 
-std::deque<yf::data::arm::Point3d> yf::algorithm::cleaning_motion::get_via_points(const yf::data::arm::MotionType &motion_type,
-                                                                                  std::deque<yf::data::arm::Point3d> init_cleaning_points)
+std::deque<yf::data::arm::Point3d> yf::algorithm::cleaning_motion::get_mop_via_points(const yf::data::arm::MotionType& motion_type,
+                                                                                      const std::deque<yf::data::arm::Point3d>& init_cleaning_points)
 {
     std::deque<yf::data::arm::Point3d> via_points;
 
     switch (motion_type)
     {
-        case yf::data::arm::MotionType::PlaneMotion: // plain_cleaning
+        case yf::data::arm::MotionType::Plane:
         {
-            /// 1. Initialization
-            edge_p1_ = init_cleaning_points[0];
-            edge_p2_ = init_cleaning_points[1];
-            edge_p3_ = init_cleaning_points[2];
-            edge_p4_ = init_cleaning_points[3];
+            //@@ input: 4 points
 
+            /// 1. Initialization
+            init_p1_ = init_cleaning_points[0];
+            init_p2_ = init_cleaning_points[1];
+            init_p3_ = init_cleaning_points[2];
+            init_p4_ = init_cleaning_points[3];
 
             int motion_line = layer_ + 1;
             int occupied_points = motion_line * 2;
@@ -467,8 +476,8 @@ std::deque<yf::data::arm::Point3d> yf::algorithm::cleaning_motion::get_via_point
             int points_no_each_line = std::floor(free_points/motion_line);
             int totoal_points = occupied_points + motion_line * points_no_each_line;
 
-            float delta_x = abs(edge_p2_.x - edge_p1_.x);
-            float delta_z = abs(edge_p3_.z - edge_p2_.z);
+            float delta_x = abs(init_p2_.x - init_p1_.x);
+            float delta_z = abs(init_p3_.z - init_p2_.z);
 
             float delta_x_each_point = delta_x / ( points_no_each_line + 1.0);
             float delta_z_each_line = delta_z / layer_;
@@ -518,12 +527,12 @@ std::deque<yf::data::arm::Point3d> yf::algorithm::cleaning_motion::get_via_point
                     // current line point no.
                     cur_line_point_no ++;
 
-                    via_point.x = (1-u)*(1-v)*edge_p1_.x + v*(1-u)*edge_p2_.x + u*v*edge_p3_.x + u*(1-v)*edge_p4_.x;
-                    via_point.y = (1-u)*(1-v)*edge_p1_.y + v*(1-u)*edge_p2_.y + u*v*edge_p3_.y + u*(1-v)*edge_p4_.y;
-                    via_point.z = (1-u)*(1-v)*edge_p1_.z + v*(1-u)*edge_p2_.z + u*v*edge_p3_.z + u*(1-v)*edge_p4_.z;
-                    via_point.rx = (1-u)*(1-v)*edge_p1_.rx + v*(1-u)*edge_p2_.rx + u*v*edge_p3_.rx + u*(1-v)*edge_p4_.rx;
-                    via_point.ry = (1-u)*(1-v)*edge_p1_.ry + v*(1-u)*edge_p2_.ry + u*v*edge_p3_.ry + u*(1-v)*edge_p4_.ry;
-                    via_point.rz = (1-u)*(1-v)*edge_p1_.rz + v*(1-u)*edge_p2_.rz + u*v*edge_p3_.rz + u*(1-v)*edge_p4_.rz;
+                    via_point.x = (1-u) * (1-v) * init_p1_.x + v * (1 - u) * init_p2_.x + u * v * init_p3_.x + u * (1 - v) * init_p4_.x;
+                    via_point.y = (1-u) * (1-v) * init_p1_.y + v * (1 - u) * init_p2_.y + u * v * init_p3_.y + u * (1 - v) * init_p4_.y;
+                    via_point.z = (1-u) * (1-v) * init_p1_.z + v * (1 - u) * init_p2_.z + u * v * init_p3_.z + u * (1 - v) * init_p4_.z;
+                    via_point.rx = (1-u) * (1-v) * init_p1_.rx + v * (1 - u) * init_p2_.rx + u * v * init_p3_.rx + u * (1 - v) * init_p4_.rx;
+                    via_point.ry = (1-u) * (1-v) * init_p1_.ry + v * (1 - u) * init_p2_.ry + u * v * init_p3_.ry + u * (1 - v) * init_p4_.ry;
+                    via_point.rz = (1-u) * (1-v) * init_p1_.rz + v * (1 - u) * init_p2_.rz + u * v * init_p3_.rz + u * (1 - v) * init_p4_.rz;
 
                     temp_points.push_back(via_point);
                 }
@@ -548,29 +557,63 @@ std::deque<yf::data::arm::Point3d> yf::algorithm::cleaning_motion::get_via_point
                 line_counter ++;
             }
 
+            /// 2. add on reverse via points
+
+            auto via_points_reverse = via_points;
+
+            std::reverse(via_points_reverse.begin(),via_points_reverse.end());
+
+            for(int n = 0 ; n < via_points_reverse.size() ; n++)
+            {
+                via_points.push_back(via_points_reverse[n]);
+            }
+
             break;
         }
 
-        case yf::data::arm::MotionType::LineMotion: // line_cleaning
+        case yf::data::arm::MotionType::Line:
         {
-            /// 1. Initialization
-            edge_p1_ = init_cleaning_points[0];
-            edge_p2_ = init_cleaning_points[1];
+            //@@ input: 2 points
 
-            via_points.push_back(edge_p1_);
-            via_points.push_back(edge_p2_);
+            /// 1. Initialization
+            init_p1_ = init_cleaning_points[0];
+            init_p2_ = init_cleaning_points[1];
+
+            via_points.push_back(init_p1_);
+            via_points.push_back(init_p2_);
+
+            /// 2. add on reverse via points
+
+            auto via_points_reverse = via_points;
+
+            std::reverse(via_points_reverse.begin(),via_points_reverse.end());
+
+            for(int n = 0 ; n < via_points_reverse.size() ; n++)
+            {
+                via_points.push_back(via_points_reverse[n]);
+            }
 
             break;
         }
-    }
 
-    auto via_points_reverse = via_points;
+        case yf::data::arm::MotionType::CircleFull:
+        {
+            // get center_point_, radius_, v1_, v2_
+            this->CenterFit3d(init_cleaning_points);
 
-    std::reverse(via_points_reverse.begin(),via_points_reverse.end());
+            // via_points
+            for(int i = 1; i <= 361; i = i+10)
+            {
+                yf::data::arm::Point3d via_point;
 
-    for(int n = 0 ; n < via_points_reverse.size() ; n++)
-    {
-        via_points.push_back(via_points_reverse[n]);
+                float a = i/180*PI;
+                via_point.x = center_point_.x+sin(a)*radius_*v1_(0)+cos(a)*radius_*v2_(0);
+                via_point.y = center_point_.y+sin(a)*radius_*v1_(1)+cos(a)*radius_*v2_(1);
+                via_point.z = center_point_.z+sin(a)*radius_*v1_(2)+cos(a)*radius_*v2_(2);
+
+                via_points.push_back(via_point);
+            }
+        }
     }
 
     return via_points;
@@ -578,7 +621,7 @@ std::deque<yf::data::arm::Point3d> yf::algorithm::cleaning_motion::get_via_point
 
 std::deque<yf::data::arm::Point3d>
 yf::algorithm::cleaning_motion::get_uvc_via_points(const yf::data::arm::MotionType &motion_type,
-                                                   std::deque<yf::data::arm::Point3d> init_cleaning_points,
+                                                   const std::deque<yf::data::arm::Point3d>& init_cleaning_points,
                                                    const int& layer,
                                                    const float& step_ratio_horizontal)
 {
@@ -586,17 +629,17 @@ yf::algorithm::cleaning_motion::get_uvc_via_points(const yf::data::arm::MotionTy
 
     switch (motion_type)
     {
-        case yf::data::arm::MotionType::PlaneMotion: // plain_cleaning
+        case yf::data::arm::MotionType::Plane: // plain_cleaning
         {
             LOG(INFO) << "wrong motion type!";
             break;
         }
 
-        case yf::data::arm::MotionType::LineMotion: // line_cleaning
+        case yf::data::arm::MotionType::Line: // line_cleaning
         {
             /// 1. Initialization
-            edge_p1_ = init_cleaning_points[0];
-            edge_p2_ = init_cleaning_points[1];
+            init_p1_ = init_cleaning_points[0];
+            init_p2_ = init_cleaning_points[1];
 
             std::deque<yf::data::arm::Point3d> temp_points;
 
@@ -604,12 +647,12 @@ yf::algorithm::cleaning_motion::get_uvc_via_points(const yf::data::arm::MotionTy
             {
                 yf::data::arm::Point3d via_point;
 
-                via_point.x = (1-v)*edge_p1_.x + v*edge_p2_.x;
-                via_point.y = (1-v)*edge_p1_.y + v*edge_p2_.y;
-                via_point.z = (1-v)*edge_p1_.z + v*edge_p2_.z;
-                via_point.rx = (1-v)*edge_p1_.rx + v*edge_p2_.rx;
-                via_point.ry = (1-v)*edge_p1_.ry + v*edge_p2_.ry;
-                via_point.rz = (1-v)*edge_p1_.rz + v*edge_p2_.rz;
+                via_point.x = (1-v) * init_p1_.x + v * init_p2_.x;
+                via_point.y = (1-v) * init_p1_.y + v * init_p2_.y;
+                via_point.z = (1-v) * init_p1_.z + v * init_p2_.z;
+                via_point.rx = (1-v) * init_p1_.rx + v * init_p2_.rx;
+                via_point.ry = (1-v) * init_p1_.ry + v * init_p2_.ry;
+                via_point.rz = (1-v) * init_p1_.rz + v * init_p2_.rz;
 
                 temp_points.push_back(via_point);
             }
@@ -639,5 +682,119 @@ yf::algorithm::cleaning_motion::get_uvc_via_points(const yf::data::arm::MotionTy
 void yf::algorithm::cleaning_motion::set_layer(const int &layer_no)
 {
     layer_ = layer_no;
+    return;
+}
+
+void yf::algorithm::cleaning_motion::CenterFit3d(const std::deque<yf::data::arm::Point3d> &init_cleaning_points)
+{
+    // 1. input points
+    std::vector<float> v_p1 = this->Point3d_2_Vector(init_cleaning_points[0]);
+    std::vector<float> v_p2 = this->Point3d_2_Vector(init_cleaning_points[1]);
+    std::vector<float> v_p3 = this->Point3d_2_Vector(init_cleaning_points[2]);
+
+    // 2. center_point. fix rx,ry,rz
+    center_point_.rx = init_cleaning_points[0].rx;
+    center_point_.ry = init_cleaning_points[0].ry;
+    center_point_.rz = init_cleaning_points[0].rz;
+
+    // 3. Start calculation
+    Eigen::RowVectorXf p1 = Eigen::Map<Eigen::Matrix<float, 1, 3> >(v_p1.data());
+    Eigen::RowVectorXf p2 = Eigen::Map<Eigen::Matrix<float, 1, 3> >(v_p2.data());
+    Eigen::RowVectorXf p3 = Eigen::Map<Eigen::Matrix<float, 1, 3> >(v_p3.data());
+
+    // v1, v2 describe the vectors from p1 to p2 and p3, resp.
+    v1_ = p2 - p1;
+    v2_ = p3 - p1;
+
+    // l1, l2 describe the lengths of those vectors
+    float l1 = std::sqrtf(v1_(0) * v1_(0) + v1_(1) * v1_(1) + v1_(2) * v1_(2));
+    float l2 = std::sqrtf(v2_(0) * v2_(0) + v2_(1) * v2_(1) + v2_(2) * v2_(2));
+
+    // v1n, v2n describe the normalized vectors v1 and v2
+    Eigen::RowVectorXf v1n = v1_ / l1;
+    Eigen::RowVectorXf v2n = v2_ / l2;
+
+    // nv describes the normal vector on the plane of the circle
+    std::vector<float> v_nv;
+
+    float nv_x = v1n(1)*v2n(2) - v1n(2)*v2n(1);
+    float nv_y = v1n(2)*v2n(0) - v1n(0)*v2n(2);
+    float nv_z = v1n(0)*v2n(1) - v1n(1)*v2n(0);
+
+    v_nv.push_back(nv_x);
+    v_nv.push_back(nv_y);
+    v_nv.push_back(nv_z);
+
+    Eigen::RowVectorXf nv = Eigen::Map<Eigen::Matrix<float, 1, 3> >(v_nv.data());
+
+    // v2nb: orthogonalization of v2n against v1n
+    float dotp = v2n(0)*v1n(0) + v2n(1)*v1n(1) + v2n(2)*v1n(2);
+    Eigen::RowVector3f v2nb = v2n;
+    for (int n = 0; n <= 2 ; n++)
+    {
+        v2nb(n) = v2nb(n) - dotp * v1n(n);
+    }
+    // normalize v2nb
+    float l2nb = std::sqrtf((v2nb(0)*v2nb(0)+v2nb(1)*v2nb(1)+v2nb(2)*v2nb(2)));
+
+    v2nb = v2nb/l2nb;
+
+    // remark: the circle plane will now be discretized as follows
+    //
+    // origin: p1                    normal vector on plane: nv
+    // first coordinate vector: v1n  second coordinate vector: v2nb
+    //
+    // calculate 2d coordinates of points in the plane
+    // p1_2d = zeros(n,2); % set per construction
+    // p2_2d = zeros(n,2);p2_2d(:,1) = l1; % set per construction
+
+    // p3_2d = zeros(n,2); // has to be calculated
+    Eigen::RowVector2f p3_2d; p3_2d(0) = 0; p3_2d(1) = 0;
+
+    for (int n = 0; n <= 2 ; n++)
+    {
+        p3_2d(0) = p3_2d(0) + v2_(n) * v1n(n);
+        p3_2d(1) = p3_2d(1) + v2_(n) * v2nb(n);
+    }
+
+    // calculate the fitting circle
+    // due to the special construction of the 2d system this boils down to solving
+    // q1 = [0,0], q2 = [a,0], q3 = [b,c] (points on 2d circle)
+    // crossing perpendicular bisectors, s and t running indices:
+    // solve [a/2,s] = [b/2 + c*t, c/2 - b*t]
+    // solution t = (a-b)/(2*c)
+
+    float a = l1; float b = p3_2d(0); float c = p3_2d(1);
+    float t = 0.5*(a-b)/c;
+    float scale1 = b/2 + c*t;
+    float scale2 = c/2 - b*t;
+
+    // center_point. x,y,z
+    center_point_.x = p1(0) + scale1*v1n(0) + scale2*v2nb(0);
+    center_point_.y = p1(1) + scale1*v1n(1) + scale2*v2nb(1);
+    center_point_.z = p1(2) + scale1*v1n(2) + scale2*v2nb(2);
+
+    // radius
+    radius_ = std::sqrtf((center_point_.x-p1(0))*(center_point_.x-p1(0)) +
+                             (center_point_.y-p1(1))*(center_point_.y-p1(1)) +
+                             (center_point_.z-p1(2))*(center_point_.z-p1(2)));
+
+    return;
+}
+
+std::vector<float> yf::algorithm::cleaning_motion::Point3d_2_Vector(const yf::data::arm::Point3d &point)
+{
+    std::vector<float> v_point;
+    v_point.clear();
+
+    v_point.push_back(point.x); v_point.push_back(point.y); v_point.push_back(point.z);
+    v_point.push_back(point.rx); v_point.push_back(point.ry); v_point.push_back(point.rz);
+
+    return v_point;
+}
+
+void yf::algorithm::cleaning_motion::set_offset_distance(const float &distance)
+{
+    offset_distance_ = distance;
     return;
 }
