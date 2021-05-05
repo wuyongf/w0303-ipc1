@@ -43,6 +43,8 @@ namespace yf
 
         public:
 
+            void thread_HandleStatus();
+
             void thread_WaitSchedules();
 
             void thread_DoSchedules();
@@ -153,7 +155,7 @@ namespace yf
 
 
         private:
-            // Overall control --- thread wait schedules and thread do schdules
+            // Overall control --- thread wait schedules and thread do schedules
             //
             // schedule_flag
             bool schedule_flag_ = true;
@@ -606,8 +608,6 @@ void yf::sys::nw_sys::thread_DoSchedules()
         if(nw_status_ptr_->arm_mission_status == data::common::MissionStatus::Idle)
         {
             LOG(INFO) << "All schedules are done";
-
-            LOG(INFO) << "current time: " << sql_ptr_->TimeNow() << std::endl;
         }
         else
         {
@@ -788,6 +788,9 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
                     bool arm_config_stage_success_flag = false;
 
                     arm_wait_plc003_success_flag = this->WaitForUgvPLCRegisterInt(3,1,2);
+
+                    ///TIME 200ms
+                    std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
                     if(arm_wait_plc003_success_flag == true)
                     {
@@ -1921,6 +1924,14 @@ void yf::sys::nw_sys::ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode,
                     case data::arm::ModelType::DeskRectangle:
                     {
                         std::string command = "Post arm_via45_line_d";
+
+                        this->ArmTask(command);
+
+                        break;
+                    }
+                    case data::arm::ModelType::DeskCircle:
+                    {
+                        std::string command = "Post arm_via45_p2p";
 
                         this->ArmTask(command);
 

@@ -29,8 +29,12 @@ namespace yf
                                                                   const std::deque<yf::data::arm::Point3d>& init_cleaning_points,
                                                                   const int& layer,
                                                                   const float& step_ratio_horizontal);
-
+        public:
             void set_layer(const int& layer_no);
+            yf::data::arm::Point3d get_center();
+            float get_radius();
+            Eigen::RowVectorXf get_v1n();
+            Eigen::RowVector3f get_v2nb();
 
         private:
 
@@ -52,8 +56,8 @@ namespace yf
             yf::data::arm::Point3d center_point_;
             float radius_;
 
-            Eigen::RowVector3f v1_;
-            Eigen::RowVector3f v2_;
+            Eigen::RowVectorXf v1n_;
+            Eigen::RowVector3f v2nb_;
 
             float offset_distance_;
 
@@ -458,6 +462,9 @@ std::deque<yf::data::arm::Point3d> yf::algorithm::cleaning_motion::get_mop_via_p
 {
     std::deque<yf::data::arm::Point3d> via_points;
 
+    via_points.clear();
+
+
     switch (motion_type)
     {
         case yf::data::arm::MotionType::Plane:
@@ -598,21 +605,86 @@ std::deque<yf::data::arm::Point3d> yf::algorithm::cleaning_motion::get_mop_via_p
 
         case yf::data::arm::MotionType::CircleFull:
         {
+            std::deque<yf::data::arm::Point3d> via_points_a;
+            std::deque<yf::data::arm::Point3d> via_points_b;
+
+            via_points_a.clear();
+            via_points_b.clear();
+
             // get center_point_, radius_, v1_, v2_
             this->CenterFit3d(init_cleaning_points);
 
-            // via_points
+            // via_points, with center_point_ and radius_
             for(int i = 1; i <= 361; i = i+10)
             {
                 yf::data::arm::Point3d via_point;
 
-                float a = i/180*PI;
-                via_point.x = center_point_.x+sin(a)*radius_*v1_(0)+cos(a)*radius_*v2_(0);
-                via_point.y = center_point_.y+sin(a)*radius_*v1_(1)+cos(a)*radius_*v2_(1);
-                via_point.z = center_point_.z+sin(a)*radius_*v1_(2)+cos(a)*radius_*v2_(2);
+                float a = i/180.0*PI;
+                via_point.x = center_point_.x + sin(a) * radius_ * v1n_(0) + cos(a) * radius_ * v2nb_(0);
+                via_point.y = center_point_.y + sin(a) * radius_ * v1n_(1) + cos(a) * radius_ * v2nb_(1);
+                via_point.z = center_point_.z + sin(a) * radius_ * v1n_(2) + cos(a) * radius_ * v2nb_(2);
+                via_point.rx = center_point_.rx;
+                via_point.ry = center_point_.ry;
+                via_point.rz = center_point_.rz;
 
                 via_points.push_back(via_point);
             }
+
+            // search via_p0
+
+            int index = 0;
+
+            float delta_distance =  (init_cleaning_points[0].x-via_points[0].x) * (init_cleaning_points[0].x-via_points[0].x) +
+                                    (init_cleaning_points[0].y-via_points[0].y) * (init_cleaning_points[0].y-via_points[0].y) +
+                                    (init_cleaning_points[0].z-via_points[0].z) * (init_cleaning_points[0].z-via_points[0].z);
+
+            for (int n = 0; n < via_points.size(); n++)
+            {
+                float delta_distance_temp = (init_cleaning_points[0].x-via_points[n].x) * (init_cleaning_points[0].x-via_points[n].x) +
+                                            (init_cleaning_points[0].y-via_points[n].y) * (init_cleaning_points[0].y-via_points[n].y) +
+                                            (init_cleaning_points[0].z-via_points[n].z) * (init_cleaning_points[0].z-via_points[n].z);
+                if(delta_distance > delta_distance_temp)
+                {
+                    delta_distance = delta_distance_temp;
+
+                    index = n;
+                }
+            }
+
+            if(index != 0)
+            {
+                via_points_a.insert(via_points_a.begin(),via_points.begin()+index,via_points.end());
+
+                via_points_b.insert(via_points_b.begin(), via_points.begin(),via_points.begin()+index-1);
+
+                via_points.clear();
+
+                via_points.insert(via_points.end(),via_points_a.begin(),via_points_a.end());
+                via_points.insert(via_points.end(),via_points_b.begin(),via_points_b.end());
+            }
+
+            break;
+        }
+
+        case yf::data::arm::MotionType::CircleHalf:
+        {
+            // get center_point_, radius_, v1_, v2_
+            this->CenterFit3d(init_cleaning_points);
+
+            // via_points, with center_point_ and radius_
+            for(int i = 1; i <= 181; i = i+10)
+            {
+                yf::data::arm::Point3d via_point;
+
+                float a = i/180*PI;
+                via_point.x = center_point_.x + sin(a) * radius_ * v1n_(0) + cos(a) * radius_ * v2nb_(0);
+                via_point.y = center_point_.y + sin(a) * radius_ * v1n_(1) + cos(a) * radius_ * v2nb_(1);
+                via_point.z = center_point_.z + sin(a) * radius_ * v1n_(2) + cos(a) * radius_ * v2nb_(2);
+
+                via_points.push_back(via_point);
+            }
+
+            break;
         }
     }
 
@@ -703,23 +775,23 @@ void yf::algorithm::cleaning_motion::CenterFit3d(const std::deque<yf::data::arm:
     Eigen::RowVectorXf p3 = Eigen::Map<Eigen::Matrix<float, 1, 3> >(v_p3.data());
 
     // v1, v2 describe the vectors from p1 to p2 and p3, resp.
-    v1_ = p2 - p1;
-    v2_ = p3 - p1;
+    Eigen::RowVector3f v1 = p2 - p1;
+    Eigen::RowVector3f v2 = p3 - p1;
 
     // l1, l2 describe the lengths of those vectors
-    float l1 = std::sqrtf(v1_(0) * v1_(0) + v1_(1) * v1_(1) + v1_(2) * v1_(2));
-    float l2 = std::sqrtf(v2_(0) * v2_(0) + v2_(1) * v2_(1) + v2_(2) * v2_(2));
+    float l1 = std::sqrtf(v1(0) * v1(0) + v1(1) * v1(1) + v1(2) * v1(2));
+    float l2 = std::sqrtf(v2(0) * v2(0) + v2(1) * v2(1) + v2(2) * v2(2));
 
     // v1n, v2n describe the normalized vectors v1 and v2
-    Eigen::RowVectorXf v1n = v1_ / l1;
-    Eigen::RowVectorXf v2n = v2_ / l2;
+    v1n_ = v1 / l1;
+    Eigen::RowVectorXf v2n = v2 / l2;
 
     // nv describes the normal vector on the plane of the circle
     std::vector<float> v_nv;
 
-    float nv_x = v1n(1)*v2n(2) - v1n(2)*v2n(1);
-    float nv_y = v1n(2)*v2n(0) - v1n(0)*v2n(2);
-    float nv_z = v1n(0)*v2n(1) - v1n(1)*v2n(0);
+    float nv_x = v1n_(1) * v2n(2) - v1n_(2) * v2n(1);
+    float nv_y = v1n_(2) * v2n(0) - v1n_(0) * v2n(2);
+    float nv_z = v1n_(0) * v2n(1) - v1n_(1) * v2n(0);
 
     v_nv.push_back(nv_x);
     v_nv.push_back(nv_y);
@@ -728,16 +800,16 @@ void yf::algorithm::cleaning_motion::CenterFit3d(const std::deque<yf::data::arm:
     Eigen::RowVectorXf nv = Eigen::Map<Eigen::Matrix<float, 1, 3> >(v_nv.data());
 
     // v2nb: orthogonalization of v2n against v1n
-    float dotp = v2n(0)*v1n(0) + v2n(1)*v1n(1) + v2n(2)*v1n(2);
-    Eigen::RowVector3f v2nb = v2n;
+    float dotp = v2n(0) * v1n_(0) + v2n(1) * v1n_(1) + v2n(2) * v1n_(2);
+    v2nb_ = v2n;
     for (int n = 0; n <= 2 ; n++)
     {
-        v2nb(n) = v2nb(n) - dotp * v1n(n);
+        v2nb_(n) = v2nb_(n) - dotp * v1n_(n);
     }
     // normalize v2nb
-    float l2nb = std::sqrtf((v2nb(0)*v2nb(0)+v2nb(1)*v2nb(1)+v2nb(2)*v2nb(2)));
+    float l2nb = std::sqrtf((v2nb_(0) * v2nb_(0) + v2nb_(1) * v2nb_(1) + v2nb_(2) * v2nb_(2)));
 
-    v2nb = v2nb/l2nb;
+    v2nb_ = v2nb_ / l2nb;
 
     // remark: the circle plane will now be discretized as follows
     //
@@ -753,8 +825,8 @@ void yf::algorithm::cleaning_motion::CenterFit3d(const std::deque<yf::data::arm:
 
     for (int n = 0; n <= 2 ; n++)
     {
-        p3_2d(0) = p3_2d(0) + v2_(n) * v1n(n);
-        p3_2d(1) = p3_2d(1) + v2_(n) * v2nb(n);
+        p3_2d(0) = p3_2d(0) + v2(n) * v1n_(n);
+        p3_2d(1) = p3_2d(1) + v2(n) * v2nb_(n);
     }
 
     // calculate the fitting circle
@@ -770,9 +842,9 @@ void yf::algorithm::cleaning_motion::CenterFit3d(const std::deque<yf::data::arm:
     float scale2 = c/2 - b*t;
 
     // center_point. x,y,z
-    center_point_.x = p1(0) + scale1*v1n(0) + scale2*v2nb(0);
-    center_point_.y = p1(1) + scale1*v1n(1) + scale2*v2nb(1);
-    center_point_.z = p1(2) + scale1*v1n(2) + scale2*v2nb(2);
+    center_point_.x = p1(0) + scale1 * v1n_(0) + scale2 * v2nb_(0);
+    center_point_.y = p1(1) + scale1 * v1n_(1) + scale2 * v2nb_(1);
+    center_point_.z = p1(2) + scale1 * v1n_(2) + scale2 * v2nb_(2);
 
     // radius
     radius_ = std::sqrtf((center_point_.x-p1(0))*(center_point_.x-p1(0)) +
@@ -797,4 +869,24 @@ void yf::algorithm::cleaning_motion::set_offset_distance(const float &distance)
 {
     offset_distance_ = distance;
     return;
+}
+
+yf::data::arm::Point3d yf::algorithm::cleaning_motion::get_center()
+{
+    return center_point_;
+}
+
+float yf::algorithm::cleaning_motion::get_radius()
+{
+    return radius_;
+}
+
+Eigen::RowVectorXf yf::algorithm::cleaning_motion::get_v1n()
+{
+    return v1n_;
+}
+
+Eigen::RowVector3f yf::algorithm::cleaning_motion::get_v2nb()
+{
+    return v2nb_;
 }

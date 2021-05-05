@@ -53,14 +53,14 @@ int main(void) {
     std::cout <<"-----" << std::endl;
 
     yf::modbus::tm_modbus tm_modbus;
+//
+//    const char* ip_address = "192.168.7.29";
+//
+//    int port = 502;
 
-    const char* ip_address = "192.168.7.29";
+    tm_modbus.Start("192.168.7.29",502);
 
-    int port = 502;
-
-    tm_modbus.Start(ip_address,port);
-
-//    auto DI_0 = tm_modbus.get_end_module_DI(1);
+    auto DI_0 = tm_modbus.get_end_module_DI(1);
 
 //    std::cout << "DI_0: " << DI_0 << std::endl;
 
@@ -93,8 +93,6 @@ int main(void) {
 
         x_list.push_back(x);
     }
-
-
 
 /// For robot coordinate
 

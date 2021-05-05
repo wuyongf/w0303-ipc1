@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cstdint>
+#include <cmath>
 
 //
 //#include "../include/boost_1_75_0/boost/asio.hpp"

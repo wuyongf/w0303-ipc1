@@ -9,33 +9,33 @@ project (w0303)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# opencv, for image processing
-
+## opencv, for image processing
 find_package(OpenCV REQUIRED)
 
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
-# nanodbc, for sql
+## nanodbc, for sql
 find_package(nanodbc CONFIG REQUIRED)
 
 ## glog
-##
 set(GLOG_INCLUDE_DIR D:/software/include/glog_x64-windows/include/glog)
 set(GLOG_LIBRARY_DIR D:/software/include/glog_x64-windows/lib)
 
 find_package(glog 0.4.0 REQUIRED)
-find_package(libmodbus CONFIG REQUIRED)
-find_package(Poco CONFIG REQUIRED Foundation Net XML Zip Data JSON)
 
 include_directories(${GLOG_INCLUDE_DIR})
 link_directories(${GLOG_LIBRARY_DIR})
 
+## modbus
+find_package(libmodbus CONFIG REQUIRED)
+
+## poco
+find_package(Poco CONFIG REQUIRED Foundation Net XML Zip Data JSON)
+
 ## Eigen3 library
-##
 include_directories( "D:/software/include/Eigen3" )
 
 ## Boost library
-##
 if (1)
 
     set(BOOST_ROOT D:/software/include/boost_1_75_0)
@@ -126,7 +126,7 @@ target_link_libraries(c_testing "d:/nw_sys/nw_sql_application_dll.dll")
 ##
 
 add_executable(sql_testing "useful-functions/sql_testing.cpp")
-target_link_libraries(sql_testing PRIVATE nanodbc)
+target_link_libraries(sql_testing PRIVATE glog::glog nanodbc modbus Poco::Foundation Poco::Net Poco::XML Poco::Zip Poco::Data Poco::JSON)
 
 
 

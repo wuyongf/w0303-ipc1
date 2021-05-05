@@ -11,9 +11,18 @@ int main()
 //    yf::sql::sql_server sql("SQL Server","192.168.7.84","NW_mobile_robot_sys","sa","wuyongfeng1334");
 //    yf::sql::sql_server sql("ODBC Driver 17 for SQL Server","localhost","NW_mobile_robot_sys","sa","wuyongfeng1334");
 
+/// For IPC1
+    std::shared_ptr<yf::sql::sql_server> sql = std::make_shared<yf::sql::sql_server>("SQL Server","192.168.7.27","NW_mobile_robot_sys","sa","NWcadcam2021");
+
 /// For localhost
-    std::shared_ptr<yf::sql::sql_server> sql = std::make_shared<yf::sql::sql_server>("ODBC Driver 17 for SQL Server","localhost","NW_mobile_robot_sys","sa","wuyongfeng1334");
+//    std::shared_ptr<yf::sql::sql_server> sql = std::make_shared<yf::sql::sql_server>("ODBC Driver 17 for SQL Server","localhost","NW_mobile_robot_sys","sa","wuyongfeng1334");
 //    yf::sql::sql_server sql("ODBC Driver 17 for SQL Server","192.168.0.8","NW_mobile_robot_sys","sa","Willsonic2010");
+
+    std::deque<int> point_ids = sql->GetRefPathInitPointIds(3012);
+
+
+
+#if 0
 
     std::cout << "ODBCConnectionStr: " << sql->getODBCConnectionStr() << std::endl;
     //"Driver={SQL Server};Server=192.168.0.8;Database=NW_mobile_robot_sys;Uid=sa;Pwd=Willsonic2010"
@@ -91,6 +100,12 @@ int main()
     auto time = time_year + time_month + time_day + "_" + time_hour + time_min;
 
     cout << "time: " << time << endl;
+
+
+#endif
+
+#if 0
+
     /// workflow
 
     /// 0. get cur_job_id
@@ -140,7 +155,7 @@ int main()
 
         std::deque<yf::data::arm::Point3d> init_cleaning_points;
 
-        switch (motion_type) 
+        switch (motion_type)
         {
             case 1: // plain_cleaning
             {
@@ -186,8 +201,7 @@ int main()
         // ArmTask("Post xxx")
     }
 
-
-
+#endif
 
 
     return 1;

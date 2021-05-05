@@ -123,28 +123,34 @@ namespace yf
 
             int GetArmMissionPointId(const int& arm_mission_config_id, const std::string& arm_point_name);
 
-            int GetArmMotionType(const int& arm_mission_config_id);
 
+            int GetArmMotionType(const int& arm_mission_config_id);
             int GetTaskMode(const int& model_config_id);
-            int GetOperationArea(const int &arm_config_id);
+            int GetOperationArea(const int& arm_config_id);
             int GetToolAngle(const int& arm_mission_config_id);
             int GetMotionType(const int& arm_mission_config_id);
 
-            // retrieve data from table "data_arm_points"
+            // retrieve point(x,y,z,rx,ry,rz) from table "data_arm_points"
             int GetStandbyPositionId(const int& arm_config_id);
-            //
             yf::data::arm::Point3d GetArmPoint(const int& point_id);
             float GetArmPointElement(const int &point_id, const std::string &point_element);
 
             // retrieve data from table "data_arm_mc_ref_landmark_pos"
             int GetArmRefLMPosId(const int& arm_mission_config_id);
-            //
             yf::data::arm::Point3d GetArmRefLMPos(const int& pos_id);
-            float GetArmRefLMPosElement(const int &pos_id, const std::string &pos_element);
+            float GetArmRefLMPosElement(const int &pos_id, const std::string &pos_element);  // private
 
+            //
             int GetLandmarkFlag(const int &arm_mission_config_id);
 
+            // for ref_path_init_point
+            // (1) table "data_arm_points"
+            // (2) table "data_arm_mc_ref_path_init_points"
             std::deque<yf::data::arm::Point3d> GetCleanPoints(const int& arm_mission_config_id, const yf::data::arm::MotionType& motion_type);
+
+            std::deque<int> GetRefPathInitPointIds(const int& arm_mission_config_id);
+            yf::data::arm::Point3d GetRefPathInitPoint(const int& point_id);
+            float GetRefPathInitPointElement(const int &point_id, const std::string &point_element);
 
             /// Ugv_mission_config
             int GetUgvMissionConfigNum(const int& model_config_id);
@@ -2080,51 +2086,6 @@ int yf::sql::sql_server::GetLandmarkFlag(const int &arm_mission_config_id)
     }
 }
 
-std::deque<yf::data::arm::Point3d>
-yf::sql::sql_server::GetCleanPoints(const int &arm_mission_config_id, const yf::data::arm::MotionType &motion_type)
-{
-    std::deque<yf::data::arm::Point3d> clean_points;
-
-    switch (motion_type)
-    {
-        case yf::data::arm::MotionType::Plane:
-        {
-            int plane_cleaning_p1_id = this->GetArmMissionPointId(arm_mission_config_id, "plane_cleaning_p1");
-            int plane_cleaning_p2_id = this->GetArmMissionPointId(arm_mission_config_id, "plane_cleaning_p2");
-            int plane_cleaning_p3_id = this->GetArmMissionPointId(arm_mission_config_id, "plane_cleaning_p3");
-            int plane_cleaning_p4_id = this->GetArmMissionPointId(arm_mission_config_id, "plane_cleaning_p4");
-
-            yf::data::arm::Point3d plane_cleaning_p1 = this->GetArmPoint(plane_cleaning_p1_id);
-            yf::data::arm::Point3d plane_cleaning_p2 = this->GetArmPoint(plane_cleaning_p2_id);
-            yf::data::arm::Point3d plane_cleaning_p3 = this->GetArmPoint(plane_cleaning_p3_id);
-            yf::data::arm::Point3d plane_cleaning_p4 = this->GetArmPoint(plane_cleaning_p4_id);
-
-            clean_points.push_back(plane_cleaning_p1);
-            clean_points.push_back(plane_cleaning_p2);
-            clean_points.push_back(plane_cleaning_p3);
-            clean_points.push_back(plane_cleaning_p4);
-
-            break;
-        }
-        case yf::data::arm::MotionType::Line:
-        {
-            int line_cleaning_p1_id = this->GetArmMissionPointId(arm_mission_config_id, "line_cleaning_p1");
-            int line_cleaning_p2_id = this->GetArmMissionPointId(arm_mission_config_id, "line_cleaning_p2");
-
-            yf::data::arm::Point3d line_cleaning_p1 = this->GetArmPoint(line_cleaning_p1_id);
-            yf::data::arm::Point3d line_cleaning_p2 = this->GetArmPoint(line_cleaning_p2_id);
-
-            clean_points.push_back(line_cleaning_p1);
-            clean_points.push_back(line_cleaning_p2);
-
-            break;
-
-        }
-    }
-
-    return clean_points;
-}
-
 void yf::sql::sql_server::OSGetScheduleReady(const int &schedule_id, const int &seconds_later_from_now)
 {
     std::string query;
@@ -2358,6 +2319,153 @@ yf::data::arm::Point3d yf::sql::sql_server::GetArmRefLMPos(const int &pos_id)
     return point3d;
 
     return yf::data::arm::Point3d();
+}
+
+std::deque<yf::data::arm::Point3d>
+yf::sql::sql_server::GetCleanPoints(const int &arm_mission_config_id, const yf::data::arm::MotionType &motion_type)
+{
+    std::deque<yf::data::arm::Point3d> clean_points;
+
+    switch (motion_type)
+    {
+        case yf::data::arm::MotionType::Plane:
+        {
+            int plane_cleaning_p1_id = this->GetArmMissionPointId(arm_mission_config_id, "plane_cleaning_p1");
+            int plane_cleaning_p2_id = this->GetArmMissionPointId(arm_mission_config_id, "plane_cleaning_p2");
+            int plane_cleaning_p3_id = this->GetArmMissionPointId(arm_mission_config_id, "plane_cleaning_p3");
+            int plane_cleaning_p4_id = this->GetArmMissionPointId(arm_mission_config_id, "plane_cleaning_p4");
+
+            yf::data::arm::Point3d plane_cleaning_p1 = this->GetArmPoint(plane_cleaning_p1_id);
+            yf::data::arm::Point3d plane_cleaning_p2 = this->GetArmPoint(plane_cleaning_p2_id);
+            yf::data::arm::Point3d plane_cleaning_p3 = this->GetArmPoint(plane_cleaning_p3_id);
+            yf::data::arm::Point3d plane_cleaning_p4 = this->GetArmPoint(plane_cleaning_p4_id);
+
+            clean_points.push_back(plane_cleaning_p1);
+            clean_points.push_back(plane_cleaning_p2);
+            clean_points.push_back(plane_cleaning_p3);
+            clean_points.push_back(plane_cleaning_p4);
+
+            break;
+        }
+        case yf::data::arm::MotionType::Line:
+        {
+            int line_cleaning_p1_id = this->GetArmMissionPointId(arm_mission_config_id, "line_cleaning_p1");
+            int line_cleaning_p2_id = this->GetArmMissionPointId(arm_mission_config_id, "line_cleaning_p2");
+
+            yf::data::arm::Point3d line_cleaning_p1 = this->GetArmPoint(line_cleaning_p1_id);
+            yf::data::arm::Point3d line_cleaning_p2 = this->GetArmPoint(line_cleaning_p2_id);
+
+            clean_points.push_back(line_cleaning_p1);
+            clean_points.push_back(line_cleaning_p2);
+
+            break;
+        }
+        case yf::data::arm::MotionType::CircleFull:
+        {
+            auto ref_path_init_point_ids =  this->GetRefPathInitPointIds(arm_mission_config_id);
+
+            int ref_path_p1_id = ref_path_init_point_ids[0];
+            int ref_path_p2_id = ref_path_init_point_ids[1];
+            int ref_path_p3_id = ref_path_init_point_ids[2];
+
+            clean_points.push_back(this->GetRefPathInitPoint(ref_path_p1_id));
+            clean_points.push_back(this->GetRefPathInitPoint(ref_path_p2_id));
+            clean_points.push_back(this->GetRefPathInitPoint(ref_path_p3_id));
+
+            break;
+        }
+    }
+
+    return clean_points;
+}
+
+std::deque<int> yf::sql::sql_server::GetRefPathInitPointIds(const int &arm_mission_config_id)
+{
+    std::deque<int> ref_path_init_point_ids;
+
+    std::string query_update;
+
+    std::string arm_mission_config_id_str = std::to_string(arm_mission_config_id);
+
+    //"SELECT ID FROM schedule_table where status=1 AND planned_start > '2021-02-06 11:10:08.000'"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT ID FROM data_arm_mc_ref_path_init_points where arm_mission_config_id = " + arm_mission_config_id_str + " ORDER BY point_order" ;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            std::string id_str = result.get<std::string>(0, "null");
+
+            int id = std::stoi(id_str);
+
+            ref_path_init_point_ids.push_back(id);
+        };
+
+        Disconnect();
+
+        return ref_path_init_point_ids;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+    }
+
+}
+
+float yf::sql::sql_server::GetRefPathInitPointElement(const int &point_id, const std::string &point_element)
+{
+    std::string query_update;
+
+    std::string pos_id_str = std::to_string(point_id);
+
+    float element_value;
+
+    //"SELECT ID FROM schedule_table where status=1 AND planned_start > '2021-02-06 11:10:08.000'"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT " + point_element + " FROM data_arm_mc_ref_path_init_points where ID = " + pos_id_str;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            element_value = result.get<float>(point_element);
+        };
+
+        Disconnect();
+
+        return element_value;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return 0;
+    };
+}
+
+yf::data::arm::Point3d yf::sql::sql_server::GetRefPathInitPoint(const int &point_id)
+{
+    yf::data::arm::Point3d point3d;
+
+    point3d.x = this->GetRefPathInitPointElement(point_id,"x");
+    point3d.y = this->GetRefPathInitPointElement(point_id,"y");
+    point3d.z = this->GetRefPathInitPointElement(point_id,"z");
+    point3d.rx = this->GetRefPathInitPointElement(point_id,"rx");
+    point3d.ry = this->GetRefPathInitPointElement(point_id,"ry");
+    point3d.rz = this->GetRefPathInitPointElement(point_id,"rz");
+
+    return point3d;
 }
 
 
