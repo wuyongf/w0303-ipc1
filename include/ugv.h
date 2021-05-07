@@ -46,6 +46,7 @@ using Poco::Path;
 using Poco::URI;
 using Poco::Exception;
 
+// For determining WIN or Linux
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
 static const std::string slash="\\";
 #else
@@ -69,7 +70,7 @@ namespace yf
             void SetUriAddress();
             void SetAuthentication(const std::string& auth_info);
 
-            /// Getter();
+            /// Getter
             std::string GetIpAddress();
             std::string GetUriAddress();
             std::string GetAuthentication();
@@ -78,9 +79,10 @@ namespace yf
             std::string GetRespondReason();
 
             /// Important.
+            // todo: comment the cout
             std::string GetRequestResult();
 
-            /// Methods
+            /// Basic Methods
 
             bool GetMethod(const std::string& sub_path);
             bool PutMethod(const std::string& sub_path,const Poco::JSON::Object& obj);
@@ -98,11 +100,6 @@ namespace yf
             // (2) todo: update to nw_status
             // (3) todo: update to database
             bool IsConnected();
-
-            // (1) done: Get State
-            // (2) todo: update to nw_status
-            // (3) todo: update to database
-            int  GetState();
 
             int GetPLCRegisterIntValue(const int& plc_register);
             float GetPLCRegisterFloatValue(const int& plc_register);
@@ -162,12 +159,18 @@ namespace yf
             std::string GetMapGUID(const std::string& session_name, const std::string& map_name);
 
         public:
-            // MiR Control
+            // MiR Mission Control
             bool Play();
             bool Pause();
 
             bool PostMissionQueue(const std::string& mission_guid);
             bool DeleteMissionQueue();
+
+        public:
+            // Getter: MiR Properties
+            int     GetState();
+            float   GetBatteryPercentage();
+            std::vector<float> GetCurPosition();
 
         private:
 
@@ -185,7 +188,7 @@ namespace yf
             std::string model_name_ = "mir100";
 
             // for rest api
-            std::string ip_address_     = "192.168.2.113";
+            std::string ip_address_     = "192.168.7.34";
             std::string uri_address_    = "http://" + ip_address_;
 
             URI uri_;
@@ -206,7 +209,7 @@ namespace yf
             std::string session_guid_HA_    = "84c07703-8579-11eb-9840-00012978eb45";
 
             std::string group_id_           = "mirconst-guid-0000-0011-missiongroup";   // default group: mission group
-            bool hidden_flag_    = false;
+            bool        hidden_flag_        = false;
 
             std::string cur_mission_name_;
             std::string cur_session_guid_;
@@ -401,16 +404,16 @@ bool yf::ugv::mir::PostMethod(const std::string &sub_path, const Poco::JSON::Obj
 {
     try
     {
-        // TODO: prepare session.
+        //1. prepare session.
 
         HTTPClientSession session(uri_.getHost(), uri_.getPort());
         session.setKeepAlive(true);
-        // TODO: prepare path.
+        //2. prepare path.
         uri_.setPath(sub_path);
         std::string path(uri_.getPathAndQuery());
         if (path.empty()) path = "/";
 
-        // TODO: send request.
+        //3. send request.
 
         HTTPRequest req(HTTPRequest::HTTP_POST, path, HTTPMessage::HTTP_1_1);
 
@@ -418,9 +421,9 @@ bool yf::ugv::mir::PostMethod(const std::string &sub_path, const Poco::JSON::Obj
         req.setContentType(api_content_type_);
         req.setCredentials(api_credentials_scheme_, api_credentials_authentication_);
 
-        // TODO: set header here.
+        //4. set header here.
 
-        // TODO: set request body.  obj
+        //5. set request body.  obj
 
         std::ostringstream ss;
         obj.stringify(ss);
@@ -428,13 +431,13 @@ bool yf::ugv::mir::PostMethod(const std::string &sub_path, const Poco::JSON::Obj
         body = ss.str();
         req.setContentLength(body.length());
 
-        // TODO: sends request, returns open stream.
+        //6. sends request, returns open stream.
 
         session.sendRequest(req) << body;
 
         //        req.write(std::cout); // print out request
 
-        // TODO: get response.
+        //7. get response.
 
         HTTPResponse res;
 
@@ -1639,6 +1642,50 @@ std::string yf::ugv::mir::GetMapGUID(const std::string &session_name, const std:
     }
 
     return map_guid;
+}
+
+float yf::ugv::mir::GetBatteryPercentage()
+{
+    GetMethod("/api/v2.0.0/status");
+
+    auto json_result = GetRequestResult();
+
+    Poco::JSON::Parser parser;
+
+    Poco::Dynamic::Var result = parser.parse(json_result);
+
+    Poco::JSON::Object::Ptr object = result.extract<Poco::JSON::Object::Ptr>();
+
+    float state = object->getValue<float>("battery_percentage");
+
+    return state;
+}
+
+std::vector<float> yf::ugv::mir::GetCurPosition()
+{
+    GetMethod("/api/v2.0.0/status");
+
+    auto json_result = GetRequestResult();
+
+    Poco::JSON::Parser parser;
+
+    Poco::Dynamic::Var result = parser.parse(json_result);
+
+    Poco::JSON::Object::Ptr object = result.extract<Poco::JSON::Object::Ptr>();
+
+    Poco::JSON::Object::Ptr position_obj = object->getObject("position");
+
+    auto x = position_obj->getValue<float>("x");
+    auto y = position_obj->getValue<float>("y");
+    auto orientation = position_obj->getValue<float>("orientation");
+
+    std::vector<float> position;
+
+    position.push_back(x);
+    position.push_back(y);
+    position.push_back(orientation);
+
+    return position;
 }
 
 

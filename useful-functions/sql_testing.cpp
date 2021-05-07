@@ -18,7 +18,9 @@ int main()
 //    std::shared_ptr<yf::sql::sql_server> sql = std::make_shared<yf::sql::sql_server>("ODBC Driver 17 for SQL Server","localhost","NW_mobile_robot_sys","sa","wuyongfeng1334");
 //    yf::sql::sql_server sql("ODBC Driver 17 for SQL Server","192.168.0.8","NW_mobile_robot_sys","sa","Willsonic2010");
 
-    std::deque<int> point_ids = sql->GetRefPathInitPointIds(3012);
+    sql->UpdateDeviceBatteryCapacity("ugv",10);
+
+    sql->UpdateDeviceUgvCurPosition(10,10,10);
 
 
 

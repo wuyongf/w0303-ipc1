@@ -59,31 +59,17 @@ endif ()
 
 # Add source to this project's executable.
 
-## for w0303
-add_executable (w0303_entrance "src/w0303_entrance.cpp" )
+## for testing
 
-add_executable (w0303_entrance2 "src/w0303_entrance2.cpp" "include/net_w0303_server.h")
-target_link_libraries(w0303_entrance2 PUBLIC glog::glog)
-
-add_executable (w0303_entrance3 "src/w0303_entrance3.cpp")
-target_link_libraries(w0303_entrance3 PUBLIC glog::glog nanodbc)
-
-add_executable (sql "src/sql.cpp")
-target_link_libraries(sql PUBLIC glog::glog nanodbc)
-
-add_executable (manager_arm "src/manager_arm.cpp" )
-##
-
-add_executable (1_entrance "src/backup_1_entrance.cpp" )
-
+# boost_asio
 add_executable (z_boost_tcpip "useful-functions/boost_tcpip.cpp" )
 
+# winsocket
 add_executable (z_winsocket_v1.0 "useful-functions/z_winsocket_server_v1.0.cpp" )
-
 add_executable (z_winsocket_v1.1 "useful-functions/z_winsocket_server_v1.1.cpp" )
 
+# c++ tutorial --- thread
 add_executable (z_move_semantics "useful-functions/z_move_semantics.cpp" )
-
 add_executable (thread_promise_future "useful-functions/thread_promise_future.cpp" )
 add_executable (thread_fuc_object "useful-functions/thread_fuc_object.cpp" )
 add_executable (thread_data_racing "useful-functions/thread_data_racing.cpp" )
@@ -91,11 +77,7 @@ add_executable (thread_mutex_lock "useful-functions/thread_mutex_lock.cpp" )
 add_executable (thread_monitor_object_pattern "useful-functions/thread_monitor_object_pattern.cpp" )
 add_executable (thread_concurrent_msg_q "useful-functions/thread_concurrent_msg_q.cpp" )
 
-add_executable (net_simple_server "src/net_simple_sever.cpp" )
-
-add_executable (net_simple_client "src/net_simple_client.cpp" )
-
-#tutorial: chat: client -- server -- msg
+# c++ tutorial --- boost asio chat: client -- server -- msg
 add_executable (z_boost_chat_client "useful-functions/boost_chat_client.cpp" )
 #target_link_libraries(z_boost_chat_client ${Boost_LIBRARY_DIR})
 
@@ -111,9 +93,9 @@ target_link_libraries(google_glog PRIVATE glog::glog)
 add_executable (checksum_dec_to_hex "useful-functions/w0303_checksum_dec_to_hex.cpp" )
 add_executable (w03003_cur_time "useful-functions/w03003_cur_time.cpp" )
 
-
-## database. how to include .dll file
-#d:/nw_sys/nw_sql_application_dll.dll
+# c++ tutorial --- how to export .dll
+# database. how to include .dll file
+# d:/nw_sys/nw_sql_application_dll.dll
 link_directories(lib)
 
 add_executable(c_testing "useful-functions/chiu_c_testing.cpp")
@@ -123,26 +105,26 @@ target_link_libraries(c_testing "d:/nw_sys/nw_sql_application_dll.dll")
 #target_link_libraries(dll_libhallo liblibhallo.dll)
 
 
-##
+## for w0303
 
+add_executable(w0303_main "src/w0303_main.cpp" "include/net_w0303_server.h")
+target_link_libraries(w0303_main PUBLIC glog::glog nanodbc modbus Poco::Foundation Poco::Net Poco::XML Poco::Zip Poco::Data Poco::JSON)
+
+
+#
 add_executable(sql_testing "useful-functions/sql_testing.cpp")
 target_link_libraries(sql_testing PRIVATE glog::glog nanodbc modbus Poco::Foundation Poco::Net Poco::XML Poco::Zip Poco::Data Poco::JSON)
 
-
-
+#
 add_executable(modbus_test "useful-functions/modbus_test.cpp")
 target_link_libraries(modbus_test PRIVATE modbus)
 
+#
+add_executable(sql_ha_onsite_setting "useful-functions/sql_ha_onsite_setting.cpp" "include/net_w0303_server.h")
+target_link_libraries(sql_ha_onsite_setting PUBLIC glog::glog nanodbc modbus Poco::Foundation Poco::Net Poco::XML Poco::Zip Poco::Data Poco::JSON)
 
 
-add_executable(w0303_main_test1 "src/w0303_main_test1.cpp" "include/net_w0303_server.h")
-target_link_libraries(w0303_main_test1 PUBLIC glog::glog nanodbc modbus Poco::Foundation Poco::Net Poco::XML Poco::Zip Poco::Data Poco::JSON)
-
-add_executable(sql_ha_setting "useful-functions/sql_ha_setting.cpp" "include/net_w0303_server.h")
-target_link_libraries(sql_ha_setting PUBLIC glog::glog nanodbc modbus Poco::Foundation Poco::Net Poco::XML Poco::Zip Poco::Data Poco::JSON)
-
-
-add_executable(mir_poco "src/mir_poco.cpp" )
+add_executable(mir_poco "useful-functions/mir_poco.cpp" )
 target_link_libraries(mir_poco PUBLIC glog::glog nanodbc modbus Poco::Foundation Poco::Net Poco::XML Poco::Zip Poco::Data)
 
 # for mir testing
@@ -155,7 +137,6 @@ target_link_libraries(mir_map PUBLIC glog::glog nanodbc modbus Poco::Foundation 
 add_executable(poco_ping_testing "useful-functions/poco_ping_testing.cpp" )
 target_link_libraries(poco_ping_testing PUBLIC glog::glog nanodbc modbus Poco::Foundation Poco::Net Poco::XML Poco::Zip Poco::Data Poco::JSON  ${OpenCV_LIBS})
 
-
 add_executable(hex2float "useful-functions/hex2float.cpp")
 
 add_executable(arm_test "useful-functions/arm_test.cpp" "include/net_w0303_server.h")
@@ -165,9 +146,5 @@ target_link_libraries(arm_test PUBLIC glog::glog nanodbc modbus Poco::Foundation
 add_executable(str_parse_test1 "useful-functions/str_parse_test1.cpp" "include/net_w0303_server.h")
 target_link_libraries(str_parse_test1 PUBLIC glog::glog nanodbc modbus Poco::Foundation Poco::Net Poco::XML Poco::Zip Poco::Data Poco::JSON)
 
-add_executable(al_test "useful-functions/al_test.cpp")
+add_executable(al_test "useful-functions/al_test.cpp" )
 target_link_libraries(al_test PUBLIC glog::glog nanodbc modbus Poco::Foundation Poco::Net Poco::XML Poco::Zip Poco::Data Poco::JSON)
-
-
-
-# TODO: Add tests and install targets if needed.

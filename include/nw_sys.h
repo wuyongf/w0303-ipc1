@@ -43,8 +43,6 @@ namespace yf
 
         public:
 
-            void thread_HandleStatus();
-
             void thread_WaitSchedules();
 
             void thread_DoSchedules();
@@ -98,7 +96,8 @@ namespace yf
             void UpdateDbDeviceStatusBeforeTask (const int& cur_job_id);
             void UpdateDbDeviceStatusAfterTask (const int& cur_job_id);
 
-        protected: // SQL
+        protected:
+            // SQL
 
             void UpdateDbDeviceArmConnectionStatus();
             void UpdateDbDeviceArmMissionStatus();
@@ -108,6 +107,10 @@ namespace yf
             void UpdateDbCurJobStatusAndLog();
 
             void GetSysControlMode();
+
+        private:
+            // Time Sleep
+            yf::algorithm::TimeSleep sleep;
 
         private:
 
@@ -123,7 +126,7 @@ namespace yf
             yf::arm::tm tm5;
 
             // ugv
-            yf::ugv::mir mir100;
+            std::shared_ptr<yf::ugv::mir> mir100_ptr_;
 
             // ipc2;
             yf::ipc2::raspberry pi4;
@@ -153,7 +156,26 @@ namespace yf
 
             std::thread th_do_schedules_;
 
+        /// Web Status Manager
+        private:
+            // properties
+            bool web_status_flag_ = false;
 
+            // methods
+            void thread_WebStatusManager();
+
+            void thread_Web_UgvBatteryPercentage(bool& web_status_flag,
+                                                 const int& sleep_duration);
+            void thread_Web_UgvCurPosition(const bool& web_status_flag,
+                                           const int& sleep_duration);
+
+        private:
+            // variables
+            std::thread th_web_status_manager_;
+            std::thread th_web_ugv_battery_;
+            std::thread th_web_ugv_position_;
+
+        /// Overall Control --- thread wait_schedules and do_schedules
         private:
             // Overall control --- thread wait schedules and thread do schedules
             //
@@ -249,8 +271,13 @@ void yf::sys::nw_sys::Start()
     tm5.GetConnectionStatus();
 
     /// 2. Initialization --- ugv
-    mir100.Start("192.168.7.34", nw_status_ptr_, sql_ptr_);
+    mir100_ptr_ = std::make_shared<yf::ugv::mir>();
+    mir100_ptr_->Start("192.168.7.34", nw_status_ptr_, sql_ptr_);
 
+    /// 3. Web Status Manager
+    th_web_status_manager_ = std::thread(&nw_sys::thread_WebStatusManager, this);
+
+    /// 4. Do Schedule and Wait Schedule
     th_do_schedules_ = std::thread(&nw_sys::thread_DoSchedules, this);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));    // wait 500 ms
@@ -722,16 +749,16 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
     /// 2. Assign Ugv Mission
     //
     // 2.1. Ugv: post a new mission via REST
-    mir100.PostMission(cur_model_config_id_);
+    mir100_ptr_->PostMission(cur_model_config_id_);
     // 2.2. Ugv: post actions via REST
-    mir100.PostActions(cur_model_config_id_);
+    mir100_ptr_->PostActions(cur_model_config_id_);
     // 2.3  Ugv: get current mission_guid
-    cur_mission_guid_ = mir100.GetCurMissionGUID();
+    cur_mission_guid_ = mir100_ptr_->GetCurMissionGUID();
 
     /// 3. Initial Status Checking
     //
     bool arm_init_status_check_success_flag = tm5.InitialStatusCheckForMission(2);
-    bool ugv_init_status_check_success_flag = mir100.InitialStatusCheckForMission(2);
+    bool ugv_init_status_check_success_flag = mir100_ptr_->InitialStatusCheckForMission(2);
 
     if (arm_init_status_check_success_flag == true &&
         ugv_init_status_check_success_flag == true)
@@ -746,11 +773,11 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
 
         mir100.DeleteMissionQueue();
 #endif
-        mir100.PostMissionQueue(cur_mission_guid_);
+        mir100_ptr_->PostMissionQueue(cur_mission_guid_);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-        mir100.Play();
+        mir100_ptr_->Play();
 
         /// b. while ugv mission has not finished, keep assigning arm mission config and executing arm mission.
         ///
@@ -759,7 +786,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
 
         while (mission_continue_flag)
         {
-            while(mir100.GetPLCRegisterIntValue(4) != 2)
+            while(mir100_ptr_->GetPLCRegisterIntValue(4) != 2)
             {
                 ///TIME 200ms
                 std::this_thread::sleep_for(std::chrono::milliseconds(200));
@@ -774,7 +801,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
 
                 /// b.2 ugv_init_mission_status_check
                 // wait plc004 == 1 and mir state is executing ;
-                ugv_mission_continue_flag = mir100.InitMissionStatusCheck(2);
+                ugv_mission_continue_flag = mir100_ptr_->InitMissionStatusCheck(2);
 
                 if(ugv_mission_continue_flag == true)
                 {
@@ -794,7 +821,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
 
                     if(arm_wait_plc003_success_flag == true)
                     {
-                        auto cur_order = mir100.GetPLCRegisterIntValue(2);
+                        auto cur_order = mir100_ptr_->GetPLCRegisterIntValue(2);
 
                         //todo:
                         /// b.3.1 start configuring arm mission.
@@ -803,7 +830,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
                         cur_operation_area_ =  arm_mission_configs[cur_order-1].operation_area;
 
                         // z. finish configure stage.
-                        mir100.SetPLCRegisterIntValue(3,0);
+                        mir100_ptr_->SetPLCRegisterIntValue(3,0);
                         arm_config_stage_success_flag = true;
 
                         // wait for executing flag/signal.
@@ -949,7 +976,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
                             this->ArmTask("Post arm_back_to_safety");
 
                             //
-                            mir100.SetPLCRegisterIntValue(1,0);
+                            mir100_ptr_->SetPLCRegisterIntValue(1,0);
                             std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
                             /// Last order
@@ -980,7 +1007,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
                                 arm_mission_success_flag = true;
 
                                 // set ugv_mission_success_flag
-                                if(mir100.GetPLCRegisterIntValue(4) == 2)
+                                if(mir100_ptr_->GetPLCRegisterIntValue(4) == 2)
                                 {
                                     ugv_mission_success_flag    = true;
                                     mission_continue_flag       = false;
@@ -1025,10 +1052,10 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
     {
         mission_success_flag = true;
 
-        mir100.SetPLCRegisterIntValue(4,0);
+        mir100_ptr_->SetPLCRegisterIntValue(4,0);
     }
 
-    mir100.Pause();
+    mir100_ptr_->Pause();
 
     //todo:
     /// based on mission_success_flag, Update to DB.
@@ -1614,7 +1641,7 @@ bool yf::sys::nw_sys::WaitForUgvPLCRegisterInt(const int &plc_register, const in
     while (true)
     {
         // get cur ugv plc register xx, value xxx.
-        auto result = mir100.GetPLCRegisterIntValue(plc_register);
+        auto result = mir100_ptr_->GetPLCRegisterIntValue(plc_register);
 
         if (value != result)
         {
@@ -1655,7 +1682,7 @@ bool yf::sys::nw_sys::WaitForUgvPLCRegisterFloat(const int &plc_register, const 
     while (true)
     {
         // get cur ugv plc register xx, value xxx.
-        auto result = mir100.GetPLCRegisterFloatValue(plc_register);
+        auto result = mir100_ptr_->GetPLCRegisterFloatValue(plc_register);
 
         if (value != result)
         {
@@ -2002,6 +2029,66 @@ void yf::sys::nw_sys::ArmRemovePad()
             this->ArmTask("Post remove_large_pad");
             break;
         }
+    }
+}
+
+void yf::sys::nw_sys::thread_WebStatusManager()
+{
+    /// Configuration
+    ///
+    /// duration for each thread
+    int duration_min_ugv_battery = 10;
+    int duration_sec_ugv_pos = 10;
+
+    /// each thread's control flag
+    web_status_flag_ = true;
+
+    /// kick off each thread
+    th_web_ugv_battery_ = std::thread(&nw_sys::thread_Web_UgvBatteryPercentage, this,
+                                      std::ref(web_status_flag_),std::move(duration_min_ugv_battery));
+
+    th_web_ugv_position_ = std::thread(&nw_sys::thread_Web_UgvCurPosition, this,
+                                       std::ref(web_status_flag_),std::move(duration_sec_ugv_pos));
+
+    /// Duration: 1 min
+    while (schedule_flag_ == true)
+    {
+        sleep.min(1);
+    }
+
+    /// Stop all web status threads
+    web_status_flag_ = false;
+}
+
+void yf::sys::nw_sys::thread_Web_UgvBatteryPercentage(bool &web_status_flag,
+                                                      const int& sleep_duration)
+{
+    while(web_status_flag)
+    {
+        // todo: need to handle how to check whether mir is ON/OFF
+
+        // retrieve data from ugv
+        auto result = mir100_ptr_->GetBatteryPercentage();
+        // update to sql
+        sql_ptr_->UpdateDeviceBatteryCapacity("ugv", result);
+
+        sleep.min(sleep_duration);
+    }
+}
+
+void yf::sys::nw_sys::thread_Web_UgvCurPosition(const bool &web_status_flag,
+                                                const int &sleep_duration)
+{
+    while(web_status_flag)
+    {
+        // todo: need to handle how to check whether mir is ON/OFF
+
+        // retrieve data from ugv
+        auto result = mir100_ptr_->GetCurPosition();
+        // update to sql
+        sql_ptr_->UpdateDeviceUgvCurPosition(result[0],result[1],result[2]);
+
+        sleep.sec(sleep_duration);
     }
 }
 

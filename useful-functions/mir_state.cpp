@@ -32,12 +32,20 @@ int main()
 //        std::cout << "name[" << n << "]: " << map_name_list[n] << std::endl;
 //    }
 
+
+    auto pos = mir100.GetCurPosition();
+
+
+
+#if 0
     auto pos_name_list = mir100.GetPositionNameList("HA","HA_MainBlock_3/F");
 
     for (int n = 0; n < pos_name_list.size(); n++)
     {
         std::cout << "name[" << n << "]: " << pos_name_list[n] << std::endl;
     }
+
+#endif
 
 #if 0
 

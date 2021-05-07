@@ -75,6 +75,7 @@ namespace yf
         public:
             degree_related(){}
             virtual ~degree_related(){}
+
         };
 
         class arm_path
@@ -109,6 +110,17 @@ namespace yf
             std::vector<std::vector<float>> Convert2RealPathByLM(std::vector<std::vector<float>>& original_path,
                                                                  std::vector<float>& ref_tag_position,
                                                                  std::vector<float>& real_tag_positon);
+        };
+
+        class TimeSleep
+        {
+        public:
+            TimeSleep(){};
+            virtual ~TimeSleep(){};
+        public:
+            void ms(const int& ms);
+            void sec(const int& sec);
+            void min(const int& min);
         };
     }
 }
@@ -889,4 +901,24 @@ Eigen::RowVectorXf yf::algorithm::cleaning_motion::get_v1n()
 Eigen::RowVector3f yf::algorithm::cleaning_motion::get_v2nb()
 {
     return v2nb_;
+}
+
+void yf::algorithm::TimeSleep::ms(const int &ms)
+{
+    ///TIME
+    std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+}
+
+void yf::algorithm::TimeSleep::min(const int &min)
+{
+    auto min_r = min * 1000 * 60;
+    ///TIME
+    std::this_thread::sleep_for(std::chrono::milliseconds(min_r));
+}
+
+void yf::algorithm::TimeSleep::sec(const int &sec)
+{
+    auto result = sec * 1000;
+    ///TIME
+    std::this_thread::sleep_for(std::chrono::milliseconds(result));
 }

@@ -47,6 +47,10 @@ namespace yf
 
             void Disconnect();
 
+        private:
+            std::mutex muxConn;
+
+        public:
             /// time method
             //
             std::string TimeNow();
@@ -104,6 +108,7 @@ namespace yf
             void UpdateDeviceMissionStatus(const std::string& device_name, const int& mission_status);
 
             void UpdateDeviceBatteryCapacity(const std::string& device_name, const float& battery_capacity);
+            void UpdateDeviceUgvCurPosition(const float& x, const float& y,const float& theta);
 
             // Sys Status
             //
@@ -253,13 +258,15 @@ bool yf::sql::sql_server::isConnected()
 
 void yf::sql::sql_server::Connect()
 {
+
     try
     {
+        std::unique_lock lock(muxConn);
         nanodbc::connection connection(ODBCConnectionStr_);
         conn_ = connection;
     }
     catch (std::exception& e)
-    {
+    {  
         std::cerr << e.what() << std::endl;
         std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
     }
@@ -267,6 +274,7 @@ void yf::sql::sql_server::Connect()
 
 void yf::sql::sql_server::Disconnect()
 {
+
     try
     {
         conn_.disconnect();
@@ -2467,6 +2475,52 @@ yf::data::arm::Point3d yf::sql::sql_server::GetRefPathInitPoint(const int &point
 
     return point3d;
 }
+
+void yf::sql::sql_server::UpdateDeviceUgvCurPosition(const float &x, const float &y, const float &theta)
+{
+    std::string x_str = std::to_string(x);
+    std::string y_str = std::to_string(y);
+    std::string theta_str = std::to_string(theta);
+
+    std::string query_update;
+
+    try
+    {
+        /// x
+        Connect();
+
+        query_update = "UPDATE sys_status_device SET ugv_pos_x = " + x_str + ", modified_date='" + TimeNow() + "' WHERE device = 'ugv'" ;
+
+        nanodbc::execute(conn_,query_update);
+
+        Disconnect();
+
+        /// y
+        Connect();
+
+        query_update = "UPDATE sys_status_device SET ugv_pos_y = " + y_str + " WHERE device = 'ugv'" ;
+
+        nanodbc::execute(conn_,query_update);
+
+        Disconnect();
+
+        /// z
+        Connect();
+
+        query_update = "UPDATE sys_status_device SET ugv_pos_theta = " + theta_str + " WHERE device = 'ugv'" ;
+
+        nanodbc::execute(conn_,query_update);
+
+        Disconnect();
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+    }
+}
+
+
 
 
 

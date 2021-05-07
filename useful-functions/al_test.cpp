@@ -6,6 +6,7 @@
 
 int main()
 {
+
     yf::algorithm::cleaning_motion al_motion;
 
     yf::data::arm::Point3d p1;
