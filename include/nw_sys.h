@@ -657,7 +657,6 @@ void yf::sys::nw_sys::thread_DoSchedules()
 
         // record the end time
         // update the schedule status to database
-
     }
 }
 
@@ -805,8 +804,8 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
 
                 if(ugv_mission_continue_flag == true)
                 {
-                    // stage 1: configure arm mission
-                    // stage 2: execute arm mission
+                    /// stage 1: configure arm mission
+                    /// stage 2: execute arm mission
 
                     /// b.3 stage 1: configure arm mission.
 
@@ -845,13 +844,14 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
                             if(cur_order == 1)
                             {
                                 cur_tool_angle_ = data::arm::ToolAngle::Zero;
-
+#if 0 /// Disable For Testing
                                 this->ArmPickTool(cur_task_mode_);
 
-//                                if(cur_task_mode_ == data::arm::TaskMode::Mopping)
-//                                {
-//                                    this->ArmPickPad();
-//                                }
+                                if(cur_task_mode_ == data::arm::TaskMode::Mopping)
+                                {
+                                    this->ArmPickPad();
+                                }
+#endif
                             }
 
                             /// For each order, move to safety position first.
@@ -948,7 +948,6 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
 
                                         continue;
                                     }
-
                                 }
 
                                 // 3. check&set tool_angle
@@ -986,20 +985,21 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
 
                                 // back to home first
                                 this->ArmTask("Post arm_safety_to_home");
-
+#if 0 /// Disable For Testing
                                 // remove pad if its necessary
-//                                if(cur_task_mode_ == data::arm::TaskMode::Mopping)
-//                                {
-//                                    if(cur_tool_angle_ == data::arm::ToolAngle::FortyFive)
-//                                    {
-//                                        this->ArmTask("Post tool_angle_0");
-//                                    }
-//
-//                                    this->ArmRemovePad();
-//                                }
+                                if(cur_task_mode_ == data::arm::TaskMode::Mopping)
+                                {
+                                    if(cur_tool_angle_ == data::arm::ToolAngle::FortyFive)
+                                    {
+                                        this->ArmTask("Post tool_angle_0");
+                                    }
+
+                                    this->ArmRemovePad();
+                                }
 
                                 // place the tool
                                 this->ArmPlaceTool(cur_task_mode_);
+#endif
                                 cur_tool_angle_ = data::arm::ToolAngle::Zero;
 
                                 /// ipc1 loop

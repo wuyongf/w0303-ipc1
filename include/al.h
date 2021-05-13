@@ -23,14 +23,21 @@ namespace yf
                                        const data::arm::Point3d& p3, const data::arm::Point3d& p4);
 
             std::deque<yf::data::arm::Point3d> get_mop_via_points(const yf::data::arm::MotionType &motion_type,
-                                                                  const std::deque<yf::data::arm::Point3d>& init_cleaning_points);
+                                                                  const std::deque<yf::data::arm::Point3d>& ref_path_init_points,
+                                                                  const int& layer,
+                                                                  float& step_ratio_horizontal);
 
             std::deque<yf::data::arm::Point3d> get_uvc_via_points(const yf::data::arm::MotionType& motion_type,
-                                                                  const std::deque<yf::data::arm::Point3d>& init_cleaning_points,
+                                                                  const std::deque<yf::data::arm::Point3d>& ref_path_init_points,
                                                                   const int& layer,
                                                                   const float& step_ratio_horizontal);
+
+        private:
+
+            std::deque<yf::data::arm::Point3d> GetCircleEachLayerViaPoints(const float& radius, const float& step_ratio_horizontal, const yf::data::arm::Point3d& init_point);
+
         public:
-            void set_layer(const int& layer_no);
+
             yf::data::arm::Point3d get_center();
             float get_radius();
             Eigen::RowVectorXf get_v1n();
@@ -49,8 +56,7 @@ namespace yf
             data::arm::Point3d init_p4_;
 
             /// for motion type: Plane
-            int layer_          = 1; // at least 1
-            int sample_points_  = 40;
+            int sample_points_  = 60;
 
             /// for motion type: Circle
             yf::data::arm::Point3d center_point_;
@@ -469,13 +475,15 @@ void yf::algorithm::cleaning_motion::set_plain_edge_points(const yf::data::arm::
 
 }
 
-std::deque<yf::data::arm::Point3d> yf::algorithm::cleaning_motion::get_mop_via_points(const yf::data::arm::MotionType& motion_type,
-                                                                                      const std::deque<yf::data::arm::Point3d>& init_cleaning_points)
+std::deque<yf::data::arm::Point3d>
+yf::algorithm::cleaning_motion::get_mop_via_points(const yf::data::arm::MotionType& motion_type,
+                                                   const std::deque<yf::data::arm::Point3d>& ref_path_init_points,
+                                                   const int& layer,
+                                                   float& step_ratio_horizontal)
 {
+    // Initialization
     std::deque<yf::data::arm::Point3d> via_points;
-
     via_points.clear();
-
 
     switch (motion_type)
     {
@@ -484,12 +492,12 @@ std::deque<yf::data::arm::Point3d> yf::algorithm::cleaning_motion::get_mop_via_p
             //@@ input: 4 points
 
             /// 1. Initialization
-            init_p1_ = init_cleaning_points[0];
-            init_p2_ = init_cleaning_points[1];
-            init_p3_ = init_cleaning_points[2];
-            init_p4_ = init_cleaning_points[3];
+            init_p1_ = ref_path_init_points[0];
+            init_p2_ = ref_path_init_points[1];
+            init_p3_ = ref_path_init_points[2];
+            init_p4_ = ref_path_init_points[3];
 
-            int motion_line = layer_ + 1;
+            int motion_line = layer + 1;
             int occupied_points = motion_line * 2;
             int free_points = sample_points_ - occupied_points;
             int points_no_each_line = std::floor(free_points/motion_line);
@@ -499,10 +507,9 @@ std::deque<yf::data::arm::Point3d> yf::algorithm::cleaning_motion::get_mop_via_p
             float delta_z = abs(init_p3_.z - init_p2_.z);
 
             float delta_x_each_point = delta_x / ( points_no_each_line + 1.0);
-            float delta_z_each_line = delta_z / layer_;
+            float delta_z_each_line = delta_z / layer;
 
-            float step_ratio_horizontal = abs( delta_x_each_point / delta_x );
-            float step_ratio_vertical = 1.0 / layer_;
+            float step_ratio_vertical = 1.0 / layer;
 
             bool even_flag = true;
             int line_counter = 0;
@@ -595,8 +602,8 @@ std::deque<yf::data::arm::Point3d> yf::algorithm::cleaning_motion::get_mop_via_p
             //@@ input: 2 points
 
             /// 1. Initialization
-            init_p1_ = init_cleaning_points[0];
-            init_p2_ = init_cleaning_points[1];
+            init_p1_ = ref_path_init_points[0];
+            init_p2_ = ref_path_init_points[1];
 
             via_points.push_back(init_p1_);
             via_points.push_back(init_p2_);
@@ -617,62 +624,23 @@ std::deque<yf::data::arm::Point3d> yf::algorithm::cleaning_motion::get_mop_via_p
 
         case yf::data::arm::MotionType::CircleFull:
         {
-            std::deque<yf::data::arm::Point3d> via_points_a;
-            std::deque<yf::data::arm::Point3d> via_points_b;
-
-            via_points_a.clear();
-            via_points_b.clear();
-
             // get center_point_, radius_, v1_, v2_
-            this->CenterFit3d(init_cleaning_points);
+            this->CenterFit3d(ref_path_init_points);
 
-            // via_points, with center_point_ and radius_
-            for(int i = 1; i <= 361; i = i+10)
+            // delta_radius
+            float delta_radius = radius_/static_cast<float>(layer);
+
+            //
+            for (int n = 0; n < layer; n++)
             {
-                yf::data::arm::Point3d via_point;
+                auto radius = radius_  - n * delta_radius;
+                auto step_ratio = step_ratio_horizontal * (n+1);
 
-                float a = i/180.0*PI;
-                via_point.x = center_point_.x + sin(a) * radius_ * v1n_(0) + cos(a) * radius_ * v2nb_(0);
-                via_point.y = center_point_.y + sin(a) * radius_ * v1n_(1) + cos(a) * radius_ * v2nb_(1);
-                via_point.z = center_point_.z + sin(a) * radius_ * v1n_(2) + cos(a) * radius_ * v2nb_(2);
-                via_point.rx = center_point_.rx;
-                via_point.ry = center_point_.ry;
-                via_point.rz = center_point_.rz;
+                std::deque<yf::data::arm::Point3d> via_points_each_layer;
 
-                via_points.push_back(via_point);
-            }
+                via_points_each_layer = this->GetCircleEachLayerViaPoints(radius,step_ratio,ref_path_init_points[0]);
 
-            // search via_p0
-
-            int index = 0;
-
-            float delta_distance =  (init_cleaning_points[0].x-via_points[0].x) * (init_cleaning_points[0].x-via_points[0].x) +
-                                    (init_cleaning_points[0].y-via_points[0].y) * (init_cleaning_points[0].y-via_points[0].y) +
-                                    (init_cleaning_points[0].z-via_points[0].z) * (init_cleaning_points[0].z-via_points[0].z);
-
-            for (int n = 0; n < via_points.size(); n++)
-            {
-                float delta_distance_temp = (init_cleaning_points[0].x-via_points[n].x) * (init_cleaning_points[0].x-via_points[n].x) +
-                                            (init_cleaning_points[0].y-via_points[n].y) * (init_cleaning_points[0].y-via_points[n].y) +
-                                            (init_cleaning_points[0].z-via_points[n].z) * (init_cleaning_points[0].z-via_points[n].z);
-                if(delta_distance > delta_distance_temp)
-                {
-                    delta_distance = delta_distance_temp;
-
-                    index = n;
-                }
-            }
-
-            if(index != 0)
-            {
-                via_points_a.insert(via_points_a.begin(),via_points.begin()+index,via_points.end());
-
-                via_points_b.insert(via_points_b.begin(), via_points.begin(),via_points.begin()+index-1);
-
-                via_points.clear();
-
-                via_points.insert(via_points.end(),via_points_a.begin(),via_points_a.end());
-                via_points.insert(via_points.end(),via_points_b.begin(),via_points_b.end());
+                via_points.insert(via_points.end(),via_points_each_layer.begin(),via_points_each_layer.end());
             }
 
             break;
@@ -681,7 +649,7 @@ std::deque<yf::data::arm::Point3d> yf::algorithm::cleaning_motion::get_mop_via_p
         case yf::data::arm::MotionType::CircleHalf:
         {
             // get center_point_, radius_, v1_, v2_
-            this->CenterFit3d(init_cleaning_points);
+            this->CenterFit3d(ref_path_init_points);
 
             // via_points, with center_point_ and radius_
             for(int i = 1; i <= 181; i = i+10)
@@ -698,6 +666,12 @@ std::deque<yf::data::arm::Point3d> yf::algorithm::cleaning_motion::get_mop_via_p
 
             break;
         }
+
+        default:
+        {
+            via_points = ref_path_init_points;
+            break;
+        }
     }
 
     return via_points;
@@ -705,7 +679,7 @@ std::deque<yf::data::arm::Point3d> yf::algorithm::cleaning_motion::get_mop_via_p
 
 std::deque<yf::data::arm::Point3d>
 yf::algorithm::cleaning_motion::get_uvc_via_points(const yf::data::arm::MotionType &motion_type,
-                                                   const std::deque<yf::data::arm::Point3d>& init_cleaning_points,
+                                                   const std::deque<yf::data::arm::Point3d>& ref_path_init_points,
                                                    const int& layer,
                                                    const float& step_ratio_horizontal)
 {
@@ -722,8 +696,8 @@ yf::algorithm::cleaning_motion::get_uvc_via_points(const yf::data::arm::MotionTy
         case yf::data::arm::MotionType::Line: // line_cleaning
         {
             /// 1. Initialization
-            init_p1_ = init_cleaning_points[0];
-            init_p2_ = init_cleaning_points[1];
+            init_p1_ = ref_path_init_points[0];
+            init_p2_ = ref_path_init_points[1];
 
             std::deque<yf::data::arm::Point3d> temp_points;
 
@@ -761,12 +735,6 @@ yf::algorithm::cleaning_motion::get_uvc_via_points(const yf::data::arm::MotionTy
 #endif
 
     return via_points;
-}
-
-void yf::algorithm::cleaning_motion::set_layer(const int &layer_no)
-{
-    layer_ = layer_no;
-    return;
 }
 
 void yf::algorithm::cleaning_motion::CenterFit3d(const std::deque<yf::data::arm::Point3d> &init_cleaning_points)
@@ -901,6 +869,69 @@ Eigen::RowVectorXf yf::algorithm::cleaning_motion::get_v1n()
 Eigen::RowVector3f yf::algorithm::cleaning_motion::get_v2nb()
 {
     return v2nb_;
+}
+
+std::deque<yf::data::arm::Point3d> yf::algorithm::cleaning_motion::GetCircleEachLayerViaPoints(const float& radius,
+                                                                                               const float& step_ratio_horizontal,
+                                                                                               const yf::data::arm::Point3d& init_point)
+{
+    std::deque<yf::data::arm::Point3d> via_points_layer;
+
+    std::deque<yf::data::arm::Point3d> via_points_a;
+    std::deque<yf::data::arm::Point3d> via_points_b;
+
+    via_points_a.clear();
+    via_points_b.clear();
+
+    // via_points, with center_point_ and radius_
+    for(int i = 1; i <= 361; i = i+step_ratio_horizontal*360)
+    {
+        yf::data::arm::Point3d via_point;
+
+        float a = i/180.0*PI;
+        via_point.x = center_point_.x + sin(a) * radius * v1n_(0) + cos(a) * radius * v2nb_(0);
+        via_point.y = center_point_.y + sin(a) * radius * v1n_(1) + cos(a) * radius * v2nb_(1);
+        via_point.z = center_point_.z + sin(a) * radius * v1n_(2) + cos(a) * radius * v2nb_(2);
+        via_point.rx = center_point_.rx;
+        via_point.ry = center_point_.ry;
+        via_point.rz = center_point_.rz;
+
+        via_points_layer.push_back(via_point);
+    }
+
+    // search via_p0
+
+    int index = 0;
+
+    float delta_distance = (init_point.x - via_points_layer[0].x) * (init_point.x - via_points_layer[0].x) +
+                           (init_point.y - via_points_layer[0].y) * (init_point.y - via_points_layer[0].y) +
+                           (init_point.z - via_points_layer[0].z) * (init_point.z - via_points_layer[0].z);
+
+    for (int n = 0; n < via_points_layer.size(); n++)
+    {
+        float delta_distance_temp = (init_point.x - via_points_layer[n].x) * (init_point.x - via_points_layer[n].x) +
+                                    (init_point.y - via_points_layer[n].y) * (init_point.y - via_points_layer[n].y) +
+                                    (init_point.z - via_points_layer[n].z) * (init_point.z - via_points_layer[n].z);
+        if(delta_distance > delta_distance_temp)
+        {
+            delta_distance = delta_distance_temp;
+
+            index = n;
+        }
+    }
+
+    if(index != 0)
+    {
+        via_points_a.insert(via_points_a.begin(),via_points_layer.begin()+index,via_points_layer.end());
+        via_points_b.insert(via_points_b.begin(), via_points_layer.begin(),via_points_layer.begin()+index-1);
+
+        via_points_layer.clear();
+
+        via_points_layer.insert(via_points_layer.end(),via_points_a.begin(),via_points_a.end());
+        via_points_layer.insert(via_points_layer.end(),via_points_b.begin(),via_points_b.end());
+    }
+
+    return via_points_layer;
 }
 
 void yf::algorithm::TimeSleep::ms(const int &ms)
