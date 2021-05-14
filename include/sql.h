@@ -432,7 +432,7 @@ std::string yf::sql::sql_server::get_time_element(const std::string &element)
     {
         return time_hour_;
     }
-    else if (element == "min")
+    else if (element == "minute")
     {
         return time_minute_;
     }
@@ -2196,7 +2196,7 @@ std::string yf::sql::sql_server::get_future_db_time(const int &seconds_later_fro
     auto month = this->get_time_element("month");
     auto day = this->get_time_element("day");
     auto hour = this->get_time_element("hour");
-    auto min = this->get_time_element("min");
+    auto min = this->get_time_element("minute");
     auto sec = this->get_time_element("sec");
 
     auto date = convert_to_timepoint(std::stoi(year), std::stoi(month)-1, std::stoi(day),std::stoi(hour),std::stoi(min),std::stoi(sec));

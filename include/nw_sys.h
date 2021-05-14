@@ -53,11 +53,7 @@ namespace yf
 
             void WaitSchedulesInitialCheck();
 
-        public: // layer 1
-
-            void ArmTask(const std::string& arm_command);
-
-        public: // layer 2
+        public: // layer 2 based on tm5.ArmTask();
 
             void ArmPickTool(const yf::data::arm::TaskMode& task_mode);
             void ArmPlaceTool(const yf::data::arm::TaskMode& task_mode);
@@ -166,6 +162,7 @@ namespace yf
 
             void thread_Web_UgvBatteryPercentage(bool& web_status_flag,
                                                  const int& sleep_duration);
+
             void thread_Web_UgvCurPosition(const bool& web_status_flag,
                                            const int& sleep_duration);
 
@@ -250,29 +247,33 @@ void yf::sys::nw_sys::Start()
 {
     /// 0. Initialization
     //
-    // (0) nw_status and sql
+    // 0.1 nw_status
     nw_status_ptr_ = std::make_shared<yf::status::nw_status>();
-    //sql_ptr_       = std::make_shared<yf::sql::sql_server>("ODBC Driver 17 for SQL Server","localhost","NW_mobile_robot_sys","sa","wuyongfeng1334");
+    // 0.2 sql
     sql_ptr_       = std::make_shared<yf::sql::sql_server>("SQL Server","192.168.7.27","NW_mobile_robot_sys","sa","NWcadcam2021");
-
-    // (1) thread ipc_server, establish server and keep updating, keep waiting for devices connection.
+    // 0.3 ipc_server
+    //  establish server and keep updating, keep waiting for devices connection.
     th_ipc_server_ = std::thread(&nw_sys::thread_IPCServerStartup, this, std::ref(ipc_server_ptr_), std::ref(ipc_server_flag_));
 
     /// 1. Initialization --- arm
     //
-    // (2) startup tm5 control module and pass <1> ipc_server_ptr, <2> nw_status_ptr <3> sql_ptr
+    // 1.1 startup tm5 control module and pass <1> ipc_server_ptr, <2> nw_status_ptr <3> sql_ptr
     tm5.Start(ipc_server_ptr_,nw_status_ptr_,sql_ptr_);
 
-    // (3) block the program, wait for arm connection
+    // 1.2 block the program, wait for arm connection
     // todo(undone): should notify the database!
     tm5.WaitForConnection();
 
-    // update the connection status to sys_status & database ;
+    // 1.3 update the connection status to sys_status & database ;
     tm5.GetConnectionStatus();
 
     /// 2. Initialization --- ugv
+    //
     mir100_ptr_ = std::make_shared<yf::ugv::mir>();
     mir100_ptr_->Start("192.168.7.34", nw_status_ptr_, sql_ptr_);
+
+    /// TIME
+    sleep.ms(100);
 
     /// 3. Web Status Manager
     th_web_status_manager_ = std::thread(&nw_sys::thread_WebStatusManager, this);
@@ -280,10 +281,10 @@ void yf::sys::nw_sys::Start()
     /// 4. Do Schedule and Wait Schedule
     th_do_schedules_ = std::thread(&nw_sys::thread_DoSchedules, this);
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));    // wait 500 ms
+    /// TIME
+    sleep.ms(500);
 
     th_wait_schedules_ = std::thread(&nw_sys::thread_WaitSchedules, this);
-
 }
 
 void yf::sys::nw_sys::Close()
@@ -311,7 +312,6 @@ void yf::sys::nw_sys::Close()
     //  to let th_ipc_server_ to join.
     ipc_server_flag_ = false;
     th_ipc_server_.join();
-
 }
 
 void yf::sys::nw_sys::thread_IPCServerStartup(std::shared_ptr<IPCServer>& server_ptr, bool& server_flag)
@@ -328,13 +328,6 @@ void yf::sys::nw_sys::thread_IPCServerStartup(std::shared_ptr<IPCServer>& server
     return;
 }
 
-void yf::sys::nw_sys::ArmTask(const std::string &arm_command)
-{
-    tm5.CheckArmInitMssionStaus();
-    tm5.AssignArmMission(arm_command);
-    tm5.UpdateArmCurMissionStatus();
-}
-
 void yf::sys::nw_sys::thread_WaitSchedules()
 {
     while (schedule_flag_)
@@ -348,6 +341,7 @@ void yf::sys::nw_sys::thread_WaitSchedules()
             WaitSchedulesInitialCheck();
 
             LOG(INFO) << "[thread_wait_schedules]: stage 0 --- Initial Check [Complete]";
+
             #if 0
             bool initial_check_flag = true;
 
@@ -480,12 +474,11 @@ void yf::sys::nw_sys::thread_WaitSchedules()
                     GetSysControlMode();
 
                     ///TIME
-                    // sleep 2s and then keep checking
-                    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                    sleep.ms(500);
                 }
 
                 ///TIME
-                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                sleep.ms(500);
             }
 
             schedule_number = 0;
@@ -511,7 +504,9 @@ void yf::sys::nw_sys::thread_WaitSchedules()
         // (2) option 2 -- mutex lock
         //
         // lock and wait for notify.
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+        ///TIME
+        sleep.ms(50);
 
         LOG(INFO) << "[thread_wait_schedules]: lock thread: wait schedule";
 
@@ -577,8 +572,9 @@ void yf::sys::nw_sys::thread_DoSchedules()
 
                 tm5.UpdateArmCurMissionStatus();
                 LOG(INFO) << "schedule initial check: wait for arm is idle";
-                std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
+                ///TIME
+                sleep.ms(2000);
             }
 
             // (2) Do Each Schedule
@@ -649,7 +645,10 @@ void yf::sys::nw_sys::thread_DoSchedules()
 
         // trigger thread: wait schedule
         wait_schedule_flag = true;
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+        ///TIME
+        sleep.ms(50);
+
         std::unique_lock<std::mutex> ul_wait(mux_Blocking_wait_schedule);
         cv_Blocking_wait_schedule.notify_one();
 
@@ -774,7 +773,8 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
 #endif
         mir100_ptr_->PostMissionQueue(cur_mission_guid_);
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        ///TIME
+        sleep.ms(100);
 
         mir100_ptr_->Play();
 
@@ -787,8 +787,8 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
         {
             while(mir100_ptr_->GetPLCRegisterIntValue(4) != 2)
             {
-                ///TIME 200ms
-                std::this_thread::sleep_for(std::chrono::milliseconds(200));
+                ///TIME
+                sleep.ms(200);
 
                 /// b.1 Initialization
 
@@ -815,8 +815,8 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
 
                     arm_wait_plc003_success_flag = this->WaitForUgvPLCRegisterInt(3,1,2);
 
-                    ///TIME 200ms
-                    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+                    ///TIME
+                    sleep.ms(200);
 
                     if(arm_wait_plc003_success_flag == true)
                     {
@@ -859,17 +859,17 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
                             if(cur_order == 1)
                             {
                                 this->ArmSetOperationArea(cur_operation_area_);
-                                this->ArmTask("Post arm_home_to_safety");
+                                tm5.ArmTask("Post arm_home_to_safety");
                             }
                             else
                             {
                                 // if cur_operation_area is not equal to last one, move to safety position first.
                                 if(cur_operation_area_ != arm_mission_configs[cur_order-2].operation_area)
                                 {
-                                    this->ArmTask("Post arm_safety_to_home");
+                                    tm5.ArmTask("Post arm_safety_to_home");
 
                                     this->ArmSetOperationArea(cur_operation_area_);
-                                    this->ArmTask("Post arm_home_to_safety");
+                                    tm5.ArmTask("Post arm_home_to_safety");
                                 }
                             }
 
@@ -881,9 +881,9 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
                                 auto standby_point = arm_mission_configs[n].standby_position;
                                 std::string standby_point_str = this->ArmGetPointStr(standby_point);
                                 //  1.2 set standby_point
-                                this->ArmTask("Set standby_p0 = "+standby_point_str);
+                                tm5.ArmTask("Set standby_p0 = "+standby_point_str);
                                 //  1.3 move to standby_point
-                                this->ArmTask("Move_to standby_p0");
+                                tm5.ArmTask("Move_to standby_p0");
 
                                 // 2. check landmark_or_not?
                                 if(arm_mission_configs[n].landmark_flag == true)
@@ -892,26 +892,26 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
                                     //  2.1.1 retrieve init_lm_vision_position_str
                                     std::string ref_vision_lm_init_position_str = this->ArmGetPointStr(arm_mission_configs[n].ref_vision_lm_init_position);
                                     //  2.1.2 set init_lm_vision_position
-                                    this->ArmTask("Set vision_lm_init_p0 = " + ref_vision_lm_init_position_str);
+                                    tm5.ArmTask("Set vision_lm_init_p0 = " + ref_vision_lm_init_position_str);
                                     //  2.1.3 move_to init_lm_vision_position
-                                    this->ArmTask("Move_to vision_lm_init_p0");
+                                    tm5.ArmTask("Move_to vision_lm_init_p0");
 
                                     // 2.2 execute vision_find_landmark
-                                    this->ArmTask("Post vision_find_landmark");
+                                    tm5.ArmTask("Post vision_find_landmark");
 
                                     // 2.3 check find_landmark_flag
-                                    this->ArmTask("Post get_find_landmark_flag");
+                                    tm5.ArmTask("Post get_find_landmark_flag");
 
                                     if(tm5.GetFindLandmarkFlag() == true)
                                     {
                                         LOG(INFO) << "Find Landmark!";
 
                                         // 2.4 get real_landmark_pos
-                                        this->ArmTask("Post get_landmark_pos_str");
+                                        tm5.ArmTask("Post get_landmark_pos_str");
                                         real_lm_pos_ = tm5.GetRealLandmarkPos();
 
                                         // 2.5 post back_to_standby_position.
-                                        this->ArmTask("Move_to standby_p0");
+                                        tm5.ArmTask("Move_to standby_p0");
 
                                         // 2.6 get TF
                                         // 2.7 calculate the new via_points
@@ -942,9 +942,9 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
                                         LOG(INFO) << "Cannot find Landmark! cur_arm_mission_config aborted!!";
 
                                         // back to standby_point
-                                        this->ArmTask("Move_to standby_p0");
+                                        tm5.ArmTask("Move_to standby_p0");
                                         // back to safety position
-                                        this->ArmTask("Post arm_back_to_safety");
+                                        tm5.ArmTask("Post arm_back_to_safety");
 
                                         continue;
                                     }
@@ -956,7 +956,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
                                 // 4. check motion_type, decide which motion.
                                 // 5. assign n_via_points.
                                 std::string n_via_points_str = std::to_string(arm_mission_configs[n].n_via_points);
-                                this->ArmTask("Set n_points = " + n_via_points_str);
+                                tm5.ArmTask("Set n_points = " + n_via_points_str);
 
                                 // 6. set approach_point
                                 this->ArmSetApproachPoint(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].tool_angle);
@@ -968,15 +968,17 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
                                 this->ArmPostViaPoints(cur_task_mode_, arm_mission_configs[n].tool_angle, arm_mission_configs[n].model_type);
 
                                 // 9. post return standby_position
-                                this->ArmTask("Move_to standby_p0");
+                                tm5.ArmTask("Move_to standby_p0");
                             }
 
                             // 10. post return safety.
-                            this->ArmTask("Post arm_back_to_safety");
+                            tm5.ArmTask("Post arm_back_to_safety");
 
                             //
                             mir100_ptr_->SetPLCRegisterIntValue(1,0);
-                            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+                            ///TIME
+                            sleep.ms(500);
 
                             /// Last order
                             if(cur_order == cur_mission_num_)
@@ -984,14 +986,14 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
                                 /// arm motion
 
                                 // back to home first
-                                this->ArmTask("Post arm_safety_to_home");
+                                tm5.ArmTask("Post arm_safety_to_home");
 #if 0 /// Disable For Testing
                                 // remove pad if its necessary
                                 if(cur_task_mode_ == data::arm::TaskMode::Mopping)
                                 {
                                     if(cur_tool_angle_ == data::arm::ToolAngle::FortyFive)
                                     {
-                                        this->ArmTask("Post tool_angle_0");
+                                        tm5.ArmTask("Post tool_angle_0");
                                     }
 
                                     this->ArmRemovePad();
@@ -1516,7 +1518,7 @@ void yf::sys::nw_sys::WaitSchedulesInitialCheck()
                     GetSysControlMode();
 
                     ///TIME
-                    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+                    sleep.sec(2);
                 }
                 break;
             }
@@ -1531,11 +1533,10 @@ void yf::sys::nw_sys::WaitSchedulesInitialCheck()
                     GetSysControlMode();
 
                     ///TIME
-                    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+                    sleep.sec(2);
                 }
                 break;
             }
-
         }
 
         LOG(INFO) << "3.1 check function: arm   [Start]";
@@ -1620,7 +1621,7 @@ void yf::sys::nw_sys::WaitSchedulesInitialCheck()
         UpdateDbDeviceArmMissionStatus();
 
         ///TIME
-        std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+        sleep.ms(1500);
     }
 }
 
@@ -1645,7 +1646,8 @@ bool yf::sys::nw_sys::WaitForUgvPLCRegisterInt(const int &plc_register, const in
 
         if (value != result)
         {
-            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+            ///TIME
+            sleep.ms(200);
         }
         else
         {
@@ -1686,7 +1688,8 @@ bool yf::sys::nw_sys::WaitForUgvPLCRegisterFloat(const int &plc_register, const 
 
         if (value != result)
         {
-            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+            ///TIME
+            sleep.ms(200);
         }
         else
         {
@@ -1712,12 +1715,12 @@ void yf::sys::nw_sys::ArmPickTool(const yf::data::arm::TaskMode &task_mode)
     {
         case yf::data::arm::TaskMode::Mopping:
         {
-            this->ArmTask("Post pick_mop");
+            tm5.ArmTask("Post pick_mop");
             break;
         }
         case yf::data::arm::TaskMode::UVCScanning:
         {
-            this->ArmTask("Post pick_uvc");
+            tm5.ArmTask("Post pick_uvc");
             break;
         }
     }
@@ -1731,12 +1734,12 @@ void yf::sys::nw_sys::ArmPlaceTool(const yf::data::arm::TaskMode &task_mode)
     {
         case yf::data::arm::TaskMode::Mopping:
         {
-            this->ArmTask("Post place_mop");
+            tm5.ArmTask("Post place_mop");
             break;
         }
         case yf::data::arm::TaskMode::UVCScanning:
         {
-            this->ArmTask("Post place_uvc");
+            tm5.ArmTask("Post place_uvc");
             break;
         }
     }
@@ -1750,47 +1753,47 @@ void yf::sys::nw_sys::ArmSetOperationArea(const yf::data::arm::OperationArea &op
     {
         case data::arm::OperationArea::Rear:
         {
-            this->ArmTask("Set operation_area = 0");
+            tm5.ArmTask("Set operation_area = 0");
             break;
         }
         case data::arm::OperationArea::Left:
         {
-            this->ArmTask("Set operation_area = 1");
+            tm5.ArmTask("Set operation_area = 1");
             break;
         }
         case data::arm::OperationArea::Right:
         {
-            this->ArmTask("Set operation_area = 2");
+            tm5.ArmTask("Set operation_area = 2");
             break;
         }
         case data::arm::OperationArea::RearRightCorner:
         {
-            this->ArmTask("Set operation_area = 3");
+            tm5.ArmTask("Set operation_area = 3");
             break;
         }
         case data::arm::OperationArea::RightLower:
         {
-            this->ArmTask("Set operation_area = 4");
+            tm5.ArmTask("Set operation_area = 4");
             break;
         }
         case data::arm::OperationArea::RightHigher:
         {
-            this->ArmTask("Set operation_area = 5");
+            tm5.ArmTask("Set operation_area = 5");
             break;
         }
         case data::arm::OperationArea::RearLeftCorner:
         {
-            this->ArmTask("Set operation_area = 6");
+            tm5.ArmTask("Set operation_area = 6");
             break;
         }
         case data::arm::OperationArea::LeftLower:
         {
-            this->ArmTask("Set operation_area = 7");
+            tm5.ArmTask("Set operation_area = 7");
             break;
         }
         case data::arm::OperationArea::LeftHigher:
         {
-            this->ArmTask("Set operation_area = 8");
+            tm5.ArmTask("Set operation_area = 8");
             break;
         }
     }
@@ -1823,7 +1826,7 @@ yf::sys::nw_sys::ArmSetToolAngle(const yf::data::arm::TaskMode &task_mode, const
             {
                 if(cur_tool_angle_ == data::arm::ToolAngle::FortyFive)
                 {
-                    this->ArmTask("Post tool_angle_0");
+                    tm5.ArmTask("Post tool_angle_0");
                     cur_tool_angle_ = data::arm::ToolAngle::Zero;
                 }
                 break;
@@ -1832,7 +1835,7 @@ yf::sys::nw_sys::ArmSetToolAngle(const yf::data::arm::TaskMode &task_mode, const
             {
                 if(cur_tool_angle_ == data::arm::ToolAngle::Zero)
                 {
-                    this->ArmTask("Post tool_angle_45");
+                    tm5.ArmTask("Post tool_angle_45");
                     cur_tool_angle_ = data::arm::ToolAngle::FortyFive;
                 }
                 break;
@@ -1861,7 +1864,7 @@ void yf::sys::nw_sys::ArmSetViaPoints(const std::deque<yf::data::arm::Point3d>& 
 
                 std::string command = "Set via0_" + via_num_str + " = " +via_point_str;
 
-                this->ArmTask(command);
+                tm5.ArmTask(command);
             }
 
             break;
@@ -1879,7 +1882,7 @@ void yf::sys::nw_sys::ArmSetViaPoints(const std::deque<yf::data::arm::Point3d>& 
 
                 std::string command = "Set via45_" + via_num_str + " = " +via_point_str;
 
-                this->ArmTask(command);
+                tm5.ArmTask(command);
             }
 
             break;
@@ -1899,7 +1902,7 @@ void yf::sys::nw_sys::ArmSetApproachPoint(const yf::data::arm::Point3d& approach
 
             std::string command = "Set 0_approach_point = " + approach_point_str;
 
-            this->ArmTask(command);
+            tm5.ArmTask(command);
 
             break;
         }
@@ -1909,7 +1912,7 @@ void yf::sys::nw_sys::ArmSetApproachPoint(const yf::data::arm::Point3d& approach
 
             std::string command = "Set 45_approach_point = " + approach_point_str;
 
-            this->ArmTask(command);
+            tm5.ArmTask(command);
 
             break;
         }
@@ -1931,7 +1934,7 @@ void yf::sys::nw_sys::ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode,
 
                 std::string command = "Post arm_via0_line";
 
-                this->ArmTask(command);
+                tm5.ArmTask(command);
 
                 break;
             }
@@ -1944,7 +1947,7 @@ void yf::sys::nw_sys::ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode,
                     {
                         std::string command = "Post arm_via45_line_z";
 
-                        this->ArmTask(command);
+                        tm5.ArmTask(command);
 
                         break;
                     }
@@ -1952,7 +1955,7 @@ void yf::sys::nw_sys::ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode,
                     {
                         std::string command = "Post arm_via45_line_d";
 
-                        this->ArmTask(command);
+                        tm5.ArmTask(command);
 
                         break;
                     }
@@ -1960,7 +1963,15 @@ void yf::sys::nw_sys::ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode,
                     {
                         std::string command = "Post arm_via45_p2p";
 
-                        this->ArmTask(command);
+                        tm5.ArmTask(command);
+
+                        break;
+                    }
+                    case data::arm::ModelType::DeskPolygon:
+                    {
+                        std::string command = "Post arm_via45_line_z";
+
+                        tm5.ArmTask(command);
 
                         break;
                     }
@@ -1968,7 +1979,7 @@ void yf::sys::nw_sys::ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode,
                     {
                         std::string command = "Post arm_via45_line_y";
 
-                        this->ArmTask(command);
+                        tm5.ArmTask(command);
 
                         break;
                     }
@@ -1981,7 +1992,7 @@ void yf::sys::nw_sys::ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode,
         {
             std::string command = "Post uvc_via0_line";
 
-            this->ArmTask(command);
+            tm5.ArmTask(command);
         }
 
 
@@ -1994,17 +2005,17 @@ void yf::sys::nw_sys::ArmPickPad()
     {
         case data::arm::ModelType::Handrail:
         {
-            this->ArmTask("Post pick_small_pad");
+            tm5.ArmTask("Post pick_small_pad");
             break;
         }
         case data::arm::ModelType::Windows:
         {
-            this->ArmTask("Post pick_large_pad");
+            tm5.ArmTask("Post pick_large_pad");
             break;
         }
         case data::arm::ModelType::NurseStation:
         {
-            this->ArmTask("Post pick_large_pad");
+            tm5.ArmTask("Post pick_large_pad");
             break;
         }
     }
@@ -2016,17 +2027,17 @@ void yf::sys::nw_sys::ArmRemovePad()
     {
         case data::arm::ModelType::Handrail:
         {
-            this->ArmTask("Post remove_small_pad");
+            tm5.ArmTask("Post remove_small_pad");
             break;
         }
         case data::arm::ModelType::Windows:
         {
-            this->ArmTask("Post remove_large_pad");
+            tm5.ArmTask("Post remove_large_pad");
             break;
         }
         case data::arm::ModelType::NurseStation:
         {
-            this->ArmTask("Post remove_large_pad");
+            tm5.ArmTask("Post remove_large_pad");
             break;
         }
     }
@@ -2050,10 +2061,10 @@ void yf::sys::nw_sys::thread_WebStatusManager()
     th_web_ugv_position_ = std::thread(&nw_sys::thread_Web_UgvCurPosition, this,
                                        std::ref(web_status_flag_),std::move(duration_sec_ugv_pos));
 
-    /// Duration: 1 min
+    /// Duration: 1 minute
     while (schedule_flag_ == true)
     {
-        sleep.min(1);
+        sleep.minute(1);
     }
 
     /// Stop all web status threads
@@ -2072,7 +2083,7 @@ void yf::sys::nw_sys::thread_Web_UgvBatteryPercentage(bool &web_status_flag,
         // update to sql
         sql_ptr_->UpdateDeviceBatteryCapacity("ugv", result);
 
-        sleep.min(sleep_duration);
+        sleep.minute(sleep_duration);
     }
 }
 

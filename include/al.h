@@ -1,5 +1,9 @@
 #pragma once
 
+#include <iostream>
+#include <Windows.h>
+#include <stdio.h>
+
 #include "al_common.h"
 #include "data.h"
 
@@ -35,6 +39,9 @@ namespace yf
         private:
 
             std::deque<yf::data::arm::Point3d> GetCircleEachLayerViaPoints(const float& radius, const float& step_ratio_horizontal, const yf::data::arm::Point3d& init_point);
+
+            double GetCurveOffsetDistance(const int& layer_no,
+                                             const std::deque<yf::data::arm::Point3d>& ref_init_points);
 
         public:
 
@@ -126,7 +133,7 @@ namespace yf
         public:
             void ms(const int& ms);
             void sec(const int& sec);
-            void min(const int& min);
+            void minute(const int& min);
         };
     }
 }
@@ -667,6 +674,116 @@ yf::algorithm::cleaning_motion::get_mop_via_points(const yf::data::arm::MotionTy
             break;
         }
 
+        case yf::data::arm::MotionType::Curve:
+        {
+            using namespace std;
+
+            struct robot_path_data {
+                int no_of_point;
+                double z;
+                double point[500][3];
+
+                robot_path_data()
+                {
+                    no_of_point = 0;
+                    z = 0;
+
+                    for (int i = 0; i < 500; i++)
+                    {
+                        for(int j = 0; j < 3; j++)
+                        {
+                            point[i][j] = 0;
+                        }
+                    }
+                };
+            };
+
+            typedef int(*getoffsetpath)(robot_path_data*,double,robot_path_data*[]);
+
+            double  offset = this->GetCurveOffsetDistance(layer, ref_path_init_points);
+
+            /// ref_init_points ---> double array
+            double ptt[500][3];
+
+            // array initialization
+            for (auto & i : ptt)
+            {
+                for(double & j : i)
+                {
+                    j = 0;
+                }
+            }
+
+            // ref_init_points ---> array
+            for(int n = 0; n < ref_path_init_points.size(); n++)
+            {
+                ptt[n][0] = ref_path_init_points[n].x;
+                ptt[n][1] = ref_path_init_points[n].y;
+                ptt[n][2] = 0;
+            }
+
+            /// Offset Method input:
+            int i,j,no_of_offset_path;
+
+            robot_path_data init_path,*offset_path[50];
+
+            getoffsetpath get_offset_path;
+
+            HINSTANCE hinstLib = LoadLibrary(TEXT("C:\\Dev\\w0303\\Arm_Control_Module_v1.0\\lib\\polylineoffset.dll"));
+
+            /// Offset Method input: point size
+            init_path.no_of_point = ref_path_init_points.size();
+
+            /// Offset Method output:
+            for (i = 0; i < init_path.no_of_point; i++)
+            {   for (j=0;j<3;j++)
+                    init_path.point[i][j] = ptt[i][j];
+            }
+            get_offset_path=(getoffsetpath)GetProcAddress(hinstLib, "find_offset_paths");
+            no_of_offset_path=get_offset_path(&init_path,offset,offset_path);
+
+            /// yf
+            //
+            for(int n = 0 ; n < no_of_offset_path; n++)
+            {
+                std::deque<yf::data::arm::Point3d> ref_path_each_layer;
+
+                /// For Each Layer, Find All Points
+                auto each_layer_path = offset_path[n];
+
+                // 1. find each layer's point number.
+                int each_layer_points_number = each_layer_path->no_of_point;
+
+                // assign to std container
+                for (int m = 0; m < each_layer_points_number; m++)
+                {
+                    yf::data::arm::Point3d point;
+
+                    point.x = each_layer_path->point[m][0];
+                    point.y = each_layer_path->point[m][1];
+
+                    //
+                    point.z  = ref_path_init_points[0].z;
+                    point.rx = ref_path_init_points[0].rx;
+                    point.ry = ref_path_init_points[0].ry;
+                    point.rz = ref_path_init_points[0].rz;
+
+                    ref_path_each_layer.push_back(point);
+                }
+
+                // rearrange path. check even
+                if(n % 2 != 0)
+                {
+                    std::reverse(ref_path_each_layer.begin(), ref_path_each_layer.end());
+                }
+
+                // insert to ref_paths
+                via_points.insert(via_points.end(), ref_path_each_layer.begin(), ref_path_each_layer.end());
+            }
+
+            break;
+        }
+
         default:
         {
             via_points = ref_path_init_points;
@@ -934,13 +1051,45 @@ std::deque<yf::data::arm::Point3d> yf::algorithm::cleaning_motion::GetCircleEach
     return via_points_layer;
 }
 
+double yf::algorithm::cleaning_motion::GetCurveOffsetDistance(const int &layer_no,
+                                                              const std::deque<yf::data::arm::Point3d> &ref_init_points)
+{
+    auto start_point = ref_init_points[0];
+    auto end_point = ref_init_points[ref_init_points.size()-1];
+
+    float   vec_max_magnitude = 0;
+    int     farthest_point_no;
+
+    for(int n = 1; n < ref_init_points.size()-1 ; n ++)
+    {
+        auto vec_1_x = start_point.x - ref_init_points[n].x;
+        auto vec_1_y = start_point.y - ref_init_points[n].y;
+
+        auto vec_2_x = end_point.x - ref_init_points[n].x;
+        auto vec_2_y = end_point.y - ref_init_points[n].y;
+
+        auto vec_3_x = (vec_1_x+vec_2_x)/2;
+        auto vec_3_y = (vec_1_y+vec_2_y)/2;
+
+        auto vec_3_magnitude = std::sqrtf(vec_3_x*vec_3_x + vec_3_y*vec_3_y);
+
+        if(vec_max_magnitude < vec_3_magnitude)
+        {
+            vec_max_magnitude = vec_3_magnitude;
+            farthest_point_no = n+1;
+        }
+    }
+
+    return vec_max_magnitude/(layer_no+1);
+}
+
 void yf::algorithm::TimeSleep::ms(const int &ms)
 {
     ///TIME
     std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 }
 
-void yf::algorithm::TimeSleep::min(const int &min)
+void yf::algorithm::TimeSleep::minute(const int &min)
 {
     auto min_r = min * 1000 * 60;
     ///TIME

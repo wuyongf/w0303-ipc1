@@ -1,154 +1,215 @@
-// c_testing.cpp : This file contains the 'main' function. Program execution begins and ends there.
+// call_offset_dll.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
 #include <iostream>
-#include <thread>
-#include <msclr/marshal_cppstd.h>
-#using "d:/nw_sys/nw_sql_application_dll.dll"   //ÒýÓÃdll
+#include <Windows.h>
+#include <stdio.h>
 
-using namespace nw_sql_application_dll;
+#include "../include/data_arm.h"
+
 using namespace std;
 
-int check_flag;
+struct robot_path_data {
+    int no_of_point;
+    double z;
+    double point[500][3];
 
-
-void thread_function() {
-
-    int i = 1, j, k, no_of_task, temp_job_id = 0, schedule_type;
-    std::string temp[10];
-    database_operation_class^ database_operation1 = gcnew database_operation_class();
-    System::String^ temp_string;
-
-    do
+    robot_path_data()
     {
-        if (check_flag == 1)
+        no_of_point = 0;
+        z = 0;
+
+        for (int i = 0; i < 500; i++)
         {
-            temp_job_id = 0;
-            cout << "Carry out new operation!" << endl;
-            no_of_task = database_operation1->get_latest_job_task(); // get all tasks of 1st available schedule operation 
-            if (no_of_task > 0)
+            for(int j = 0; j < 3; j++)
             {
-                database_operation1->update_device_current_status_and_log(1, 2); // 1 para: device id - 1 robot arm, 2nd para: new status - 1 idle, 2 working, 3 error, 4 breakdown
-                schedule_type = database_operation1->get_schedule_type(database_operation1->task_detail[0]->schedule_id); // get the type of schedule operation
-                database_operation1->update_schedule_status(database_operation1->task_detail[0]->schedule_id, 2); // status=2, in progress
-                database_operation1->update_schedule_record(database_operation1->task_detail[0]->schedule_id, 2); // status=2, in progress
+                point[i][j] = 0;
             }
-            for (j = 0; j < no_of_task; j++)
-            {
-                temp_string = database_operation1->task_detail[j]->building;
-                temp[0] = msclr::interop::marshal_as< std::string >(temp_string);
-                temp_string = database_operation1->task_detail[j]->floor;
-                temp[1] = msclr::interop::marshal_as< std::string >(temp_string);
-                temp_string = database_operation1->task_detail[j]->room;
-                temp[2] = msclr::interop::marshal_as< std::string >(temp_string);
-                cout << "job:" << database_operation1->task_detail[j]->job_id << " building:" <<
-                    temp[0].c_str() << " floor:" << temp[1].c_str()
-                    << " room:" << temp[2].c_str() << " type:" <<
-                    database_operation1->task_detail[j]->type << " x:" << database_operation1->task_detail[j]->x << " y:" <<
-                    database_operation1->task_detail[j]->y << endl;
-                if (temp_job_id != database_operation1->task_detail[j]->job_id)
-                {
-                    if (temp_job_id != 0)
-                        database_operation1->update_job_record(temp_job_id, 3);
-                    if (schedule_type == 1)
-                    {
-                        database_operation1->update_job_status(temp_job_id, 3);
-                        database_operation1->update_job_status(database_operation1->task_detail[j]->job_id, 2); // 2nd para: new status - 2 in progress, 3 finish, 4 cancel
-                    }
-                    temp_job_id = database_operation1->task_detail[j]->job_id;
-                    database_operation1->update_job_record(temp_job_id, 2);
-                }
-                if (schedule_type == 1)
-                    database_operation1->update_task_status(database_operation1->task_detail[j]->task_id, 2); // 2nd para: new status - 2 in progress, 3 finish, 4 cancel
-                database_operation1->update_task_record(database_operation1->task_detail[j]->task_id, 2);
-                k = 0;
-                do
-                {   // sql waiting...
-                    // robot operation
-                    System::Threading::Thread::Sleep(5000);
-                    cout << "Operation finish? (1=y,else=n)" << endl;
-                    cin >> k;
-                } while (k != 1);
-                database_operation1->update_task_record(database_operation1->task_detail[j]->task_id, 3);
-                if (schedule_type == 1)
-                    database_operation1->update_task_status(database_operation1->task_detail[j]->task_id, 3); // 2nd para: new status - 2 in progress, 3 finish, 4 cancel
-
-                // call robot operation
-                k = 0;
-            }
-
-            if (no_of_task > 0)
-            {
-                database_operation1->update_job_record(temp_job_id, 3);
-                database_operation1->update_job_status(temp_job_id, 3);
-                check_flag = 2;
-            }
-            else
-                check_flag = 0;
         }
-        if (check_flag == 2)
-        {
-            // System::Threading::Thread::Sleep(5000);
-            // cout << "Operation finish? (1=y,else=n)" << endl;
-           // cin >> j;
-           //  if (j == 1)
-            {
-                temp_job_id = 0;
-                //for (j = 0; j < no_of_task; j++)
-                //{
-                //    if (temp_job_id != database_operation1->task_detail[j]->job_id)
-                //    {
-                //        temp_job_id = database_operation1->task_detail[j]->job_id;
-                //        database_operation1->update_job_status(temp_job_id, 3); // 2nd para: new status - 2 in progress, 3 finish, 4 cancel
-                //    }
-                //    database_operation1->update_task_status(database_operation1->task_detail[j]->task_id, 3); // 2nd para: new status - 2 in progress, 3 finish, 4 cancel
-                //}
-                if (database_operation1->get_schedule_type(database_operation1->task_detail[0]->schedule_id) == 1) // schedule operation type=one time 
-                    database_operation1->update_schedule_status(database_operation1->task_detail[0]->schedule_id, 3);
-                database_operation1->update_schedule_record(database_operation1->task_detail[0]->schedule_id, 3);
-                database_operation1->update_device_current_status_and_log(1, 1);
-                check_flag = 0;
-            }
-            cout << "Finish schedule operation!" << endl;
-        }
-    } while (i == 1);
-}
+    };
+};
 
-void thread_function2()
+double curve_get_offset_distance(const int& layer_no, const std::deque<yf::data::arm::Point3d>& ref_init_points)
 {
-    database_operation_class^ database_operation = gcnew database_operation_class();
-    int i = 1, operation_available;
+    auto start_point = ref_init_points[0];
+    auto end_point = ref_init_points[ref_init_points.size()-1];
 
-    cout << "Start monitor new scheduled operation!" << endl;
-    do
+    float   vec_max_magnitude = 0;
+    int     farthest_point_no;
+
+    for(int n = 1; n < ref_init_points.size()-1 ; n ++)
     {
-        if (check_flag == 0)
-            operation_available = database_operation->check_all_schedule_operation_available();
-        else
-            operation_available = 0;
-        if (operation_available > 0)
+        auto vec_1_x = start_point.x - ref_init_points[n].x;
+        auto vec_1_y = start_point.y - ref_init_points[n].y;
+
+        auto vec_2_x = end_point.x - ref_init_points[n].x;
+        auto vec_2_y = end_point.y - ref_init_points[n].y;
+
+        auto vec_3_x = (vec_1_x+vec_2_x)/2;
+        auto vec_3_y = (vec_1_y+vec_2_y)/2;
+
+        auto vec_3_magnitude = std::sqrtf(vec_3_x*vec_3_x + vec_3_y*vec_3_y);
+
+        if(vec_max_magnitude < vec_3_magnitude)
         {
-            cout << "New scheduled operation is ready!" << endl;
-            check_flag = 1;
+            vec_max_magnitude = vec_3_magnitude;
+            farthest_point_no = n+1;
         }
-        System::Threading::Thread::Sleep(2000);
-    } while (i == 1);
+    }
+
+    return vec_max_magnitude/(layer_no+1);
 }
+
+typedef int(*getoffsetpath)(robot_path_data*,double,robot_path_data*[]);
 int main()
 {
 
+#if 0    /// rear
+    //    pt[0][0] = -717.7292; // x0
+//    pt[0][1] = -368.8069; // y0
+//    pt[0][2] = 0;
+//    pt[1][0] = -515.1719; // x1
+//    pt[1][1] = -244.5387; // y1
+//    pt[1][2] = 0;
+//    pt[2][0] = -592.2229; // x2
+//    pt[2][1] = -96.76231; // y2
+//    pt[2][2] = 0;
+//    pt[3][0] = -571.4864; // x3
+//    pt[3][1] = 75.99839; // y3
+//    pt[3][2] = 0;
+//    pt[4][0] = -772.9131; // x4
+//    pt[4][1] = 144.4268; // y4
+//    pt[4][2] = 0;
+#endif
 
-    int no_of_task;
-    //database_operation_class^ database_operation = gcnew database_operation_class();
+#if 0    /// left
+    pt[0][0] = -357.5795; // x0
+    pt[0][1] = 759.9092; // y0
+    pt[0][2] = 0;
+    pt[1][0] = -234.9845; // x1
+    pt[1][1] = 553.1698; // y1
+    pt[1][2] = 0;
+    pt[2][0] = -67.39543; // x2
+    pt[2][1] = 636.0949; // y2
+    pt[2][2] = 0;
+    pt[3][0] = 107.8367; // x3
+    pt[3][1] = 601.476; // y3
+    pt[3][2] = 0;
+    pt[4][0] = 132.8193; // x4
+    pt[4][1] = 797.4377; // y4
+    pt[4][2] = 0;
+#endif
 
-    //no_of_task = database_operation->get_latest_job_task();
-    //no_of_task = database_operation->task_detail[4]->job_id;
-    check_flag = 0;
-    thread t1(thread_function);
-    thread t2(thread_function2);
-    t1.join();
-    t2.join();
-    return 0;
+    ///yf: Initialization
+    yf::data::arm::Point3d p1,p2,p3,p4,p5;
+
+    p1.x = -717.7292; p1.y = -368.8069; p1.z = 0; p1.rx = 0; p1.ry = 0; p1.rz = 0;
+    p2.x = -515.1719; p2.y = -244.5387;
+    p3.x = -592.2229; p3.y = -96.76231;
+    p4.x = -571.4864; p4.y = 75.99839;
+    p5.x = -772.9131; p5.y = 144.4268;
+
+    std::deque<yf::data::arm::Point3d> ref_init_points;
+
+    ref_init_points.push_back(p1);
+    ref_init_points.push_back(p2);
+    ref_init_points.push_back(p3);
+    ref_init_points.push_back(p4);
+    ref_init_points.push_back(p5);
+
+
+    ///yf: layer decide offset
+    // find height
+
+    int layer = 4;
+
+    double  offset = curve_get_offset_distance(layer, ref_init_points);
+
+    /// ref_init_points ---> double array
+    double ptt[500][3];
+
+    // array initialization
+    for (auto & i : ptt)
+    {
+        for(double & j : i)
+        {
+            j = 0;
+        }
+    }
+
+    // ref_init_points ---> array
+    for(int n = 0; n < ref_init_points.size(); n++)
+    {
+        ptt[n][0] = ref_init_points[n].x;
+        ptt[n][1] = ref_init_points[n].y;
+        ptt[n][2] = 0;
+    }
+
+    /// Offset Method input
+    int i,j,no_of_offset_path;
+
+    robot_path_data init_path,*offset_path[50];
+
+    getoffsetpath get_offset_path;
+
+    HINSTANCE hinstLib = LoadLibrary(TEXT("c:\\polylineoffset.dll"));
+
+    if (hinstLib == NULL)
+    {
+        return 1;
+    }
+
+    /// Offset Method input: point size
+    init_path.no_of_point = ref_init_points.size();
+
+    /// Offset Method output
+    for (i = 0; i < init_path.no_of_point; i++)
+    {   for (j=0;j<3;j++)
+            init_path.point[i][j] = ptt[i][j];
+    }
+    get_offset_path=(getoffsetpath)GetProcAddress(hinstLib, "find_offset_paths");
+    no_of_offset_path=get_offset_path(&init_path,offset,offset_path);
+
+
+    /// yf
+    std::deque<yf::data::arm::Point3d> ref_path;
+
+    for(int n = 0 ; n < no_of_offset_path; n++)
+    {
+        std::deque<yf::data::arm::Point3d> ref_path_each_layer;
+
+        /// For Each Layer, Find All Points
+        auto each_layer_path = offset_path[n];
+
+        // 1. find each layer's point number.
+        int each_layer_points_number = each_layer_path->no_of_point;
+
+        // assign to std container
+        for (int m = 0; m < each_layer_points_number; m++)
+        {
+            yf::data::arm::Point3d point;
+
+            point.x = each_layer_path->point[m][0];
+            point.y = each_layer_path->point[m][1];
+
+            //
+            point.z  = ref_init_points[0].z;
+            point.rx = ref_init_points[0].rx;
+            point.ry = ref_init_points[0].ry;
+            point.rz = ref_init_points[0].rz;
+
+            ref_path_each_layer.push_back(point);
+        }
+
+        // rearrange path. check even
+        if(n % 2 != 0)
+        {
+            std::reverse(ref_path_each_layer.begin(), ref_path_each_layer.end());
+        }
+
+        // insert to ref_paths
+        ref_path.insert(ref_path.end(), ref_path_each_layer.begin(), ref_path_each_layer.end());
+    }
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu

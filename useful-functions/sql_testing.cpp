@@ -8,20 +8,21 @@ using std::endl;
 
 int main()
 {
+
+/// For localhost: ROG
 //    yf::sql::sql_server sql("SQL Server","192.168.7.84","NW_mobile_robot_sys","sa","wuyongfeng1334");
-//    yf::sql::sql_server sql("ODBC Driver 17 for SQL Server","localhost","NW_mobile_robot_sys","sa","wuyongfeng1334");
+//    std::shared_ptr<yf::sql::sql_server> sql = std::make_shared<yf::sql::sql_server>("ODBC Driver 17 for SQL Server","localhost","NW_mobile_robot_sys","sa","wuyongfeng1334");
+
+/// For localhost: NW 238 OFFICE
+//    yf::sql::sql_server sql("ODBC Driver 17 for SQL Server","192.168.0.8","NW_mobile_robot_sys","sa","Willsonic2010");
+
 
 /// For IPC1
     std::shared_ptr<yf::sql::sql_server> sql = std::make_shared<yf::sql::sql_server>("SQL Server","192.168.7.27","NW_mobile_robot_sys","sa","NWcadcam2021");
 
-/// For localhost
-//    std::shared_ptr<yf::sql::sql_server> sql = std::make_shared<yf::sql::sql_server>("ODBC Driver 17 for SQL Server","localhost","NW_mobile_robot_sys","sa","wuyongfeng1334");
-//    yf::sql::sql_server sql("ODBC Driver 17 for SQL Server","192.168.0.8","NW_mobile_robot_sys","sa","Willsonic2010");
-
     sql->UpdateDeviceBatteryCapacity("ugv",10);
 
     sql->UpdateDeviceUgvCurPosition(10,10,10);
-
 
 
 #if 0

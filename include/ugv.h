@@ -578,7 +578,7 @@ bool yf::ugv::mir::PostMission(const int& model_config_id)
     auto time_month = sql_ptr_->get_time_element("month");
     auto time_day = sql_ptr_->get_time_element("day");
     auto time_hour = sql_ptr_->get_time_element("hour");
-    auto time_min = sql_ptr_->get_time_element("min");
+    auto time_min = sql_ptr_->get_time_element("minute");
 
     auto time = time_year + time_month + time_day + "_" + time_hour + time_min;
 
