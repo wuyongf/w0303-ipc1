@@ -653,27 +653,6 @@ yf::algorithm::cleaning_motion::get_mop_via_points(const yf::data::arm::MotionTy
             break;
         }
 
-        case yf::data::arm::MotionType::CircleHalf:
-        {
-            // get center_point_, radius_, v1_, v2_
-            this->CenterFit3d(ref_path_init_points);
-
-            // via_points, with center_point_ and radius_
-            for(int i = 1; i <= 181; i = i+10)
-            {
-                yf::data::arm::Point3d via_point;
-
-                float a = i/180*PI;
-                via_point.x = center_point_.x + sin(a) * radius_ * v1n_(0) + cos(a) * radius_ * v2nb_(0);
-                via_point.y = center_point_.y + sin(a) * radius_ * v1n_(1) + cos(a) * radius_ * v2nb_(1);
-                via_point.z = center_point_.z + sin(a) * radius_ * v1n_(2) + cos(a) * radius_ * v2nb_(2);
-
-                via_points.push_back(via_point);
-            }
-
-            break;
-        }
-
         case yf::data::arm::MotionType::Curve:
         {
             using namespace std;
@@ -804,13 +783,13 @@ yf::algorithm::cleaning_motion::get_uvc_via_points(const yf::data::arm::MotionTy
 
     switch (motion_type)
     {
-        case yf::data::arm::MotionType::Plane: // plain_cleaning
+        case yf::data::arm::MotionType::Plane:
         {
             LOG(INFO) << "wrong motion type!";
             break;
         }
 
-        case yf::data::arm::MotionType::Line: // line_cleaning
+        case yf::data::arm::MotionType::Line:
         {
             /// 1. Initialization
             init_p1_ = ref_path_init_points[0];
@@ -834,6 +813,146 @@ yf::algorithm::cleaning_motion::get_uvc_via_points(const yf::data::arm::MotionTy
 
             via_points = temp_points;
 
+            break;
+        }
+
+        case yf::data::arm::MotionType::CircleFull:
+        {
+            // get center_point_, radius_, v1_, v2_
+            this->CenterFit3d(ref_path_init_points);
+
+            // delta_radius
+            float delta_radius = radius_/static_cast<float>(layer);
+
+            //
+            for (int n = 0; n < layer; n++)
+            {
+                auto radius = radius_  - n * delta_radius;
+                auto step_ratio = step_ratio_horizontal * (n+1);
+
+                std::deque<yf::data::arm::Point3d> via_points_each_layer;
+
+                via_points_each_layer = this->GetCircleEachLayerViaPoints(radius,step_ratio,ref_path_init_points[0]);
+
+                via_points.insert(via_points.end(),via_points_each_layer.begin(),via_points_each_layer.end());
+            }
+
+            break;
+        }
+
+        case yf::data::arm::MotionType::Curve:
+        {
+            using namespace std;
+
+            struct robot_path_data {
+                int no_of_point;
+                double z;
+                double point[500][3];
+
+                robot_path_data()
+                {
+                    no_of_point = 0;
+                    z = 0;
+
+                    for (int i = 0; i < 500; i++)
+                    {
+                        for(int j = 0; j < 3; j++)
+                        {
+                            point[i][j] = 0;
+                        }
+                    }
+                };
+            };
+
+            typedef int(*getoffsetpath)(robot_path_data*,double,robot_path_data*[]);
+
+            double  offset = this->GetCurveOffsetDistance(layer, ref_path_init_points);
+
+            /// ref_init_points ---> double array
+            double ptt[500][3];
+
+            // array initialization
+            for (auto & i : ptt)
+            {
+                for(double & j : i)
+                {
+                    j = 0;
+                }
+            }
+
+            // ref_init_points ---> array
+            for(int n = 0; n < ref_path_init_points.size(); n++)
+            {
+                ptt[n][0] = ref_path_init_points[n].x;
+                ptt[n][1] = ref_path_init_points[n].y;
+                ptt[n][2] = 0;
+            }
+
+            /// Offset Method input:
+            int i,j,no_of_offset_path;
+
+            robot_path_data init_path,*offset_path[50];
+
+            getoffsetpath get_offset_path;
+
+            HINSTANCE hinstLib = LoadLibrary(TEXT("C:\\Dev\\w0303\\Arm_Control_Module_v1.0\\lib\\polylineoffset.dll"));
+
+            /// Offset Method input: point size
+            init_path.no_of_point = ref_path_init_points.size();
+
+            /// Offset Method output:
+            for (i = 0; i < init_path.no_of_point; i++)
+            {   for (j=0;j<3;j++)
+                    init_path.point[i][j] = ptt[i][j];
+            }
+            get_offset_path=(getoffsetpath)GetProcAddress(hinstLib, "find_offset_paths");
+            no_of_offset_path=get_offset_path(&init_path,offset,offset_path);
+
+            /// yf
+            //
+            for(int n = 0 ; n < no_of_offset_path; n++)
+            {
+                std::deque<yf::data::arm::Point3d> ref_path_each_layer;
+
+                /// For Each Layer, Find All Points
+                auto each_layer_path = offset_path[n];
+
+                // 1. find each layer's point number.
+                int each_layer_points_number = each_layer_path->no_of_point;
+
+                // assign to std container
+                for (int m = 0; m < each_layer_points_number; m++)
+                {
+                    yf::data::arm::Point3d point;
+
+                    point.x = each_layer_path->point[m][0];
+                    point.y = each_layer_path->point[m][1];
+
+                    //
+                    point.z  = ref_path_init_points[0].z;
+                    point.rx = ref_path_init_points[0].rx;
+                    point.ry = ref_path_init_points[0].ry;
+                    point.rz = ref_path_init_points[0].rz;
+
+                    ref_path_each_layer.push_back(point);
+                }
+
+                // rearrange path. check even
+                if(n % 2 != 0)
+                {
+                    std::reverse(ref_path_each_layer.begin(), ref_path_each_layer.end());
+                }
+
+                // insert to ref_paths
+                via_points.insert(via_points.end(), ref_path_each_layer.begin(), ref_path_each_layer.end());
+            }
+
+            break;
+        }
+
+        default:
+        {
+            via_points = ref_path_init_points;
             break;
         }
     }
@@ -1000,6 +1119,15 @@ std::deque<yf::data::arm::Point3d> yf::algorithm::cleaning_motion::GetCircleEach
     via_points_a.clear();
     via_points_b.clear();
 
+    yf::data::arm::Point3d via_point_end;
+
+    via_point_end.x = center_point_.x + sin(1/180.0*PI) * radius * v1n_(0) + cos(1/180.0*PI) * radius * v2nb_(0);
+    via_point_end.y = center_point_.y + sin(1/180.0*PI) * radius * v1n_(1) + cos(1/180.0*PI) * radius * v2nb_(1);
+    via_point_end.z = center_point_.z + sin(1/180.0*PI) * radius * v1n_(2) + cos(1/180.0*PI) * radius * v2nb_(2);
+    via_point_end.rx = center_point_.rx;
+    via_point_end.ry = center_point_.ry;
+    via_point_end.rz = center_point_.rz;
+
     // via_points, with center_point_ and radius_
     for(int i = 1; i <= 361; i = i+step_ratio_horizontal*360)
     {
@@ -1047,6 +1175,8 @@ std::deque<yf::data::arm::Point3d> yf::algorithm::cleaning_motion::GetCircleEach
         via_points_layer.insert(via_points_layer.end(),via_points_a.begin(),via_points_a.end());
         via_points_layer.insert(via_points_layer.end(),via_points_b.begin(),via_points_b.end());
     }
+
+    via_points_layer.push_back(via_point_end);
 
     return via_points_layer;
 }
