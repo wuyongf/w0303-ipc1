@@ -657,7 +657,8 @@ yf::algorithm::cleaning_motion::get_mop_via_points(const yf::data::arm::MotionTy
         {
             using namespace std;
 
-            struct robot_path_data {
+            struct robot_path_data
+            {
                 int no_of_point;
                 double z;
                 double point[500][3];
@@ -785,7 +786,97 @@ yf::algorithm::cleaning_motion::get_uvc_via_points(const yf::data::arm::MotionTy
     {
         case yf::data::arm::MotionType::Plane:
         {
-            LOG(INFO) << "wrong motion type!";
+            //@@ input: 4 points
+
+            /// 1. Initialization
+            init_p1_ = ref_path_init_points[0];
+            init_p2_ = ref_path_init_points[1];
+            init_p3_ = ref_path_init_points[2];
+            init_p4_ = ref_path_init_points[3];
+
+            int motion_line = layer + 1;
+            int occupied_points = motion_line * 2;
+            int free_points = sample_points_ - occupied_points;
+            int points_no_each_line = std::floor(free_points/motion_line);
+            int totoal_points = occupied_points + motion_line * points_no_each_line;
+
+            float delta_x = abs(init_p2_.x - init_p1_.x);
+            float delta_z = abs(init_p3_.z - init_p2_.z);
+
+            float delta_x_each_point = delta_x / ( points_no_each_line + 1.0);
+            float delta_z_each_line = delta_z / layer;
+
+            float step_ratio_vertical = 1.0 / layer;
+
+            bool even_flag = true;
+            int line_counter = 0;
+
+            int point_no = 0;
+
+            for (float u = 0.0; u <= 1.0; u = u + step_ratio_vertical)
+            {
+                // count no. func
+                // if the number is even, we should count the point from left to right
+                // for 1st line, line_counter == 0
+                //
+                if( line_counter % 2 == 0 )
+                {
+                    even_flag = true;
+                }
+                else
+                {
+                    even_flag = false;
+                }
+
+                // current line point no.
+                //
+                int cur_line_point_no = 0;
+
+                // temp deque for each line.
+                //
+                std::deque<yf::data::arm::Point3d> temp_points;
+                temp_points.clear();
+
+                for(float v = 0.0 ; v <= 1.0; v = v + step_ratio_horizontal)
+                {
+                    yf::data::arm::Point3d via_point;
+
+                    // count point_no.
+                    point_no ++;
+
+                    // current line point no.
+                    cur_line_point_no ++;
+
+                    via_point.x = (1-u) * (1-v) * init_p1_.x + v * (1 - u) * init_p2_.x + u * v * init_p3_.x + u * (1 - v) * init_p4_.x;
+                    via_point.y = (1-u) * (1-v) * init_p1_.y + v * (1 - u) * init_p2_.y + u * v * init_p3_.y + u * (1 - v) * init_p4_.y;
+                    via_point.z = (1-u) * (1-v) * init_p1_.z + v * (1 - u) * init_p2_.z + u * v * init_p3_.z + u * (1 - v) * init_p4_.z;
+                    via_point.rx = (1-u) * (1-v) * init_p1_.rx + v * (1 - u) * init_p2_.rx + u * v * init_p3_.rx + u * (1 - v) * init_p4_.rx;
+                    via_point.ry = (1-u) * (1-v) * init_p1_.ry + v * (1 - u) * init_p2_.ry + u * v * init_p3_.ry + u * (1 - v) * init_p4_.ry;
+                    via_point.rz = (1-u) * (1-v) * init_p1_.rz + v * (1 - u) * init_p2_.rz + u * v * init_p3_.rz + u * (1 - v) * init_p4_.rz;
+
+                    temp_points.push_back(via_point);
+                }
+
+                if(even_flag == true)
+                {
+                    for(int n = 0; n < temp_points.size(); n++)
+                    {
+                        via_points.push_back(temp_points[n]);
+                    }
+                }
+                else
+                {
+                    std::reverse(temp_points.begin(),temp_points.end());
+
+                    for(int n = 0; n < temp_points.size(); n++)
+                    {
+                        via_points.push_back(temp_points[n]);
+                    }
+                }
+
+                line_counter ++;
+            }
+
             break;
         }
 
@@ -844,7 +935,8 @@ yf::algorithm::cleaning_motion::get_uvc_via_points(const yf::data::arm::MotionTy
         {
             using namespace std;
 
-            struct robot_path_data {
+            struct robot_path_data
+            {
                 int no_of_point;
                 double z;
                 double point[500][3];

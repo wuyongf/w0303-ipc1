@@ -82,6 +82,9 @@ namespace yf
 
             void GetScheduleExecTime(const int& id);
 
+            // Filter
+            // int GetTaskMode(const int& model_config_id);
+
             // Schedule
             //
             void UpdateScheduleData(const int& schedule_id, const int& schedule_status);

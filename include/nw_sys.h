@@ -53,13 +53,15 @@ namespace yf
 
             void WaitSchedulesInitialCheck();
 
-        public: // layer 2 based on tm5.ArmTask();
+        public: // Arm Method: based on tm5.ArmTask();
 
             void ArmPickTool(const yf::data::arm::TaskMode& task_mode);
             void ArmPlaceTool(const yf::data::arm::TaskMode& task_mode);
 
             void ArmPickPad();
             void ArmRemovePad();
+
+            void ArmAbsorbWater();
 
             void ArmSetOperationArea(const yf::data::arm::OperationArea& operation_area);
 
@@ -72,13 +74,17 @@ namespace yf
 
             void ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode, const yf::data::arm::ToolAngle& tool_angle, const yf::data::arm::ModelType& model_type);
 
-        public:
-
-            void DoJobs(const int& cur_schedule_id);
-            void DoTasks(const int& cur_job_id);
+        public: // Ugv Method: based on tm5.ArmTask();
 
             bool WaitForUgvPLCRegisterInt(const int& plc_register, const int& value, const int& timeout_min);
             bool WaitForUgvPLCRegisterFloat(const int& plc_register, const float& value, const int& timeout_min);
+
+        public:
+
+            void DoJobs(const int& cur_schedule_id);
+            void DoTasks(const int& cur_job_id, const int& next_job_id);
+
+            void JobsFilter(std::deque<int>& q_ids);
 
             void UpdateDbScheduleBeforeTask (const int& cur_schedule_id);
             void UpdateDbScheduleAfterTask (const int& cur_schedule_id);
@@ -201,6 +207,9 @@ namespace yf
             std::deque<int> q_job_ids;
             int job_number = 0;
 
+            std::deque<int> q_job_mopping_ids;
+            std::deque<int> q_job_uvc_scanning_ids;
+
             std::deque<int> q_task_ids;
             int task_number = 0;
 
@@ -219,6 +228,7 @@ namespace yf
             yf::data::arm::ModelType cur_model_type_;
 
             yf::data::arm::OperationArea cur_operation_area_;
+            yf::data::arm::OperationArea last_operation_area_;
 
             yf::data::arm::ToolAngle cur_tool_angle_ = yf::data::arm::ToolAngle::Zero;
 
@@ -666,15 +676,31 @@ void yf::sys::nw_sys::DoJobs(const int &cur_schedule_id)
     LOG(INFO) << "Do Jobs...";
 
     q_job_ids = sql_ptr_->GetJobsId(cur_schedule_id);
+
+//    /// Job Filter, do mopping first!
+//    this->JobsFilter(q_job_ids);
+
     job_number = q_job_ids.size();
 
     // if there is any Job
     //
     while (q_job_ids.size() != 0)
     {
+        int cur_job_id;
+        int next_job_id;
 
-        auto cur_job_id = q_job_ids.front();
+        cur_job_id = q_job_ids.front();
         q_job_ids.pop_front();
+
+        /// Find Next Job Id
+        if(q_job_ids.size() != 0)
+        {
+            next_job_id = q_job_ids.front();
+        }
+        else
+        {
+            next_job_id = -1;
+        }
 
         nw_status_ptr_->db_cur_job_id = cur_job_id;
 
@@ -684,7 +710,7 @@ void yf::sys::nw_sys::DoJobs(const int &cur_schedule_id)
         sql_ptr_->UpdateJobLog(cur_job_id, 2);
 
         // TODO: (2) Execute the job!
-        DoTasks(cur_job_id);
+        DoTasks(cur_job_id,next_job_id);
 
         // TODO: (3)
         //  a. Break the loop or not?
@@ -723,7 +749,7 @@ void yf::sys::nw_sys::DoJobs(const int &cur_schedule_id)
     }
 }
 
-void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
+void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
 {
     /// 0. Initialization
     //
@@ -813,6 +839,8 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
 
                     bool arm_config_stage_success_flag = false;
 
+                    int last_order;
+
                     arm_wait_plc003_success_flag = this->WaitForUgvPLCRegisterInt(3,1,2);
 
                     ///TIME
@@ -820,18 +848,38 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
 
                     if(arm_wait_plc003_success_flag == true)
                     {
+                        // get current order
                         auto cur_order = mir100_ptr_->GetPLCRegisterIntValue(2);
+                        // get_last_order
+                        if(cur_order == 1)
+                        {
+                            last_order = cur_order;
+                        }
+                        else
+                        {
+                            last_order = cur_order-1;
+                        }
+                        LOG(INFO) << "flag0";
+                        // get last operation area
+                        int  last_arm_config_id = sql_ptr_->GetArmConfigId(cur_model_config_id_, last_order);
+                        auto last_operation_area = tm5.GetOperationArea(last_arm_config_id);
+                        LOG(INFO) << "flag1";
 
                         //todo:
+                        // // check arm mission config is valid or not
+                        int  cur_arm_config_id = sql_ptr_->GetArmConfigId(cur_model_config_id_, cur_order);
+
+
+                        ///
                         /// b.3.1 start configuring arm mission.
                         auto arm_mission_configs = tm5.ConfigureArmMission(cur_model_config_id_, cur_order);
-
-                        cur_operation_area_ =  arm_mission_configs[cur_order-1].operation_area;
-
+                        LOG(INFO) << "flag2";
+                        cur_operation_area_ =  arm_mission_configs[0].operation_area;
+                        LOG(INFO) << "flag3";
                         // z. finish configure stage.
                         mir100_ptr_->SetPLCRegisterIntValue(3,0);
                         arm_config_stage_success_flag = true;
-
+                        LOG(INFO) << "flag4";
                         // wait for executing flag/signal.
                         arm_wait_plc001_success_flag = this->WaitForUgvPLCRegisterInt(1,1,2);
 
@@ -844,12 +892,13 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
                             if(cur_order == 1)
                             {
                                 cur_tool_angle_ = data::arm::ToolAngle::Zero;
-#if 0 /// Disable For Testing
+#if 1 /// Disable For Testing
                                 this->ArmPickTool(cur_task_mode_);
 
                                 if(cur_task_mode_ == data::arm::TaskMode::Mopping)
                                 {
                                     this->ArmPickPad();
+                                    this->ArmAbsorbWater();
                                 }
 #endif
                             }
@@ -864,7 +913,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
                             else
                             {
                                 // if cur_operation_area is not equal to last one, move to safety position first.
-                                if(cur_operation_area_ != arm_mission_configs[cur_order-2].operation_area)
+                                if(cur_operation_area_ != last_operation_area)
                                 {
                                     tm5.ArmTask("Post arm_safety_to_home");
 
@@ -973,6 +1022,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
 
                             // 10. post return safety.
                             tm5.ArmTask("Post arm_back_to_safety");
+                            ///
 
                             //
                             mir100_ptr_->SetPLCRegisterIntValue(1,0);
@@ -987,7 +1037,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id)
 
                                 // back to home first
                                 tm5.ArmTask("Post arm_safety_to_home");
-#if 0 /// Disable For Testing
+#if 1 /// Disable For Testing
                                 // remove pad if its necessary
                                 if(cur_task_mode_ == data::arm::TaskMode::Mopping)
                                 {
@@ -1977,7 +2027,7 @@ void yf::sys::nw_sys::ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode,
                     }
                     default:
                     {
-                        std::string command = "Post arm_via45_line_y";
+                        std::string command = "Post arm_via45_line_z";
 
                         tm5.ArmTask(command);
 
@@ -2018,6 +2068,11 @@ void yf::sys::nw_sys::ArmPickPad()
             tm5.ArmTask("Post pick_large_pad");
             break;
         }
+        default:
+        {
+            tm5.ArmTask("Post pick_small_pad");
+            break;
+        }
     }
 }
 
@@ -2038,6 +2093,11 @@ void yf::sys::nw_sys::ArmRemovePad()
         case data::arm::ModelType::NurseStation:
         {
             tm5.ArmTask("Post remove_large_pad");
+            break;
+        }
+        default:
+        {
+            tm5.ArmTask("Post remove_small_pad");
             break;
         }
     }
@@ -2101,6 +2161,41 @@ void yf::sys::nw_sys::thread_Web_UgvCurPosition(const bool &web_status_flag,
 
         sleep.sec(sleep_duration);
     }
+}
+
+void yf::sys::nw_sys::JobsFilter(std::deque<int>& q_ids)
+{
+    q_job_mopping_ids.clear();
+    q_job_uvc_scanning_ids.clear();
+
+    for(int n = 0; n < q_ids.size(); n++)
+    {
+        // for each job id, check its task_mode
+        switch (sql_ptr_->GetTaskMode(q_ids[n]))
+        {
+            case 1:
+            {
+                q_job_mopping_ids.push_back(q_ids[n]);
+                break;
+            }
+            case 2:
+            {
+                q_job_uvc_scanning_ids.push_back(q_ids[n]);
+                break;
+            }
+        }
+    }
+
+    q_ids.clear();
+
+    q_ids.insert(q_ids.end(), q_job_mopping_ids.begin(), q_job_mopping_ids.end());
+    q_ids.insert(q_ids.end(), q_job_uvc_scanning_ids.begin(), q_job_uvc_scanning_ids.end());
+
+}
+
+void yf::sys::nw_sys::ArmAbsorbWater()
+{
+    tm5.ArmTask("Post arm_absorb_water");
 }
 
 

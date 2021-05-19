@@ -1,0 +1,777 @@
+Log file created at: 2021/05/18 19:58:12
+Running on machine: WUYONGF
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I0518 19:58:12.423147 27820 arm.h:308] wait for arm connection...
+I0518 19:58:12.882148 27820 arm.h:310] arm connected.
+I0518 19:58:12.882148 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: TM5-900
+I0518 19:58:13.297152 23708 nw_sys.h:540] [thread_do_schedules]: lock!
+I0518 19:58:13.808149 10452 nw_sys.h:347] [thread_wait_schedules]: unlock!
+I0518 19:58:13.809150 10452 nw_sys.h:349] [thread_wait_schedules]: stage 0 --- Initial Check [Start]
+I0518 19:58:13.809150 10452 nw_sys.h:1539] 1. update sys control mode
+I0518 19:58:13.881150 10452 nw_sys.h:1543] 2. updated all devices status
+I0518 19:58:13.881150 10452 nw_sys.h:1544] 2.1 request arm_connection_status and arm_mission_status from arm
+I0518 19:58:13.997148 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 19:58:13.997148 10452 arm.h:548] arm is idle.
+I0518 19:58:13.998152 10452 nw_sys.h:1548] 3. check function
+I0518 19:58:13.998152 10452 nw_sys.h:1550] 3.0 check function: sys_status   [Start]
+I0518 19:58:13.998152 10452 nw_sys.h:1556] sys_control_mode: Auto
+I0518 19:58:13.998152 10452 nw_sys.h:1592] 3.1 check function: arm   [Start]
+I0518 19:58:13.998152 10452 nw_sys.h:1601] 3.1 check function: arm   [Complete]
+I0518 19:58:13.998152 10452 nw_sys.h:1650] 3.2 check function: ugv   [Start]
+I0518 19:58:13.999150 10452 nw_sys.h:1652] 3.2 check function: ugv   [Complete]
+I0518 19:58:13.999150 10452 nw_sys.h:1667] 4. Update Status to SQL
+I0518 19:58:13.999150 10452 nw_sys.h:1668] 4.1 Update Status to SQL: Arm
+I0518 19:58:16.102151 10452 nw_sys.h:353] [thread_wait_schedules]: stage 0 --- Initial Check [Complete]
+I0518 19:58:16.102151 10452 nw_sys.h:461] [thread_wait_schedules]: stage 1 --- Wait for Database Available Schedules
+I0518 19:58:16.102151 10452 nw_sys.h:468] wait for incoming schedules
+I0518 19:58:16.867148 10452 nw_sys.h:468] wait for incoming schedules
+I0518 19:58:17.527156 10452 nw_sys.h:468] wait for incoming schedules
+I0518 19:58:18.308372 10452 nw_sys.h:468] wait for incoming schedules
+I0518 19:58:19.088925 10452 nw_sys.h:468] wait for incoming schedules
+I0518 19:58:19.733927 10452 nw_sys.h:468] wait for incoming schedules
+I0518 19:58:20.349460 10452 nw_sys.h:468] wait for incoming schedules
+I0518 19:58:21.084523 10452 nw_sys.h:468] wait for incoming schedules
+I0518 19:58:21.730336 10452 nw_sys.h:468] wait for incoming schedules
+I0518 19:58:22.405390 10452 nw_sys.h:468] wait for incoming schedules
+I0518 19:58:23.110389 10452 nw_sys.h:468] wait for incoming schedules
+I0518 19:58:23.725386 10452 nw_sys.h:468] wait for incoming schedules
+I0518 19:58:24.400389 10452 nw_sys.h:468] wait for incoming schedules
+I0518 19:58:25.195390 10452 nw_sys.h:468] wait for incoming schedules
+I0518 19:58:25.840445 10452 nw_sys.h:502] [thread_wait_schedules]: unlock thread: do schedule
+I0518 19:58:25.840445 23708 nw_sys.h:545] [thread_do_schedules]: unlock!
+I0518 19:58:25.841445 23708 nw_sys.h:548] thread: do schedule has been unlocked
+I0518 19:58:25.900445 10452 nw_sys.h:521] [thread_wait_schedules]: lock thread: wait schedule
+I0518 19:58:36.564457 23708 nw_sys.h:676] Do Jobs...
+I0518 19:58:44.619204 23708 arm.h:548] arm is idle.
+I0518 19:58:46.555991 23708 nw_sys.h:838] mission. stage 1: configure arm mission...
+I0518 19:58:46.559995 23708 nw_sys.h:1691] Wait for PLC Register 3 == 1
+I0518 19:58:47.354387 23708 nw_sys.h:862] flag0
+I0518 19:58:47.474390 23708 nw_sys.h:866] flag1
+I0518 19:58:51.873711 23708 nw_sys.h:876] flag2
+I0518 19:58:51.874716 23708 nw_sys.h:878] flag3
+I0518 19:58:51.945711 23708 nw_sys.h:882] flag4
+I0518 19:58:51.947716 23708 nw_sys.h:1691] Wait for PLC Register 1 == 1
+I0518 19:58:58.502151 23708 arm.h:665] [IPC1 ---> Arm]: Post pick_mop
+I0518 19:58:58.552603 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post pick_mop, Arm Running
+I0518 19:58:58.906002 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 19:59:19.339673 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post pick_mop, Arm Finish
+I0518 19:59:19.341464 23708 arm.h:536] arm has finished.
+I0518 19:59:19.392915 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 19:59:19.503911 23708 arm.h:548] arm is idle.
+I0518 19:59:19.659337 23708 arm.h:665] [IPC1 ---> Arm]: Post pick_small_pad
+I0518 19:59:19.677337 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post pick_small_pad, Arm Running
+I0518 19:59:20.027068 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 19:59:33.417397 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post pick_small_pad, Arm Finish
+I0518 19:59:33.510761 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 19:59:33.510761 23708 arm.h:548] arm is idle.
+I0518 19:59:33.646049 23708 arm.h:665] [IPC1 ---> Arm]: Post arm_absorb_water
+I0518 19:59:33.659821 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_absorb_water, Arm Running
+I0518 19:59:33.946910 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 19:59:49.533464 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_absorb_water, Arm Finish
+I0518 19:59:49.612833 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 19:59:49.612833 23708 arm.h:548] arm is idle.
+I0518 19:59:49.750803 23708 arm.h:665] [IPC1 ---> Arm]: Set operation_area = 2
+I0518 19:59:49.765800 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set operation_area = 2, Arm Running
+I0518 19:59:49.820176 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set operation_area = 2, Arm Finish
+I0518 19:59:50.089304 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 19:59:50.090301 23708 arm.h:548] arm is idle.
+I0518 19:59:50.276342 23708 arm.h:665] [IPC1 ---> Arm]: Post arm_home_to_safety
+I0518 19:59:50.301339 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_home_to_safety, Arm Running
+I0518 19:59:50.653640 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 19:59:55.799645 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_home_to_safety, Arm Finish
+I0518 19:59:55.911645 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 19:59:55.912647 23708 arm.h:548] arm is idle.
+I0518 19:59:56.046645 23708 arm.h:665] [IPC1 ---> Arm]: Set standby_p0 = -145.776306,-244.866501,624.474121,140.643799,3.612796,0.182800
+I0518 19:59:56.074646 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set standby_p0 = -145.776306,-244.866501,624.474121,140.643799,3.612796,0.182800, Arm Running
+I0518 19:59:56.120648 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set standby_p0 = -145.776306,-244.866501,624.474121,140.643799,3.612796,0.182800, Arm Finish
+I0518 19:59:56.404644 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 19:59:56.405645 23708 arm.h:548] arm is idle.
+I0518 19:59:56.628645 23708 arm.h:665] [IPC1 ---> Arm]: Move_to standby_p0
+I0518 19:59:56.644649 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Running
+I0518 19:59:56.935434 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 19:59:58.148521 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Finish
+I0518 19:59:58.225520 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 19:59:58.226521 23708 arm.h:548] arm is idle.
+I0518 19:59:58.636472 23708 arm.h:665] [IPC1 ---> Arm]: Set vision_lm_init_p0 = -220.160797,-284.210205,674.702576,127.255997,6.612477,-1.210800
+I0518 19:59:58.661470 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set vision_lm_init_p0 = -220.160797,-284.210205,674.702576,127.255997,6.612477,-1.210800, Arm Running
+I0518 19:59:58.709470 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set vision_lm_init_p0 = -220.160797,-284.210205,674.702576,127.255997,6.612477,-1.210800, Arm Finish
+I0518 19:59:58.996299 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 19:59:58.999301 23708 arm.h:548] arm is idle.
+I0518 19:59:59.141964 23708 arm.h:665] [IPC1 ---> Arm]: Move_to vision_lm_init_p0
+I0518 19:59:59.159967 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to vision_lm_init_p0, Arm Running
+I0518 19:59:59.465374 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:00:00.309434 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to vision_lm_init_p0, Arm Finish
+I0518 20:00:00.309434 23708 arm.h:536] arm has finished.
+I0518 20:00:00.362785 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:00:00.503201 23708 arm.h:548] arm is idle.
+I0518 20:00:00.645406 23708 arm.h:665] [IPC1 ---> Arm]: Post vision_find_landmark
+I0518 20:00:00.663427 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post vision_find_landmark, Arm Running
+I0518 20:00:01.005874 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:00:01.241163 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post vision_find_landmark, Arm Finish
+I0518 20:00:01.241875 23708 arm.h:536] arm has finished.
+I0518 20:00:01.310930 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:00:01.398830 23708 arm.h:548] arm is idle.
+I0518 20:00:01.558168 23708 arm.h:665] [IPC1 ---> Arm]: Post get_find_landmark_flag
+I0518 20:00:01.582173 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_find_landmark_flag, Arm Running
+I0518 20:00:01.630168 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: find_landmark_flag = true
+I0518 20:00:01.675170 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_find_landmark_flag, Arm Finish
+I0518 20:00:01.913704 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:00:01.913704 23708 arm.h:548] arm is idle.
+I0518 20:00:01.914706 23708 nw_sys.h:956] Find Landmark!
+I0518 20:00:02.043296 23708 arm.h:665] [IPC1 ---> Arm]: Post get_landmark_pos_str
+I0518 20:00:02.061303 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_landmark_pos_str, Arm Running
+I0518 20:00:02.114408 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: landmark_pos_str = {-138.66,-740.91,534.2,-90.65,-3.2,-175.45}
+I0518 20:00:02.238118 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_landmark_pos_str, Arm Finish
+I0518 20:00:02.413820 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:00:02.414821 23708 arm.h:548] arm is idle.
+I0518 20:00:02.673738 23708 arm.h:665] [IPC1 ---> Arm]: Move_to standby_p0
+I0518 20:00:02.686734 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Running
+I0518 20:00:03.005957 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:00:03.767832 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Finish
+I0518 20:00:03.873952 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:00:03.874969 23708 arm.h:548] arm is idle.
+I0518 20:00:04.008894 23708 arm.h:665] [IPC1 ---> Arm]: Post tool_angle_45
+I0518 20:00:04.028896 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post tool_angle_45, Arm Running
+I0518 20:00:04.383013 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:00:07.135185 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post tool_angle_45, Arm Finish
+I0518 20:00:07.227596 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:00:07.228595 23708 arm.h:548] arm is idle.
+I0518 20:00:07.392383 23708 arm.h:665] [IPC1 ---> Arm]: Set n_points = 4
+I0518 20:00:07.411383 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set n_points = 4, Arm Running
+I0518 20:00:07.469398 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set n_points = 4, Arm Finish
+I0518 20:00:07.743887 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:00:07.744891 23708 arm.h:548] arm is idle.
+I0518 20:00:07.895857 23708 arm.h:665] [IPC1 ---> Arm]: Set 45_approach_point = 90.329651,-646.881653,434.261719,163.965775,-3.101969,5.211088
+I0518 20:00:07.924300 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set 45_approach_point = 90.329651,-646.881653,434.261719,163.965775,-3.101969,5.211088, Arm Running
+I0518 20:00:07.970985 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set 45_approach_point = 90.329651,-646.881653,434.261719,163.965775,-3.101969,5.211088, Arm Finish
+I0518 20:00:08.332978 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:00:08.332978 23708 arm.h:548] arm is idle.
+I0518 20:00:08.534981 23708 arm.h:665] [IPC1 ---> Arm]: Set via45_1 = 95.896439,-672.577942,385.185181,165.611374,-2.673927,4.934910
+I0518 20:00:08.563987 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_1 = 95.896439,-672.577942,385.185181,165.611374,-2.673927,4.934910, Arm Running
+I0518 20:00:08.614985 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_1 = 95.896439,-672.577942,385.185181,165.611374,-2.673927,4.934910, Arm Finish
+I0518 20:00:08.907739 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:00:08.908736 23708 arm.h:548] arm is idle.
+I0518 20:00:09.056044 23708 arm.h:665] [IPC1 ---> Arm]: Set via45_2 = -143.935471,-675.807861,397.036041,162.798080,3.073543,0.679176
+I0518 20:00:09.084062 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_2 = -143.935471,-675.807861,397.036041,162.798080,3.073543,0.679176, Arm Running
+I0518 20:00:09.132020 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_2 = -143.935471,-675.807861,397.036041,162.798080,3.073543,0.679176, Arm Finish
+I0518 20:00:09.394546 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:00:09.394546 23708 arm.h:548] arm is idle.
+I0518 20:00:09.540802 23708 arm.h:665] [IPC1 ---> Arm]: Set via45_3 = -143.935471,-675.807861,397.036041,162.798080,3.073543,0.679176
+I0518 20:00:09.568799 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_3 = -143.935471,-675.807861,397.036041,162.798080,3.073543,0.679176, Arm Running
+I0518 20:00:09.615808 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_3 = -143.935471,-675.807861,397.036041,162.798080,3.073543,0.679176, Arm Finish
+I0518 20:00:09.909291 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:00:09.910295 23708 arm.h:548] arm is idle.
+I0518 20:00:10.065618 23708 arm.h:665] [IPC1 ---> Arm]: Set via45_4 = 95.896439,-672.577942,385.185181,165.611374,-2.673927,4.934910
+I0518 20:00:10.092820 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_4 = 95.896439,-672.577942,385.185181,165.611374,-2.673927,4.934910, Arm Running
+I0518 20:00:10.149617 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_4 = 95.896439,-672.577942,385.185181,165.611374,-2.673927,4.934910, Arm Finish
+I0518 20:00:10.534222 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:00:10.535221 23708 arm.h:548] arm is idle.
+I0518 20:00:10.673193 23708 arm.h:665] [IPC1 ---> Arm]: Post arm_via45_line_z
+I0518 20:00:10.691761 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_via45_line_z, Arm Running
+I0518 20:00:11.010684 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:00:21.739352 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_via45_line_z, Arm Finish
+I0518 20:00:21.815537 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:00:21.815537 23708 arm.h:548] arm is idle.
+I0518 20:00:21.973984 23708 arm.h:665] [IPC1 ---> Arm]: Move_to standby_p0
+I0518 20:00:21.990985 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Running
+I0518 20:00:22.430990 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:00:23.965993 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Finish
+I0518 20:00:23.967990 23708 arm.h:536] arm has finished.
+I0518 20:00:24.034448 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:00:24.105855 23708 arm.h:548] arm is idle.
+I0518 20:00:24.362505 23708 arm.h:665] [IPC1 ---> Arm]: Post arm_back_to_safety
+I0518 20:00:24.377501 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_back_to_safety, Arm Running
+I0518 20:00:24.727139 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:00:27.176410 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Finish
+I0518 20:00:27.177202 23708 arm.h:536] arm has finished.
+I0518 20:00:27.235376 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_back_to_safety, Arm Finish
+I0518 20:00:27.330520 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:00:27.331521 23708 arm.h:548] arm is idle.
+I0518 20:00:28.302459 23708 nw_sys.h:838] mission. stage 1: configure arm mission...
+I0518 20:00:28.304456 23708 nw_sys.h:1691] Wait for PLC Register 3 == 1
+I0518 20:00:28.551586 23708 nw_sys.h:862] flag0
+I0518 20:00:28.657585 23708 nw_sys.h:866] flag1
+I0518 20:00:32.129392 23708 nw_sys.h:876] flag2
+I0518 20:00:32.129392 23708 nw_sys.h:878] flag3
+I0518 20:00:32.240264 23708 nw_sys.h:882] flag4
+I0518 20:00:32.242265 23708 nw_sys.h:1691] Wait for PLC Register 1 == 1
+I0518 20:00:34.690879 23708 arm.h:665] [IPC1 ---> Arm]: Set standby_p0 = -11.706590,-332.183594,664.945618,133.281998,-1.546243,7.375292
+I0518 20:00:34.726991 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set standby_p0 = -11.706590,-332.183594,664.945618,133.281998,-1.546243,7.375292, Arm Running
+I0518 20:00:35.024878 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set standby_p0 = -11.706590,-332.183594,664.945618,133.281998,-1.546243,7.375292, Arm Finish
+I0518 20:00:35.195986 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:00:35.195986 23708 arm.h:548] arm is idle.
+I0518 20:00:35.360191 23708 arm.h:665] [IPC1 ---> Arm]: Move_to standby_p0
+I0518 20:00:35.376515 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Running
+I0518 20:00:35.863082 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:00:37.095928 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Finish
+I0518 20:00:37.095928 23708 arm.h:536] arm has finished.
+I0518 20:00:37.156594 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:00:37.306262 23708 arm.h:548] arm is idle.
+I0518 20:00:37.439102 23708 arm.h:665] [IPC1 ---> Arm]: Set vision_lm_init_p0 = -11.706590,-332.183594,664.945618,133.281998,-1.546243,7.375292
+I0518 20:00:37.460630 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set vision_lm_init_p0 = -11.706590,-332.183594,664.945618,133.281998,-1.546243,7.375292, Arm Running
+I0518 20:00:37.507174 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set vision_lm_init_p0 = -11.706590,-332.183594,664.945618,133.281998,-1.546243,7.375292, Arm Finish
+I0518 20:00:37.787746 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:00:37.788748 23708 arm.h:548] arm is idle.
+I0518 20:00:37.942904 23708 arm.h:665] [IPC1 ---> Arm]: Move_to vision_lm_init_p0
+I0518 20:00:37.956082 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to vision_lm_init_p0, Arm Running
+I0518 20:00:38.038198 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to vision_lm_init_p0, Arm Finish
+I0518 20:00:38.376356 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:00:38.377358 23708 arm.h:548] arm is idle.
+I0518 20:00:38.624385 23708 arm.h:665] [IPC1 ---> Arm]: Post vision_find_landmark
+I0518 20:00:38.645382 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post vision_find_landmark, Arm Running
+I0518 20:00:39.045418 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:00:43.744093 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post vision_find_landmark, Arm Finish
+I0518 20:00:43.824472 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:00:43.825485 23708 arm.h:548] arm is idle.
+I0518 20:00:43.952100 23708 arm.h:665] [IPC1 ---> Arm]: Post get_find_landmark_flag
+I0518 20:00:43.973747 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_find_landmark_flag, Arm Running
+I0518 20:00:44.023123 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: find_landmark_flag = true
+I0518 20:00:44.069254 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_find_landmark_flag, Arm Finish
+I0518 20:00:44.376353 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:00:44.376353 23708 arm.h:548] arm is idle.
+I0518 20:00:44.377355 23708 nw_sys.h:956] Find Landmark!
+I0518 20:00:44.654776 23708 arm.h:665] [IPC1 ---> Arm]: Post get_landmark_pos_str
+I0518 20:00:44.676753 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_landmark_pos_str, Arm Running
+I0518 20:00:44.735684 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: landmark_pos_str = {-130.84,-709.86,505.27,-89.31,0.96,-177.87}
+I0518 20:00:44.778545 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_landmark_pos_str, Arm Finish
+I0518 20:00:44.990272 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:00:44.990272 23708 arm.h:548] arm is idle.
+I0518 20:00:45.140691 23708 arm.h:665] [IPC1 ---> Arm]: Move_to standby_p0
+I0518 20:00:45.154690 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Running
+I0518 20:00:45.502753 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:00:46.151459 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Finish
+I0518 20:00:46.358075 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:00:46.359076 23708 arm.h:548] arm is idle.
+I0518 20:00:46.610414 23708 arm.h:665] [IPC1 ---> Arm]: Set n_points = 4
+I0518 20:00:46.624985 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set n_points = 4, Arm Running
+I0518 20:00:46.692271 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set n_points = 4, Arm Finish
+I0518 20:00:46.960703 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:00:46.961706 23708 arm.h:548] arm is idle.
+I0518 20:00:47.111711 23708 arm.h:665] [IPC1 ---> Arm]: Set 45_approach_point = 359.219574,-623.268066,438.885468,164.842438,-6.475945,9.470552
+I0518 20:00:47.139983 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set 45_approach_point = 359.219574,-623.268066,438.885468,164.842438,-6.475945,9.470552, Arm Running
+I0518 20:00:47.188859 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set 45_approach_point = 359.219574,-623.268066,438.885468,164.842438,-6.475945,9.470552, Arm Finish
+I0518 20:00:47.439373 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:00:47.440366 23708 arm.h:548] arm is idle.
+I0518 20:00:47.579514 23708 arm.h:665] [IPC1 ---> Arm]: Set via45_1 = 381.131378,-633.290649,389.480469,165.117752,-6.070386,9.441110
+I0518 20:00:47.608224 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_1 = 381.131378,-633.290649,389.480469,165.117752,-6.070386,9.441110, Arm Running
+I0518 20:00:47.660243 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_1 = 381.131378,-633.290649,389.480469,165.117752,-6.070386,9.441110, Arm Finish
+I0518 20:00:47.954974 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:00:47.954974 23708 arm.h:548] arm is idle.
+I0518 20:00:48.111982 23708 arm.h:665] [IPC1 ---> Arm]: Set via45_2 = -664.914734,-672.402771,376.732574,163.059601,-3.490389,-9.886230
+I0518 20:00:48.140611 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_2 = -664.914734,-672.402771,376.732574,163.059601,-3.490389,-9.886230, Arm Running
+I0518 20:00:48.289305 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_2 = -664.914734,-672.402771,376.732574,163.059601,-3.490389,-9.886230, Arm Finish
+I0518 20:00:48.559787 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:00:48.563783 23708 arm.h:548] arm is idle.
+I0518 20:00:48.704787 23708 arm.h:665] [IPC1 ---> Arm]: Set via45_3 = -664.914734,-672.402771,376.732574,163.059601,-3.490389,-9.886230
+I0518 20:00:48.731788 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_3 = -664.914734,-672.402771,376.732574,163.059601,-3.490389,-9.886230, Arm Running
+I0518 20:00:48.781785 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_3 = -664.914734,-672.402771,376.732574,163.059601,-3.490389,-9.886230, Arm Finish
+I0518 20:00:49.016784 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:00:49.017786 23708 arm.h:548] arm is idle.
+I0518 20:00:49.148161 23708 arm.h:665] [IPC1 ---> Arm]: Set via45_4 = 381.131378,-633.290649,389.480469,165.117752,-6.070386,9.441110
+I0518 20:00:49.174638 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_4 = 381.131378,-633.290649,389.480469,165.117752,-6.070386,9.441110, Arm Running
+I0518 20:00:49.225891 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_4 = 381.131378,-633.290649,389.480469,165.117752,-6.070386,9.441110, Arm Finish
+I0518 20:00:49.484786 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:00:49.486800 23708 arm.h:548] arm is idle.
+I0518 20:00:49.600095 23708 arm.h:665] [IPC1 ---> Arm]: Post arm_via45_line_z
+I0518 20:00:49.617317 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_via45_line_z, Arm Running
+I0518 20:00:49.940867 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:01:08.728364 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_via45_line_z, Arm Finish
+I0518 20:01:08.833370 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:01:08.834370 23708 arm.h:548] arm is idle.
+I0518 20:01:09.000017 23708 arm.h:665] [IPC1 ---> Arm]: Move_to standby_p0
+I0518 20:01:09.014020 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Running
+I0518 20:01:09.359019 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:01:11.268601 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Finish
+I0518 20:01:11.345485 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:01:11.346487 23708 arm.h:548] arm is idle.
+I0518 20:01:11.461719 23708 arm.h:665] [IPC1 ---> Arm]: Post arm_back_to_safety
+I0518 20:01:11.479560 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_back_to_safety, Arm Running
+I0518 20:01:11.817378 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:01:14.598625 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_back_to_safety, Arm Finish
+I0518 20:01:14.821334 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:01:14.821334 23708 arm.h:548] arm is idle.
+I0518 20:01:15.738394 23708 nw_sys.h:838] mission. stage 1: configure arm mission...
+I0518 20:01:15.740393 23708 nw_sys.h:1691] Wait for PLC Register 3 == 1
+I0518 20:01:16.010238 23708 nw_sys.h:862] flag0
+I0518 20:01:16.108966 23708 nw_sys.h:866] flag1
+I0518 20:01:21.235138 23708 nw_sys.h:876] flag2
+I0518 20:01:21.235138 23708 nw_sys.h:878] flag3
+I0518 20:01:21.303136 23708 nw_sys.h:882] flag4
+I0518 20:01:21.305140 23708 nw_sys.h:1691] Wait for PLC Register 1 == 1
+I0518 20:01:21.539523 23708 arm.h:665] [IPC1 ---> Arm]: Set standby_p0 = -29.552839,-331.009186,664.955688,133.291107,-2.167395,3.712809
+I0518 20:01:21.566958 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set standby_p0 = -29.552839,-331.009186,664.955688,133.291107,-2.167395,3.712809, Arm Running
+I0518 20:01:21.619824 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set standby_p0 = -29.552839,-331.009186,664.955688,133.291107,-2.167395,3.712809, Arm Finish
+I0518 20:01:21.960705 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:01:21.960705 23708 arm.h:548] arm is idle.
+I0518 20:01:22.333945 23708 arm.h:665] [IPC1 ---> Arm]: Move_to standby_p0
+I0518 20:01:22.357625 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Running
+I0518 20:01:22.691547 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:01:24.149437 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Finish
+I0518 20:01:24.354988 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:01:24.354988 23708 arm.h:548] arm is idle.
+I0518 20:01:24.498540 23708 arm.h:665] [IPC1 ---> Arm]: Set vision_lm_init_p0 = -29.554911,-331.009003,664.955688,133.291107,-2.167395,3.712452
+I0518 20:01:24.524487 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set vision_lm_init_p0 = -29.554911,-331.009003,664.955688,133.291107,-2.167395,3.712452, Arm Running
+I0518 20:01:24.581362 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set vision_lm_init_p0 = -29.554911,-331.009003,664.955688,133.291107,-2.167395,3.712452, Arm Finish
+I0518 20:01:24.889130 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:01:24.889130 23708 arm.h:548] arm is idle.
+I0518 20:01:25.075356 23708 arm.h:665] [IPC1 ---> Arm]: Move_to vision_lm_init_p0
+I0518 20:01:25.088352 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to vision_lm_init_p0, Arm Running
+I0518 20:01:25.441749 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:01:25.665827 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to vision_lm_init_p0, Arm Finish
+I0518 20:01:25.665827 23708 arm.h:536] arm has finished.
+I0518 20:01:25.754668 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:01:25.866550 23708 arm.h:548] arm is idle.
+I0518 20:01:26.089076 23708 arm.h:665] [IPC1 ---> Arm]: Post vision_find_landmark
+I0518 20:01:26.101601 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post vision_find_landmark, Arm Running
+I0518 20:01:26.784463 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:01:31.066082 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post vision_find_landmark, Arm Finish
+I0518 20:01:31.066082 23708 arm.h:536] arm has finished.
+I0518 20:01:31.229418 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:01:31.358002 23708 arm.h:548] arm is idle.
+I0518 20:01:31.516775 23708 arm.h:665] [IPC1 ---> Arm]: Post get_find_landmark_flag
+I0518 20:01:31.536841 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_find_landmark_flag, Arm Running
+I0518 20:01:31.592396 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: find_landmark_flag = true
+I0518 20:01:31.639266 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_find_landmark_flag, Arm Finish
+I0518 20:01:31.854846 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:01:31.854846 23708 arm.h:548] arm is idle.
+I0518 20:01:31.854846 23708 nw_sys.h:956] Find Landmark!
+I0518 20:01:31.976356 23708 arm.h:665] [IPC1 ---> Arm]: Post get_landmark_pos_str
+I0518 20:01:32.090356 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_landmark_pos_str, Arm Running
+I0518 20:01:32.150013 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: landmark_pos_str = {-134.61,-684.2,522.32,-90.43,0.43,-179.75}
+Post get_landmark_pos_str, Arm Finish
+I0518 20:01:32.462023 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:01:32.463021 23708 arm.h:548] arm is idle.
+I0518 20:01:32.563488 23708 arm.h:665] [IPC1 ---> Arm]: Move_to standby_p0
+I0518 20:01:32.582298 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Running
+I0518 20:01:32.914366 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:01:33.533883 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Finish
+I0518 20:01:33.613380 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:01:33.613380 23708 arm.h:548] arm is idle.
+I0518 20:01:33.761258 23708 arm.h:665] [IPC1 ---> Arm]: Set n_points = 4
+I0518 20:01:33.775279 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set n_points = 4, Arm Running
+I0518 20:01:33.823083 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set n_points = 4, Arm Finish
+I0518 20:01:34.188750 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:01:34.188750 23708 arm.h:548] arm is idle.
+I0518 20:01:34.436625 23708 arm.h:665] [IPC1 ---> Arm]: Set 45_approach_point = 376.199249,-614.537048,447.678497,165.821304,-6.797232,13.142539
+I0518 20:01:34.464625 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set 45_approach_point = 376.199249,-614.537048,447.678497,165.821304,-6.797232,13.142539, Arm Running
+I0518 20:01:34.510625 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set 45_approach_point = 376.199249,-614.537048,447.678497,165.821304,-6.797232,13.142539, Arm Finish
+I0518 20:01:34.782604 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:01:34.782604 23708 arm.h:548] arm is idle.
+I0518 20:01:34.909602 23708 arm.h:665] [IPC1 ---> Arm]: Set via45_1 = 381.191254,-618.418518,395.347626,166.058655,-3.889941,12.261646
+I0518 20:01:34.930994 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_1 = 381.191254,-618.418518,395.347626,166.058655,-3.889941,12.261646, Arm Running
+I0518 20:01:34.977008 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_1 = 381.191254,-618.418518,395.347626,166.058655,-3.889941,12.261646, Arm Finish
+I0518 20:01:35.251698 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:01:35.251698 23708 arm.h:548] arm is idle.
+I0518 20:01:35.407531 23708 arm.h:665] [IPC1 ---> Arm]: Set via45_2 = -688.634644,-624.773010,390.125092,167.508041,2.043668,-7.553465
+I0518 20:01:35.432411 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_2 = -688.634644,-624.773010,390.125092,167.508041,2.043668,-7.553465, Arm Running
+I0518 20:01:35.479912 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_2 = -688.634644,-624.773010,390.125092,167.508041,2.043668,-7.553465, Arm Finish
+I0518 20:01:35.783702 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:01:35.784704 23708 arm.h:548] arm is idle.
+I0518 20:01:35.948053 23708 arm.h:665] [IPC1 ---> Arm]: Set via45_3 = -688.634644,-624.773010,390.125092,167.508041,2.043668,-7.553465
+I0518 20:01:35.975188 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_3 = -688.634644,-624.773010,390.125092,167.508041,2.043668,-7.553465, Arm Running
+I0518 20:01:36.098982 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_3 = -688.634644,-624.773010,390.125092,167.508041,2.043668,-7.553465, Arm Finish
+I0518 20:01:36.361019 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:01:36.362018 23708 arm.h:548] arm is idle.
+I0518 20:01:36.588387 23708 arm.h:665] [IPC1 ---> Arm]: Set via45_4 = 381.191254,-618.418518,395.347626,166.058655,-3.889941,12.261646
+I0518 20:01:36.617393 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_4 = 381.191254,-618.418518,395.347626,166.058655,-3.889941,12.261646, Arm Running
+I0518 20:01:36.662395 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_4 = 381.191254,-618.418518,395.347626,166.058655,-3.889941,12.261646, Arm Finish
+I0518 20:01:36.945243 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:01:36.946246 23708 arm.h:548] arm is idle.
+I0518 20:01:37.096598 23708 arm.h:665] [IPC1 ---> Arm]: Post arm_via45_line_z
+I0518 20:01:37.108597 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_via45_line_z, Arm Running
+I0518 20:01:37.431845 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:01:56.656647 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_via45_line_z, Arm Finish
+I0518 20:01:56.657645 23708 arm.h:536] arm has finished.
+I0518 20:01:56.708868 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:01:56.859376 23708 arm.h:548] arm is idle.
+I0518 20:01:57.047376 23708 arm.h:665] [IPC1 ---> Arm]: Move_to standby_p0
+I0518 20:01:57.066380 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Running
+I0518 20:01:57.387379 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:01:59.394614 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Finish
+I0518 20:01:59.481673 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:01:59.482671 23708 arm.h:548] arm is idle.
+I0518 20:01:59.829332 23708 arm.h:665] [IPC1 ---> Arm]: Post arm_back_to_safety
+I0518 20:01:59.846357 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_back_to_safety, Arm Running
+I0518 20:02:00.230428 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:02:02.881047 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_back_to_safety, Arm Finish
+I0518 20:02:03.002413 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:02:03.003365 23708 arm.h:548] arm is idle.
+I0518 20:02:03.884917 23708 nw_sys.h:838] mission. stage 1: configure arm mission...
+I0518 20:02:03.887917 23708 nw_sys.h:1691] Wait for PLC Register 3 == 1
+I0518 20:02:04.165910 23708 nw_sys.h:862] flag0
+I0518 20:02:04.294180 23708 nw_sys.h:866] flag1
+I0518 20:02:08.108033 23708 nw_sys.h:876] flag2
+I0518 20:02:08.108033 23708 nw_sys.h:878] flag3
+I0518 20:02:08.177034 23708 nw_sys.h:882] flag4
+I0518 20:02:08.178041 23708 nw_sys.h:1691] Wait for PLC Register 1 == 1
+I0518 20:02:10.380039 23708 arm.h:665] [IPC1 ---> Arm]: Set standby_p0 = -4.860601,-302.825287,736.240417,136.671707,0.531470,6.625334
+I0518 20:02:10.403841 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set standby_p0 = -4.860601,-302.825287,736.240417,136.671707,0.531470,6.625334, Arm Running
+I0518 20:02:10.760365 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set standby_p0 = -4.860601,-302.825287,736.240417,136.671707,0.531470,6.625334, Arm Finish
+Get Status, Arm Idle
+I0518 20:02:10.760365 23708 arm.h:548] arm is idle.
+I0518 20:02:10.897364 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:02:10.898365 23708 arm.h:665] [IPC1 ---> Arm]: Move_to standby_p0
+I0518 20:02:10.911365 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Running
+I0518 20:02:11.203985 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:02:12.445495 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Finish
+I0518 20:02:12.540191 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:02:12.541206 23708 arm.h:548] arm is idle.
+I0518 20:02:12.720744 23708 arm.h:665] [IPC1 ---> Arm]: Set vision_lm_init_p0 = -4.860601,-302.825287,736.240417,136.671707,0.531470,6.625334
+I0518 20:02:12.740814 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set vision_lm_init_p0 = -4.860601,-302.825287,736.240417,136.671707,0.531470,6.625334, Arm Running
+I0518 20:02:12.801443 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set vision_lm_init_p0 = -4.860601,-302.825287,736.240417,136.671707,0.531470,6.625334, Arm Finish
+I0518 20:02:13.069299 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:02:13.070299 23708 arm.h:548] arm is idle.
+I0518 20:02:13.221889 23708 arm.h:665] [IPC1 ---> Arm]: Move_to vision_lm_init_p0
+I0518 20:02:13.234031 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to vision_lm_init_p0, Arm Running
+I0518 20:02:13.311924 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to vision_lm_init_p0, Arm Finish
+I0518 20:02:13.578486 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:02:13.578486 23708 arm.h:548] arm is idle.
+I0518 20:02:13.691694 23708 arm.h:665] [IPC1 ---> Arm]: Post vision_find_landmark
+I0518 20:02:13.719600 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post vision_find_landmark, Arm Running
+I0518 20:02:14.204833 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post vision_find_landmark, Arm Finish
+I0518 20:02:14.508846 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:02:14.509847 23708 arm.h:548] arm is idle.
+I0518 20:02:14.654500 23708 arm.h:665] [IPC1 ---> Arm]: Post get_find_landmark_flag
+I0518 20:02:14.674790 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_find_landmark_flag, Arm Running
+I0518 20:02:14.721233 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: find_landmark_flag = true
+I0518 20:02:14.769552 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_find_landmark_flag, Arm Finish
+I0518 20:02:15.023309 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:02:15.024305 23708 arm.h:548] arm is idle.
+I0518 20:02:15.024305 23708 nw_sys.h:956] Find Landmark!
+I0518 20:02:15.192541 23708 arm.h:665] [IPC1 ---> Arm]: Post get_landmark_pos_str
+I0518 20:02:15.206545 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_landmark_pos_str, Arm Running
+I0518 20:02:15.267082 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: landmark_pos_str = {34.95,-758.37,527.17,-90.19,-1,-167.28}
+I0518 20:02:15.311909 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_landmark_pos_str, Arm Finish
+I0518 20:02:15.557442 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:02:15.557442 23708 arm.h:548] arm is idle.
+I0518 20:02:15.718103 23708 arm.h:665] [IPC1 ---> Arm]: Move_to standby_p0
+I0518 20:02:15.738641 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Running
+I0518 20:02:15.814803 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Finish
+I0518 20:02:16.137856 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:02:16.138856 23708 arm.h:548] arm is idle.
+I0518 20:02:16.378548 23708 arm.h:665] [IPC1 ---> Arm]: Set n_points = 4
+I0518 20:02:16.391551 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set n_points = 4, Arm Running
+I0518 20:02:16.446048 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set n_points = 4, Arm Finish
+I0518 20:02:16.694137 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:02:16.695142 23708 arm.h:548] arm is idle.
+I0518 20:02:16.832285 23708 arm.h:665] [IPC1 ---> Arm]: Set 45_approach_point = 481.032166,-570.969421,442.262268,166.522110,-1.394368,26.773479
+I0518 20:02:16.856875 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set 45_approach_point = 481.032166,-570.969421,442.262268,166.522110,-1.394368,26.773479, Arm Running
+I0518 20:02:16.912083 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set 45_approach_point = 481.032166,-570.969421,442.262268,166.522110,-1.394368,26.773479, Arm Finish
+I0518 20:02:17.167613 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:02:17.168614 23708 arm.h:548] arm is idle.
+I0518 20:02:17.355955 23708 arm.h:665] [IPC1 ---> Arm]: Set via45_1 = 499.144958,-589.147705,398.856750,166.777908,1.019285,24.859085
+I0518 20:02:17.379484 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_1 = 499.144958,-589.147705,398.856750,166.777908,1.019285,24.859085, Arm Running
+I0518 20:02:17.439810 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_1 = 499.144958,-589.147705,398.856750,166.777908,1.019285,24.859085, Arm Finish
+I0518 20:02:17.729404 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:02:17.729404 23708 arm.h:548] arm is idle.
+I0518 20:02:17.883646 23708 arm.h:665] [IPC1 ---> Arm]: Set via45_2 = -491.341370,-809.300171,376.285797,166.576065,2.783784,3.416471
+I0518 20:02:17.910472 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_2 = -491.341370,-809.300171,376.285797,166.576065,2.783784,3.416471, Arm Running
+I0518 20:02:17.969472 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_2 = -491.341370,-809.300171,376.285797,166.576065,2.783784,3.416471, Arm Finish
+I0518 20:02:18.254446 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:02:18.254446 23708 arm.h:548] arm is idle.
+I0518 20:02:18.482396 23708 arm.h:665] [IPC1 ---> Arm]: Set via45_3 = -491.341370,-809.300171,376.285797,166.576065,2.783784,3.416471
+I0518 20:02:18.503446 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_3 = -491.341370,-809.300171,376.285797,166.576065,2.783784,3.416471, Arm Running
+I0518 20:02:18.547420 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_3 = -491.341370,-809.300171,376.285797,166.576065,2.783784,3.416471, Arm Finish
+I0518 20:02:18.833104 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:02:18.833104 23708 arm.h:548] arm is idle.
+I0518 20:02:18.981914 23708 arm.h:665] [IPC1 ---> Arm]: Set via45_4 = 499.144958,-589.147705,398.856750,166.777908,1.019285,24.859085
+I0518 20:02:19.004637 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_4 = 499.144958,-589.147705,398.856750,166.777908,1.019285,24.859085, Arm Running
+I0518 20:02:19.066421 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_4 = 499.144958,-589.147705,398.856750,166.777908,1.019285,24.859085, Arm Finish
+I0518 20:02:19.348428 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:02:19.349427 23708 arm.h:548] arm is idle.
+I0518 20:02:19.471196 23708 arm.h:665] [IPC1 ---> Arm]: Post arm_via45_line_z
+I0518 20:02:19.486196 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_via45_line_z, Arm Running
+I0518 20:02:19.832116 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:02:38.595180 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_via45_line_z, Arm Finish
+I0518 20:02:38.595180 23708 arm.h:536] arm has finished.
+I0518 20:02:38.661830 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:02:38.742288 23708 arm.h:548] arm is idle.
+I0518 20:02:38.893780 23708 arm.h:665] [IPC1 ---> Arm]: Move_to standby_p0
+I0518 20:02:38.910985 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Running
+I0518 20:02:39.227430 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:02:41.553627 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Finish
+I0518 20:02:41.644428 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:02:41.644428 23708 arm.h:548] arm is idle.
+I0518 20:02:41.765753 23708 arm.h:665] [IPC1 ---> Arm]: Post arm_back_to_safety
+I0518 20:02:41.781754 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_back_to_safety, Arm Running
+I0518 20:02:42.245716 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:02:44.331845 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_back_to_safety, Arm Finish
+I0518 20:02:44.464474 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:02:44.464474 23708 arm.h:548] arm is idle.
+I0518 20:02:45.312681 23708 nw_sys.h:838] mission. stage 1: configure arm mission...
+I0518 20:02:45.314576 23708 nw_sys.h:1691] Wait for PLC Register 3 == 1
+I0518 20:02:45.594813 23708 nw_sys.h:862] flag0
+I0518 20:02:45.729782 23708 nw_sys.h:866] flag1
+I0518 20:02:49.372958 23708 nw_sys.h:876] flag2
+I0518 20:02:49.373914 23708 nw_sys.h:878] flag3
+I0518 20:02:49.455792 23708 nw_sys.h:882] flag4
+I0518 20:02:49.457794 23708 nw_sys.h:1691] Wait for PLC Register 1 == 1
+I0518 20:02:52.561951 23708 arm.h:665] [IPC1 ---> Arm]: Set standby_p0 = -23.289370,-287.335510,677.892273,122.012299,-0.951865,-4.415102
+I0518 20:02:52.586223 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set standby_p0 = -23.289370,-287.335510,677.892273,122.012299,-0.951865,-4.415102, Arm Running
+I0518 20:02:52.635459 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set standby_p0 = -23.289370,-287.335510,677.892273,122.012299,-0.951865,-4.415102, Arm Finish
+I0518 20:02:52.886274 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:02:52.886641 23708 arm.h:548] arm is idle.
+I0518 20:02:53.024829 23708 arm.h:665] [IPC1 ---> Arm]: Move_to standby_p0
+I0518 20:02:53.044088 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Running
+I0518 20:02:53.371953 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:02:54.623812 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Finish
+I0518 20:02:54.754460 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:02:54.755460 23708 arm.h:548] arm is idle.
+I0518 20:02:54.907527 23708 arm.h:665] [IPC1 ---> Arm]: Set vision_lm_init_p0 = -23.289370,-287.335510,677.892273,122.012299,-0.951865,-4.415102
+I0518 20:02:54.929525 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set vision_lm_init_p0 = -23.289370,-287.335510,677.892273,122.012299,-0.951865,-4.415102, Arm Running
+I0518 20:02:55.001526 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set vision_lm_init_p0 = -23.289370,-287.335510,677.892273,122.012299,-0.951865,-4.415102, Arm Finish
+I0518 20:02:55.258311 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:02:55.258311 23708 arm.h:548] arm is idle.
+I0518 20:02:55.396762 23708 arm.h:665] [IPC1 ---> Arm]: Move_to vision_lm_init_p0
+I0518 20:02:55.411079 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to vision_lm_init_p0, Arm Running
+I0518 20:02:55.489778 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to vision_lm_init_p0, Arm Finish
+I0518 20:02:55.752532 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:02:55.752532 23708 arm.h:548] arm is idle.
+I0518 20:02:55.890650 23708 arm.h:665] [IPC1 ---> Arm]: Post vision_find_landmark
+I0518 20:02:55.905648 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post vision_find_landmark, Arm Running
+I0518 20:02:56.394361 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:02:56.446360 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post vision_find_landmark, Arm Finish
+I0518 20:02:56.446360 23708 arm.h:536] arm has finished.
+I0518 20:02:56.511359 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:02:56.579723 23708 arm.h:548] arm is idle.
+I0518 20:02:56.732949 23708 arm.h:665] [IPC1 ---> Arm]: Post get_find_landmark_flag
+I0518 20:02:56.758988 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_find_landmark_flag, Arm Running
+I0518 20:02:56.814178 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: find_landmark_flag = true
+I0518 20:02:56.874487 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_find_landmark_flag, Arm Finish
+I0518 20:02:57.065552 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:02:57.065552 23708 arm.h:548] arm is idle.
+I0518 20:02:57.065552 23708 nw_sys.h:956] Find Landmark!
+I0518 20:02:57.206321 23708 arm.h:665] [IPC1 ---> Arm]: Post get_landmark_pos_str
+I0518 20:02:57.221323 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_landmark_pos_str, Arm Running
+I0518 20:02:57.280321 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: landmark_pos_str = {-82.51,-691.45,536.98,-90.71,1.25,-179.17}
+I0518 20:02:57.324319 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_landmark_pos_str, Arm Finish
+I0518 20:02:57.555629 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:02:57.556628 23708 arm.h:548] arm is idle.
+I0518 20:02:57.695626 23708 arm.h:665] [IPC1 ---> Arm]: Move_to standby_p0
+I0518 20:02:57.716622 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Running
+I0518 20:02:57.795622 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Finish
+I0518 20:02:58.123157 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:02:58.124161 23708 arm.h:548] arm is idle.
+I0518 20:02:58.258157 23708 arm.h:665] [IPC1 ---> Arm]: Set n_points = 4
+I0518 20:02:58.273162 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set n_points = 4, Arm Running
+I0518 20:02:58.385156 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set n_points = 4, Arm Finish
+I0518 20:02:58.589087 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:02:58.589087 23708 arm.h:548] arm is idle.
+I0518 20:02:58.743901 23708 arm.h:665] [IPC1 ---> Arm]: Set 45_approach_point = 380.177704,-606.308655,445.315125,166.261795,-4.035672,8.597812
+I0518 20:02:58.771271 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set 45_approach_point = 380.177704,-606.308655,445.315125,166.261795,-4.035672,8.597812, Arm Running
+I0518 20:02:58.823887 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set 45_approach_point = 380.177704,-606.308655,445.315125,166.261795,-4.035672,8.597812, Arm Finish
+I0518 20:02:59.111647 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:02:59.112644 23708 arm.h:548] arm is idle.
+I0518 20:02:59.228780 23708 arm.h:665] [IPC1 ---> Arm]: Set via45_1 = 378.424133,-618.619446,398.490295,165.622803,-2.327146,6.843707
+I0518 20:02:59.254251 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_1 = 378.424133,-618.619446,398.490295,165.622803,-2.327146,6.843707, Arm Running
+I0518 20:02:59.305725 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_1 = 378.424133,-618.619446,398.490295,165.622803,-2.327146,6.843707, Arm Finish
+I0518 20:02:59.535503 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:02:59.535503 23708 arm.h:548] arm is idle.
+I0518 20:02:59.696905 23708 arm.h:665] [IPC1 ---> Arm]: Set via45_2 = -634.378418,-628.811584,384.727844,163.838593,-5.884445,-9.003173
+I0518 20:02:59.721326 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_2 = -634.378418,-628.811584,384.727844,163.838593,-5.884445,-9.003173, Arm Running
+I0518 20:02:59.783143 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_2 = -634.378418,-628.811584,384.727844,163.838593,-5.884445,-9.003173, Arm Finish
+I0518 20:03:00.121742 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:03:00.122743 23708 arm.h:548] arm is idle.
+I0518 20:03:00.258741 23708 arm.h:665] [IPC1 ---> Arm]: Set via45_3 = -634.378418,-628.811584,384.727844,163.838593,-5.884445,-9.003173
+I0518 20:03:00.283742 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_3 = -634.378418,-628.811584,384.727844,163.838593,-5.884445,-9.003173, Arm Running
+I0518 20:03:00.412739 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_3 = -634.378418,-628.811584,384.727844,163.838593,-5.884445,-9.003173, Arm Finish
+I0518 20:03:00.637234 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:03:00.637234 23708 arm.h:548] arm is idle.
+I0518 20:03:00.782074 23708 arm.h:665] [IPC1 ---> Arm]: Set via45_4 = 378.424133,-618.619446,398.490295,165.622803,-2.327146,6.843707
+I0518 20:03:00.804076 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_4 = 378.424133,-618.619446,398.490295,165.622803,-2.327146,6.843707, Arm Running
+I0518 20:03:00.851805 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_4 = 378.424133,-618.619446,398.490295,165.622803,-2.327146,6.843707, Arm Finish
+I0518 20:03:01.148754 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:03:01.148754 23708 arm.h:548] arm is idle.
+I0518 20:03:01.291783 23708 arm.h:665] [IPC1 ---> Arm]: Post arm_via45_line_z
+I0518 20:03:01.307194 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_via45_line_z, Arm Running
+I0518 20:03:01.648232 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:03:20.520849 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_via45_line_z, Arm Finish
+I0518 20:03:20.623848 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:03:20.624847 23708 arm.h:548] arm is idle.
+I0518 20:03:20.774523 23708 arm.h:665] [IPC1 ---> Arm]: Move_to standby_p0
+I0518 20:03:20.789062 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Running
+I0518 20:03:21.105120 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:03:23.274570 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Finish
+I0518 20:03:23.368073 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:03:23.368073 23708 arm.h:548] arm is idle.
+I0518 20:03:23.503190 23708 arm.h:665] [IPC1 ---> Arm]: Post arm_back_to_safety
+I0518 20:03:23.519946 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_back_to_safety, Arm Running
+I0518 20:03:23.839203 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:03:26.559619 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_back_to_safety, Arm Finish
+I0518 20:03:26.559619 23708 arm.h:536] arm has finished.
+I0518 20:03:26.613427 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:03:26.723021 23708 arm.h:548] arm is idle.
+I0518 20:03:27.674170 23708 nw_sys.h:838] mission. stage 1: configure arm mission...
+I0518 20:03:27.676170 23708 nw_sys.h:1691] Wait for PLC Register 3 == 1
+I0518 20:03:27.959863 23708 nw_sys.h:862] flag0
+I0518 20:03:28.229902 23708 nw_sys.h:866] flag1
+I0518 20:03:31.746940 23708 nw_sys.h:876] flag2
+I0518 20:03:31.746940 23708 nw_sys.h:878] flag3
+I0518 20:03:31.804994 23708 nw_sys.h:882] flag4
+I0518 20:03:31.806993 23708 nw_sys.h:1691] Wait for PLC Register 1 == 1
+I0518 20:03:34.828897 23708 arm.h:665] [IPC1 ---> Arm]: Set standby_p0 = -82.620247,-292.574799,654.471924,124.008003,-4.116431,1.200935
+I0518 20:03:34.857352 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set standby_p0 = -82.620247,-292.574799,654.471924,124.008003,-4.116431,1.200935, Arm Running
+I0518 20:03:34.903178 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set standby_p0 = -82.620247,-292.574799,654.471924,124.008003,-4.116431,1.200935, Arm Finish
+I0518 20:03:35.203210 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:03:35.203210 23708 arm.h:548] arm is idle.
+I0518 20:03:35.358785 23708 arm.h:665] [IPC1 ---> Arm]: Move_to standby_p0
+I0518 20:03:35.373785 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Running
+I0518 20:03:35.710182 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:03:36.915992 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Finish
+I0518 20:03:36.915992 23708 arm.h:536] arm has finished.
+I0518 20:03:36.969864 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:03:37.075330 23708 arm.h:548] arm is idle.
+I0518 20:03:37.204198 23708 arm.h:665] [IPC1 ---> Arm]: Set vision_lm_init_p0 = -82.620247,-292.574799,654.471924,124.008003,-4.116431,1.200935
+I0518 20:03:37.230690 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set vision_lm_init_p0 = -82.620247,-292.574799,654.471924,124.008003,-4.116431,1.200935, Arm Running
+I0518 20:03:37.287209 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set vision_lm_init_p0 = -82.620247,-292.574799,654.471924,124.008003,-4.116431,1.200935, Arm Finish
+I0518 20:03:37.593189 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:03:37.593189 23708 arm.h:548] arm is idle.
+I0518 20:03:37.832253 23708 arm.h:665] [IPC1 ---> Arm]: Move_to vision_lm_init_p0
+I0518 20:03:37.849290 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to vision_lm_init_p0, Arm Running
+I0518 20:03:37.933176 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to vision_lm_init_p0, Arm Finish
+I0518 20:03:38.268292 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:03:38.269233 23708 arm.h:548] arm is idle.
+I0518 20:03:38.509430 23708 arm.h:665] [IPC1 ---> Arm]: Post vision_find_landmark
+I0518 20:03:38.525427 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post vision_find_landmark, Arm Running
+I0518 20:03:38.989145 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:03:39.039788 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post vision_find_landmark, Arm Finish
+I0518 20:03:39.182168 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:03:39.182168 23708 arm.h:548] arm is idle.
+I0518 20:03:39.342679 23708 arm.h:665] [IPC1 ---> Arm]: Post get_find_landmark_flag
+I0518 20:03:39.362932 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_find_landmark_flag, Arm Running
+I0518 20:03:39.417995 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: find_landmark_flag = true
+I0518 20:03:39.464494 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_find_landmark_flag, Arm Finish
+I0518 20:03:39.698638 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:03:39.698638 23708 arm.h:548] arm is idle.
+I0518 20:03:39.698638 23708 nw_sys.h:956] Find Landmark!
+I0518 20:03:39.861244 23708 arm.h:665] [IPC1 ---> Arm]: Post get_landmark_pos_str
+I0518 20:03:39.874794 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_landmark_pos_str, Arm Running
+I0518 20:03:39.924710 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: landmark_pos_str = {-95.11,-660.56,519.41,-91.15,0.92,-178.64}
+I0518 20:03:39.965989 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post get_landmark_pos_str, Arm Finish
+I0518 20:03:40.256289 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:03:40.257289 23708 arm.h:548] arm is idle.
+I0518 20:03:40.496335 23708 arm.h:665] [IPC1 ---> Arm]: Move_to standby_p0
+I0518 20:03:40.513342 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Running
+I0518 20:03:40.589334 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Finish
+I0518 20:03:40.840338 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:03:40.840338 23708 arm.h:548] arm is idle.
+I0518 20:03:40.998337 23708 arm.h:665] [IPC1 ---> Arm]: Set n_points = 4
+I0518 20:03:41.017804 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set n_points = 4, Arm Running
+I0518 20:03:41.064596 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set n_points = 4, Arm Finish
+I0518 20:03:41.358469 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:03:41.358469 23708 arm.h:548] arm is idle.
+I0518 20:03:41.464653 23708 arm.h:665] [IPC1 ---> Arm]: Set 45_approach_point = -60.835915,-577.553162,402.496399,168.528534,-2.694839,5.688909
+I0518 20:03:41.492980 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set 45_approach_point = -60.835915,-577.553162,402.496399,168.528534,-2.694839,5.688909, Arm Running
+I0518 20:03:41.541918 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set 45_approach_point = -60.835915,-577.553162,402.496399,168.528534,-2.694839,5.688909, Arm Finish
+I0518 20:03:41.842128 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:03:41.843128 23708 arm.h:548] arm is idle.
+I0518 20:03:42.014689 23708 arm.h:665] [IPC1 ---> Arm]: Set via45_1 = -48.536743,-590.527100,369.436615,166.334122,-3.193210,6.463073
+I0518 20:03:42.037688 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_1 = -48.536743,-590.527100,369.436615,166.334122,-3.193210,6.463073, Arm Running
+I0518 20:03:42.156831 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_1 = -48.536743,-590.527100,369.436615,166.334122,-3.193210,6.463073, Arm Finish
+I0518 20:03:42.418707 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:03:42.418707 23708 arm.h:548] arm is idle.
+I0518 20:03:42.580971 23708 arm.h:665] [IPC1 ---> Arm]: Set via45_2 = -445.995087,-595.657471,354.760712,165.925140,-3.993138,0.823370
+I0518 20:03:42.611025 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_2 = -445.995087,-595.657471,354.760712,165.925140,-3.993138,0.823370, Arm Running
+I0518 20:03:42.657876 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_2 = -445.995087,-595.657471,354.760712,165.925140,-3.993138,0.823370, Arm Finish
+I0518 20:03:42.947712 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:03:42.948717 23708 arm.h:548] arm is idle.
+I0518 20:03:43.110229 23708 arm.h:665] [IPC1 ---> Arm]: Set via45_3 = -445.995087,-595.657471,354.760712,165.925140,-3.993138,0.823370
+I0518 20:03:43.138231 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_3 = -445.995087,-595.657471,354.760712,165.925140,-3.993138,0.823370, Arm Running
+I0518 20:03:43.189363 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_3 = -445.995087,-595.657471,354.760712,165.925140,-3.993138,0.823370, Arm Finish
+I0518 20:03:43.462718 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:03:43.462718 23708 arm.h:548] arm is idle.
+I0518 20:03:43.612063 23708 arm.h:665] [IPC1 ---> Arm]: Set via45_4 = -48.536743,-590.527100,369.436615,166.334122,-3.193210,6.463073
+I0518 20:03:43.638741 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_4 = -48.536743,-590.527100,369.436615,166.334122,-3.193210,6.463073, Arm Running
+I0518 20:03:43.690745 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Set via45_4 = -48.536743,-590.527100,369.436615,166.334122,-3.193210,6.463073, Arm Finish
+I0518 20:03:43.988029 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:03:43.988029 23708 arm.h:548] arm is idle.
+I0518 20:03:44.230207 23708 arm.h:665] [IPC1 ---> Arm]: Post arm_via45_line_z
+I0518 20:03:44.243202 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_via45_line_z, Arm Running
+I0518 20:03:44.581569 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:03:55.097745 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_via45_line_z, Arm Finish
+I0518 20:03:55.098747 23708 arm.h:536] arm has finished.
+I0518 20:03:55.162333 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:03:55.259835 23708 arm.h:548] arm is idle.
+I0518 20:03:55.377926 23708 arm.h:665] [IPC1 ---> Arm]: Move_to standby_p0
+I0518 20:03:55.398222 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Running
+I0518 20:03:55.743043 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:03:56.678110 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Move_to standby_p0, Arm Finish
+I0518 20:03:56.679106 23708 arm.h:536] arm has finished.
+I0518 20:03:56.742625 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:03:56.860225 23708 arm.h:548] arm is idle.
+I0518 20:03:56.999401 23708 arm.h:665] [IPC1 ---> Arm]: Post arm_back_to_safety
+I0518 20:03:57.017400 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_back_to_safety, Arm Running
+I0518 20:03:57.363867 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:04:00.416745 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_back_to_safety, Arm Finish
+I0518 20:04:00.500367 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:04:00.500849 23708 arm.h:548] arm is idle.
+I0518 20:04:01.234323 23708 arm.h:665] [IPC1 ---> Arm]: Post arm_safety_to_home
+I0518 20:04:01.249327 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_safety_to_home, Arm Running
+I0518 20:04:01.592626 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:04:10.143261 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post arm_safety_to_home, Arm Finish
+I0518 20:04:10.244429 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:04:10.244429 23708 arm.h:548] arm is idle.
+I0518 20:04:10.488221 23708 arm.h:665] [IPC1 ---> Arm]: Post tool_angle_0
+I0518 20:04:10.506466 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post tool_angle_0, Arm Running
+I0518 20:04:10.835681 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:04:13.602066 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post tool_angle_0, Arm Finish
+I0518 20:04:13.605060 23708 arm.h:536] arm has finished.
+I0518 20:04:13.661551 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:04:13.750037 23708 arm.h:548] arm is idle.
+I0518 20:04:13.869159 23708 arm.h:665] [IPC1 ---> Arm]: Post remove_small_pad
+I0518 20:04:13.884734 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post remove_small_pad, Arm Running
+I0518 20:04:14.298765 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:04:26.271853 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post remove_small_pad, Arm Finish
+I0518 20:04:26.272853 23708 arm.h:536] arm has finished.
+I0518 20:04:26.325649 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:04:26.487529 23708 arm.h:548] arm is idle.
+I0518 20:04:26.633908 23708 arm.h:665] [IPC1 ---> Arm]: Post place_mop
+I0518 20:04:26.648488 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post place_mop, Arm Running
+I0518 20:04:26.952169 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Running
+I0518 20:04:47.975301 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Post place_mop, Arm Finish
+I0518 20:04:48.073801 24520 net_w0303_server.h:265] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0518 20:04:48.073801 23708 arm.h:548] arm is idle.
+I0518 20:04:48.491734 23708 nw_sys.h:728] update current jobs status and log...
+I0518 20:04:48.672304 23708 nw_sys.h:739] All Jobs are done
+I0518 20:04:48.812244 23708 nw_sys.h:643] All schedules are done
+I0518 20:04:48.874929 23708 nw_sys.h:665] unlock thread: wait schedule
+I0518 20:04:48.874929 10452 nw_sys.h:526] [thread_wait_schedules]: unlock!
+I0518 20:04:48.874929 23708 nw_sys.h:540] [thread_do_schedules]: lock!
+I0518 20:04:48.874929 10452 nw_sys.h:347] [thread_wait_schedules]: unlock!
+I0518 20:04:48.874929 10452 nw_sys.h:349] [thread_wait_schedules]: stage 0 --- Initial Check [Start]
+I0518 20:04:48.875931 10452 nw_sys.h:1539] 1. update sys control mode
+I0518 20:04:48.939702 10452 nw_sys.h:1543] 2. updated all devices status
+I0518 20:04:48.940702 10452 nw_sys.h:1544] 2.1 request arm_connection_status and arm_mission_status from arm
+I0518 20:04:49.078055 10452 arm.h:548] arm is idle.
+I0518 20:04:49.078055 10452 nw_sys.h:1548] 3. check function
+I0518 20:04:49.078055 10452 nw_sys.h:1550] 3.0 check function: sys_status   [Start]
+I0518 20:04:49.079049 10452 nw_sys.h:1556] sys_control_mode: Auto
+I0518 20:04:49.079049 10452 nw_sys.h:1592] 3.1 check function: arm   [Start]
+I0518 20:04:49.079049 10452 nw_sys.h:1601] 3.1 check function: arm   [Complete]
+I0518 20:04:49.079049 10452 nw_sys.h:1650] 3.2 check function: ugv   [Start]
+I0518 20:04:49.079049 10452 nw_sys.h:1652] 3.2 check function: ugv   [Complete]
+I0518 20:04:49.079049 10452 nw_sys.h:1667] 4. Update Status to SQL
+I0518 20:04:49.079049 10452 nw_sys.h:1668] 4.1 Update Status to SQL: Arm
+I0518 20:04:50.723837 10452 nw_sys.h:353] [thread_wait_schedules]: stage 0 --- Initial Check [Complete]
+I0518 20:04:50.723837 10452 nw_sys.h:461] [thread_wait_schedules]: stage 1 --- Wait for Database Available Schedules
+I0518 20:04:50.723837 10452 nw_sys.h:468] wait for incoming schedules
+I0518 20:04:51.359848 10452 nw_sys.h:468] wait for incoming schedules
+I0518 20:04:52.020455 10452 nw_sys.h:468] wait for incoming schedules
+I0518 20:04:52.730988 10452 nw_sys.h:468] wait for incoming schedules
+I0518 20:04:53.353132 10452 nw_sys.h:468] wait for incoming schedules
+I0518 20:04:53.972630 10452 nw_sys.h:468] wait for incoming schedules
+I0518 20:04:54.705338 10452 nw_sys.h:468] wait for incoming schedules
+I0518 20:04:55.374191 10452 nw_sys.h:468] wait for incoming schedules
+I0518 20:04:55.996233 10452 nw_sys.h:468] wait for incoming schedules
+I0518 20:04:56.775056 10452 nw_sys.h:468] wait for incoming schedules
+I0518 20:04:57.394750 10452 nw_sys.h:468] wait for incoming schedules
+I0518 20:04:58.004714 10452 nw_sys.h:468] wait for incoming schedules
+I0518 20:04:58.704943 10452 nw_sys.h:468] wait for incoming schedules
+I0518 20:04:59.320601 10452 nw_sys.h:468] wait for incoming schedules
+I0518 20:05:00.375049 10452 nw_sys.h:468] wait for incoming schedules
+I0518 20:05:01.420783 10452 nw_sys.h:468] wait for incoming schedules
+I0518 20:05:02.202165 10452 nw_sys.h:468] wait for incoming schedules
+I0518 20:05:02.826521 10452 nw_sys.h:468] wait for incoming schedules
+I0518 20:05:03.686260 10452 nw_sys.h:468] wait for incoming schedules
+I0518 20:05:09.905632 10452 nw_sys.h:468] wait for incoming schedules
+I0518 20:05:10.523980 10452 nw_sys.h:468] wait for incoming schedules
