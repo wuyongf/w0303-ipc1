@@ -52,7 +52,7 @@ namespace yf
                 }
                 catch (std::exception& e)
                 {
-                    std::cerr << "Client Excpetion: " << e.what() << std::endl;
+                    std::cerr << "Client Exception: " << e.what() << std::endl;
                     return false;
                 }
                 return false;

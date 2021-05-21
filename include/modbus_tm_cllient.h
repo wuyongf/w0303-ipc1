@@ -78,6 +78,7 @@ void yf::modbus::tm_modbus::Start(const char *tm_ip_address, const int& port)
     }
     catch (std::error_code er)
     {
+        std::cerr << "tm_modbus Start() Failed!" << std::endl;
         std::cerr << er << std::endl;
     }
 }

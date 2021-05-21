@@ -11,14 +11,34 @@ int main()
 
 /// For localhost: ROG
 //    yf::sql::sql_server sql("SQL Server","192.168.7.84","NW_mobile_robot_sys","sa","wuyongfeng1334");
-//    std::shared_ptr<yf::sql::sql_server> sql = std::make_shared<yf::sql::sql_server>("ODBC Driver 17 for SQL Server","localhost","NW_mobile_robot_sys","sa","wuyongfeng1334");
+    std::shared_ptr<yf::sql::sql_server> sql = std::make_shared<yf::sql::sql_server>("ODBC Driver 17 for SQL Server","localhost","NW_mobile_robot_sys","sa","wuyongfeng1334");
 
 /// For localhost: NW 238 OFFICE
 //    yf::sql::sql_server sql("ODBC Driver 17 for SQL Server","192.168.0.8","NW_mobile_robot_sys","sa","Willsonic2010");
 
 
 /// For IPC1
-    std::shared_ptr<yf::sql::sql_server> sql = std::make_shared<yf::sql::sql_server>("SQL Server","192.168.7.27","NW_mobile_robot_sys","sa","NWcadcam2021");
+//    std::shared_ptr<yf::sql::sql_server> sql = std::make_shared<yf::sql::sql_server>("SQL Server","192.168.7.27","NW_mobile_robot_sys","sa","NWcadcam2021");
+    int cur_order = 5;
+
+    auto v = sql->GetValidIndexes(4038);
+    auto first = sql->GetFirstValidOrder(4038);
+    auto last  = sql->GetLastValidOrder(4038);
+
+    int last_valid_order;
+
+    if(cur_order == first)
+    {
+        last_valid_order = cur_order;
+    }
+    else
+    {
+        std::vector<int>::iterator cur_valid_index_index = std::find(v.begin(), v.end(), cur_order - 1);
+
+        auto last_valid_order_index = cur_valid_index_index - v.begin() - 1;
+
+        last_valid_order = v[last_valid_order_index] + 1;
+    }
 
     sql->UpdateDeviceBatteryCapacity("ugv",10);
 
@@ -205,6 +225,7 @@ int main()
     }
 
 #endif
+
 
 
     return 1;

@@ -2,23 +2,21 @@
 
 int main(int argc, char *argv[])
 {
-    // glog
-    //
+    // GLOG
     // Start Logging...
     FLAGS_alsologtostderr = true;
     FLAGS_log_dir = "C:/Dev/w0303/Arm_Control_Module_v1.0/logs";
     google::InitGoogleLogging(argv[0]);
 
+    // NW_SYS Start!
     yf::sys::nw_sys nw_sys(12345);
-
     nw_sys.Start();
 
-//    std::cout << "sleep 10s... " << std::endl;
-//    std::this_thread::sleep_for(std::chrono::milliseconds(10000));
-
+    // Sleep...
     std::cout << "sleep 30000000s... " << std::endl;
     std::this_thread::sleep_for(std::chrono::milliseconds(30000000));
 
+    // NW_SYS Shutdown!
     std::cout << "sys shut down... " << std::endl;
     nw_sys.Close();
 

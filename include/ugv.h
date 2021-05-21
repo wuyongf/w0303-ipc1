@@ -113,7 +113,7 @@ namespace yf
             // methods for ipc1
             //
             // (1) check mission continue flag
-            bool InitMissionStatusCheck(const int& timeout_min);
+            bool MissionStatusCheck(const int& timeout_min);
             
             // (2) current ugv mission state
             void RetrieveUgvCurrentMissionState();
@@ -1128,10 +1128,10 @@ std::string yf::ugv::mir::GetMapGUID(const std::string &map_name)
 
 // @@ input: timeout. suggestion: 1 minute.
 //
-bool yf::ugv::mir::InitMissionStatusCheck(const int& timeout_min)
+bool yf::ugv::mir::MissionStatusCheck(const int& timeout_min)
 {
     // init
-    bool iner_mission_flag = false;
+    bool inner_mission_flag = false;
 
     // initialization
     bool update_flag = true;
@@ -1145,14 +1145,14 @@ bool yf::ugv::mir::InitMissionStatusCheck(const int& timeout_min)
 
         if(plc_004_value == 1)
         {
-            iner_mission_flag = true;
+            inner_mission_flag = true;
         }
 
         // 2. get current state
         this->RetrieveUgvCurrentMissionState();
 
         // 3. set mission_continue_flag
-        if(iner_mission_flag == true && nw_status_ptr_->ugv_mission_status_ == data::common::UgvState::Executing)
+        if(inner_mission_flag == true && nw_status_ptr_->ugv_mission_status_ == data::common::UgvState::Executing)
         {
             update_flag = false;
             break;

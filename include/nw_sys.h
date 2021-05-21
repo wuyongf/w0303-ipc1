@@ -1,18 +1,14 @@
 #pragma once
-
+// STL
 #include <thread>
-
-//glog
+// GLOG
 #include <glog/logging.h>
-
-//Net
-#include "../include/net.h"
-#include "../include/net_w0303_server.h"
-#include "../include/net_w0303_client.h"
-
+// Net
+#include "net.h"
+#include "net_w0303_server.h"
+#include "net_w0303_client.h"
 // Database
-#include "../include/sql.h"
-
+#include "sql.h"
 // Status
 #include "nw_status.h"
 // Arm
@@ -28,10 +24,9 @@ namespace yf
     {
         class nw_sys
         {
-        public:
-            // sys overall
-            //
-            // constructor, destructor
+        public: // Sys Basic
+
+            // Constructor & Destructor
             nw_sys(const int& ipc_port);
             virtual ~nw_sys(){}
 
@@ -41,7 +36,7 @@ namespace yf
             // Close the system
             void Close();
 
-        public:
+        public: // Two Main Functions
 
             void thread_WaitSchedules();
 
@@ -60,26 +55,22 @@ namespace yf
 
             void ArmPickPad();
             void ArmRemovePad();
-
             void ArmAbsorbWater();
 
             void ArmSetOperationArea(const yf::data::arm::OperationArea& operation_area);
-
-            std::string ArmGetPointStr(const yf::data::arm::Point3d& point);
             void ArmSetToolAngle(const yf::data::arm::TaskMode& task_mode ,const yf::data::arm::ToolAngle& tool_angle);
-
             void ArmSetApproachPoint(const yf::data::arm::Point3d& approach_point,const yf::data::arm::ToolAngle& tool_angle);
-
             void ArmSetViaPoints(const std::deque<yf::data::arm::Point3d>& via_points, const yf::data::arm::ToolAngle& tool_angle);
-
             void ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode, const yf::data::arm::ToolAngle& tool_angle, const yf::data::arm::ModelType& model_type);
 
-        public: // Ugv Method: based on tm5.ArmTask();
+            std::string ArmGetPointStr(const yf::data::arm::Point3d& point);
+
+        public: // Ugv Method: based on REST API
 
             bool WaitForUgvPLCRegisterInt(const int& plc_register, const int& value, const int& timeout_min);
             bool WaitForUgvPLCRegisterFloat(const int& plc_register, const float& value, const int& timeout_min);
 
-        public:
+        public: // Methods for two main functions
 
             void DoJobs(const int& cur_schedule_id);
             void DoTasks(const int& cur_job_id, const int& next_job_id);
@@ -98,8 +89,7 @@ namespace yf
             void UpdateDbDeviceStatusBeforeTask (const int& cur_job_id);
             void UpdateDbDeviceStatusAfterTask (const int& cur_job_id);
 
-        protected:
-            // SQL
+        protected: // SQL
 
             void UpdateDbDeviceArmConnectionStatus();
             void UpdateDbDeviceArmMissionStatus();
@@ -110,46 +100,38 @@ namespace yf
 
             void GetSysControlMode();
 
-        private:
-            // Time Sleep
+        private: // Time Sleep Class
+
             yf::algorithm::TimeSleep sleep;
 
-        private:
+        private: /// SYS basic properties
 
-            // SYS
             // shared_ptr: nw_status
             std::shared_ptr<yf::status::nw_status> nw_status_ptr_;
 
-            // Each Module
             // shared_ptr: sql
             std::shared_ptr<yf::sql::sql_server> sql_ptr_;
 
             // arm
             yf::arm::tm tm5;
 
-            // ugv
+            // shared_ptr: ugv
             std::shared_ptr<yf::ugv::mir> mir100_ptr_;
 
-            // ipc2;
+            // ipc2
             yf::ipc2::raspberry pi4;
 
-            // algorithm
-            // yf::al::transformation landmark_trans;
-
-            // tm5.PublishTask("BackToHomePosition");
-            // arm_mission_status_ = tm5.GetMissionStatus;
-            // schedule_id
-
             // Schedule
-            // database - Schedule - Job - Task current status
+            // Data Structure:
+            // Schedule - Job(each model & a task_mode) - Task(each ugv_mission_config_id & arm_config)
             yf::data::common::MissionStatus db_cur_schedule_status_;
             yf::data::common::MissionStatus db_cur_job_status_;
             yf::data::common::MissionStatus db_cur_task_status_;
 
-            // ipc server...
+            // ipc server
             std::shared_ptr<IPCServer> ipc_server_ptr_;
 
-            // flow control variable
+            // flow control variables
             //
             bool        ipc_server_flag_ = true;
             std::thread th_ipc_server_;
@@ -173,7 +155,7 @@ namespace yf
                                            const int& sleep_duration);
 
         private:
-            // variables
+            // threads handle
             std::thread th_web_status_manager_;
             std::thread th_web_ugv_battery_;
             std::thread th_web_ugv_position_;
@@ -223,9 +205,13 @@ namespace yf
 
             int cur_mission_num_;
 
-            yf::data::arm::TaskMode cur_task_mode_;
+            std::vector<int> cur_valid_result_queue_;
+            int cur_first_valid_order_;
+            int cur_last_valid_order_;
+            std::vector<int> cur_valid_indexes_;
 
-            yf::data::arm::ModelType cur_model_type_;
+            yf::data::arm::TaskMode     cur_task_mode_;
+            yf::data::arm::ModelType    cur_model_type_;
 
             yf::data::arm::OperationArea cur_operation_area_;
             yf::data::arm::OperationArea last_operation_area_;
@@ -245,12 +231,13 @@ namespace yf
     }
 }
 
+//@@
+// 0. This is a constructor
+// 1. Establish a network server: create shared ptr: ipc_server_ptr
+// 2. Assign ipc port for TM network connection.
 yf::sys::nw_sys::nw_sys(const int &ipc_port)
 {
-    // 0. constructor
-    // 1. create shared ptr: ipc_server_ptr
-    // 2. assign ipc port for TM network connection.
-    ipc_server_ptr_ = std::make_shared<IPCServer>(ipc_port);    //ipc_port: 12345
+    ipc_server_ptr_ = std::make_shared<IPCServer>(ipc_port);    //e.g. ipc_port: 12345
 }
 
 void yf::sys::nw_sys::Start()
@@ -344,13 +331,11 @@ void yf::sys::nw_sys::thread_WaitSchedules()
     {
         while (wait_schedule_flag)
         {
-            LOG(INFO) << "[thread_wait_schedules]: unlock!";
+            LOG(INFO) << "[thread_WaitSchedules]: Start!";
 
-            LOG(INFO) << "[thread_wait_schedules]: stage 0 --- Initial Check [Start]";
-
+            LOG(INFO) << "[thread_WaitSchedules]: 1. --- Initial Check [Start]";
             WaitSchedulesInitialCheck();
-
-            LOG(INFO) << "[thread_wait_schedules]: stage 0 --- Initial Check [Complete]";
+            LOG(INFO) << "[thread_WaitSchedules]: 1. --- Initial Check [Complete]";
 
             #if 0
             bool initial_check_flag = true;
@@ -458,30 +443,28 @@ void yf::sys::nw_sys::thread_WaitSchedules()
             }
             #endif
 
-            LOG(INFO) << "[thread_wait_schedules]: stage 1 --- Wait for Database Available Schedules";
+            LOG(INFO) << "[thread_WaitSchedules]: stage 1 --- Wait for Database Available Schedules";
 
             /// prerequisite for front-end. If Devices connection are not all IDLE. Do not Publish Schedule.
             //
             while (schedule_number == 0 )
             {
-
-                LOG(INFO) << "wait for incoming schedules";
+                LOG(INFO) << "[thread_wait_schedules]: wait for incoming schedules";
 
                 // (1) retrieve schedule number from database...
                 q_schedule_ids   = sql_ptr_->GetAvailableScheuldesId();
-
                 schedule_number  = q_schedule_ids.size();
 
                 // (2) update sys control mode
-                GetSysControlMode();
+                this->GetSysControlMode();
 
                 // wait for auto mode.
                 while (nw_status_ptr_->sys_control_mode_ != data::common::SystemMode::Auto)
                 {
-                    LOG(INFO) << "sys is not in auto mode, keep waiting...";
+                    LOG(INFO) << "[thread_wait_schedules]: sys is not in auto mode, keep waiting...";
 
                     // update sys control mode
-                    GetSysControlMode();
+                    this->GetSysControlMode();
 
                     ///TIME
                     sleep.ms(500);
@@ -498,8 +481,7 @@ void yf::sys::nw_sys::thread_WaitSchedules()
             do_schedule_flag = true;
             std::unique_lock<std::mutex> ul(mux_Blocking_do_schedule);
             cv_Blocking_do_schedule.notify_one();
-
-            LOG(INFO) << "[thread_wait_schedules]: unlock thread: do schedule";
+            LOG(INFO) << "[thread_WaitSchedules]: notify thread_DoSchedules";
 
             // For sys to shut down
             if(schedule_flag_ == false)
@@ -508,22 +490,14 @@ void yf::sys::nw_sys::thread_WaitSchedules()
             }
         }
 
-        // (1) option 1 -- keep looping
-        //std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-
-        // (2) option 2 -- mutex lock
-        //
-        // lock and wait for notify.
-
         ///TIME
         sleep.ms(50);
 
-        LOG(INFO) << "[thread_wait_schedules]: lock thread: wait schedule";
-
+        LOG(INFO) << "[thread_WaitSchedules]: lock!";
         std::unique_lock<std::mutex> ul_wait(mux_Blocking_wait_schedule);
         cv_Blocking_wait_schedule.wait(ul_wait);
+        LOG(INFO) << "[thread_WaitSchedules]: unlock!";
 
-        LOG(INFO) << "[thread_wait_schedules]: unlock!";
     }
 
     LOG(INFO) << "schedule flag is false, thread: wait schedules should be shut down...";
@@ -531,21 +505,16 @@ void yf::sys::nw_sys::thread_WaitSchedules()
 
 void yf::sys::nw_sys::thread_DoSchedules()
 {
-    // wait for do_schedule_flag = ture
     while (schedule_flag_)
     {
         // Default status is locking....
         while (do_schedule_flag == false)
         {
-            LOG(INFO) << "[thread_do_schedules]: lock!";
-
+            LOG(INFO) << "[thread_DoSchedules]: lock!";
             std::unique_lock<std::mutex> ul(mux_Blocking_do_schedule);
             cv_Blocking_do_schedule.wait(ul);
-
-            LOG(INFO) << "[thread_do_schedules]: unlock!";
+            LOG(INFO) << "[thread_DoSchedules]: unlock!";
         }
-
-        LOG(INFO) << "thread: do schedule has been unlocked";
 
         // For sys to shut down
         // (1) Check whether the sys is shutting down.
@@ -554,7 +523,7 @@ void yf::sys::nw_sys::thread_DoSchedules()
             return;
         }
 
-        // if there is schedule
+        // if there is any schedule
         //
         while (q_schedule_ids.size() != 0)
         {
@@ -569,11 +538,8 @@ void yf::sys::nw_sys::thread_DoSchedules()
             {
                 if(!sql_ptr_->isFutureTime(time_countdown, time_now))
                 {
-
-                    LOG(INFO) << "The Arm has not responded for 3 minutes.";
-                    LOG(INFO) << "The Schedule failed at the initial check stage.";
-                    //
-                    // todo: alert the user... No need, stage 3 will do the job.
+                    LOG(INFO) << "[thread_DoSchedules]: The Arm has not responded for 3 minutes.";
+                    LOG(INFO) << "[thread_DoSchedules]: The Schedule failed at the initial check stage.";
 
                     break;
                 }
@@ -581,7 +547,7 @@ void yf::sys::nw_sys::thread_DoSchedules()
                 time_now = sql_ptr_->TimeNow();
 
                 tm5.UpdateArmCurMissionStatus();
-                LOG(INFO) << "schedule initial check: wait for arm is idle";
+                LOG(INFO) << "[thread_DoSchedules]: schedule initial check: wait for arm is idle";
 
                 ///TIME
                 sleep.ms(2000);
@@ -602,18 +568,18 @@ void yf::sys::nw_sys::thread_DoSchedules()
                 // wait for execute time...
                 sql_ptr_->WaitForExecute(execute_time);
 
-                // TODO: Update Mission Status to database
+                /// Update Mission Status to database
                 UpdateDbScheduleBeforeTask(cur_schedule_id);
 
-                // TODO: Execute the schedule!
+                /// Execute the schedule!
                 DoJobs(cur_schedule_id);
 
-                // TODO: Update the schedule status to database!
+                /// Update the schedule status to database!
                 UpdateDbScheduleAfterTask(cur_schedule_id);
             }
             else
             {
-                LOG(INFO) << "abort current schedules...";
+                LOG(INFO) << "[thread_DoSchedules]: abort current schedules...";
                 q_schedule_ids.clear();
             }
 
@@ -630,7 +596,7 @@ void yf::sys::nw_sys::thread_DoSchedules()
 
             if( nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Disconnected || arm_mission_failed_status )
             {
-                LOG(INFO) << "abort current schedules...";
+                LOG(INFO) << "[thread_DoSchedules]: abort current schedules...";
                 q_schedule_ids.clear();
             }
         }
@@ -640,35 +606,28 @@ void yf::sys::nw_sys::thread_DoSchedules()
         // if done successfully
         if(nw_status_ptr_->arm_mission_status == data::common::MissionStatus::Idle)
         {
-            LOG(INFO) << "All schedules are done";
+            LOG(INFO) << "[thread_DoSchedules]: All schedules have been done!";
         }
         else
         {
-            LOG(INFO) << "Cancel the rest of schedules...";
+            LOG(INFO) << "[thread_DoSchedules]: Cancel the rest of schedules...";
         }
 
-        // Any way
-        //
-        // reset do schedule thread to lock
-        // wait for notified by wait schedule thread
+        // Anyway, lock thread_DoSchedules and then keep waiting
         do_schedule_flag = false;
 
-        // trigger thread: wait schedule
+        // trigger thread_WaitSchedules
+        LOG(INFO) << "[thread_DoSchedules]: notify thread_WaitSchedules";
         wait_schedule_flag = true;
-
         ///TIME
         sleep.ms(50);
-
         std::unique_lock<std::mutex> ul_wait(mux_Blocking_wait_schedule);
         cv_Blocking_wait_schedule.notify_one();
-
-        LOG(INFO) << "unlock thread: wait schedule";
 
         // record the end time
         // update the schedule status to database
     }
 }
-
 
 
 void yf::sys::nw_sys::DoJobs(const int &cur_schedule_id)
@@ -754,18 +713,24 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
     /// 0. Initialization
     //
     bool ugv_mission_success_flag = false;
-
     bool arm_mission_success_flag = false;
 
     bool arm_sub_mission_success_flag = false;
-
     bool mission_success_flag = false;
 
     /// 1. Initialization
     //
     //  1.1 Get cur_model_config_id From DB
     cur_model_config_id_    = sql_ptr_->GetModelConfigId(cur_job_id);
+
     cur_mission_num_        = sql_ptr_->GetUgvMissionConfigNum(cur_model_config_id_);
+
+    // e.g. {0,0,0,1,1,1}
+    cur_valid_result_queue_ = sql_ptr_->GetArmConfigValidResultQueue(cur_model_config_id_);
+    cur_first_valid_order_  = sql_ptr_->GetFirstValidOrder(cur_model_config_id_);
+    cur_last_valid_order_   = sql_ptr_->GetLastValidOrder(cur_model_config_id_);
+    // e.g {3,4,5}
+    cur_valid_indexes_ = sql_ptr_->GetValidIndexes(cur_model_config_id_);
 
     cur_model_type_         = tm5.GetModelType(cur_model_config_id_);
     cur_task_mode_          = tm5.GetTaskMode(cur_model_config_id_);
@@ -784,62 +749,49 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
     bool arm_init_status_check_success_flag = tm5.InitialStatusCheckForMission(2);
     bool ugv_init_status_check_success_flag = mir100_ptr_->InitialStatusCheckForMission(2);
 
+    /// 3.1 Start executing a mission, which is a model_config (n ugv_mission_configs and n arm_configs)
     if (arm_init_status_check_success_flag == true &&
         ugv_init_status_check_success_flag == true)
     {
-#if 0
-        /// a. kick start ugv mission
-        mir100.Pause();
-
-        LOG(INFO) << "mir100.Pause()" ;
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
-        mir100.DeleteMissionQueue();
-#endif
+        // kick off mir missions.
         mir100_ptr_->PostMissionQueue(cur_mission_guid_);
-
         ///TIME
         sleep.ms(100);
-
         mir100_ptr_->Play();
 
-        /// b. while ugv mission has not finished, keep assigning arm mission config and executing arm mission.
+        /// \brief
         ///
+        /// while ugv mission has not finished, keep assigning arm mission config and executing arm mission.
         /// for ugv mission finish info, please refer to PLC Register Assignment
         bool mission_continue_flag = true;
 
         while (mission_continue_flag)
         {
+            // while mir's mission has not finished
             while(mir100_ptr_->GetPLCRegisterIntValue(4) != 2)
             {
                 ///TIME
                 sleep.ms(200);
 
                 /// b.1 Initialization
-
                 bool ugv_mission_continue_flag = false;
 
                 bool arm_mission_continue_flag = false;
                 bool arm_wait_plc003_success_flag = false;
                 bool arm_wait_plc001_success_flag = false;
 
-                /// b.2 ugv_init_mission_status_check
+                /// b.2 ugv_mission_status_check
                 // wait plc004 == 1 and mir state is executing ;
-                ugv_mission_continue_flag = mir100_ptr_->InitMissionStatusCheck(2);
+                ugv_mission_continue_flag = mir100_ptr_->MissionStatusCheck(2);
 
                 if(ugv_mission_continue_flag == true)
                 {
+                    /// stage 0: check arm config is valid or not
                     /// stage 1: configure arm mission
                     /// stage 2: execute arm mission
 
-                    /// b.3 stage 1: configure arm mission.
-
-                    LOG(INFO) << "mission. stage 1: configure arm mission...";
-
                     bool arm_config_stage_success_flag = false;
-
-                    int last_order;
+                    int last_valid_order;
 
                     arm_wait_plc003_success_flag = this->WaitForUgvPLCRegisterInt(3,1,2);
 
@@ -848,231 +800,303 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
 
                     if(arm_wait_plc003_success_flag == true)
                     {
-                        // get current order
+                        /// get current order
                         auto cur_order = mir100_ptr_->GetPLCRegisterIntValue(2);
-                        // get_last_order
-                        if(cur_order == 1)
-                        {
-                            last_order = cur_order;
-                        }
-                        else
-                        {
-                            last_order = cur_order-1;
-                        }
-                        LOG(INFO) << "flag0";
-                        // get last operation area
-                        int  last_arm_config_id = sql_ptr_->GetArmConfigId(cur_model_config_id_, last_order);
-                        auto last_operation_area = tm5.GetOperationArea(last_arm_config_id);
-                        LOG(INFO) << "flag1";
 
                         //todo:
-                        // // check arm mission config is valid or not
+                        // check arm config is valid or not
                         int  cur_arm_config_id = sql_ptr_->GetArmConfigId(cur_model_config_id_, cur_order);
+                        int  is_valid = sql_ptr_->GetArmConfigIsValid(cur_arm_config_id);
+                        LOG(INFO) << "current arm config is_valid:" << is_valid;
 
-
-                        ///
-                        /// b.3.1 start configuring arm mission.
-                        auto arm_mission_configs = tm5.ConfigureArmMission(cur_model_config_id_, cur_order);
-                        LOG(INFO) << "flag2";
-                        cur_operation_area_ =  arm_mission_configs[0].operation_area;
-                        LOG(INFO) << "flag3";
-                        // z. finish configure stage.
-                        mir100_ptr_->SetPLCRegisterIntValue(3,0);
-                        arm_config_stage_success_flag = true;
-                        LOG(INFO) << "flag4";
-                        // wait for executing flag/signal.
-                        arm_wait_plc001_success_flag = this->WaitForUgvPLCRegisterInt(1,1,2);
-
-                        if(arm_wait_plc001_success_flag == true)
+                        switch(is_valid)
                         {
-                            //todo:
-                            /// b.3.2 start executing arm mission
-
-                            /// First order, pick the pad
-                            if(cur_order == 1)
+                            case 0: // invalid
                             {
-                                cur_tool_angle_ = data::arm::ToolAngle::Zero;
-#if 1 /// Disable For Testing
-                                this->ArmPickTool(cur_task_mode_);
+                                // arm configure stage has finished
+                                // notify mir100 and ipc
+                                mir100_ptr_->SetPLCRegisterIntValue(3,0);
 
-                                if(cur_task_mode_ == data::arm::TaskMode::Mopping)
+                                // wait for executing flag/signal.
+                                arm_wait_plc001_success_flag = this->WaitForUgvPLCRegisterInt(1,1,2);
+
+                                if(arm_wait_plc001_success_flag == true)
                                 {
-                                    this->ArmPickPad();
-                                    this->ArmAbsorbWater();
+                                    /// TIME
+                                    sleep.ms(200);
+                                    mir100_ptr_->SetPLCRegisterIntValue(1,0);
                                 }
-#endif
-                            }
-
-                            /// For each order, move to safety position first.
-                            //
-                            if(cur_order == 1)
-                            {
-                                this->ArmSetOperationArea(cur_operation_area_);
-                                tm5.ArmTask("Post arm_home_to_safety");
-                            }
-                            else
-                            {
-                                // if cur_operation_area is not equal to last one, move to safety position first.
-                                if(cur_operation_area_ != last_operation_area)
+                                else
                                 {
-                                    tm5.ArmTask("Post arm_safety_to_home");
+                                    LOG(INFO) << "mission failed at step 2: wait for plc001 == 1";
 
-                                    this->ArmSetOperationArea(cur_operation_area_);
-                                    tm5.ArmTask("Post arm_home_to_safety");
+                                    arm_mission_success_flag = false;
+                                    mission_continue_flag = false;
+                                    break;
                                 }
-                            }
 
-                            /// Loop all the arm_mission_configs
-                            for (int n = 0; n < arm_mission_configs.size(); n++)
-                            {
-                                // 1. move to standby_position
-                                //  1.1 get standby_point_str
-                                auto standby_point = arm_mission_configs[n].standby_position;
-                                std::string standby_point_str = this->ArmGetPointStr(standby_point);
-                                //  1.2 set standby_point
-                                tm5.ArmTask("Set standby_p0 = "+standby_point_str);
-                                //  1.3 move to standby_point
-                                tm5.ArmTask("Move_to standby_p0");
-
-                                // 2. check landmark_or_not?
-                                if(arm_mission_configs[n].landmark_flag == true)
+                                /// Last order
+                                if(cur_order == cur_mission_num_)
                                 {
-                                    // 2.1 init_lm_vision_position.
-                                    //  2.1.1 retrieve init_lm_vision_position_str
-                                    std::string ref_vision_lm_init_position_str = this->ArmGetPointStr(arm_mission_configs[n].ref_vision_lm_init_position);
-                                    //  2.1.2 set init_lm_vision_position
-                                    tm5.ArmTask("Set vision_lm_init_p0 = " + ref_vision_lm_init_position_str);
-                                    //  2.1.3 move_to init_lm_vision_position
-                                    tm5.ArmTask("Move_to vision_lm_init_p0");
+                                    sleep.ms(1000);
+                                    /// ipc1 loop
+                                    // set arm_mission_success_flag
+                                    arm_mission_success_flag = true;
 
-                                    // 2.2 execute vision_find_landmark
-                                    tm5.ArmTask("Post vision_find_landmark");
-
-                                    // 2.3 check find_landmark_flag
-                                    tm5.ArmTask("Post get_find_landmark_flag");
-
-                                    if(tm5.GetFindLandmarkFlag() == true)
+                                    // set ugv_mission_success_flag
+                                    if(mir100_ptr_->GetPLCRegisterIntValue(4) == 2)
                                     {
-                                        LOG(INFO) << "Find Landmark!";
+                                        ugv_mission_success_flag    = true;
+                                        mission_continue_flag       = false;
+                                    }
+                                }
 
-                                        // 2.4 get real_landmark_pos
-                                        tm5.ArmTask("Post get_landmark_pos_str");
-                                        real_lm_pos_ = tm5.GetRealLandmarkPos();
+                                break;
+                            }
+                            case 1: // valid
+                            {
+                                ///
+                                LOG(INFO) << "configure arm mission   [Start!]";
+                                auto arm_mission_configs = tm5.ConfigureArmMission(cur_model_config_id_, cur_order);
+                                LOG(INFO) << "configure arm mission   [Finished!]";
 
-                                        // 2.5 post back_to_standby_position.
-                                        tm5.ArmTask("Move_to standby_p0");
+                                cur_operation_area_ =  arm_mission_configs[0].operation_area;
+                                LOG(INFO) << "flag3";
 
-                                        // 2.6 get TF
-                                        // 2.7 calculate the new via_points
+                                //todo: find last valid order
+                                // input: cur_order, which is the cur_valid_order!
+                                // todo:
+                                /// get_cur_valid_order
+                                /// get_last_valid_order
+                                if(cur_order == cur_first_valid_order_)
+                                {
+                                    last_valid_order = cur_order;
+                                }
+                                else
+                                {
+                                    std::vector<int>::iterator cur_valid_index_index = std::find(cur_valid_indexes_.begin(), cur_valid_indexes_.end(), cur_order-1);
 
-                                        std::deque<yf::data::arm::Point3d> real_via_points;
+                                    auto last_valid_order_index = cur_valid_index_index - cur_valid_indexes_.begin() - 1;
 
-                                        real_via_points = tm5.GetRealViaPoints(arm_mission_configs[n].via_points, arm_mission_configs[n].ref_landmark_pos, real_lm_pos_);
+                                    last_valid_order = cur_valid_indexes_[last_valid_order_index] + 1;
+                                }
 
-                                        arm_mission_configs[n].via_points.clear();
+                                /// get last operation area
+                                int  last_arm_config_id = sql_ptr_->GetArmConfigId(cur_model_config_id_, last_valid_order);
+                                auto last_operation_area = tm5.GetOperationArea(last_arm_config_id);
 
-                                        arm_mission_configs[n].via_points = real_via_points;
 
-                                        // 2.8 calculate the real approach point
+                                // arm configure stage has finished
+                                // notify mir100 and ipc
+                                mir100_ptr_->SetPLCRegisterIntValue(3,0);
+                                arm_config_stage_success_flag = true;
 
-                                        yf::data::arm::Point3d real_via_approach_point;
+                                LOG(INFO) << "flag4";
+                                // wait for executing flag/signal.
+                                arm_wait_plc001_success_flag = this->WaitForUgvPLCRegisterInt(1,1,2);
 
-                                        real_via_approach_point = tm5.GetRealPointByLM(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].ref_landmark_pos, real_lm_pos_);
+                                if(arm_wait_plc001_success_flag == true)
+                                {
+                                    //todo:
+                                    /// b.3.2 start executing arm mission
 
-                                        arm_mission_configs[n].via_approach_pos.x = real_via_approach_point.x;
-                                        arm_mission_configs[n].via_approach_pos.y = real_via_approach_point.y;
-                                        arm_mission_configs[n].via_approach_pos.z = real_via_approach_point.z;
-                                        arm_mission_configs[n].via_approach_pos.rx = real_via_approach_point.rx;
-                                        arm_mission_configs[n].via_approach_pos.ry = real_via_approach_point.ry;
-                                        arm_mission_configs[n].via_approach_pos.rz = real_via_approach_point.rz;
+                                    /// First order, pick the pad
+                                    if(cur_order == cur_first_valid_order_)
+                                    {
+                                        cur_tool_angle_ = data::arm::ToolAngle::Zero;
+#if 1 /// Disable For Testing
+                                        this->ArmPickTool(cur_task_mode_);
+
+                                        if(cur_task_mode_ == data::arm::TaskMode::Mopping)
+                                        {
+                                            this->ArmPickPad();
+                                            this->ArmAbsorbWater();
+                                        }
+#endif
+                                    }
+
+                                    /// For each order, move to safety position first.
+                                    //
+                                    if(cur_order == cur_first_valid_order_ )
+                                    {
+                                        this->ArmSetOperationArea(cur_operation_area_);
+                                        tm5.ArmTask("Post arm_home_to_safety");
                                     }
                                     else
                                     {
-                                        LOG(INFO) << "Cannot find Landmark! cur_arm_mission_config aborted!!";
+                                        // if cur_operation_area is not equal to last one, move to safety position first.
+                                        if(cur_operation_area_ != last_operation_area)
+                                        {
+                                            tm5.ArmTask("Post arm_safety_to_home");
 
-                                        // back to standby_point
-                                        tm5.ArmTask("Move_to standby_p0");
-                                        // back to safety position
-                                        tm5.ArmTask("Post arm_back_to_safety");
-
-                                        continue;
+                                            this->ArmSetOperationArea(cur_operation_area_);
+                                            tm5.ArmTask("Post arm_home_to_safety");
+                                        }
                                     }
-                                }
 
-                                // 3. check&set tool_angle
-                                this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
-
-                                // 4. check motion_type, decide which motion.
-                                // 5. assign n_via_points.
-                                std::string n_via_points_str = std::to_string(arm_mission_configs[n].n_via_points);
-                                tm5.ArmTask("Set n_points = " + n_via_points_str);
-
-                                // 6. set approach_point
-                                this->ArmSetApproachPoint(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].tool_angle);
-
-                                // 7. set via_points
-                                this->ArmSetViaPoints(arm_mission_configs[n].via_points, arm_mission_configs[n].tool_angle);
-
-                                // 8. post via_points
-                                this->ArmPostViaPoints(cur_task_mode_, arm_mission_configs[n].tool_angle, arm_mission_configs[n].model_type);
-
-                                // 9. post return standby_position
-                                tm5.ArmTask("Move_to standby_p0");
-                            }
-
-                            // 10. post return safety.
-                            tm5.ArmTask("Post arm_back_to_safety");
-                            ///
-
-                            //
-                            mir100_ptr_->SetPLCRegisterIntValue(1,0);
-
-                            ///TIME
-                            sleep.ms(500);
-
-                            /// Last order
-                            if(cur_order == cur_mission_num_)
-                            {
-                                /// arm motion
-
-                                // back to home first
-                                tm5.ArmTask("Post arm_safety_to_home");
-#if 1 /// Disable For Testing
-                                // remove pad if its necessary
-                                if(cur_task_mode_ == data::arm::TaskMode::Mopping)
-                                {
-                                    if(cur_tool_angle_ == data::arm::ToolAngle::FortyFive)
+                                    /// Loop all the arm_mission_configs
+                                    for (int n = 0; n < arm_mission_configs.size(); n++)
                                     {
-                                        tm5.ArmTask("Post tool_angle_0");
+                                        // 1. move to standby_position
+                                        //  1.1 get standby_point_str
+                                        auto standby_point = arm_mission_configs[n].standby_position;
+                                        std::string standby_point_str = this->ArmGetPointStr(standby_point);
+                                        //  1.2 set standby_point
+                                        tm5.ArmTask("Set standby_p0 = "+standby_point_str);
+                                        //  1.3 move to standby_point
+                                        tm5.ArmTask("Move_to standby_p0");
+
+                                        // 2. check landmark_or_not?
+                                        if(arm_mission_configs[n].landmark_flag == true)
+                                        {
+                                            // 2.1 init_lm_vision_position.
+                                            //  2.1.1 retrieve init_lm_vision_position_str
+                                            std::string ref_vision_lm_init_position_str = this->ArmGetPointStr(arm_mission_configs[n].ref_vision_lm_init_position);
+                                            //  2.1.2 set init_lm_vision_position
+                                            tm5.ArmTask("Set vision_lm_init_p0 = " + ref_vision_lm_init_position_str);
+                                            //  2.1.3 move_to init_lm_vision_position
+                                            tm5.ArmTask("Move_to vision_lm_init_p0");
+
+                                            // 2.2 execute vision_find_landmark
+                                            tm5.ArmTask("Post vision_find_landmark");
+
+                                            // 2.3 check find_landmark_flag
+                                            tm5.ArmTask("Post get_find_landmark_flag");
+
+                                            if(tm5.GetFindLandmarkFlag() == true)
+                                            {
+                                                LOG(INFO) << "Find Landmark!";
+
+                                                // 2.4 get real_landmark_pos
+                                                tm5.ArmTask("Post get_landmark_pos_str");
+                                                real_lm_pos_ = tm5.GetRealLandmarkPos();
+
+                                                // 2.5 post back_to_standby_position.
+                                                tm5.ArmTask("Move_to standby_p0");
+
+                                                // 2.6 get TF
+                                                // 2.7 calculate the new via_points
+
+                                                std::deque<yf::data::arm::Point3d> real_via_points;
+
+                                                real_via_points = tm5.GetRealViaPoints(arm_mission_configs[n].via_points, arm_mission_configs[n].ref_landmark_pos, real_lm_pos_);
+
+                                                arm_mission_configs[n].via_points.clear();
+
+                                                arm_mission_configs[n].via_points = real_via_points;
+
+                                                // 2.8 calculate the real approach point
+
+                                                yf::data::arm::Point3d real_via_approach_point;
+
+                                                real_via_approach_point = tm5.GetRealPointByLM(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].ref_landmark_pos, real_lm_pos_);
+
+                                                arm_mission_configs[n].via_approach_pos.x = real_via_approach_point.x;
+                                                arm_mission_configs[n].via_approach_pos.y = real_via_approach_point.y;
+                                                arm_mission_configs[n].via_approach_pos.z = real_via_approach_point.z;
+                                                arm_mission_configs[n].via_approach_pos.rx = real_via_approach_point.rx;
+                                                arm_mission_configs[n].via_approach_pos.ry = real_via_approach_point.ry;
+                                                arm_mission_configs[n].via_approach_pos.rz = real_via_approach_point.rz;
+                                            }
+                                            else
+                                            {
+                                                LOG(INFO) << "Cannot find Landmark! cur_arm_mission_config aborted!!";
+
+                                                // back to standby_point
+                                                tm5.ArmTask("Move_to standby_p0");
+                                                // back to safety position
+                                                tm5.ArmTask("Post arm_back_to_safety");
+
+                                                continue;
+                                            }
+                                        }
+
+                                        // 3. check&set tool_angle
+                                        this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
+
+                                        // 4. check motion_type, decide which motion.
+                                        // 5. assign n_via_points.
+                                        std::string n_via_points_str = std::to_string(arm_mission_configs[n].n_via_points);
+                                        tm5.ArmTask("Set n_points = " + n_via_points_str);
+
+                                        // 6. set approach_point
+                                        this->ArmSetApproachPoint(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].tool_angle);
+
+                                        // 7. set via_points
+                                        this->ArmSetViaPoints(arm_mission_configs[n].via_points, arm_mission_configs[n].tool_angle);
+
+                                        // 8. post via_points
+                                        this->ArmPostViaPoints(cur_task_mode_, arm_mission_configs[n].tool_angle, arm_mission_configs[n].model_type);
+
+                                        // 9. post return standby_position
+                                        tm5.ArmTask("Move_to standby_p0");
                                     }
 
-                                    this->ArmRemovePad();
-                                }
+                                    // 10. post return safety.
+                                    tm5.ArmTask("Post arm_back_to_safety");
+                                    ///
 
-                                // place the tool
-                                this->ArmPlaceTool(cur_task_mode_);
+
+
+                                    ///TIME
+                                    sleep.ms(500);
+
+                                    /// Last valid order
+                                    if(cur_order == cur_last_valid_order_)
+                                    {
+                                        /// arm motion
+
+                                        // back to home first
+                                        tm5.ArmTask("Post arm_safety_to_home");
+#if 1 /// Disable For Testing
+                                        // remove pad if its necessary
+                                        if (cur_task_mode_ == data::arm::TaskMode::Mopping)
+                                        {
+                                            if (cur_tool_angle_ == data::arm::ToolAngle::FortyFive)
+                                            {
+                                                tm5.ArmTask("Post tool_angle_0");
+                                            }
+
+                                            this->ArmRemovePad();
+                                        }
+
+                                        // place the tool
+                                        this->ArmPlaceTool(cur_task_mode_);
 #endif
-                                cur_tool_angle_ = data::arm::ToolAngle::Zero;
+                                        cur_tool_angle_ = data::arm::ToolAngle::Zero;
 
-                                /// ipc1 loop
-                                // set arm_mission_success_flag
-                                arm_mission_success_flag = true;
+                                    }
 
-                                // set ugv_mission_success_flag
-                                if(mir100_ptr_->GetPLCRegisterIntValue(4) == 2)
-                                {
-                                    ugv_mission_success_flag    = true;
-                                    mission_continue_flag       = false;
+                                    /// info mir100 the arm has finished
+                                    mir100_ptr_->SetPLCRegisterIntValue(1,0);
+
+
+                                    /// Last order
+                                    if(cur_order == cur_mission_num_)
+                                    {
+                                        /// ipc1 loop
+                                        // set arm_mission_success_flag
+                                        arm_mission_success_flag = true;
+
+                                        // set ugv_mission_success_flag
+                                        if(mir100_ptr_->GetPLCRegisterIntValue(4) == 2)
+                                        {
+                                            ugv_mission_success_flag    = true;
+                                            mission_continue_flag       = false;
+                                        }
+                                    }
                                 }
-                            }
-                        }
-                        else
-                        {
-                            LOG(INFO) << "mission failed at step 2: wait for plc001 == 1";
+                                else
+                                {
+                                    LOG(INFO) << "mission failed at step 2: wait for plc001 == 1";
 
-                            arm_mission_success_flag = false;
-                            mission_continue_flag = false;
-                            break;
+                                    arm_mission_success_flag = false;
+                                    mission_continue_flag = false;
+                                    break;
+                                }
+
+                                break;
+                            }
                         }
                     }
                     else
@@ -1536,32 +1560,30 @@ void yf::sys::nw_sys::WaitSchedulesInitialCheck()
     //
     while (init_check_continue_flag)
     {
-        LOG(INFO) << "1. update sys control mode";
-
+        LOG(INFO) << "[thread_WaitSchedules]: 1.1 update sys control mode";
         GetSysControlMode();
 
-        LOG(INFO) << "2. updated all devices status";
-        LOG(INFO) << "2.1 request arm_connection_status and arm_mission_status from arm";
+        LOG(INFO) << "[thread_WaitSchedules]: 1.2 update all devices status";
 
+        LOG(INFO) << "[thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status";
         tm5.UpdateArmCurMissionStatus();
 
-        LOG(INFO) << "3. check function";
+        LOG(INFO) << "[thread_WaitSchedules]: 1.3 check functions   [Start]";
 
-        LOG(INFO) << "3.0 check function: sys_status   [Start]";
-
+        LOG(INFO) << "[thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]";
         switch (nw_status_ptr_->sys_control_mode_)
         {
             case data::common::SystemMode::Auto:
             {
-                LOG(INFO) << "sys_control_mode: Auto";
+                LOG(INFO) << "[thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto";
                 sys_init_check_continue_flag = false;
                 break;
             }
 
             case data::common::SystemMode::Manual:
             {
-                LOG(INFO) << "sys_control_mode: Manual";
-                LOG(INFO) << "wait for Auto Mode";
+                LOG(INFO) << "[thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Manual";
+                LOG(INFO) << "[thread_WaitSchedules]: 1.3.1.1 wait for Auto Mode";
                 while (nw_status_ptr_->sys_control_mode_ != data::common::SystemMode::Auto)
                 {
                     // update sys control mode
@@ -1575,8 +1597,8 @@ void yf::sys::nw_sys::WaitSchedulesInitialCheck()
 
             case data::common::SystemMode::ManualSetting:
             {
-                LOG(INFO) << "sys_control_mode: ManualSetting";
-                LOG(INFO) << "wait for Auto Mode";
+                LOG(INFO) << "[thread_WaitSchedules]: 1.3.1.1 sys_control_mode: ManualSetting";
+                LOG(INFO) << "[thread_WaitSchedules]: 1.3.1.1 wait for Auto Mode";
                 while (nw_status_ptr_->sys_control_mode_ != data::common::SystemMode::Auto)
                 {
                     // update sys control mode
@@ -1588,9 +1610,9 @@ void yf::sys::nw_sys::WaitSchedulesInitialCheck()
                 break;
             }
         }
+        LOG(INFO) << "[thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]";
 
-        LOG(INFO) << "3.1 check function: arm   [Start]";
-
+        LOG(INFO) << "[thread_WaitSchedules]: 1.3.2 check arm   [Start]";
         if(arm_init_check_continue_flag)
         {
             /// for arm_init_status_check_continue_flag
@@ -1598,7 +1620,7 @@ void yf::sys::nw_sys::WaitSchedulesInitialCheck()
             if( nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Connected &&
                 nw_status_ptr_->arm_mission_status    == data::common::MissionStatus::Idle)
             {
-                LOG(INFO) << "3.1 check function: arm   [Complete]";
+                LOG(INFO) << "[thread_WaitSchedules]: 1.3.2 check arm   [Complete]";
                 arm_init_status_check_continue_flag = false;
             }
             else
@@ -1608,24 +1630,26 @@ void yf::sys::nw_sys::WaitSchedulesInitialCheck()
                 if ( nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Connected &&
                      nw_status_ptr_->arm_mission_status == data::common::MissionStatus::Error)
                 {
-                    LOG(INFO) << "Please stop robotic arm project...";
+                    LOG(INFO) << "[thread_WaitSchedules]: 1.3.2.1 Please stop robotic arm project...";
                 }
 
                 // For Arm Disconnected situation
                 //
                 if( nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Disconnected)
                 {
-                    LOG(INFO) << "Arm disconnected...";
-                    LOG(INFO) << "Please switch to Recovery Mode..."; // Ask for recovery mode
+                    LOG(INFO) << "[thread_WaitSchedules]: 1.3.2.2 Arm disconnected...";
+                    LOG(INFO) << "[thread_WaitSchedules]: 1.3.2.3 Please switch to Recovery Mode..."; // Ask for recovery mode
 
                     if(nw_status_ptr_->sys_control_mode_ == data::common::SystemMode::Recovery)
                     {
-                        LOG(INFO) << "Please play arm project..."; // Ask for recovery mode
+                        LOG(INFO) << "[thread_WaitSchedules]: 1.3.2.4 Please play arm project..."; // Ask for recovery mode
 
                         tm5.WaitForConnection();
                         // Get Status and update to SQL
                         tm5.GetConnectionStatus();
                         tm5.GetMissionStatus();
+
+                        LOG(INFO) << "[thread_WaitSchedules]: 1.3.2 check arm   [Complete]";
                     }
                 }
             }
@@ -1647,12 +1671,13 @@ void yf::sys::nw_sys::WaitSchedulesInitialCheck()
             }
         }
 
-        LOG(INFO) << "3.2 check function: ugv   [Start]";
+        LOG(INFO) << "[thread_WaitSchedules]: 1.3.3 check ugv   [Start]";
         bool ugv_init_check_continue_flag = false;
-        LOG(INFO) << "3.2 check function: ugv   [Complete]";
+        LOG(INFO) << "[thread_WaitSchedules]: 1.3.3 check ugv   [Complete]";
+
+        LOG(INFO) << "[thread_WaitSchedules]: 1.3 check functions   [Complete]";
 
         // check the initial_check_flag
-
         if(sys_init_check_continue_flag == false &&
            arm_init_check_continue_flag == false &&
            ugv_init_check_continue_flag == false )
@@ -1664,8 +1689,8 @@ void yf::sys::nw_sys::WaitSchedulesInitialCheck()
             init_check_continue_flag = true;
         }
 
-        LOG(INFO) << "4. Update Status to SQL";
-        LOG(INFO) << "4.1 Update Status to SQL: Arm";
+        LOG(INFO) << "[thread_WaitSchedules]: 1.4 Update Status to SQL";
+        LOG(INFO) << "[thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm";
 
         UpdateDbDeviceArmConnectionStatus();
         UpdateDbDeviceArmMissionStatus();
@@ -2103,6 +2128,11 @@ void yf::sys::nw_sys::ArmRemovePad()
     }
 }
 
+void yf::sys::nw_sys::ArmAbsorbWater()
+{
+    tm5.ArmTask("Post arm_absorb_water");
+}
+
 void yf::sys::nw_sys::thread_WebStatusManager()
 {
     /// Configuration
@@ -2163,6 +2193,8 @@ void yf::sys::nw_sys::thread_Web_UgvCurPosition(const bool &web_status_flag,
     }
 }
 
+/// \brief Sorting all incoming job ids, do mopping jobs first, and then ucv scanning jobs
+///
 void yf::sys::nw_sys::JobsFilter(std::deque<int>& q_ids)
 {
     q_job_mopping_ids.clear();
@@ -2193,10 +2225,6 @@ void yf::sys::nw_sys::JobsFilter(std::deque<int>& q_ids)
 
 }
 
-void yf::sys::nw_sys::ArmAbsorbWater()
-{
-    tm5.ArmTask("Post arm_absorb_water");
-}
 
 
 
@@ -2212,10 +2240,11 @@ void yf::sys::nw_sys::ArmAbsorbWater()
 
 
 
-
-
-
-//
+/// \brief
+/// \param
+/// \param
+/// \param
+/// \note
 
 // Do Schedule
 // (1) Retrieve Schedule from database and parse...

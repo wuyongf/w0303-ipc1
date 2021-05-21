@@ -1030,8 +1030,8 @@ yf::data::arm::Point3d yf::arm::tm::GetViaApproachPoint(const int &arm_mission_c
     return via_approach_point;
 }
 
-// configure & calculate via points.
-//
+/// \brief configure & calculate via points.
+///
 std::deque<yf::data::arm::Point3d>
 yf::arm::tm::GetRefViaPoints(const yf::data::arm::ModelType& model_type, const yf::data::arm::TaskMode& task_mode, const int &arm_mission_config_id, const yf::data::arm::MotionType &motion_type)
 {

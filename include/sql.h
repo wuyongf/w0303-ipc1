@@ -126,11 +126,11 @@ namespace yf
             /// Arm_mission_config
             //
             int GetArmConfigId(const int& model_config_id, const int& cur_order);
+            int GetArmConfigIsValid(const int& arm_config_id);
 
             std::deque<int> GetArmMissionConfigIds(const int& arm_config_id);
 
             int GetArmMissionPointId(const int& arm_mission_config_id, const std::string& arm_point_name);
-
 
             int GetArmMotionType(const int& arm_mission_config_id);
             int GetTaskMode(const int& model_config_id);
@@ -170,6 +170,11 @@ namespace yf
             /// Ugv_mission_config
             int GetUgvMissionConfigNum(const int& model_config_id);
 
+            std::vector<int> GetArmConfigValidResultQueue(const int& model_config_id);
+            int GetFirstValidOrder(const int& model_config_id);
+            int GetLastValidOrder(const int& model_config_id);
+            std::vector<int> GetValidIndexes(const int& model_config_id);
+
             std::deque<std::string> GetUgvMissionConfigPositionNames(const int& model_config_id);
 
             int GetModelId(const int& model_config_id);
@@ -182,6 +187,8 @@ namespace yf
             std::string GetBuildingInfo(const int& model_config_id);
             std::string GetFloorInfo(const int& model_config_id);
 
+        private:
+            bool static IsOne(int x){return x == 1;}
         public:
 
             /// Onsite setup
@@ -228,6 +235,7 @@ namespace yf
 
             std::string schedule_id_execute_time;
 
+            std::vector<int> GetFirstAndLastValidOrderNo(const int &model_config_id);
         };
     }
 }
@@ -284,7 +292,6 @@ void yf::sql::sql_server::Connect()
 
 void yf::sql::sql_server::Disconnect()
 {
-
     try
     {
         conn_.disconnect();
@@ -2390,7 +2397,6 @@ std::deque<int> yf::sql::sql_server::GetRefPathInitPointIds(const int &arm_missi
         std::cerr << e.what() << std::endl;
         std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
     }
-
 }
 
 float yf::sql::sql_server::GetRefPathInitPointElement(const int &point_id, const std::string &point_element)
@@ -2580,6 +2586,119 @@ float yf::sql::sql_server::GetRefPathStepRatioHorizontal(const int &arm_mission_
         std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
         return 0;
     }
+}
+
+int yf::sql::sql_server::GetArmConfigIsValid(const int &arm_config_id)
+{
+    // query string
+    std::string query_update;
+
+    // input
+    std::string arm_config_id_str = std::to_string(arm_config_id);
+
+    // output
+    int is_valid;
+
+    //"SELECT arm_config_id FROM data_ugv_mission_config where model_config_id = 1"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT is_valid FROM data_arm_config where ID = " + arm_config_id_str  ;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            is_valid = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return is_valid;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return 0;
+    };
+}
+
+std::vector<int> yf::sql::sql_server::GetArmConfigValidResultQueue(const int &model_config_id)
+{
+    std::vector<int> valid_q;
+
+    int total_mission_config_num = this->GetUgvMissionConfigNum(model_config_id);
+
+    for (int n = 1; n < total_mission_config_num+1 ; n++)
+    {
+        int cur_arm_config_id = this->GetArmConfigId(model_config_id,n);
+
+        int is_valid = this->GetArmConfigIsValid(cur_arm_config_id);
+
+        valid_q.push_back(is_valid);
+    }
+
+    return valid_q;
+}
+
+int yf::sql::sql_server::GetFirstValidOrder(const int &model_config_id)
+{
+    std::vector<int> valid_q = this->GetArmConfigValidResultQueue(model_config_id);
+
+    // find the first valid order!
+    std::vector<int>::iterator first_valid_index = std::find(valid_q.begin(), valid_q.end(), 1);
+
+    int first_valid_order = first_valid_index-valid_q.begin() + 1;
+
+    return first_valid_order;
+}
+
+int yf::sql::sql_server::GetLastValidOrder(const int &model_config_id)
+{
+    std::vector<int> valid_q = this->GetArmConfigValidResultQueue(model_config_id);
+
+    std::vector<int> is_valid = {1};
+
+    // find the first valid order!
+    std::vector<int>::iterator last_valid_index = std::find_end(valid_q.begin(), valid_q.end(), is_valid.begin(), is_valid.end());
+
+    int last_valid_order = last_valid_index-valid_q.begin() + 1;
+
+    return last_valid_order;
+}
+
+std::vector<int> yf::sql::sql_server::GetValidIndexes(const int& model_config_id)
+{
+    auto valid_result_queue = this->GetArmConfigValidResultQueue(model_config_id);
+
+    /// valid_indexes
+    std::vector<int> valid_indexes;
+
+    std::vector<int>::iterator first_index = std::find(valid_result_queue.begin(), valid_result_queue.end(), 1);
+
+    if(first_index == std::end(valid_result_queue))
+    {
+        std::cout << "there is no any valid index"<< std::endl;
+    }
+    else
+    {
+        //todo: for loop, find all valid index. push back to valid_indexes
+
+        std::vector<int>::iterator iter = valid_result_queue.begin();
+
+        while ((iter = std::find_if(iter, valid_result_queue.end(), IsOne)) != valid_result_queue.end())
+        {
+            // Do something with iter
+            valid_indexes.push_back(iter-valid_result_queue.begin());
+
+            iter++;
+        }
+    }
+    return valid_indexes;
 }
 
 

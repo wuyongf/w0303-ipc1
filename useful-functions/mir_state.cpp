@@ -8,8 +8,69 @@
 #include "../include/sql.h"
 #include "../include/nw_status.h"
 
+
+#include<iostream>
+#include<vector>
+#include<algorithm>
+#include<deque>
+
+bool isOne(int x){
+    return x == 1;
+}
+
 int main()
 {
+    //todo: input an valid order: 4
+    // find last valid order: 3
+    ///*
+    int cur_valid_order = 4;
+
+    ///* input is_valid vector
+    std::vector<int> v_test = {0,0,0,1,1,0,1,0,0,0,0};
+
+    ///* element to be found
+    std::vector<int> value = {1};
+
+    /// valid_indexes
+    std::vector<int> valid_indexes;
+
+    std::vector<int>::iterator first_index = std::find(v_test.begin(), v_test.end(), 1);
+
+    std::vector<int>::iterator last_index = std::find_end(v_test.begin(), v_test.end(), value.begin(), value.end());
+
+    int fvv = first_index-v_test.begin();
+    int lvv = last_index-v_test.begin();
+    std::cout << "first valid index: " << fvv << std::endl;
+    std::cout << "last valid index: " << lvv << std::endl;
+
+    if(first_index == std::end(v_test))
+    {
+        std::cout << "there is no any valid index"<< std::endl;
+    }
+    else
+    {
+        //todo: for loop, find all valid index. push back to valid_indexes
+
+        std::vector<int>::iterator iter = v_test.begin();
+
+        while ((iter = std::find_if(iter, v_test.end(), isOne)) != v_test.end())
+        {
+            // Do something with iter
+            valid_indexes.push_back(iter-v_test.begin());
+
+            iter++;
+        }
+    }
+
+    std::vector<int>::iterator cur_valid_index_index = std::find(valid_indexes.begin(), valid_indexes.end(), cur_valid_order);
+
+
+    auto cur_valid_order_index = cur_valid_index_index - valid_indexes.begin();
+    auto last_valid_order_index = cur_valid_index_index - valid_indexes.begin() - 1;
+
+    std::cout << "last_valid_order: " <<  valid_indexes[last_valid_order_index] << std::endl;
+
+
     std::shared_ptr<yf::status::nw_status> nw_status_ptr = std::make_shared<yf::status::nw_status>();
 //    std::shared_ptr<yf::sql::sql_server> sql_ptr = std::make_shared<yf::sql::sql_server>("SQL Server","192.168.7.84","NW_mobile_robot_sys","sa","wuyongfeng1334");
     std::shared_ptr<yf::sql::sql_server> sql_ptr = std::make_shared<yf::sql::sql_server>("SQL Server","192.168.7.27","NW_mobile_robot_sys","sa","NWcadcam2021");
