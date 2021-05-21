@@ -655,6 +655,8 @@ yf::algorithm::cleaning_motion::get_mop_via_points(const yf::data::arm::MotionTy
 
         case yf::data::arm::MotionType::Curve:
         {
+            via_points.insert(via_points.end(), ref_path_init_points.begin(), ref_path_init_points.end());
+
             using namespace std;
 
             struct robot_path_data
@@ -709,7 +711,7 @@ yf::algorithm::cleaning_motion::get_mop_via_points(const yf::data::arm::MotionTy
 
             getoffsetpath get_offset_path;
 
-            HINSTANCE hinstLib = LoadLibrary(TEXT("C:\\Dev\\w0303\\Arm_Control_Module_v1.0\\lib\\polylineoffset.dll"));
+            HINSTANCE hinstLib = LoadLibrary(TEXT("C:\\dev\\w0303-ipc1\\lib\\polylineoffset.dll"));
 
             /// Offset Method input: point size
             init_path.no_of_point = ref_path_init_points.size();
@@ -752,7 +754,7 @@ yf::algorithm::cleaning_motion::get_mop_via_points(const yf::data::arm::MotionTy
                 }
 
                 // rearrange path. check even
-                if(n % 2 != 0)
+                if(n % 2 == 0)
                 {
                     std::reverse(ref_path_each_layer.begin(), ref_path_each_layer.end());
                 }
@@ -909,6 +911,7 @@ yf::algorithm::cleaning_motion::get_uvc_via_points(const yf::data::arm::MotionTy
 
         case yf::data::arm::MotionType::CircleFull:
         {
+
             // get center_point_, radius_, v1_, v2_
             this->CenterFit3d(ref_path_init_points);
 
@@ -933,6 +936,8 @@ yf::algorithm::cleaning_motion::get_uvc_via_points(const yf::data::arm::MotionTy
 
         case yf::data::arm::MotionType::Curve:
         {
+            via_points.insert(via_points.end(), ref_path_init_points.begin(), ref_path_init_points.end());
+
             using namespace std;
 
             struct robot_path_data
@@ -987,8 +992,7 @@ yf::algorithm::cleaning_motion::get_uvc_via_points(const yf::data::arm::MotionTy
 
             getoffsetpath get_offset_path;
 
-            HINSTANCE hinstLib = LoadLibrary(TEXT("C:\\Dev\\w0303\\Arm_Control_Module_v1.0\\lib\\polylineoffset.dll"));
-
+            HINSTANCE hinstLib = LoadLibrary(TEXT("C:\\dev\\w0303-ipc1\\lib\\polylineoffset.dll"));
             /// Offset Method input: point size
             init_path.no_of_point = ref_path_init_points.size();
 
@@ -1030,7 +1034,7 @@ yf::algorithm::cleaning_motion::get_uvc_via_points(const yf::data::arm::MotionTy
                 }
 
                 // rearrange path. check even
-                if(n % 2 != 0)
+                if(n % 2 == 0)
                 {
                     std::reverse(ref_path_each_layer.begin(), ref_path_each_layer.end());
                 }

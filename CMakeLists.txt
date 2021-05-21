@@ -34,6 +34,9 @@ find_package(Poco CONFIG REQUIRED Foundation Net XML Zip Data JSON)
 
 ## Eigen3 library
 include_directories( "D:/software/include/Eigen3" )
+#
+#find_package(Eigen3 CONFIG REQUIRED)
+#target_link_libraries(main PRIVATE Eigen3::Eigen)
 
 ## Boost library
 if (1)

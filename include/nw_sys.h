@@ -1074,6 +1074,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
                                     /// Last order
                                     if(cur_order == cur_mission_num_)
                                     {
+                                        sleep.ms(1000);
                                         /// ipc1 loop
                                         // set arm_mission_success_flag
                                         arm_mission_success_flag = true;
@@ -2093,6 +2094,11 @@ void yf::sys::nw_sys::ArmPickPad()
             tm5.ArmTask("Post pick_large_pad");
             break;
         }
+        case data::arm::ModelType::DeskPolygon:
+        {
+            tm5.ArmTask("Post pick_large_pad");
+            break;
+        }
         default:
         {
             tm5.ArmTask("Post pick_small_pad");
@@ -2116,6 +2122,11 @@ void yf::sys::nw_sys::ArmRemovePad()
             break;
         }
         case data::arm::ModelType::NurseStation:
+        {
+            tm5.ArmTask("Post remove_large_pad");
+            break;
+        }
+        case data::arm::ModelType::DeskPolygon:
         {
             tm5.ArmTask("Post remove_large_pad");
             break;

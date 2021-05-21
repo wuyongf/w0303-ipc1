@@ -76,3 +76,31 @@ HA Onsite Setting
    (1) tool
 
    (2) motion path
+
+***
+**CLion Configuration**
+
+1. vcpkg
+
+   (1) Search:
+   
+         .\vcpkg\vcpkg search [package name]
+
+   (2) Install: for x64
+
+         .\vcpkg\vcpkg install [package name]:x64-windows
+   
+   (3) Package list
+
+         .\vcpkg\vcpkg install glog:x64-windows
+
+         .\vcpkg\vcpkg install nanodbc:x64-windows
+
+         libmodbus
+
+         poco
+
+         eigen3
+
+         boost
+
