@@ -1899,6 +1899,9 @@ void yf::ugv::mir::PostActionsForDebugTest(const int &model_config_id)
     int priority = 1;
 
     /// (1) Initialization Stage
+    this->PostActionAdjustLocalization(mission_guid,priority);
+    priority++;
+
     this->PostActionSetPLC(101,0,mission_guid,priority);
     priority++;
 

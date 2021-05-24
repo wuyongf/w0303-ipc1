@@ -28,6 +28,9 @@ int main()
 
     mir100.Start("192.168.7.34", nw_status_ptr, sql_ptr);
 
+    mir100.PostMission(4038);
+    mir100.PostActions(4038);
+
 
     mir100.ChangeMapByDBMapStatus();
 
