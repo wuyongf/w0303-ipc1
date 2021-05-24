@@ -20,6 +20,19 @@ bool isOne(int x){
 
 int main()
 {
+    std::shared_ptr<yf::status::nw_status> nw_status_ptr = std::make_shared<yf::status::nw_status>();
+//    std::shared_ptr<yf::sql::sql_server> sql_ptr = std::make_shared<yf::sql::sql_server>("SQL Server","192.168.7.84","NW_mobile_robot_sys","sa","wuyongfeng1334");
+    std::shared_ptr<yf::sql::sql_server> sql_ptr = std::make_shared<yf::sql::sql_server>("SQL Server","192.168.7.27","NW_mobile_robot_sys","sa","NWcadcam2021");
+
+    yf::ugv::mir mir100;
+
+    mir100.Start("192.168.7.34", nw_status_ptr, sql_ptr);
+
+    mir100.ChangeInitPositionByDBMapStatus();
+    //mir100.ChangeMap("EMSD_Headquaters_4/F");
+
+
+
     //todo: input an valid order: 4
     // find last valid order: 3
     ///*
@@ -71,13 +84,7 @@ int main()
     std::cout << "last_valid_order: " <<  valid_indexes[last_valid_order_index] << std::endl;
 
 
-    std::shared_ptr<yf::status::nw_status> nw_status_ptr = std::make_shared<yf::status::nw_status>();
-//    std::shared_ptr<yf::sql::sql_server> sql_ptr = std::make_shared<yf::sql::sql_server>("SQL Server","192.168.7.84","NW_mobile_robot_sys","sa","wuyongfeng1334");
-    std::shared_ptr<yf::sql::sql_server> sql_ptr = std::make_shared<yf::sql::sql_server>("SQL Server","192.168.7.27","NW_mobile_robot_sys","sa","NWcadcam2021");
 
-    yf::ugv::mir mir100;
-
-    mir100.Start("192.168.7.34", nw_status_ptr, sql_ptr);
 
 //    auto name_list = mir100.GetSessionNameList();
 //

@@ -181,11 +181,18 @@ namespace yf
             int GetModelType(const int& model_config_id);
             std::string GetModelName(const int& model_config_id);
 
-            int GetMapId(const int& model_id);
+            int GetMapIdFromModelId(const int& model_id);
             std::string GetMapElement(const int& map_id, const std::string& map_element);
             std::string GetSiteInfo(const int& model_config_id);
             std::string GetBuildingInfo(const int& model_config_id);
             std::string GetFloorInfo(const int& model_config_id);
+
+            std::string GetMapNameFromMapStatus();
+
+            int GetUgvInitPositionIdFromMapStatus();
+            float GetUgvInitPositionElement(const int& id, const std::string& element);
+            std::vector<float> GetUgvInitPositionFromMapStatus();
+
 
         private:
             bool static IsOne(int x){return x == 1;}
@@ -1715,7 +1722,7 @@ std::string yf::sql::sql_server::GetModelName(const int &model_config_id)
     };
 }
 
-int yf::sql::sql_server::GetMapId(const int &model_id)
+int yf::sql::sql_server::GetMapIdFromModelId(const int &model_id)
 {
     // query string
     std::string query_update;
@@ -1801,7 +1808,7 @@ std::string yf::sql::sql_server::GetSiteInfo(const int &model_config_id)
     auto model_id = this->GetModelId(model_config_id);
 
     // 2. get map_id
-    auto map_id = this->GetMapId(model_id);
+    auto map_id = this->GetMapIdFromModelId(model_id);
 
     // 3. get location_site_id
     auto location_site_id_str = this->GetMapElement(map_id, "location_site_id");
@@ -1853,7 +1860,7 @@ std::string yf::sql::sql_server::GetBuildingInfo(const int &model_config_id)
     auto model_id = this->GetModelId(model_config_id);
 
     // 2. get map_id
-    auto map_id = this->GetMapId(model_id);
+    auto map_id = this->GetMapIdFromModelId(model_id);
 
     // 3. get location_site_id
     auto location_building_id_str = this->GetMapElement(map_id, "location_building_id");
@@ -1905,7 +1912,7 @@ std::string yf::sql::sql_server::GetFloorInfo(const int &model_config_id)
     auto model_id = this->GetModelId(model_config_id);
 
     // 2. get map_id
-    auto map_id = this->GetMapId(model_id);
+    auto map_id = this->GetMapIdFromModelId(model_id);
 
     // 3. get location_site_id
     auto location_floor_id_str = this->GetMapElement(map_id, "location_floor_id");
@@ -2699,6 +2706,138 @@ std::vector<int> yf::sql::sql_server::GetValidIndexes(const int& model_config_id
         }
     }
     return valid_indexes;
+}
+
+std::string yf::sql::sql_server::GetMapNameFromMapStatus()
+{
+    // query string
+    std::string query_update;
+
+    // input
+
+    // output
+    std::string map_name;
+
+    //"SELECT position_name FROM data_ugv_mission_config where model_config_id = 1 ORDER BY mission_order"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT map_name FROM data_ugv_map where status = 1 ";
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            map_name = result.get<std::string>(0);
+        };
+
+        Disconnect();
+
+        return map_name;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return map_name;
+    };
+}
+
+int yf::sql::sql_server::GetUgvInitPositionIdFromMapStatus()
+{
+    // query string
+    std::string query_update;
+
+    // input
+
+    // output
+    int init_position_id;
+
+    //"SELECT position_name FROM data_ugv_mission_config where model_config_id = 1 ORDER BY mission_order"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT init_position_id FROM data_ugv_map where status = 1 ";
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            init_position_id = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return init_position_id;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return init_position_id;
+    };
+}
+
+float yf::sql::sql_server::GetUgvInitPositionElement(const int &id, const std::string &element)
+{
+    // query string
+    std::string query_update;
+
+    // input
+    std::string point_id_str = std::to_string(id);
+
+    // output
+    float element_value_str;
+
+    //"SELECT position_name FROM data_ugv_mission_config where model_config_id = 1 ORDER BY mission_order"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT " + element + " FROM data_ugv_map_InitPositionList where ID = " + point_id_str ;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            element_value_str = result.get<float>(0);
+        };
+
+        Disconnect();
+
+        return element_value_str;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return element_value_str;
+    };
+}
+
+std::vector<float> yf::sql::sql_server::GetUgvInitPositionFromMapStatus()
+{
+    auto init_position_id  = this->GetUgvInitPositionIdFromMapStatus();
+
+    float x = this->GetUgvInitPositionElement(init_position_id, "init_position_x");
+    float y = this->GetUgvInitPositionElement(init_position_id, "init_position_y");
+    float theta = this->GetUgvInitPositionElement(init_position_id, "init_position_theta");
+
+    std::vector<float> init_position;
+
+    init_position.push_back(x);
+    init_position.push_back(y);
+    init_position.push_back(theta);
+
+    return init_position;
 }
 
 

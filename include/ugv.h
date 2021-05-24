@@ -154,6 +154,7 @@ namespace yf
             std::deque<std::string> GetMapNameList(const std::string& session_name);
             std::deque<std::string> GetPositionNameList(const std::string& session_name, const std::string& map_name);
 
+
         private:
             std::string GetSessionGUID(const std::string& session_name);
             std::string GetMapGUID(const std::string& session_name, const std::string& map_name);
@@ -165,6 +166,13 @@ namespace yf
 
             bool PostMissionQueue(const std::string& mission_guid);
             bool DeleteMissionQueue();
+
+            //
+            bool ChangeMap(const std::string& map_name);
+            bool ChangeMapByDBMapStatus();
+
+            //
+            bool ChangeInitPositionByDBMapStatus();
 
         public:
             // Getter: MiR Properties
@@ -633,7 +641,7 @@ void yf::ugv::mir::PostActions(const int& model_config_id)
     // 3.
     // 3.a. get map name from db.
     auto model_id = sql_ptr_->GetModelId(model_config_id);
-    auto map_id = sql_ptr_->GetMapId(model_id);
+    auto map_id = sql_ptr_->GetMapIdFromModelId(model_id);
     auto map_name = sql_ptr_->GetMapElement(map_id,"map_name");
     // 3.b. based on map_name, retrieve map_guid from REST.
     std::string map_guid = this->GetMapGUID(map_name);
@@ -1078,7 +1086,8 @@ std::string yf::ugv::mir::GetMapGUID(const std::string &map_name)
     // method
 
     /// 1. fine tune sub_path
-    std::string sub_path = "/api/v2.0.0/sessions/" + cur_session_guid_ + "/maps";
+    //std::string sub_path = "/api/v2.0.0/sessions/" + cur_session_guid_ + "/maps";
+    std::string sub_path = "/api/v2.0.0/maps";
 
     GetMethod(sub_path);
 
@@ -1687,6 +1696,57 @@ std::vector<float> yf::ugv::mir::GetCurPosition()
 
     return position;
 }
+
+bool yf::ugv::mir::ChangeMap(const std::string& map_name)
+{
+    // Pause first
+    this->Pause();
+
+    // Change the map
+    Poco::JSON::Object State;
+
+    auto map_guid = this->GetMapGUID(map_name);
+
+    State.set("map_id", map_guid);
+
+    return PutMethod("/api/v2.0.0/status", State);
+
+}
+
+bool yf::ugv::mir::ChangeMapByDBMapStatus()
+{
+    auto map_name = sql_ptr_->GetMapNameFromMapStatus();
+
+    return this->ChangeMap(map_name);
+}
+
+bool yf::ugv::mir::ChangeInitPositionByDBMapStatus()
+{
+    // Pause first
+    this->Pause();
+
+    auto init_position =  sql_ptr_->GetUgvInitPositionFromMapStatus();
+
+
+    Poco::JSON::Object status_json;
+
+    Poco::JSON::Object position_json;
+
+    position_json.set("x", init_position[0]);
+    position_json.set("y", init_position[1]);
+    position_json.set("orientation", init_position[2]);
+
+    status_json.set("position", position_json);
+
+    /// (4) fine tune the sub_path
+
+    std::string sub_path = "/api/v2.0.0/status";
+
+    return PutMethod(sub_path, status_json);
+
+}
+
+
 
 
 
