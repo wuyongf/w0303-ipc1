@@ -5,7 +5,10 @@ int main(int argc, char *argv[])
     // GLOG
     // Start Logging...
     FLAGS_alsologtostderr = true;
-    FLAGS_log_dir = "C:\\dev\\w0303-ipc1\\logs";
+
+    FLAGS_log_dir = "C:\\Dev\\w0303\\Arm_Control_Module_v1.0";
+    //FLAGS_log_dir = "C:\\dev\\w0303-ipc1\\logs";
+
     google::InitGoogleLogging(argv[0]);
 
     // NW_SYS Start!

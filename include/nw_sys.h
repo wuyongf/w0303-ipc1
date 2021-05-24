@@ -50,7 +50,7 @@ namespace yf
 
         public: // Arm Method: based on tm5.ArmTask();
 
-            void ArmPickTool(const yf::data::arm::TaskMode& task_mode);
+            void ArmPickTool (const yf::data::arm::TaskMode& task_mode);
             void ArmPlaceTool(const yf::data::arm::TaskMode& task_mode);
 
             void ArmPickPad();
