@@ -35,6 +35,7 @@
 #include "Poco/Dynamic/Var.h"
 #include "Poco/JSON/Parser.h"
 #include "Poco/JSON/PrintHandler.h"
+#include "al.h"
 
 using Poco::Net::HTTPClientSession;
 using Poco::Net::HTTPRequest;
@@ -142,9 +143,14 @@ namespace yf
             bool PostMission(const int& model_config_id);
             void PostActions(const int& model_config_id);
 
+            bool PostMissionForDebugTest(const int& model_config_id);
+            void PostActionsForDebugTest(const int& model_config_id);
+
             bool PostActionSetPLC(const int& plc_register, const float& value, const std::string& mission_guid, const int& priority);
             bool PostActionWaitPLC(const int& plc_register, const float& value, const std::string& mission_guid, const int& priority);
             bool PostActionMove(const std::string& position_guid, const std::string &mission_guid, const int &priority);
+            bool PostActionAdjustLocalization(const std::string &mission_guid, const int &priority);
+
 
             std::string GetPositionGUID(const std::string& map_guid, const std::string& position_name);
             std::string GetCurMissionGUID();
@@ -160,6 +166,13 @@ namespace yf
             std::string GetMapGUID(const std::string& session_name, const std::string& map_name);
 
         public:
+            // Getter: MiR Properties
+            int     GetModeId();
+            int     GetStateId();
+            float   GetBatteryPercentage();
+            std::vector<float> GetCurPosition();
+
+        public:
             // MiR Mission Control
             bool Play();
             bool Pause();
@@ -167,20 +180,18 @@ namespace yf
             bool PostMissionQueue(const std::string& mission_guid);
             bool DeleteMissionQueue();
 
-            //
-            bool ChangeMap(const std::string& map_name);
-            bool ChangeMapByDBMapStatus();
-
-            //
-            bool ChangeInitPositionByDBMapStatus();
+            bool PutMap(const std::string& map_name);
 
         public:
-            // Getter: MiR Properties
-            int     GetState();
-            float   GetBatteryPercentage();
-            std::vector<float> GetCurPosition();
+            // MiR Rest API & Database
+            bool ChangeMapByDBMapStatus();
+
+            bool WaitForModeId(const int& mode_id, const int& timeout_min);
+
+            bool ChangeInitPositionByDBMapStatus();
 
         private:
+            // Private Methods
 
             bool doRequest(Poco::Net::HTTPClientSession& session, Poco::Net::HTTPRequest& request, Poco::Net::HTTPResponse& response);
 
@@ -223,6 +234,7 @@ namespace yf
             std::string cur_session_guid_;
             std::deque<std::string> cur_position_names_;
 
+            yf::algorithm::TimeSleep sleep;
         };
     }
 }
@@ -499,7 +511,7 @@ bool yf::ugv::mir::UpdatePositionOnMap(const float &pos_x, const float &pos_y, c
     return PutMethod("/api/v2.0.0/status", Position);
 }
 
-int yf::ugv::mir::GetState()
+int yf::ugv::mir::GetStateId()
 {
     GetMethod("/api/v2.0.0/status");
 
@@ -1237,7 +1249,7 @@ float yf::ugv::mir::GetPLCRegisterFloatValue(const int &plc_register)
 
 void yf::ugv::mir::RetrieveUgvCurrentMissionState() 
 {
-    int state = this->GetState();
+    int state = this->GetStateId();
 
     switch (state) 
     {
@@ -1697,7 +1709,7 @@ std::vector<float> yf::ugv::mir::GetCurPosition()
     return position;
 }
 
-bool yf::ugv::mir::ChangeMap(const std::string& map_name)
+bool yf::ugv::mir::PutMap(const std::string& map_name)
 {
     // Pause first
     this->Pause();
@@ -1717,7 +1729,7 @@ bool yf::ugv::mir::ChangeMapByDBMapStatus()
 {
     auto map_name = sql_ptr_->GetMapNameFromMapStatus();
 
-    return this->ChangeMap(map_name);
+    return this->PutMap(map_name);
 }
 
 bool yf::ugv::mir::ChangeInitPositionByDBMapStatus()
@@ -1744,6 +1756,214 @@ bool yf::ugv::mir::ChangeInitPositionByDBMapStatus()
 
     return PutMethod(sub_path, status_json);
 
+}
+
+int yf::ugv::mir::GetModeId()
+{
+    GetMethod("/api/v2.0.0/status");
+
+    auto json_result = GetRequestResult();
+
+    Poco::JSON::Parser parser;
+
+    Poco::Dynamic::Var result = parser.parse(json_result);
+
+    Poco::JSON::Object::Ptr object = result.extract<Poco::JSON::Object::Ptr>();
+
+    int mode_id = object->getValue<int>("mode_id");
+
+    return mode_id;
+}
+
+bool yf::ugv::mir::WaitForModeId(const int &mode_id, const int &timeout_min)
+{
+    std::string time_future = sql_ptr_->CountdownTime(sql_ptr_->TimeNow(),timeout_min);
+
+    LOG(INFO) << "Wait for Mode Id == " << mode_id ;
+    while (true)
+    {
+        // get cur ugv plc register xx, value xxx.
+        auto result = this->GetModeId();
+
+        if (mode_id != result)
+        {
+            ///TIME
+            sleep.ms(2000);
+        }
+        else
+        {
+            break;
+        }
+
+        /// IPC1 waits too long.
+        if(!sql_ptr_->isFutureTime(time_future, sql_ptr_->TimeNow()))
+        {
+            LOG(INFO) << "The Mode Id has not changed, current mode_id: " << result;
+
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool yf::ugv::mir::PostMissionForDebugTest(const int &model_config_id)
+{
+    /// based on model_config_id, mission_order, position_name, create a ugv mission.
+
+    // will store:
+    // cur_mission_name_
+    // cur_session_guid_
+
+    // name protocol:
+    // building_floor_ModelName_time
+    // 12w_2f_handrail_001_202104061026
+    // 12w_2f_handrail_001_20210406_1020
+
+    /// 1. get positions.
+//    auto position_names = sql_ptr_->GetUgvMissionConfigPositionNames(model_config_id);
+
+    /// 2. get session.
+    auto session_info = sql_ptr_->GetSiteInfo(model_config_id);
+
+    /// 3. get building---floor info--model name---time
+    auto building_info = sql_ptr_->GetBuildingInfo(model_config_id);
+    auto floor_info = sql_ptr_->GetFloorInfo(model_config_id);
+    auto model_name = sql_ptr_->GetModelName(model_config_id);
+
+    // time
+    sql_ptr_->UpdateTime();
+    auto time_year = sql_ptr_->get_time_element("year");
+    auto time_month = sql_ptr_->get_time_element("month");
+    auto time_day = sql_ptr_->get_time_element("day");
+    auto time_hour = sql_ptr_->get_time_element("hour");
+    auto time_min = sql_ptr_->get_time_element("minute");
+
+    auto time = time_year + time_month + time_day + "_" + time_hour + time_min;
+
+    /// (1) set cur_mission_name
+    cur_mission_name_ = building_info + "_" + floor_info + "/F_" + model_name + "_" + time + "debug_test";
+
+    /// (2) get session_id
+
+    if(session_info == "hkstp")
+    {
+        cur_session_guid_ = session_guid_HKSTP_;
+    }
+    else if(session_info == "emsd")
+    {
+        cur_session_guid_ = session_guid_EMSD_;
+    }
+    else if(session_info == "ha")
+    {
+        cur_session_guid_ = session_guid_HA_;
+    }
+
+    /// (3) mission creation
+    //@@ input:
+    //   (1) name,       done    12w_2f_handrail_001_20210406_1020
+    //   (2) session_id, done    hkstp  guid: 7aa0de9c-8579-11eb-9840-00012978eb45
+    //   (3) hidden,     done    false
+    //   (4) group_id,   done    Missions guid: mirconst-guid-0000-0011-missiongroup
+
+    Poco::JSON::Object mission;
+
+    mission.set("session_id",cur_session_guid_);
+    mission.set("name",cur_mission_name_);
+
+    mission.set("hidden", hidden_flag_);
+    mission.set("group_id", group_id_);
+
+    return PostMethod("/api/v2.0.0/missions", mission);
+}
+
+void yf::ugv::mir::PostActionsForDebugTest(const int &model_config_id)
+{
+    // 1. get mission_guid from REST
+    std::string mission_guid = this->GetCurMissionGUID();
+
+    // 2. get position_names from DB, based on model_config_id
+    std::deque<std::string> position_names = sql_ptr_->GetUgvMissionConfigPositionNames(model_config_id);
+
+    // 3.
+    // 3.a. get map name from db.
+    auto model_id = sql_ptr_->GetModelId(model_config_id);
+    auto map_id   = sql_ptr_->GetMapIdFromModelId(model_id);
+    auto map_name = sql_ptr_->GetMapElement(map_id,"map_name");
+    // 3.b. based on map_name, retrieve map_guid from REST.
+    std::string map_guid = this->GetMapGUID(map_name);
+
+    /// Actions detail
+    ///
+    int total_position_num = sql_ptr_->GetUgvMissionConfigNum(model_config_id);
+    int priority = 1;
+
+    /// (1) Initialization Stage
+    this->PostActionSetPLC(101,0,mission_guid,priority);
+    priority++;
+
+    // todo: speed, footprint initialization
+
+    /// (3) For loop, mission details
+    //
+    // get mission_name from REST. mission_order from db
+    for (int mission_count = 1; mission_count <= total_position_num; mission_count++)
+    {
+        /// a. get position name.
+        std::string position_name = position_names[mission_count-1];
+
+        /// b. position_guid
+        std::string position_guid = this->GetPositionGUID(map_guid,position_name);
+
+        //1. get ugv_mission_config_id, based on mission_count,
+        // prepare: mission_config_id
+        //
+        //@@ input: position_guid, mission_guid(done)
+        //
+        this->PostActionSetPLC(101,0,mission_guid,priority);
+        priority++;
+
+        this->PostActionMove(position_guid, mission_guid, priority);
+        priority++;
+
+        this->PostActionWaitPLC(101,1,mission_guid,priority);
+        priority++;
+    }
+
+
+}
+
+bool yf::ugv::mir::PostActionAdjustLocalization(const std::string &mission_guid, const int &priority)
+{
+    // mission_guid (done)
+    // action_type (done)  "move"
+    // parameters (?)   {position}
+    //                  {cart_entry_position}
+    //                  {main_or_entry_position}
+    //                  {marker_entry_position}
+    //                  {retries}
+    //                  {distance_threshold}
+    // priority (1)
+    //
+    // {position}: value: “position_guid" id: "position"
+
+    /// prerequisite:
+    /// 1. get position guid... based on position_name, map_id
+
+    Poco::JSON::Object action_json;
+
+
+    Poco::JSON::Array parameters_array;
+
+    action_json.set("parameters", parameters_array);
+    action_json.set("priority", priority);
+    action_json.set("action_type", "adjust_localization");
+
+    /// (4) fine tune the sub_path
+
+    std::string sub_path = "/api/v2.0.0/missions/" + mission_guid + "/actions";
+
+    return PostMethod(sub_path, action_json);
 }
 
 
