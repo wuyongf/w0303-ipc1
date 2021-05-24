@@ -711,8 +711,8 @@ yf::algorithm::cleaning_motion::get_mop_via_points(const yf::data::arm::MotionTy
 
             getoffsetpath get_offset_path;
 
-            HINSTANCE hinstLib = LoadLibrary(TEXT("C:\\Dev\\w0303\\Arm_Control_Module_v1.0\\lib\\polylineoffset.dll"));
-            //HINSTANCE hinstLib = LoadLibrary(TEXT("C:\\dev\\w0303-ipc1\\lib\\polylineoffset.dll"));
+            //HINSTANCE hinstLib = LoadLibrary(TEXT("C:\\Dev\\w0303\\Arm_Control_Module_v1.0\\lib\\polylineoffset.dll"));
+            HINSTANCE hinstLib = LoadLibrary(TEXT("C:\\dev\\w0303-ipc1\\lib\\polylineoffset.dll"));
 
             /// Offset Method input: point size
             init_path.no_of_point = ref_path_init_points.size();
@@ -993,8 +993,8 @@ yf::algorithm::cleaning_motion::get_uvc_via_points(const yf::data::arm::MotionTy
 
             getoffsetpath get_offset_path;
 
-            HINSTANCE hinstLib = LoadLibrary(TEXT("C:\\Dev\\w0303\\Arm_Control_Module_v1.0\\lib\\polylineoffset.dll"));
-            //HINSTANCE hinstLib = LoadLibrary(TEXT("C:\\dev\\w0303-ipc1\\lib\\polylineoffset.dll"));
+            //HINSTANCE hinstLib = LoadLibrary(TEXT("C:\\Dev\\w0303\\Arm_Control_Module_v1.0\\lib\\polylineoffset.dll"));
+            HINSTANCE hinstLib = LoadLibrary(TEXT("C:\\dev\\w0303-ipc1\\lib\\polylineoffset.dll"));
 
             /// Offset Method input: point size
             init_path.no_of_point = ref_path_init_points.size();

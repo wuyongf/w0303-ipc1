@@ -2051,6 +2051,30 @@ void yf::sys::nw_sys::ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode,
 
                         break;
                     }
+                    case data::arm::ModelType::Wall:
+                    {
+                        std::string command = "Post arm_via45_line_z";
+
+                        tm5.ArmTask(command);
+
+                        break;
+                    }
+                    case data::arm::ModelType::NurseStation:
+                    {
+                        std::string command = "Post arm_via45_line_z";
+
+                        tm5.ArmTask(command);
+
+                        break;
+                    }
+                    case data::arm::ModelType::Skirting:
+                    {
+                        std::string command = "Post arm_via45_line_y";
+
+                        tm5.ArmTask(command);
+
+                        break;
+                    }
                     default:
                     {
                         std::string command = "Post arm_via45_line_z";
