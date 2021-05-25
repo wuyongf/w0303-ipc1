@@ -151,6 +151,8 @@ namespace yf
             bool PostActionMove(const std::string& position_guid, const std::string &mission_guid, const int &priority);
             bool PostActionAdjustLocalization(const std::string &mission_guid, const int &priority);
 
+            bool PostActionDocking(const std::string& position_guid, const std::string &mission_guid, const int &priority);
+            std::string GetDockingGUID(const std::string& map_guid);
 
             std::string GetPositionGUID(const std::string& map_guid, const std::string& position_name);
             std::string GetCurMissionGUID();
@@ -1902,9 +1904,6 @@ void yf::ugv::mir::PostActionsForDebugTest(const int &model_config_id)
     this->PostActionAdjustLocalization(mission_guid,priority);
     priority++;
 
-    this->PostActionSetPLC(101,0,mission_guid,priority);
-    priority++;
-
     // todo: speed, footprint initialization
 
     /// (3) For loop, mission details
@@ -1967,6 +1966,118 @@ bool yf::ugv::mir::PostActionAdjustLocalization(const std::string &mission_guid,
     std::string sub_path = "/api/v2.0.0/missions/" + mission_guid + "/actions";
 
     return PostMethod(sub_path, action_json);
+}
+
+bool
+yf::ugv::mir::PostActionDocking(const std::string &position_guid, const std::string &mission_guid, const int &priority)
+{
+    // mission_guid (done)
+    // action_type (done)  "move"
+    // parameters (?)   {position}
+    //                  {cart_entry_position}
+    //                  {main_or_entry_position}
+    //                  {marker_entry_position}
+    //                  {retries}
+    //                  {distance_threshold}
+    // priority (1)
+    //
+    // {position}: value: “position_guid" id: "position"
+
+
+    Poco::JSON::Object action_docking_json;
+
+    Poco::JSON::Object marker_json;
+    Poco::JSON::Object marker_type_json;
+    Poco::JSON::Object retries_json;
+    Poco::JSON::Object max_linear_speed_json;
+
+    marker_json.set("value", position_guid);
+    marker_json.set("id", "marker");
+
+    marker_type_json.set("value", "mirconst-guid-0000-0001-marker000001");
+    marker_type_json.set("id", "marker_type");
+
+    retries_json.set("value", 10);
+    retries_json.set("id", "retries");
+
+    max_linear_speed_json.set("value", 0.5);
+    max_linear_speed_json.set("id", "max_linear_speed");
+
+    Poco::JSON::Array parameters_array;
+    parameters_array.set(0, marker_json);
+    parameters_array.set(1, marker_type_json);
+    parameters_array.set(2, retries_json);
+    parameters_array.set(3, max_linear_speed_json);
+
+    action_docking_json.set("parameters", parameters_array);
+    action_docking_json.set("priority", priority);
+
+    action_docking_json.set("action_type", "docking");
+
+    /// (4) fine tune the sub_path
+
+    std::string sub_path = "/api/v2.0.0/missions/" + mission_guid + "/actions";
+
+    return PostMethod(sub_path, action_docking_json);
+}
+
+std::string yf::ugv::mir::GetDockingGUID(const std::string &map_guid)
+{
+    std::string docking_name = "Docking";
+
+    // /api/v2.0.0/maps/cb4cfe79-8dd6-11eb-a5e3-00012978eb45/positions
+
+    /// 0. prepare the position_guid
+    std::string docking_guid;
+
+    /// 1. fine tune sub_path
+    std::string sub_path = "/api/v2.0.0/maps/" + map_guid + "/positions";
+
+    GetMethod(sub_path);
+
+    auto json_result = GetRequestResult();
+
+    Poco::JSON::Parser parser;
+
+    Poco::Dynamic::Var result = parser.parse(json_result);
+
+    Poco::JSON::Array::Ptr  array = result.extract<Poco::JSON::Array::Ptr>();
+
+    bool found_flag = false;
+
+    for (Poco::JSON::Array::ConstIterator it= array->begin(); it != array->end(); ++it)
+    {
+        if(found_flag == false)
+        {
+            // iteration, find the position_name here.
+            Poco::JSON::Object::Ptr obj = it->extract<Poco::JSON::Object::Ptr>();
+
+            std::string pos_name = obj->getValue<std::string>("name");
+            int type_id = obj->getValue<int>("type_id");
+
+            if(pos_name == docking_name && type_id == 7)
+            {
+                // 1. set found flag
+                found_flag = true;
+
+                // 2. get the position guid.
+                docking_guid = obj->getValue<std::string>("guid");
+            }
+        }
+        else
+        {
+            // already found the position
+            // do nothing.
+            return docking_guid;
+        }
+    }
+
+    if(found_flag == false)
+    {
+        std::cout << "Please create docking position first!" << std::endl;
+    }
+
+    return docking_guid;
 }
 
 

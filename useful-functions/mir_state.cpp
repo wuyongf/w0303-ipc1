@@ -28,8 +28,11 @@ int main()
 
     mir100.Start("192.168.7.34", nw_status_ptr, sql_ptr);
 
-    mir100.PostMission(4038);
-    mir100.PostActions(4038);
+    std::cout << "docking guid:" << mir100.GetDockingGUID("21bd0de2-b2f7-11eb-bb31-00012978eb45") << std::endl;
+
+
+    mir100.PostMissionForDebugTest(4038);
+    mir100.PostActionsForDebugTest(4038);
 
 
     mir100.ChangeMapByDBMapStatus();
