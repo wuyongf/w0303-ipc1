@@ -28,13 +28,14 @@ int main()
 
     mir100.Start("192.168.7.34", nw_status_ptr, sql_ptr);
 
-    std::cout << "docking guid:" << mir100.GetDockingGUID("21bd0de2-b2f7-11eb-bb31-00012978eb45") << std::endl;
+//    std::cout << "docking guid:" << mir100.GetDockingGUID("21bd0de2-b2f7-11eb-bb31-00012978eb45") << std::endl;
 
 
-    mir100.PostMissionForDebugTest(4038);
-    mir100.PostActionsForDebugTest(4038);
+    mir100.PostMissionForDebugTest(4047);
+    mir100.PostActionsForDebugTest(4047);
 
 
+//
     mir100.ChangeMapByDBMapStatus();
 
     if(mir100.WaitForModeId(7,1))
@@ -43,6 +44,8 @@ int main()
     }
 
 
+
+    mir100.PostActionAdjustLocalization("221d0b85-bc84-11eb-9acb-00012978eb45",1);
 
 
     //todo: input an valid order: 4

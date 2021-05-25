@@ -818,7 +818,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
                                 mir100_ptr_->SetPLCRegisterIntValue(3,0);
 
                                 // wait for executing flag/signal.
-                                arm_wait_plc001_success_flag = this->WaitForUgvPLCRegisterInt(1,1,2);
+                                arm_wait_plc001_success_flag = this->WaitForUgvPLCRegisterInt(1,1,5);
 
                                 if(arm_wait_plc001_success_flag == true)
                                 {
@@ -893,7 +893,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
 
                                 LOG(INFO) << "flag4";
                                 // wait for executing flag/signal.
-                                arm_wait_plc001_success_flag = this->WaitForUgvPLCRegisterInt(1,1,2);
+                                arm_wait_plc001_success_flag = this->WaitForUgvPLCRegisterInt(1,1,5);
 
                                 if(arm_wait_plc001_success_flag == true)
                                 {
