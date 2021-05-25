@@ -153,6 +153,13 @@ namespace yf
 
             bool PostActionDocking(const std::string& position_guid, const std::string &mission_guid, const int &priority);
             std::string GetDockingGUID(const std::string& map_guid);
+            //std::string GetMapGUID(const std::string& map_name);
+//
+//            auto model_id = sql_ptr_->GetModelId(model_config_id);
+//            auto map_id = sql_ptr_->GetMapIdFromModelId(model_id);
+//            auto map_name = sql_ptr_->GetMapElement(map_id,"map_name");
+//            // 3.b. based on map_name, retrieve map_guid from REST.
+//            std::string map_guid = this->GetMapGUID(map_name);
 
             std::string GetPositionGUID(const std::string& map_guid, const std::string& position_name);
             std::string GetCurMissionGUID();
