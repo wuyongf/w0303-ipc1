@@ -910,6 +910,9 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
                                         if(cur_task_mode_ == data::arm::TaskMode::Mopping)
                                         {
                                             this->ArmPickPad();
+
+                                            sleep.ms(200);
+
                                             this->ArmAbsorbWater();
                                         }
 #endif
@@ -1371,8 +1374,9 @@ void yf::sys::nw_sys::UpdateDbScheduleAfterTask(const int& cur_schedule_id)
 void yf::sys::nw_sys::UpdateDbScheduleBeforeTask(const int &cur_schedule_id)
 {
 
-    int schedule_status;
+    int schedule_status = 2;
 
+#if 0
     // todo: fine tune...
     // 2021/02/23: By checking arm_mission_status to decide schedule status...
     //
@@ -1409,6 +1413,7 @@ void yf::sys::nw_sys::UpdateDbScheduleBeforeTask(const int &cur_schedule_id)
         }
 
     }
+#endif
 
     sql_ptr_->UpdateScheduleData(cur_schedule_id, schedule_status);
     sql_ptr_->UpdateScheduleLog(cur_schedule_id, schedule_status);

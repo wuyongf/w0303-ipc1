@@ -533,20 +533,11 @@ void yf::sql::sql_server::UpdateScheduleLog(const int &schedule_id, const int &s
                 break;
             }
 
-            case 3: // finish
+            default:
             {
                 query_update = "UPDATE sys_schedule_log SET status = " + status_str + ", actual_end='" + TimeNow() + "' WHERE schedule_id = " + schedule_id_str + " AND status=2";
                 break;
             }
-
-            case 4: // cancel
-            {
-                query_update = "UPDATE sys_schedule_log SET status = " + status_str + ", actual_end='" + TimeNow() + "' WHERE schedule_id = " + schedule_id_str + " AND status=2";
-                break;
-            }
-
-                // todo:
-                // case 5: // pause
 
         }
 
