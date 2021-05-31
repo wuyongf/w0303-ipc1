@@ -56,6 +56,7 @@ namespace yf
             void ArmPickPad();
             void ArmRemovePad();
             void ArmAbsorbWater();
+            int ArmGetAbosrbType();
 
             void ArmSetOperationArea(const yf::data::arm::OperationArea& operation_area);
             void ArmSetToolAngle(const yf::data::arm::TaskMode& task_mode ,const yf::data::arm::ToolAngle& tool_angle);
@@ -907,6 +908,8 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
 #if 1 /// Disable For Testing
                                         this->ArmPickTool(cur_task_mode_);
 
+                                        sleep.ms(200);
+
                                         if(cur_task_mode_ == data::arm::TaskMode::Mopping)
                                         {
                                             this->ArmPickPad();
@@ -1035,6 +1038,9 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
                                         tm5.ArmTask("Move_to standby_p0");
                                     }
 
+                                    ///TIME
+                                    sleep.ms(200);
+
                                     // 10. post return safety.
                                     tm5.ArmTask("Post arm_back_to_safety");
                                     ///
@@ -1042,7 +1048,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
 
 
                                     ///TIME
-                                    sleep.ms(500);
+                                    sleep.ms(300);
 
                                     /// Last valid order
                                     if(cur_order == cur_last_valid_order_)
@@ -2128,6 +2134,11 @@ void yf::sys::nw_sys::ArmPickPad()
             tm5.ArmTask("Post pick_large_pad");
             break;
         }
+        case data::arm::ModelType::Skirting:
+        {
+            tm5.ArmTask("Post pick_large_pad");
+            break;
+        }
         default:
         {
             tm5.ArmTask("Post pick_small_pad");
@@ -2160,6 +2171,11 @@ void yf::sys::nw_sys::ArmRemovePad()
             tm5.ArmTask("Post remove_large_pad");
             break;
         }
+        case data::arm::ModelType::Skirting:
+        {
+            tm5.ArmTask("Post remove_large_pad");
+            break;
+        }
         default:
         {
             tm5.ArmTask("Post remove_small_pad");
@@ -2170,6 +2186,14 @@ void yf::sys::nw_sys::ArmRemovePad()
 
 void yf::sys::nw_sys::ArmAbsorbWater()
 {
+
+    // get & set absorb type
+    int absorb_type = this->ArmGetAbosrbType();
+    std::string absorb_type_command = "Set absorb_type = " + std::to_string(absorb_type);
+    tm5.ArmTask(absorb_type_command);
+
+    sleep.ms(200);
+
     tm5.ArmTask("Post arm_absorb_water");
 }
 
@@ -2263,6 +2287,27 @@ void yf::sys::nw_sys::JobsFilter(std::deque<int>& q_ids)
     q_ids.insert(q_ids.end(), q_job_mopping_ids.begin(), q_job_mopping_ids.end());
     q_ids.insert(q_ids.end(), q_job_uvc_scanning_ids.begin(), q_job_uvc_scanning_ids.end());
 
+}
+
+int yf::sys::nw_sys::ArmGetAbosrbType()
+{
+    int absorb_type = 0;
+
+    switch (cur_model_type_)
+    {
+        case data::arm::ModelType::Skirting:
+        {
+            absorb_type = 1;
+            break;
+        }
+        default:
+        {
+            absorb_type = 0;
+            break;
+        }
+    }
+
+    return absorb_type;
 }
 
 
