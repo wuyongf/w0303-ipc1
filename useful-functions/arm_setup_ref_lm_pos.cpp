@@ -41,7 +41,7 @@ int main()
 
     std::shared_ptr<yf::status::nw_status> nw_status_ptr_ = std::make_shared<yf::status::nw_status>();
 
-    std::shared_ptr<yf::sql::sql_server> sql_ptr_ = std::make_shared<yf::sql::sql_server>("SQL Server","192.168.7.27","NW_mobile_robot_sys","sa","NWcadcam2021");
+    std::shared_ptr<yf::sql::sql_server> sql_ptr_ = std::make_shared<yf::sql::sql_server>("SQL Server","192.168.7.127","NW_mobile_robot_sys","sa","NWcadcam2021");
 
     std::thread th_ipc_server_;
 
