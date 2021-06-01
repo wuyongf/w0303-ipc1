@@ -637,8 +637,20 @@ void yf::sys::nw_sys::DoJobs(const int &cur_schedule_id)
 
     q_job_ids = sql_ptr_->GetJobsId(cur_schedule_id);
 
-//    /// Job Filter, do mopping first!
+    /// Job Filter, do mopping first!
 //    this->JobsFilter(q_job_ids);
+
+    /// Ugv needs to change the map first!
+    mir100_ptr_->ClearErrorState();
+
+    mir100_ptr_->ChangeMapByDBMapStatus();
+
+    sleep.sec(5);
+
+    if(mir100_ptr_->WaitForModeId(7,1))
+    {
+        mir100_ptr_->ChangeInitPositionByDBMapStatus();
+    }
 
     job_number = q_job_ids.size();
 
@@ -1044,8 +1056,6 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
                                     // 10. post return safety.
                                     tm5.ArmTask("Post arm_back_to_safety");
                                     ///
-
-
 
                                     ///TIME
                                     sleep.ms(300);

@@ -22,7 +22,7 @@ int main()
 {
     std::shared_ptr<yf::status::nw_status> nw_status_ptr = std::make_shared<yf::status::nw_status>();
 //    std::shared_ptr<yf::sql::sql_server> sql_ptr = std::make_shared<yf::sql::sql_server>("SQL Server","192.168.7.84","NW_mobile_robot_sys","sa","wuyongfeng1334");
-    std::shared_ptr<yf::sql::sql_server> sql_ptr = std::make_shared<yf::sql::sql_server>("SQL Server","192.168.7.27","NW_mobile_robot_sys","sa","NWcadcam2021");
+    std::shared_ptr<yf::sql::sql_server> sql_ptr = std::make_shared<yf::sql::sql_server>("SQL Server","192.168.7.127","NW_mobile_robot_sys","sa","NWcadcam2021");
 
     yf::ugv::mir mir100;
 
@@ -31,21 +31,26 @@ int main()
 //    std::cout << "docking guid:" << mir100.GetDockingGUID("21bd0de2-b2f7-11eb-bb31-00012978eb45") << std::endl;
 
 
-    mir100.PostMissionForDebugTest(4047);
-    mir100.PostActionsForDebugTest(4047);
+//    mir100.PostMissionForDebugTest(4047);
+//    mir100.PostActionsForDebugTest(4047);
 
 
+////
+//    mir100.ClearErrorState();
 //
-    mir100.ChangeMapByDBMapStatus();
+//    mir100.ChangeMapByDBMapStatus();
+//
+//    ///TIME
+//    std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+//
+//    if(mir100.WaitForModeId(7,1))
+//    {
+//        mir100.ChangeInitPositionByDBMapStatus();
+//    }
 
-    if(mir100.WaitForModeId(7,1))
-    {
-        mir100.ChangeInitPositionByDBMapStatus();
-    }
+    mir100.PostActionSpeed(0.2,"221d0b85-bc84-11eb-9acb-00012978eb45",0);
 
-
-
-    mir100.PostActionAdjustLocalization("221d0b85-bc84-11eb-9acb-00012978eb45",1);
+    mir100.PostActionAdjustLocalization("221d0b85-bc84-11eb-9acb-00012978eb45",0);
 
 
     //todo: input an valid order: 4

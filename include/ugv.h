@@ -150,16 +150,13 @@ namespace yf
             bool PostActionWaitPLC(const int& plc_register, const float& value, const std::string& mission_guid, const int& priority);
             bool PostActionMove(const std::string& position_guid, const std::string &mission_guid, const int &priority);
             bool PostActionAdjustLocalization(const std::string &mission_guid, const int &priority);
+            bool PostActionSpeed(const float& speed, const std::string &mission_guid, const int &priority);
+            bool PostActionCharging(const std::string &mission_guid, const int &priority);
+
+            bool PostMissionCharing();
 
             bool PostActionDocking(const std::string& position_guid, const std::string &mission_guid, const int &priority);
             std::string GetDockingGUID(const std::string& map_guid);
-            //std::string GetMapGUID(const std::string& map_name);
-//
-//            auto model_id = sql_ptr_->GetModelId(model_config_id);
-//            auto map_id = sql_ptr_->GetMapIdFromModelId(model_id);
-//            auto map_name = sql_ptr_->GetMapElement(map_id,"map_name");
-//            // 3.b. based on map_name, retrieve map_guid from REST.
-//            std::string map_guid = this->GetMapGUID(map_name);
 
             std::string GetPositionGUID(const std::string& map_guid, const std::string& position_name);
             std::string GetCurMissionGUID();
@@ -168,7 +165,6 @@ namespace yf
             std::deque<std::string> GetSessionNameList();
             std::deque<std::string> GetMapNameList(const std::string& session_name);
             std::deque<std::string> GetPositionNameList(const std::string& session_name, const std::string& map_name);
-
 
         private:
             std::string GetSessionGUID(const std::string& session_name);
@@ -684,7 +680,13 @@ void yf::ugv::mir::PostActions(const int& model_config_id)
     this->PostActionSetPLC(3,0,mission_guid,priority);
     priority++;
 
-    // todo: speed, footprint initialization
+    /// Initialization Ugv Properties
+    // speed
+    this->PostActionSpeed(0.6,mission_guid,priority);
+    priority++;
+    // adjust localization
+    this->PostActionAdjustLocalization(mission_guid,priority);
+    priority++;
 
     /// (3) For loop, mission details
     //
@@ -837,6 +839,7 @@ bool yf::ugv::mir::PostActionWaitPLC(const int &plc_register, const float &value
         value_json.set("value",value_i);
         value_json.set("id","value");
 
+        // null value
         timeout_json.set("value", {});
         timeout_json.set("id","timeout");
 
@@ -1720,6 +1723,8 @@ std::vector<float> yf::ugv::mir::GetCurPosition()
 
 bool yf::ugv::mir::PutMap(const std::string& map_name)
 {
+    // Clear Error
+
     // Pause first
     this->Pause();
 
@@ -1747,7 +1752,6 @@ bool yf::ugv::mir::ChangeInitPositionByDBMapStatus()
     this->Pause();
 
     auto init_position =  sql_ptr_->GetUgvInitPositionFromMapStatus();
-
 
     Poco::JSON::Object status_json;
 
@@ -2085,6 +2089,99 @@ std::string yf::ugv::mir::GetDockingGUID(const std::string &map_guid)
     }
 
     return docking_guid;
+}
+
+bool yf::ugv::mir::ClearErrorState()
+{
+    Poco::JSON::Object State;
+
+    State.set("clear_error", true);
+
+    return PutMethod("/api/v2.0.0/status", State);
+}
+
+bool yf::ugv::mir::PostActionSpeed(const float &speed, const std::string &mission_guid, const int &priority)
+{
+    /// prerequisite:
+    /// 1. get position guid... based on position_name, map_id
+
+    Poco::JSON::Object action_move_json;
+
+    Poco::JSON::Object planner_params_json;
+    Poco::JSON::Object desired_speed_json;
+    Poco::JSON::Object path_timeout_json;
+    Poco::JSON::Object path_deviation_json;
+    Poco::JSON::Object obstacle_history_json;
+
+
+    planner_params_json.set("value", "desired_speed_key");
+    planner_params_json.set("id", "planner_params");
+
+    desired_speed_json.set("value", speed);
+    desired_speed_json.set("id", "desired_speed");
+
+    path_timeout_json.set("value", 5);
+    path_timeout_json.set("id", "path_timeout");
+
+    path_deviation_json.set("value", 5);
+    path_deviation_json.set("id", "path_deviation");
+
+    obstacle_history_json.set("value", "no_clearing");
+    obstacle_history_json.set("id", "obstacle_history");
+
+    Poco::JSON::Array parameters_array;
+    parameters_array.set(0, planner_params_json);
+    parameters_array.set(1, desired_speed_json);
+    parameters_array.set(2, path_timeout_json);
+    parameters_array.set(3, path_deviation_json);
+    parameters_array.set(4, obstacle_history_json);
+
+    action_move_json.set("parameters", parameters_array);
+    action_move_json.set("priority", priority);
+    action_move_json.set("action_type", "planner_settings");
+
+    /// (4) fine tune the sub_path
+
+    std::string sub_path = "/api/v2.0.0/missions/" + mission_guid + "/actions";
+
+    return PostMethod(sub_path, action_move_json);
+}
+
+bool yf::ugv::mir::PostActionCharging(const std::string &mission_guid, const int &priority)
+{
+    /// prerequisite:
+    /// 1. get position guid... based on position_name, map_id
+
+    Poco::JSON::Object action_move_json;
+
+    Poco::JSON::Object minimum_time_json;
+    Poco::JSON::Object minimum_percentage_json;
+    Poco::JSON::Object charge_until_new_mission_json;
+
+
+    minimum_time_json.set("value", {});
+    minimum_time_json.set("id", "minimum_time");
+
+    minimum_percentage_json.set("value", {});
+    minimum_percentage_json.set("id", "minimum_percentage");
+
+    charge_until_new_mission_json.set("value", true);
+    charge_until_new_mission_json.set("id", "charge_until_new_mission_json");
+
+    Poco::JSON::Array parameters_array;
+    parameters_array.set(0, minimum_time_json);
+    parameters_array.set(1, minimum_percentage_json);
+    parameters_array.set(2, charge_until_new_mission_json);
+
+    action_move_json.set("parameters", parameters_array);
+    action_move_json.set("priority", priority);
+    action_move_json.set("action_type", "charging");
+
+    /// (4) fine tune the sub_path
+
+    std::string sub_path = "/api/v2.0.0/missions/" + mission_guid + "/actions";
+
+    return PostMethod(sub_path, action_move_json);
 }
 
 

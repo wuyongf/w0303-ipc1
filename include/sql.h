@@ -193,6 +193,9 @@ namespace yf
             float GetUgvInitPositionElement(const int& id, const std::string& element);
             std::vector<float> GetUgvInitPositionFromMapStatus();
 
+            /// Ugv Initialization for Each Schedule
+            std::string GetActivatedMapName();
+
 
         private:
             bool static IsOne(int x){return x == 1;}
@@ -2829,6 +2832,46 @@ std::vector<float> yf::sql::sql_server::GetUgvInitPositionFromMapStatus()
     init_position.push_back(theta);
 
     return init_position;
+}
+
+std::string yf::sql::sql_server::GetActivatedMapName()
+{
+
+    // query string
+    std::string query_update;
+
+    // input
+
+
+    // output
+    std::string map_name;
+
+    //"SELECT position_name FROM data_ugv_mission_config where model_config_id = 1 ORDER BY mission_order"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT map_name FROM data_ugv_map where status = 1 ";
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            map_name = result.get<std::string>(0);
+        };
+
+        Disconnect();
+
+        return map_name;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return map_name;
+    };
 }
 
 
