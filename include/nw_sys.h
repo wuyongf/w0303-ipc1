@@ -271,7 +271,7 @@ void yf::sys::nw_sys::Start()
     mir100_ptr_->Start("192.168.7.34", nw_status_ptr_, sql_ptr_);
 
     /// TIME
-    sleep.ms(1000);
+    sleep.ms(3000);
 
     /// 3. Web Status Manager
     th_web_status_manager_ = std::thread(&nw_sys::thread_WebStatusManager, this);
