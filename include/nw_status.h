@@ -14,6 +14,7 @@ namespace yf
 
             virtual ~nw_status(){}
 
+            /// For Sys
             // system mode: auto mode ---> manual mode
             yf::data::common::SystemMode sys_control_mode_ = yf::data::common::SystemMode::Auto;
 
@@ -40,7 +41,7 @@ namespace yf
 
             yf::data::common::MissionStatus db_cur_task_status;
 
-            // db current id
+            /// DB properties
 
             int db_cur_schedule_id;
 
@@ -49,6 +50,9 @@ namespace yf
             int db_cur_task_id;
 
             bool cur_task_continue_flag = false;
+
+            /// For A Schedule
+            yf::data::schedule::ScheduleCommand db_cur_schedule_command_;
 
         public:
 

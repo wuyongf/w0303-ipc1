@@ -9,7 +9,7 @@
 #include "net_w0303_client.h"
 // Database
 #include "sql.h"
-// Status
+// Status & DataTypes
 #include "nw_status.h"
 // Arm
 #include "arm.h"
@@ -56,7 +56,7 @@ namespace yf
             void ArmPickPad();
             void ArmRemovePad();
             void ArmAbsorbWater();
-            int ArmGetAbosrbType();
+            int  ArmGetAbosrbType();
 
             void ArmSetOperationArea(const yf::data::arm::OperationArea& operation_area);
             void ArmSetToolAngle(const yf::data::arm::TaskMode& task_mode ,const yf::data::arm::ToolAngle& tool_angle);
@@ -100,6 +100,7 @@ namespace yf
             void UpdateDbCurJobStatusAndLog();
 
             void GetSysControlMode();
+            void GetScheduleCommand(const int&id);
 
         private: /// Time Sleep Class
 
@@ -561,9 +562,13 @@ void yf::sys::nw_sys::thread_DoSchedules()
                 auto cur_schedule_id = q_schedule_ids.front();
                 q_schedule_ids.pop_front();
 
+                // get current id
                 nw_status_ptr_->db_cur_schedule_id = cur_schedule_id;
 
-                // get current id execute time..
+                // get schedule command
+                this->GetScheduleCommand(cur_schedule_id);
+
+                // get execute time..
                 sql_ptr_->GetScheduleExecTime(cur_schedule_id);
                 std::string execute_time = sql_ptr_->get_execute_time();
                 // wait for execute time...
@@ -572,8 +577,24 @@ void yf::sys::nw_sys::thread_DoSchedules()
                 /// Update Mission Status to database
                 UpdateDbScheduleBeforeTask(cur_schedule_id);
 
-                /// Execute the schedule!
-                DoJobs(cur_schedule_id);
+                /// Execute the schedule! Based on Schedule Command!
+                switch (nw_status_ptr_->db_cur_schedule_command_)
+                {
+                    case data::schedule::ScheduleCommand::Cleaning:
+                    {
+                        DoJobs(cur_schedule_id);
+                        break;
+                    }
+                    case data::schedule::ScheduleCommand::UgvBackToDocking:
+                    {
+
+                        break;
+                    }
+                    case data::schedule::ScheduleCommand::ArmBackToHomePos:
+                    {
+                        break;
+                    }
+                }
 
                 /// Update the schedule status to database!
                 UpdateDbScheduleAfterTask(cur_schedule_id);
@@ -734,27 +755,28 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
     /// 1. Initialization
     //
     //  1.1 Get cur_model_config_id From DB
+    //  1.2 Get related variables
     cur_model_config_id_    = sql_ptr_->GetModelConfigId(cur_job_id);
-
     cur_mission_num_        = sql_ptr_->GetUgvMissionConfigNum(cur_model_config_id_);
-
-    // e.g. {0,0,0,1,1,1}
-    cur_valid_result_queue_ = sql_ptr_->GetArmConfigValidResultQueue(cur_model_config_id_);
-    cur_first_valid_order_  = sql_ptr_->GetFirstValidOrder(cur_model_config_id_);
-    cur_last_valid_order_   = sql_ptr_->GetLastValidOrder(cur_model_config_id_);
-    // e.g {3,4,5}
-    cur_valid_indexes_ = sql_ptr_->GetValidIndexes(cur_model_config_id_);
-
     cur_model_type_         = tm5.GetModelType(cur_model_config_id_);
     cur_task_mode_          = tm5.GetTaskMode(cur_model_config_id_);
 
+    //  1.3 Get Valid Order For Arm Configs
+    //  e.g. {0,0,0,1,1,1}
+    cur_valid_result_queue_ = sql_ptr_->GetArmConfigValidResultQueue(cur_model_config_id_);
+    cur_first_valid_order_  = sql_ptr_->GetFirstValidOrder(cur_model_config_id_);
+    cur_last_valid_order_   = sql_ptr_->GetLastValidOrder(cur_model_config_id_);
+    //  e.g {3,4,5}
+    cur_valid_indexes_ = sql_ptr_->GetValidIndexes(cur_model_config_id_);
+
+
     /// 2. Assign Ugv Mission
     //
-    // 2.1. Ugv: post a new mission via REST
+    //  2.1. Ugv: post a new mission via REST
     mir100_ptr_->PostMission(cur_model_config_id_);
-    // 2.2. Ugv: post actions via REST
+    //  2.2. Ugv: post actions via REST
     mir100_ptr_->PostActions(cur_model_config_id_);
-    // 2.3  Ugv: get current mission_guid
+    //  2.3  Ugv: get current mission_guid
     cur_mission_guid_ = mir100_ptr_->GetCurMissionGUID();
 
     /// 3. Initial Status Checking
@@ -769,13 +791,13 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
         // kick off mir missions.
         mir100_ptr_->PostMissionQueue(cur_mission_guid_);
         ///TIME
-        sleep.ms(100);
+        sleep.ms(200);
         mir100_ptr_->Play();
 
         /// \brief
         ///
         /// while ugv mission has not finished, keep assigning arm mission config and executing arm mission.
-        /// for ugv mission finish info, please refer to PLC Register Assignment
+        /// for ugv mission finish info, please refer to PLC Register Assignment.
         bool mission_continue_flag = true;
 
         while (mission_continue_flag)
@@ -2318,6 +2340,31 @@ int yf::sys::nw_sys::ArmGetAbosrbType()
     }
 
     return absorb_type;
+}
+
+void yf::sys::nw_sys::GetScheduleCommand(const int& id)
+{
+    switch (sql_ptr_->GetScheduleCommand(id))
+    {
+        case 1:
+        {
+            nw_status_ptr_->db_cur_schedule_command_ = data::schedule::ScheduleCommand::Cleaning;
+            break;
+        }
+
+        case 2:
+        {
+            nw_status_ptr_->db_cur_schedule_command_ = data::schedule::ScheduleCommand::UgvBackToDocking;
+            break;
+        }
+
+        case 3:
+        {
+            nw_status_ptr_->db_cur_schedule_command_ = data::schedule::ScheduleCommand::ArmBackToHomePos;
+            break;
+        }
+
+    }
 }
 
 

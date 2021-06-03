@@ -115,10 +115,12 @@ namespace yf
             void UpdateDeviceBatteryCapacity(const std::string& device_name, const float& battery_capacity);
             void UpdateDeviceUgvCurPosition(const float& x, const float& y,const float& theta);
 
-            // Sys Status
+            /// Sys Status
             //
             // sys control status
             int GetSysControlMode();
+            int GetScheduleCommand(const int& id);
+
 
             // Model_config
             int GetModelConfigId(const int& cur_job_id);
@@ -2877,6 +2879,41 @@ std::string yf::sql::sql_server::CountdownTimeSec(const int &countdown_sec)
 {
     return this->get_future_db_time(countdown_sec);
 }
+
+int yf::sql::sql_server::GetScheduleCommand(const int &id)
+{
+    std::string query_update;
+
+    int schedule_command;
+
+    //"SELECT ID FROM schedule_table where status=1 AND planned_start > '2021-02-06 11:10:08.000'"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT schedule_command FROM sys_schedule where ID = "+std::to_string(id)+" AND status=1 AND planned_start > '"+ TimeNow() +"'";
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        while(result.next())
+        {
+            schedule_command = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return schedule_command;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return -999;
+    }
+}
+
+
 
 
 

@@ -11,6 +11,13 @@ namespace yf
     {
         namespace schedule
         {
+            enum class ScheduleCommand
+            {
+                Cleaning            = 1, // either Mopping or UVCScanning, regular schedule
+                UgvBackToDocking    = 2,
+                ArmBackToHomePos    = 3
+            };
+
             enum class Location
             {
                 Null    = 0,
