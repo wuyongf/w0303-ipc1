@@ -64,7 +64,7 @@ namespace yf
             mir(){};
             virtual ~mir(){};
 
-        public:
+        public: /// MiR Properties
 
             /// Setter
             void SetIpAddress(const std::string& ip_addr);
@@ -79,12 +79,13 @@ namespace yf
             int GetRespondStatus();
             std::string GetRespondReason();
 
-            /// Important.
+        private: /// Rest API: CRUD
+
+            /// Most Basic Function
             // todo: comment the cout
             std::string GetRequestResult();
 
             /// Basic Methods
-
             bool GetMethod(const std::string& sub_path);
             bool PutMethod(const std::string& sub_path,const Poco::JSON::Object& obj);
             bool PostMethod(const std::string& sub_path, const Poco::JSON::Object& obj);
@@ -95,21 +96,21 @@ namespace yf
             void Start(const std::string& ip_addr, std::shared_ptr<yf::status::nw_status> status_ptr, std::shared_ptr<yf::sql::sql_server> sql_ptr);
             void Close();
 
-        public: /// layer 1: basic GET/POST/PUT/Delete Method
+        public: /// Layer 1: Interact with Basic GET/POST/PUT/Delete Methods
 
             // (1) done: Get Connection Status
             // (2) todo: update to nw_status
             // (3) todo: update to database
             bool IsConnected();
 
-            int GetPLCRegisterIntValue(const int& plc_register);
+            int   GetPLCRegisterIntValue(const int& plc_register);
             float GetPLCRegisterFloatValue(const int& plc_register);
 
-            bool SetPLCRegisterIntValue(const int& plc_register, const int& value);
-            bool SetPLCRegisterfloatValue(const int& plc_register, const float& value);
+            bool  SetPLCRegisterIntValue(const int& plc_register, const int& value);
+            bool  SetPLCRegisterFloatValue(const int& plc_register, const float& value);
 
 
-        public: ///  layer2: interaction with nw_status, database
+        public: ///  Layer2: Interact with nw_status, database
 
             // methods for ipc1
             //
@@ -133,7 +134,7 @@ namespace yf
             //
             bool UpdatePositionOnMap(const float& pos_x, const float& pos_y, const float& pos_theta);
 
-        public: /// layer3: create a mission --- REST API
+        public: /// Layer3: create a mission --- REST API
 
             ///3.1 based on model_config_id, mission_order, position_name, create a ugv mission.
 
@@ -1336,7 +1337,7 @@ bool yf::ugv::mir::SetPLCRegisterIntValue(const int &plc_register, const int &va
     return PostMethod(sub_path, reg_json);
 }
 
-bool yf::ugv::mir::SetPLCRegisterfloatValue(const int &plc_register, const float &value)
+bool yf::ugv::mir::SetPLCRegisterFloatValue(const int &plc_register, const float &value)
 {
     if(plc_register <= 100 || plc_register >200)
     {

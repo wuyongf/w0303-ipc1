@@ -65,6 +65,8 @@ namespace yf
 
             std::string CountdownTime(const std::string& time_now, const int& countdown_min);
 
+            std::string CountdownTimeSec(const int& countdown_sec);
+
             void WaitForExecute(const std::string &execute_time);
 
         public:
@@ -204,8 +206,9 @@ namespace yf
             /// Onsite setup
             void OSGetScheduleReady(const int& schedule_id, const int& seconds_later_from_now);
 
-            // Onsite setup: method 1: stl time ---> db time
-        private:
+
+        private: /// Onsite Setup: method 1: stl time ---> db time
+
             std::string get_future_db_time(const int& seconds_later_from_now);
 
             auto convert_to_timepoint(int years, int months, int days, int hours, int mins, int secs);
@@ -971,13 +974,9 @@ std::string yf::sql::sql_server::CountdownTime(const std::string& time_now, cons
 {
     auto v_time = Time_str2vector(time_now);
 
-    auto time_countdown =   std::to_string((int)v_time[0]) + "-" +
-                            std::to_string((int)v_time[1]) + "-" +
-                            std::to_string((int)v_time[2]) + " " +
-                            std::to_string((int)v_time[3]) + ":" +
-                            std::to_string((int)v_time[4]+countdown_min) + ":" +
-                            std::to_string((int)v_time[5]) + ".000";
-    return time_countdown;
+    int countdown_sec = countdown_min * 60;
+
+    return this->get_future_db_time(countdown_sec);
 }
 
 void yf::sql::sql_server::UpdateTaskData(const int &cur_task_id, const int &task_status)
@@ -2872,6 +2871,11 @@ std::string yf::sql::sql_server::GetActivatedMapName()
 
         return map_name;
     };
+}
+
+std::string yf::sql::sql_server::CountdownTimeSec(const int &countdown_sec)
+{
+    return this->get_future_db_time(countdown_sec);
 }
 
 

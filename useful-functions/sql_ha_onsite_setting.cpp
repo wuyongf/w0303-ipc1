@@ -79,7 +79,7 @@ int main()
     /// For localhost DB
 //    std::shared_ptr<yf::sql::sql_server> sql_ptr = std::make_shared<yf::sql::sql_server>("ODBC Driver 17 for SQL Server","localhost","NW_mobile_robot_sys","sa","wuyongfeng1334");
 
-    sql_ptr->OSGetScheduleReady(5026,10);
+    sql_ptr->OSGetScheduleReady(5026,120);
 
     /// get model_type
 //    std::cout << "model_type: " << sql_ptr->GetModelType(3)<< std::endl;

@@ -24,7 +24,7 @@ namespace yf
     {
         class nw_sys
         {
-        public: // Sys Basic
+        public: /// Sys Basic Method
 
             // Constructor & Destructor
             nw_sys(const int& ipc_port);
@@ -36,7 +36,7 @@ namespace yf
             // Close the system
             void Close();
 
-        public: // Two Main Functions
+        public: /// Two Main Functions
 
             void thread_WaitSchedules();
 
@@ -48,7 +48,7 @@ namespace yf
 
             void WaitSchedulesInitialCheck();
 
-        public: // Arm Method: based on tm5.ArmTask();
+        public: /// Arm Method: based on tm5.ArmTask();
 
             void ArmPickTool (const yf::data::arm::TaskMode& task_mode);
             void ArmPlaceTool(const yf::data::arm::TaskMode& task_mode);
@@ -66,12 +66,12 @@ namespace yf
 
             std::string ArmGetPointStr(const yf::data::arm::Point3d& point);
 
-        public: // Ugv Method: based on REST API
+        public: /// Ugv Method: based on REST API
 
             bool WaitForUgvPLCRegisterInt(const int& plc_register, const int& value, const int& timeout_min);
             bool WaitForUgvPLCRegisterFloat(const int& plc_register, const float& value, const int& timeout_min);
 
-        public: // Methods for two main functions
+        public: /// Methods for two main functions
 
             void DoJobs(const int& cur_schedule_id);
             void DoTasks(const int& cur_job_id, const int& next_job_id);
@@ -90,7 +90,7 @@ namespace yf
             void UpdateDbDeviceStatusBeforeTask (const int& cur_job_id);
             void UpdateDbDeviceStatusAfterTask (const int& cur_job_id);
 
-        protected: // SQL
+        protected: /// SQL Related
 
             void UpdateDbDeviceArmConnectionStatus();
             void UpdateDbDeviceArmMissionStatus();
@@ -101,7 +101,7 @@ namespace yf
 
             void GetSysControlMode();
 
-        private: // Time Sleep Class
+        private: /// Time Sleep Class
 
             yf::algorithm::TimeSleep sleep;
 
@@ -141,8 +141,9 @@ namespace yf
 
             std::thread th_do_schedules_;
 
-        /// Web Status Manager
-        private:
+
+        private: /// Web Status Manager
+
             // properties
             bool web_status_flag_ = false;
 
@@ -155,20 +156,19 @@ namespace yf
             void thread_Web_UgvCurPosition(const bool& web_status_flag,
                                            const int& sleep_duration);
 
-        private:
-            // threads handle
+        private: /// threads handle for Web Status Manager
+
             std::thread th_web_status_manager_;
             std::thread th_web_ugv_battery_;
             std::thread th_web_ugv_position_;
 
-        /// Overall Control --- thread wait_schedules and do_schedules
-        private:
-            // Overall control --- thread wait schedules and thread do schedules
-            //
+
+        private: /// Overall Control --- thread wait_schedules and do_schedules
+
             // schedule_flag
             bool schedule_flag_ = true;
 
-            //wait schedule
+            ///wait schedule
             //
             // (1) control flag
             bool wait_schedule_flag = true;
@@ -176,7 +176,7 @@ namespace yf
             std::mutex mux_Blocking_wait_schedule;
             std::condition_variable cv_Blocking_wait_schedule;
 
-            // do schedule
+            /// do schedule
             //
             // (1) control flag..
             bool do_schedule_flag = false;
