@@ -1177,9 +1177,14 @@ bool yf::ugv::mir::MissionStatusCheck(const int& timeout_min)
         // 1. check plc 004
         int plc_004_value = this->GetPLCRegisterIntValue(4);
 
-        if(plc_004_value == 1)
+        if(plc_004_value == 1) // mission is executing
         {
             inner_mission_flag = true;
+        }
+
+        if(plc_004_value == 3) // mission has error
+        {
+            return false;
         }
 
         // 2. get current state

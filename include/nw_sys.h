@@ -81,6 +81,10 @@ namespace yf
             void UpdateDbScheduleBeforeTask (const int& cur_schedule_id);
             void UpdateDbScheduleAfterTask (const int& cur_schedule_id);
 
+            void thread_WaitForPauseArm();
+            void thread_WaitForResumeArm();
+            void thread_WaitForCancelUgvMission();
+
             void UpdateDbJobBeforeTask (const int& cur_job_id);
             void UpdateDbJobAfterTask (const int& cur_job_id);
 
@@ -746,11 +750,11 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
 {
     /// 0. Initialization
     //
+    bool mission_success_flag = false;
     bool ugv_mission_success_flag = false;
     bool arm_mission_success_flag = false;
 
     bool arm_sub_mission_success_flag = false;
-    bool mission_success_flag = false;
 
     /// 1. Initialization
     //
@@ -803,7 +807,10 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
         while (mission_continue_flag)
         {
             // while mir's mission has not finished
-            while(mir100_ptr_->GetPLCRegisterIntValue(4) != 2)
+            // if plc4 ==2 || plc4 == 3 --> break
+            // if plc4 !=2 && plc4 != 3 ===> continue
+            while(  mir100_ptr_->GetPLCRegisterIntValue(4) != 2 &&
+                    mir100_ptr_->GetPLCRegisterIntValue(4) != 3)
             {
                 ///TIME
                 sleep.ms(200);
@@ -816,13 +823,15 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
                 bool arm_wait_plc001_success_flag = false;
 
                 /// b.2 ugv_mission_status_check
-                // wait plc004 == 1 and mir state is executing ;
+                // keep checking
+                // if plc004 == 1 and then we know mir mission is executing ;
+                // if plc004 == 3 and then we know mir mission is error;
                 ugv_mission_continue_flag = mir100_ptr_->MissionStatusCheck(2);
 
                 if(ugv_mission_continue_flag == true)
                 {
                     /// stage 0: check arm config is valid or not
-                    /// stage 1: configure arm mission
+                    /// stage 1: if it is valid, configuring arm mission
                     /// stage 2: execute arm mission
 
                     bool arm_config_stage_success_flag = false;
@@ -876,6 +885,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
                                     sleep.ms(1000);
                                     /// ipc1 loop
                                     // set arm_mission_success_flag
+
                                     arm_mission_success_flag = true;
 
                                     // set ugv_mission_success_flag
@@ -896,7 +906,6 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
                                 LOG(INFO) << "configure arm mission   [Finished!]";
 
                                 cur_operation_area_ =  arm_mission_configs[0].operation_area;
-                                LOG(INFO) << "flag3";
 
                                 //todo: find last valid order
                                 // input: cur_order, which is the cur_valid_order!
@@ -920,19 +929,21 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
                                 int  last_arm_config_id = sql_ptr_->GetArmConfigId(cur_model_config_id_, last_valid_order);
                                 auto last_operation_area = tm5.GetOperationArea(last_arm_config_id);
 
-
                                 // arm configure stage has finished
                                 // notify mir100 and ipc
                                 mir100_ptr_->SetPLCRegisterIntValue(3,0);
                                 arm_config_stage_success_flag = true;
 
-                                LOG(INFO) << "flag4";
                                 // wait for executing flag/signal.
                                 arm_wait_plc001_success_flag = this->WaitForUgvPLCRegisterInt(1,1,5);
 
                                 if(arm_wait_plc001_success_flag == true)
                                 {
                                     //todo:
+                                    // Start Monitoring Arm Status!!!
+                                    // 1. Wait for jumping out of the loop
+                                    // 2. Wait for pausing MiR mission
+
                                     /// b.3.2 start executing arm mission
 
                                     /// First order, pick the pad
@@ -1105,14 +1116,30 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
                                         this->ArmPlaceTool(cur_task_mode_);
 #endif
                                         cur_tool_angle_ = data::arm::ToolAngle::Zero;
-
                                     }
 
-                                    /// info mir100 the arm has finished
-                                    mir100_ptr_->SetPLCRegisterIntValue(1,0);
+                                    /// For the end of each arm config. Check arm is alright or not
+                                    // todo:
+                                    //  check if arm is still connected
+                                    bool arm_mission_failed_status =
+                                            nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::Error ||
+                                            nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::EStop;
 
+                                    if( nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Disconnected ||
+                                        arm_mission_failed_status )
+                                    {
+                                        arm_mission_success_flag    = false;
+                                        mission_continue_flag       = false;
+                                        mir100_ptr_->SetPLCRegisterIntValue(4,3); // error message
+                                        continue;
+                                    }
+                                    else
+                                    {
+                                        /// info mir100 the arm has finished
+                                        mir100_ptr_->SetPLCRegisterIntValue(1,0);
+                                    }
 
-                                    /// Last order
+                                    /// For Last order -- Need to decide how to break the loop
                                     if(cur_order == cur_mission_num_)
                                     {
                                         sleep.ms(1000);
@@ -1172,11 +1199,13 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
 
         mir100_ptr_->SetPLCRegisterIntValue(4,0);
     }
+    else
+    {
+        // something is wrong.
+        mission_success_flag = false;
+    }
 
     mir100_ptr_->Pause();
-
-    //todo:
-    /// based on mission_success_flag, Update to DB.
 
 
 #if 0
@@ -2365,6 +2394,55 @@ void yf::sys::nw_sys::GetScheduleCommand(const int& id)
         }
 
     }
+}
+
+void yf::sys::nw_sys::thread_WaitForCancelUgvMission()
+{
+    // wait for signal
+
+    // keep checking arm mission status and connection status
+
+    // if arm disconnected or error
+
+    // pause mir first
+
+    // cancel mir current mission
+
+    // reset signal
+
+    // wait for signal
+}
+
+void yf::sys::nw_sys::thread_WaitForPauseArm()
+{
+    // wait for signal
+
+    // keep checking ugv status
+
+    // if ugv e-stop
+
+    // pause Arm
+
+    // Notify thread_WaitForResumeArm()
+
+    // reset signal
+
+    // wait for signal
+}
+
+void yf::sys::nw_sys::thread_WaitForResumeArm()
+{
+    // wait for signal
+
+    // keep checking ugv status
+
+    // if ugv resume
+
+    // replay Arm
+
+    // reset signal
+
+    // wait for signal
 }
 
 
