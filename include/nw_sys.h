@@ -101,6 +101,8 @@ namespace yf
 
             void UpdateDbCurTaskStatusAndLog();
 
+            void UpdateDbErrorLog();
+
             void UpdateDbCurJobStatusAndLog();
 
             void GetSysControlMode();
@@ -719,6 +721,8 @@ void yf::sys::nw_sys::DoJobs(const int &cur_schedule_id)
         {
             LOG(INFO) << "abort current jobs...";
             q_job_ids.clear();
+
+            UpdateDbErrorLog();
         }
 
         // record and update current job status
@@ -847,8 +851,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
                         /// get current order
                         auto cur_order = mir100_ptr_->GetPLCRegisterIntValue(2);
 
-                        //todo:
-                        // check arm config is valid or not
+                        /// check arm config is valid or not
                         int  cur_arm_config_id = sql_ptr_->GetArmConfigId(cur_model_config_id_, cur_order);
                         int  is_valid = sql_ptr_->GetArmConfigIsValid(cur_arm_config_id);
                         LOG(INFO) << "current arm config is_valid:" << is_valid;
@@ -907,9 +910,8 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
 
                                 cur_operation_area_ =  arm_mission_configs[0].operation_area;
 
-                                //todo: find last valid order
+                                /// find last valid order
                                 // input: cur_order, which is the cur_valid_order!
-                                // todo:
                                 /// get_cur_valid_order
                                 /// get_last_valid_order
                                 if(cur_order == cur_first_valid_order_)
@@ -941,7 +943,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
                                 {
                                     //todo:
                                     // Start Monitoring Arm Status!!!
-                                    // 1. Wait for jumping out of the loop
+                                    // 1. Wait for jumping out of the loop, done
                                     // 2. Wait for pausing MiR mission
 
                                     /// b.3.2 start executing arm mission
@@ -2443,6 +2445,43 @@ void yf::sys::nw_sys::thread_WaitForResumeArm()
     // reset signal
 
     // wait for signal
+}
+
+void yf::sys::nw_sys::UpdateDbErrorLog()
+{
+    /// For Arm
+
+    // Connection Error
+    switch (nw_status_ptr_->arm_connection_status)
+    {
+        case data::common::ConnectionStatus::Disconnected:
+        {
+            sql_ptr_->UpdateErrorLog(0,"手臂未連接，請聯係管理員！");
+            break;
+        }
+    }
+
+    // Mission Error
+    switch (nw_status_ptr_->arm_mission_status)
+    {
+        case data::common::MissionStatus::Error:
+        {
+            sql_ptr_->UpdateErrorLog(1,"手臂運行錯誤，請聯係管理員！");
+            break;
+        }
+        case data::common::MissionStatus::EStop:
+        {
+            sql_ptr_->UpdateErrorLog(2,"手臂已急停，請聯係管理員！");
+            break;
+        }
+        default:
+        {
+            break;
+        }
+    }
+
+    /// For Ugv
+
 }
 
 

@@ -105,6 +105,9 @@ namespace yf
             void UpdateTaskData(const int& cur_task_id, const int& task_status);
             void UpdateTaskLog(const int& cur_task_id, const int& task_status);
 
+            /// Error Log
+            void UpdateErrorLog(const int& error_code, const std::string& error_description);
+
             // Device Status
             //
             void UpdateDeviceConnectionStatus(const std::string& device_name, const int& connection_status);
@@ -2910,6 +2913,30 @@ int yf::sql::sql_server::GetScheduleCommand(const int &id)
         std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
 
         return -999;
+    }
+}
+
+void yf::sql::sql_server::UpdateErrorLog(const int& error_code, const std::string &error_description)
+{
+
+    std::string query_update;
+
+    try
+    {
+        Connect();
+
+
+        query_update = "INSERT INTO sys_status_error_log(error_code, error_description, created_date) VALUES (" + std::to_string(error_code) + ",'" + error_description +"','"+ TimeNow() + "'";
+
+
+        nanodbc::execute(conn_,query_update);
+
+        Disconnect();
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
     }
 }
 
