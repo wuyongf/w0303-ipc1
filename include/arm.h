@@ -63,18 +63,25 @@ namespace yf
             // function: keep sending "Get Status" and check the stauts.
             void UpdateArmCurMissionStatus();
 
+            /// \brief
+            /// For Each Arm Task
+            /// in case of Arm EStop/Error/Disconnected and then block program, we need to start up a thread,
+            /// which keeps monitoring Arm Status.
+            /// if there is any error, the thread will notify program to unlock.
             void ArmTask(const std::string &arm_command)
             {
                 if(this->CheckArmInitMssionStaus())
                 {
+                    // Notify the modbus thread
+                    LOG(INFO) << "[ArmTask]: modbus_thread check start...";
                     ipc_server_ptr_->set_thread_modbus_notified();
 
                     this->AssignArmMission(arm_command);
-                    std::cout << "IN!!!";
                     this->UpdateArmCurMissionStatus();
-                    std::cout << "OUT!!!";
 
+                    // Block the modbus thread
                     ipc_server_ptr_->set_thread_modbus_blocked();
+                    LOG(INFO) << "[ArmTask]: modbus_thread check finished...";
                 }
             }
 
@@ -608,18 +615,12 @@ void yf::arm::tm::RetrieveArmCurrentMissionStatus()
     msg.body.resize(str.size());
     msg.body.assign(str.begin(),str.end());
 
-
-    std::cout << "Enter Here!!!"<< std::endl;
     ipc_server_ptr_->MessageClient(ipc_server_ptr_->GetArmClient(), msg);
-    std::cout << "Out Here!!!"<< std::endl;
 
-    // lock the thread.
+    /// lock the thread.
     // get status and preserve the status in arm_mission_status_
-
     nw_status_ptr_->arm_mission_status = ipc_server_ptr_->GetArmMissionStatus();
 
-
-    std::cout << "escape!!!" << std::endl;
 }
 
 

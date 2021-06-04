@@ -40,10 +40,8 @@ public:
         // 1. change flag
         // 2. notify thread to keep checking modbus
 
-        std::cout << "Block here!!!"<< std::endl;
         std::unique_lock<std::mutex> ul_arm_status(mux_arm_Blocking);        // create a unique lock, not blocking now.
         cv_arm_Blocking.wait(ul_arm_status);
-        std::cout << "UnLOCK here!!!"<< std::endl;
 
         return arm_mission_status;
     }
@@ -484,8 +482,6 @@ void IPCServer::thread_ModbusWaitForNotifyIPC(bool& thread_continue_flag)
     {
         while(notify_flag_ == true)
         {
-            std::cout<< "modbus check..."<< std::endl;
-
             // keep checking modbus every 10ms
             if(arm_modbus.read_isEStop() || arm_modbus.read_isError() || !arm_modbus.read_isProjectRunning())
             {
@@ -505,12 +501,11 @@ void IPCServer::thread_ModbusWaitForNotifyIPC(bool& thread_continue_flag)
 
         }
 
-        std::cout << "thread modbus lock!!!"<< std::endl;
+//        std::cout << "thread modbus lock!!!"<< std::endl;
         // block, wait for notify
         std::unique_lock<std::mutex> ul_modbus_thread(mux_modbus_thread_Blocking);        // create a unique lock, not blocking now.
         cv_modbus_thread_Blocking.wait(ul_modbus_thread);
-
-        std::cout << "thread modbus unlock!!!"<< std::endl;
+//        std::cout << "thread modbus unlock!!!"<< std::endl;
 
     }
 
