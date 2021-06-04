@@ -19,9 +19,11 @@ namespace  yf
                 std::string model_name      = "tm5-900";
                 std::string model_serial_no = "AA180152";
                 std::string tmflow_version  = "1.80.5300";
-                std::string ip_address      = "192.168.2.29";
                 uint16_t    server_port_no  = 12345;
                 uint16_t    network_port_no = 12345;
+                const char* tm_ip_address_ = "192.168.7.29";
+                int   modbus_port_no_ = 502;
+
             };
 
             struct Point3d {

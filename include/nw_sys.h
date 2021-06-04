@@ -2293,10 +2293,18 @@ void yf::sys::nw_sys::thread_Web_UgvBatteryPercentage(bool &web_status_flag,
     {
         // todo: need to handle how to check whether mir is ON/OFF
 
-        // retrieve data from ugv
-        auto result = mir100_ptr_->GetBatteryPercentage();
-        // update to sql
-        sql_ptr_->UpdateDeviceBatteryCapacity("ugv", result);
+        try
+        {
+            // retrieve data from ugv
+            auto result = mir100_ptr_->GetBatteryPercentage();
+            // update to sql
+            sql_ptr_->UpdateDeviceBatteryCapacity("ugv", result);
+        }
+        catch (std::error_code ec)
+        {
+            std::cerr << "Cannot Get MiR100 Battery Percentage. Will Try Again Later";
+        }
+
 
         sleep.minute(sleep_duration);
     }
@@ -2309,10 +2317,18 @@ void yf::sys::nw_sys::thread_Web_UgvCurPosition(const bool &web_status_flag,
     {
         // todo: need to handle how to check whether mir is ON/OFF
 
-        // retrieve data from ugv
-        auto result = mir100_ptr_->GetCurPosition();
-        // update to sql
-        sql_ptr_->UpdateDeviceUgvCurPosition(result[0],result[1],result[2]);
+
+        try
+        {
+            // retrieve data from ugv
+            auto result = mir100_ptr_->GetCurPosition();
+            // update to sql
+            sql_ptr_->UpdateDeviceUgvCurPosition(result[0],result[1],result[2]);
+        }
+        catch (std::error_code ec)
+        {
+            std::cerr << "Cannot Get MiR100 Cur Position. Will Try Again Later";
+        }
 
         sleep.sec(sleep_duration);
     }
@@ -2454,7 +2470,9 @@ void yf::sys::nw_sys::UpdateDbErrorLog()
     {
         case data::common::ConnectionStatus::Disconnected:
         {
-            sql_ptr_->UpdateErrorLog(0,"手臂未連接，請聯係管理員！");
+            //L"手臂未連接，請聯係管理員！"
+            std::string error_description = "Arm Disconnected. Please ask Admin for help!";
+            sql_ptr_->UpdateErrorLog(0,error_description);
             break;
         }
     }
@@ -2464,12 +2482,16 @@ void yf::sys::nw_sys::UpdateDbErrorLog()
     {
         case data::common::MissionStatus::Error:
         {
-            sql_ptr_->UpdateErrorLog(1,"手臂運行錯誤，請聯係管理員！");
+//            std::wstring error_description = L"手臂運行錯誤，請聯係管理員！";
+            std::string error_description = "Arm has Error. Please ask Admin for help!";
+            sql_ptr_->UpdateErrorLog(1,error_description);
             break;
         }
         case data::common::MissionStatus::EStop:
         {
-            sql_ptr_->UpdateErrorLog(2,"手臂已急停，請聯係管理員！");
+//            std::wstring error_description = L"手臂已急停，請聯係管理員！";
+            std::string error_description = "Arm has been Emergency Stop. Please ask Admin for help!";
+            sql_ptr_->UpdateErrorLog(2,error_description);
             break;
         }
         default:

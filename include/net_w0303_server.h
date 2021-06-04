@@ -10,6 +10,8 @@
 
 #include "../include/data.h"
 
+#include "modbus_tm_cllient.h"
+
 class IPCServer : public yf::net::server_interface<CustomMsgTypes>
 {
 public:
@@ -25,10 +27,24 @@ public:
     // Status
     //
     // Mission Status
+    void set_notify_flag(const bool& boolean);
+
+    void set_thread_modbus_notified();
+
+    void set_thread_modbus_blocked();
+
     yf::data::common::MissionStatus GetArmMissionStatus()
     {
+        // kick off thread to check modbus!
+        // 0. establish thread?
+        // 1. change flag
+        // 2. notify thread to keep checking modbus
+
+        std::cout << "Block here!!!"<< std::endl;
         std::unique_lock<std::mutex> ul_arm_status(mux_arm_Blocking);        // create a unique lock, not blocking now.
         cv_arm_Blocking.wait(ul_arm_status);
+        std::cout << "UnLOCK here!!!"<< std::endl;
+
         return arm_mission_status;
     }
 
@@ -95,6 +111,28 @@ public:
 
         LOG(INFO) << "Removing Arm. client [" << pre_arm_connection_id << "]";
     }
+
+public:
+
+    // Thread_KeepCheckingModbusAndThenNotifyIPC
+    void thread_ModbusWaitForNotifyIPC(bool& thread_continue_flag);
+
+private:
+
+    bool thread_continue_flag_ = true;
+    bool notify_flag_ = false;
+
+    // thread: keep checking modbus
+    std::mutex mux_modbus_thread_Blocking;
+    std::condition_variable cv_modbus_thread_Blocking;
+
+    // modbus client
+    yf::modbus::tm_modbus arm_modbus;
+    yf::data::arm::BasicInfo arm_basic_info;
+
+    std::thread th_modbus_notify_ipc_;
+
+    int create_once = 0;
 
 private:
 
@@ -183,6 +221,19 @@ protected:
             client_arm = nullptr;
             arm_connection_status = yf::data::common::ConnectionStatus::Disconnected;
             arm_mission_status = yf::data::common::MissionStatus::Error;
+/// Thread Modbus Never Close??
+//            // sleep 2s
+//            std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+//
+//
+//            // Modbus thread Join
+//            thread_continue_flag_ = false;
+//            std::unique_lock<std::mutex> ul_modbus(mux_modbus_thread_Blocking);
+//            cv_modbus_thread_Blocking.notify_one();
+//            th_modbus_notify_ipc_.join();
+//
+//            arm_modbus.Close();
+
             std::cout << "Removing Arm. client [" << client->GetID() << "]\n";
             LOG(INFO) << "Removing Arm. client [" << client->GetID() << "]";
         }
@@ -202,7 +253,7 @@ protected:
     // Called when a message arrives
     virtual void OnMessage(std::shared_ptr<yf::net::connection<CustomMsgTypes>> client, yf::net::message<CustomMsgTypes>& msg)
     {
-        // Verify each connection with sever.
+        /// Verify each connection with sever.
         //
         // 1. get latest msg
 
@@ -228,6 +279,17 @@ protected:
                 this->arm_connection_id = client->GetID();
                 client_arm = client;
                 arm_connection_status = yf::data::common::ConnectionStatus::Connected;
+
+                if(create_once == 0)
+                {
+                    // Modbus
+                    arm_modbus.Start(arm_basic_info.tm_ip_address_, arm_basic_info.modbus_port_no_);
+                    // Modbus thread
+                    th_modbus_notify_ipc_ = std::thread(&IPCServer::thread_ModbusWaitForNotifyIPC, this, std::ref(thread_continue_flag_));
+
+                    //
+                    create_once++;
+                }
 
                 // Notify WaitForConnectionFromArm()
                 std::unique_lock<std::mutex> ul(mux_Blocking);
@@ -413,4 +475,65 @@ bool IPCServer::get_find_landmark_flag()
 yf::data::arm::Point3d IPCServer::get_landmark_pos()
 {
     return landmark_pos;
+}
+
+void IPCServer::thread_ModbusWaitForNotifyIPC(bool& thread_continue_flag)
+{
+    // th_continue_flag
+    while(thread_continue_flag)
+    {
+        while(notify_flag_ == true)
+        {
+            std::cout<< "modbus check..."<< std::endl;
+
+            // keep checking modbus every 10ms
+            if(arm_modbus.read_isEStop() || arm_modbus.read_isError() || !arm_modbus.read_isProjectRunning())
+            {
+                //
+                std::cout << "Got it!!! Arm is Error!!!"<<std::endl;
+
+                // if error, notify GetArmMissionStatus()
+                std::unique_lock<std::mutex> ul_arm_status(mux_arm_Blocking);
+                cv_arm_Blocking.notify_one();
+
+                // sleep 200ms
+                std::this_thread::sleep_for(std::chrono::milliseconds(200));
+
+                // block the thread itself
+                notify_flag_ = false;
+            }
+
+        }
+
+        std::cout << "thread modbus lock!!!"<< std::endl;
+        // block, wait for notify
+        std::unique_lock<std::mutex> ul_modbus_thread(mux_modbus_thread_Blocking);        // create a unique lock, not blocking now.
+        cv_modbus_thread_Blocking.wait(ul_modbus_thread);
+
+        std::cout << "thread modbus unlock!!!"<< std::endl;
+
+    }
+
+
+
+    // block
+}
+
+void IPCServer::set_notify_flag(const bool &boolean)
+{
+    notify_flag_ = boolean;
+}
+
+void IPCServer::set_thread_modbus_notified()
+{
+    notify_flag_ = true;
+
+    std::unique_lock<std::mutex> ul_modbus_thread(mux_modbus_thread_Blocking);
+    cv_modbus_thread_Blocking.notify_one();
+
+}
+
+void IPCServer::set_thread_modbus_blocked()
+{
+    notify_flag_ = false;
 }

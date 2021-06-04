@@ -10,6 +10,8 @@
 #include <exception>
 #include <thread>
 #include <iomanip>
+#include <locale>
+#include <codecvt>
 
 //glog
 #include <glog/logging.h>
@@ -2920,6 +2922,8 @@ int yf::sql::sql_server::GetScheduleCommand(const int &id)
 void yf::sql::sql_server::UpdateErrorLog(const int& error_code, const std::string &error_description)
 {
 
+
+
     std::string query_update;
 
     try
@@ -2927,7 +2931,7 @@ void yf::sql::sql_server::UpdateErrorLog(const int& error_code, const std::strin
         Connect();
 
 
-        query_update = "INSERT INTO sys_status_error_log(error_code, error_description, created_date) VALUES (" + std::to_string(error_code) + ",'" + error_description +"','"+ TimeNow() + "'";
+        query_update = "INSERT INTO sys_status_error_log(error_code, error_description, created_date) VALUES (" + std::to_string(error_code) + ",'" + error_description +"','"+ TimeNow() + "')";
 
 
         nanodbc::execute(conn_,query_update);

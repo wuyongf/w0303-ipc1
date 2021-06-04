@@ -54,7 +54,7 @@ namespace yf
 
             //todo: Arm --- --- Check function 1.
             // function: Initial check the status of Arm.
-            void CheckArmInitMssionStaus();
+            bool CheckArmInitMssionStaus();
 
             //todo: Arm --- --- Assign Arm Job. Arm Task...
             void AssignArmMission(const std::string& arm_command_str);
@@ -65,9 +65,17 @@ namespace yf
 
             void ArmTask(const std::string &arm_command)
             {
-                this->CheckArmInitMssionStaus();
-                this->AssignArmMission(arm_command);
-                this->UpdateArmCurMissionStatus();
+                if(this->CheckArmInitMssionStaus())
+                {
+                    ipc_server_ptr_->set_thread_modbus_notified();
+
+                    this->AssignArmMission(arm_command);
+                    std::cout << "IN!!!";
+                    this->UpdateArmCurMissionStatus();
+                    std::cout << "OUT!!!";
+
+                    ipc_server_ptr_->set_thread_modbus_blocked();
+                }
             }
 
         public: // for nw_sys: each mission (retrieve data from DB)
@@ -330,7 +338,7 @@ void yf::arm::tm::GetConnectionStatus()
     }
 }
 
-void yf::arm::tm::CheckArmInitMssionStaus()
+bool yf::arm::tm::CheckArmInitMssionStaus()
 {
     bool check_flag = true;
 
@@ -349,7 +357,7 @@ void yf::arm::tm::CheckArmInitMssionStaus()
                 // The Arm is Error!
                 arm_mission_continue_flag_ = false;
 
-                return;
+                return false;
             }
 
             case yf::data::common::MissionStatus::EStop:
@@ -361,7 +369,7 @@ void yf::arm::tm::CheckArmInitMssionStaus()
                 // The Arm is E-Stop!
                 arm_mission_continue_flag_ = false;
 
-                return;
+                return false;
             }
         }
 
@@ -386,6 +394,8 @@ void yf::arm::tm::CheckArmInitMssionStaus()
                 break;
             }
         }
+
+        return true;
     }
 }
 
@@ -486,6 +496,8 @@ void yf::arm::tm::UpdateArmCurMissionStatus()
         // if not Error
         // Send "Get Status" to update the mission status
         RetrieveArmCurrentMissionStatus();
+
+        ModbusCheckArmStatus();
         ///TIME - 2021-04-16
         //std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
@@ -564,6 +576,26 @@ void yf::arm::tm::UpdateArmCurMissionStatus()
                 //std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 break;
             }
+
+            case yf::data::common::MissionStatus::Error:
+            {
+                LOG(INFO) << "ipc knows robotic arm is error!";
+
+                LOG(INFO) << "arm mission aborted";
+                nw_status_ptr_->cur_task_continue_flag = false;
+
+                return;
+            }
+
+            case yf::data::common::MissionStatus::EStop:
+            {
+                LOG(INFO) << "robotic arm has been e-stopped!";
+
+                LOG(INFO) << "arm mission aborted";
+                nw_status_ptr_->cur_task_continue_flag = false;
+
+                return;
+            }
         }
     }
 }
@@ -576,11 +608,18 @@ void yf::arm::tm::RetrieveArmCurrentMissionStatus()
     msg.body.resize(str.size());
     msg.body.assign(str.begin(),str.end());
 
+
+    std::cout << "Enter Here!!!"<< std::endl;
     ipc_server_ptr_->MessageClient(ipc_server_ptr_->GetArmClient(), msg);
+    std::cout << "Out Here!!!"<< std::endl;
 
     // lock the thread.
     // get status and preserve the status in arm_mission_status_
+
     nw_status_ptr_->arm_mission_status = ipc_server_ptr_->GetArmMissionStatus();
+
+
+    std::cout << "escape!!!" << std::endl;
 }
 
 
@@ -706,7 +745,9 @@ void yf::arm::tm::GetMissionStatus()
 
         // lock the thread.
         // get status and preserve the status in arm_mission_status_
+
         nw_status_ptr_->arm_mission_status = ipc_server_ptr_->GetArmMissionStatus();
+
     }
     else
     {
