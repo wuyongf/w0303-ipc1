@@ -107,6 +107,7 @@ namespace yf
 
             /// Error Log
             void UpdateErrorLog(const int& error_code, const std::string& error_description);
+            void UpdateSysAdvice(const int& advice_index);
 
             // Device Status
             //
@@ -2928,6 +2929,28 @@ void yf::sql::sql_server::UpdateErrorLog(const int& error_code, const std::strin
 
         query_update = "INSERT INTO sys_status_error_log(error_code, error_description, created_date) VALUES (" + std::to_string(error_code) + ",'" + error_description +"','"+ TimeNow() + "'";
 
+
+        nanodbc::execute(conn_,query_update);
+
+        Disconnect();
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+    }
+}
+
+void yf::sql::sql_server::UpdateSysAdvice(const int &advice_index)
+{
+    std::string advice_index_str = std::to_string(advice_index);
+    std::string query_update;
+
+    try
+    {
+        Connect();
+
+        query_update = "UPDATE sys_status SET advice = " + advice_index_str + ", modified_date='" + TimeNow() + "' WHERE name = 'nw_sys'" ;
 
         nanodbc::execute(conn_,query_update);
 

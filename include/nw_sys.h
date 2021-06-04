@@ -267,6 +267,7 @@ void yf::sys::nw_sys::Start()
 
     // 1.2 block the program, wait for arm connection
     // todo(undone): should notify the database!
+    sql_ptr_->UpdateSysAdvice(8);
     tm5.WaitForConnection();
 
     // 1.3 update the connection status to sys_status & database ;
@@ -278,7 +279,7 @@ void yf::sys::nw_sys::Start()
     mir100_ptr_->Start("192.168.7.34", nw_status_ptr_, sql_ptr_);
 
     /// TIME
-    sleep.ms(3000);
+    sleep.ms(5000);
 
     /// 3. Web Status Manager
     th_web_status_manager_ = std::thread(&nw_sys::thread_WebStatusManager, this);
@@ -341,9 +342,9 @@ void yf::sys::nw_sys::thread_WaitSchedules()
         {
             LOG(INFO) << "[thread_WaitSchedules]: Start!";
 
-            LOG(INFO) << "[thread_WaitSchedules]: 1. --- Initial Check [Start]";
-            WaitSchedulesInitialCheck();
-            LOG(INFO) << "[thread_WaitSchedules]: 1. --- Initial Check [Complete]";
+//            LOG(INFO) << "[thread_WaitSchedules]: 1. --- Initial Check [Start]";
+//            WaitSchedulesInitialCheck();
+//            LOG(INFO) << "[thread_WaitSchedules]: 1. --- Initial Check [Complete]";
 
             #if 0
             bool initial_check_flag = true;
@@ -457,26 +458,15 @@ void yf::sys::nw_sys::thread_WaitSchedules()
             //
             while (schedule_number == 0 )
             {
-                LOG(INFO) << "[thread_wait_schedules]: wait for incoming schedules";
+                // (1) Keep checking Sys Devices Status
+                LOG(INFO) << "[thread_WaitSchedules]: 1. --- Initial Devices Status Check [Start]";
+                WaitSchedulesInitialCheck();
+                LOG(INFO) << "[thread_WaitSchedules]: 1. --- Initial Devices Status Check [Complete]";
 
-                // (1) retrieve schedule number from database...
+                // (2) retrieve schedule number from database...
+                LOG(INFO) << "[thread_wait_schedules]: wait for incoming schedules...";
                 q_schedule_ids   = sql_ptr_->GetAvailableScheuldesId();
                 schedule_number  = q_schedule_ids.size();
-
-                // (2) update sys control mode
-                this->GetSysControlMode();
-
-                // wait for auto mode.
-                while (nw_status_ptr_->sys_control_mode_ != data::common::SystemMode::Auto)
-                {
-                    LOG(INFO) << "[thread_wait_schedules]: sys is not in auto mode, keep waiting...";
-
-                    // update sys control mode
-                    this->GetSysControlMode();
-
-                    ///TIME
-                    sleep.ms(500);
-                }
 
                 ///TIME
                 sleep.ms(500);
@@ -1648,9 +1638,11 @@ void yf::sys::nw_sys::WaitSchedulesInitialCheck()
         LOG(INFO) << "[thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]";
         switch (nw_status_ptr_->sys_control_mode_)
         {
+
             case data::common::SystemMode::Auto:
             {
                 LOG(INFO) << "[thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto";
+                sql_ptr_->UpdateSysAdvice(0);
                 sys_init_check_continue_flag = false;
                 break;
             }
@@ -1659,6 +1651,7 @@ void yf::sys::nw_sys::WaitSchedulesInitialCheck()
             {
                 LOG(INFO) << "[thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Manual";
                 LOG(INFO) << "[thread_WaitSchedules]: 1.3.1.1 wait for Auto Mode";
+                sql_ptr_->UpdateSysAdvice(7);
                 while (nw_status_ptr_->sys_control_mode_ != data::common::SystemMode::Auto)
                 {
                     // update sys control mode
@@ -1674,6 +1667,7 @@ void yf::sys::nw_sys::WaitSchedulesInitialCheck()
             {
                 LOG(INFO) << "[thread_WaitSchedules]: 1.3.1.1 sys_control_mode: ManualSetting";
                 LOG(INFO) << "[thread_WaitSchedules]: 1.3.1.1 wait for Auto Mode";
+                sql_ptr_->UpdateSysAdvice(7);
                 while (nw_status_ptr_->sys_control_mode_ != data::common::SystemMode::Auto)
                 {
                     // update sys control mode
@@ -1706,6 +1700,7 @@ void yf::sys::nw_sys::WaitSchedulesInitialCheck()
                      nw_status_ptr_->arm_mission_status == data::common::MissionStatus::Error)
                 {
                     LOG(INFO) << "[thread_WaitSchedules]: 1.3.2.1 Please stop robotic arm project...";
+                    sql_ptr_->UpdateSysAdvice(6);
                 }
 
                 // For Arm Disconnected situation
@@ -1714,16 +1709,19 @@ void yf::sys::nw_sys::WaitSchedulesInitialCheck()
                 {
                     LOG(INFO) << "[thread_WaitSchedules]: 1.3.2.2 Arm disconnected...";
                     LOG(INFO) << "[thread_WaitSchedules]: 1.3.2.3 Please switch to Recovery Mode..."; // Ask for recovery mode
+                    sql_ptr_->UpdateSysAdvice(3);
 
                     if(nw_status_ptr_->sys_control_mode_ == data::common::SystemMode::Recovery)
                     {
                         LOG(INFO) << "[thread_WaitSchedules]: 1.3.2.4 Please play arm project..."; // Ask for recovery mode
+                        sql_ptr_->UpdateSysAdvice(5);
 
                         tm5.WaitForConnection();
                         // Get Status and update to SQL
                         tm5.GetConnectionStatus();
                         tm5.GetMissionStatus();
 
+                        sql_ptr_->UpdateSysAdvice(1);
                         LOG(INFO) << "[thread_WaitSchedules]: 1.3.2 check arm   [Complete]";
                     }
                 }
