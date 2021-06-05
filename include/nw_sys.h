@@ -970,7 +970,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
                                         // if cur_operation_area is not equal to last one, move to safety position first.
                                         if(cur_operation_area_ != last_operation_area)
                                         {
-                                            tm5.ArmTask("Post arm_safety_to_home");
+                                            tm5.ArmTask("Post arm_safety_to_front_p1");
 
                                             this->ArmSetOperationArea(cur_operation_area_);
                                             tm5.ArmTask("Post arm_home_to_safety");
@@ -988,6 +988,9 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
                                         tm5.ArmTask("Set standby_p0 = "+standby_point_str);
                                         //  1.3 move to standby_point
                                         tm5.ArmTask("Move_to standby_p0");
+
+                                        // 3. check&set tool_angle
+                                        this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
 
                                         // 2. check landmark_or_not?
                                         if(arm_mission_configs[n].landmark_flag == true)
@@ -1054,8 +1057,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
                                             }
                                         }
 
-                                        // 3. check&set tool_angle
-                                        this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
+
 
                                         // 4. check motion_type, decide which motion.
                                         // 5. assign n_via_points.
