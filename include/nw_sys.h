@@ -48,7 +48,7 @@ namespace yf
 
             void WaitSchedulesInitialCheck();
 
-        public: /// Arm Method: based on tm5.ArmTask();
+        public: /// Arm Methods: based on tm5.ArmTask();
 
             void ArmPickTool (const yf::data::arm::TaskMode& task_mode);
             void ArmPlaceTool(const yf::data::arm::TaskMode& task_mode);
@@ -56,13 +56,13 @@ namespace yf
             void ArmPickPad();
             void ArmRemovePad();
             void ArmAbsorbWater();
-            int  ArmGetAbosrbType();
+            int  ArmGetAbsorbType();
 
             void ArmSetOperationArea(const yf::data::arm::OperationArea& operation_area);
             void ArmSetToolAngle(const yf::data::arm::TaskMode& task_mode ,const yf::data::arm::ToolAngle& tool_angle);
             void ArmSetApproachPoint(const yf::data::arm::Point3d& approach_point,const yf::data::arm::ToolAngle& tool_angle);
             void ArmSetViaPoints(const std::deque<yf::data::arm::Point3d>& via_points, const yf::data::arm::ToolAngle& tool_angle);
-            void ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode, const yf::data::arm::ToolAngle& tool_angle, const yf::data::arm::ModelType& model_type);
+            void ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode, const yf::data::arm::ToolAngle& tool_angle, const yf::data::arm::ModelType& model_type, const int& arm_mission_config_id);
 
             std::string ArmGetPointStr(const yf::data::arm::Point3d& point);
 
@@ -252,11 +252,11 @@ void yf::sys::nw_sys::Start()
 {
     /// 0. Initialization
     //
-    // 0.1 nw_status
+    //  0.1 nw_status
     nw_status_ptr_ = std::make_shared<yf::status::nw_status>();
-    // 0.2 sql
+    //  0.2 sql
     sql_ptr_       = std::make_shared<yf::sql::sql_server>("SQL Server","192.168.7.127","NW_mobile_robot_sys","sa","NWcadcam2021");
-    // 0.3 ipc_server
+    //  0.3 ipc_server
     //  establish server and keep updating, keep waiting for devices connection.
     th_ipc_server_ = std::thread(&nw_sys::thread_IPCServerStartup, this, std::ref(ipc_server_ptr_), std::ref(ipc_server_flag_));
 
@@ -266,7 +266,7 @@ void yf::sys::nw_sys::Start()
     tm5.Start(ipc_server_ptr_,nw_status_ptr_,sql_ptr_);
 
     // 1.2 block the program, wait for arm connection
-    // todo(undone): should notify the database!
+    // notify the database.
     sql_ptr_->UpdateSysAdvice(8);
     tm5.WaitForConnection();
 
@@ -1071,7 +1071,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
                                         this->ArmSetViaPoints(arm_mission_configs[n].via_points, arm_mission_configs[n].tool_angle);
 
                                         // 8. post via_points
-                                        this->ArmPostViaPoints(cur_task_mode_, arm_mission_configs[n].tool_angle, arm_mission_configs[n].model_type);
+                                        this->ArmPostViaPoints(cur_task_mode_, arm_mission_configs[n].tool_angle, arm_mission_configs[n].model_type, arm_mission_configs[n].id);
 
                                         // 9. post return standby_position
                                         tm5.ArmTask("Move_to standby_p0");
@@ -2073,7 +2073,8 @@ void yf::sys::nw_sys::ArmSetApproachPoint(const yf::data::arm::Point3d& approach
 
 void yf::sys::nw_sys::ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode,
                                        const yf::data::arm::ToolAngle& tool_angle,
-                                       const yf::data::arm::ModelType& model_type)
+                                       const yf::data::arm::ModelType& model_type,
+                                       const int& arm_mission_config_id)
 {
     if(task_mode == data::arm::TaskMode::Mopping)
     {
@@ -2081,10 +2082,12 @@ void yf::sys::nw_sys::ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode,
         {
             case data::arm::ToolAngle::Zero:
             {
+                tm5.SetMotorHigh();
 
                 std::string command = "Post arm_via0_line";
-
                 tm5.ArmTask(command);
+
+                tm5.SetMotorLow();
 
                 break;
             }
@@ -2095,65 +2098,138 @@ void yf::sys::nw_sys::ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode,
                 {
                     case data::arm::ModelType::Windows:
                     {
-                        std::string command = "Post arm_via45_line_z";
+                        tm5.SetMotorHigh();
 
+                        std::string command = "Post arm_via45_line_z";
                         tm5.ArmTask(command);
+
+                        tm5.SetMotorLow();
 
                         break;
                     }
                     case data::arm::ModelType::DeskRectangle:
                     {
-                        std::string command = "Post arm_via45_line_d";
+                        tm5.SetMotorHigh();
 
+                        std::string command = "Post arm_via45_line_d";
                         tm5.ArmTask(command);
+
+                        tm5.SetMotorLow();
 
                         break;
                     }
                     case data::arm::ModelType::DeskCircle:
                     {
-                        std::string command = "Post arm_via45_p2p";
+                        tm5.SetMotorHigh();
 
+                        std::string command = "Post arm_via45_p2p";
                         tm5.ArmTask(command);
+
+                        tm5.SetMotorLow();
 
                         break;
                     }
                     case data::arm::ModelType::DeskPolygon:
                     {
-                        std::string command = "Post arm_via45_line_z";
+                        tm5.SetMotorHigh();
 
+                        std::string command = "Post arm_via45_line_z";
                         tm5.ArmTask(command);
+
+                        tm5.SetMotorLow();
 
                         break;
                     }
                     case data::arm::ModelType::Wall:
                     {
-                        std::string command = "Post arm_via45_line_z";
+                        // get Force Type
+                        auto force_type = tm5.GetForceType(arm_mission_config_id);
 
-                        tm5.ArmTask(command);
+                        switch (force_type)
+                        {
+                            case data::arm::ForceType::via45_z:
+                            {
+                                tm5.SetMotorHigh();
 
+                                std::string command = "Post arm_via45_line_z";
+                                tm5.ArmTask(command);
+
+                                tm5.SetMotorLow();
+
+                                break;
+                            }
+                            case data::arm::ForceType::via45_y:
+                            {
+                                std::string command = "Post arm_via45_line_y";
+                                tm5.ArmTask(command);
+
+                                break;
+                            }
+                            default:
+                            {
+                                break;
+                            }
+                        }
                         break;
                     }
                     case data::arm::ModelType::NurseStation:
                     {
-                        std::string command = "Post arm_via45_line_z";
+                        tm5.SetMotorHigh();
 
+                        std::string command = "Post arm_via45_line_z";
                         tm5.ArmTask(command);
+
+                        tm5.SetMotorLow();
 
                         break;
                     }
                     case data::arm::ModelType::Skirting:
                     {
                         std::string command = "Post arm_via45_line_y";
-
                         tm5.ArmTask(command);
 
                         break;
                     }
+                    case data::arm::ModelType::Handrail:
+                    {
+                        // get Force Type
+                        auto force_type = tm5.GetForceType(arm_mission_config_id);
+
+                        switch (force_type)
+                        {
+                            case data::arm::ForceType::via45_z:
+                            {
+                                tm5.SetMotorHigh();
+
+                                std::string command = "Post arm_via45_line_z";
+                                tm5.ArmTask(command);
+
+                                tm5.SetMotorLow();
+
+                                break;
+                            }
+                            case data::arm::ForceType::via45_y:
+                            {
+                                std::string command = "Post arm_via45_line_y_no_force";
+                                tm5.ArmTask(command);
+
+                                break;
+                            }
+                            default:
+                            {
+                                break;
+                            }
+                        }
+                        break;
+                    }
                     default:
                     {
-                        std::string command = "Post arm_via45_line_z";
+                        tm5.SetMotorHigh();
 
+                        std::string command = "Post arm_via45_line_z";
                         tm5.ArmTask(command);
+
+                        tm5.SetMotorLow();
 
                         break;
                     }
@@ -2251,7 +2327,7 @@ void yf::sys::nw_sys::ArmAbsorbWater()
 {
 
     // get & set absorb type
-    int absorb_type = this->ArmGetAbosrbType();
+    int absorb_type = this->ArmGetAbsorbType();
     std::string absorb_type_command = "Set absorb_type = " + std::to_string(absorb_type);
     tm5.ArmTask(absorb_type_command);
 
@@ -2315,6 +2391,8 @@ void yf::sys::nw_sys::thread_Web_UgvBatteryPercentage(bool &web_status_flag,
 void yf::sys::nw_sys::thread_Web_UgvCurPosition(const bool &web_status_flag,
                                                 const int &sleep_duration)
 {
+    sleep.sec(sleep_duration);
+
     while(web_status_flag)
     {
         // todo: need to handle how to check whether mir is ON/OFF
@@ -2368,7 +2446,7 @@ void yf::sys::nw_sys::JobsFilter(std::deque<int>& q_ids)
 
 }
 
-int yf::sys::nw_sys::ArmGetAbosrbType()
+int yf::sys::nw_sys::ArmGetAbsorbType()
 {
     int absorb_type = 0;
 

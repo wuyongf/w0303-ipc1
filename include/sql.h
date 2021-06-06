@@ -147,6 +147,8 @@ namespace yf
             int GetOperationArea(const int& arm_config_id);
             int GetToolAngle(const int& arm_mission_config_id);
             int GetMotionType(const int& arm_mission_config_id);
+            int GetArmForceTypeId(const int& arm_mission_config_id);
+
 
             // retrieve point(x,y,z,rx,ry,rz) from table "data_arm_points"
             int GetStandbyPositionId(const int& arm_config_id);
@@ -2964,6 +2966,39 @@ void yf::sql::sql_server::UpdateSysAdvice(const int &advice_index)
     {
         std::cerr << e.what() << std::endl;
         std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+    }
+}
+
+int yf::sql::sql_server::GetArmForceTypeId(const int &arm_mission_config_id)
+{
+    std::string query_update;
+
+    //"SELECT ID FROM schedule_table where status=1 AND planned_start > '2021-02-06 11:10:08.000'"
+    try
+    {
+        Connect();
+
+        // "SELECT force_type_id FROM data_arm_mission_config WHERE ID = _curArmMissionConfigId.ToString();
+        query_update = "SELECT force_type_id FROM data_arm_mission_config where ID = "+ std::to_string(arm_mission_config_id);
+
+        int force_type_id;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        while(result.next())
+        {
+            force_type_id = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return force_type_id;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+        return 0;
     }
 }
 

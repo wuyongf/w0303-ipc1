@@ -43,6 +43,9 @@ namespace yf
             // (3) ipc1 updates arm connection status from nw_sys to Database
             void GetConnectionStatus();
 
+            void SetMotorHigh();
+            void SetMotorLow();
+
             /// Net Method
             // (1) ipc1(net_server) ---> arm: ipc1(net sever) requests "Get Status"
             // (2) ipc1(net_server) <--- arm: arm return current status to ipc1(net_server)
@@ -104,6 +107,8 @@ namespace yf
             yf::data::arm::ToolAngle GetToolAngle(const int& arm_mission_config_id);
 //
             yf::data::arm::MotionType GetMotionType(const int& arm_mission_config_id);
+
+            yf::data::arm::ForceType GetForceType(const int& arm_mission_config_id);
 
             yf::data::arm::Point3d GetStandbyPosition(const int& arm_config_id);
 
@@ -814,6 +819,9 @@ std::deque<yf::data::arm::MissionConfig> yf::arm::tm::ConfigureArmMission(const 
 
         data::arm::MissionConfig mission_config;
 
+        /// -1. id
+        mission_config.id = arm_mission_config_id;
+
         /// 0. model_type
         mission_config.model_type = this->GetModelType(model_config_id);
 
@@ -1197,4 +1205,39 @@ yf::data::arm::Point3d yf::arm::tm::GetRealPointByLM(const yf::data::arm::Point3
                                                      const yf::data::arm::Point3d &real_landmark_pos)
 {
     return al_arm_path.ExportRealPointByLM(original_via_points, ref_landmark_pos, real_landmark_pos);
+}
+
+void yf::arm::tm::SetMotorHigh()
+{
+    tm_modbus.set_control_box_DO(3,1);
+}
+
+void yf::arm::tm::SetMotorLow()
+{
+    tm_modbus.set_control_box_DO(3,0);
+}
+
+yf::data::arm::ForceType yf::arm::tm::GetForceType(const int &arm_mission_config_id)
+{
+    int force_type_id = sql_ptr_->GetArmForceTypeId(arm_mission_config_id);
+
+    switch (force_type_id)
+    {
+        case 0:
+        {
+            return data::arm::ForceType::null;
+        }
+        case 1:
+        {
+            return data::arm::ForceType::via45_z;
+        }
+        case 2:
+        {
+            return data::arm::ForceType::via45_y;
+        }
+        case 3:
+        {
+            return data::arm::ForceType::via0_z;
+        }
+    }
 }

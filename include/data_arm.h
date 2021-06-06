@@ -98,6 +98,14 @@ namespace  yf
                 Surface     = 6
             };
 
+            enum class ForceType
+            {
+                null        = 0,
+                via45_z     = 1,
+                via45_y     = 2,
+                via0_z      = 3
+            };
+
             // for operation area
             enum class OperationArea
             {
@@ -190,6 +198,7 @@ namespace  yf
 
             struct MissionConfig
             {
+                int                     id;
 
                 ModelType               model_type;
 
@@ -204,6 +213,8 @@ namespace  yf
                 ToolAngle               tool_angle = ToolAngle::Zero;
 
                 MotionType              motion_type;
+
+                ForceType               force_type;
 
                 Point3d                 standby_position;
 
