@@ -201,7 +201,15 @@ namespace yf
 
             std::string GetMapNameFromMapStatus();
 
-            int GetUgvInitPositionIdFromMapStatus();
+            int         GetSiteIdFromMapStatus();
+            int         GetBuildingIdFromMapStatus();
+            int         GetFloorIdFromMapStatus();
+            std::string GetSiteInfoFromSiteId(const int& site_id);
+            std::string GetBuildingInfoFromBuildingId(const int& building_id);
+            std::string GetFloorInfoFromFromFloorId(const int& floor_id);
+
+
+            int   GetUgvInitPositionIdFromMapStatus();
             float GetUgvInitPositionElement(const int& id, const std::string& element);
             std::vector<float> GetUgvInitPositionFromMapStatus();
 
@@ -3001,6 +3009,236 @@ int yf::sql::sql_server::GetArmForceTypeId(const int &arm_mission_config_id)
         return 0;
     }
 }
+
+int yf::sql::sql_server::GetSiteIdFromMapStatus()
+{
+    // query string
+    std::string query_update;
+
+    // input
+
+    // output
+    int site_id = 0;
+
+    //"SELECT position_name FROM data_ugv_mission_config where model_config_id = 1 ORDER BY mission_order"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT location_site_id FROM data_ugv_map where status = 1 ";
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            site_id = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return site_id;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return site_id;
+    };
+}
+
+int yf::sql::sql_server::GetBuildingIdFromMapStatus()
+{
+    // query string
+    std::string query_update;
+
+    // input
+
+    // output
+    int site_id = 0;
+
+    //"SELECT position_name FROM data_ugv_mission_config where model_config_id = 1 ORDER BY mission_order"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT location_building_id FROM data_ugv_map where status = 1 ";
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            site_id = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return site_id;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return site_id;
+    };
+}
+
+int yf::sql::sql_server::GetFloorIdFromMapStatus()
+{
+    // query string
+    std::string query_update;
+
+    // input
+
+    // output
+    int site_id = 0;
+
+    //"SELECT position_name FROM data_ugv_mission_config where model_config_id = 1 ORDER BY mission_order"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT location_floor_id FROM data_ugv_map where status = 1 ";
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            site_id = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return site_id;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return site_id;
+    };
+}
+
+std::string yf::sql::sql_server::GetSiteInfoFromSiteId(const int &site_id)
+{
+    // query string
+    std::string query_update;
+
+    // output
+    std::string site_str;
+
+    //"SELECT position_name FROM data_ugv_mission_config where model_config_id = 1 ORDER BY mission_order"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT location_site FROM data_Location_Site where ID = " + std::to_string(site_id) ;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            site_str = result.get<std::string>(0);
+        };
+
+        Disconnect();
+
+        return site_str;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return site_str;
+    };
+}
+
+std::string yf::sql::sql_server::GetBuildingInfoFromBuildingId(const int &building_id)
+{
+    // query string
+    std::string query_update;
+
+    // input
+
+
+    // output
+    std::string building_str;
+
+    //"SELECT position_name FROM data_ugv_mission_config where model_config_id = 1 ORDER BY mission_order"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT building_name FROM data_Location_Site_Building where ID = " + std::to_string(building_id) ;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            building_str = result.get<std::string>(0);
+        };
+
+        Disconnect();
+
+        return building_str;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return building_str;
+    };
+}
+
+std::string yf::sql::sql_server::GetFloorInfoFromFromFloorId(const int &floor_id)
+{
+    // query string
+    std::string query_update;
+
+    // input
+
+
+    // output
+    std::string floor_str;
+
+    //"SELECT position_name FROM data_ugv_mission_config where model_config_id = 1 ORDER BY mission_order"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT floor_no FROM data_Location_Site_Building_Floor where ID = " + std::to_string(floor_id) ;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            floor_str = result.get<std::string>(0);
+        };
+
+        Disconnect();
+
+        return floor_str;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return floor_str;
+    };
+}
+
+
 
 
 

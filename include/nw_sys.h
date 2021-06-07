@@ -76,6 +76,9 @@ namespace yf
             void DoJobs(const int& cur_schedule_id);
             void DoTasks(const int& cur_job_id, const int& next_job_id);
 
+            void DoJobUgvBackToChargingStation();
+            void DoJobArmBackToHomePos();
+
             void JobsFilter(std::deque<int>& q_ids);
 
             void UpdateDbScheduleBeforeTask (const int& cur_schedule_id);
@@ -576,18 +579,19 @@ void yf::sys::nw_sys::thread_DoSchedules()
                 /// Execute the schedule! Based on Schedule Command!
                 switch (nw_status_ptr_->db_cur_schedule_command_)
                 {
-                    case data::schedule::ScheduleCommand::Cleaning:
+                    case data::schedule::ScheduleCommand::CleaningJob:
                     {
                         DoJobs(cur_schedule_id);
                         break;
                     }
-                    case data::schedule::ScheduleCommand::UgvBackToDocking:
+                    case data::schedule::ScheduleCommand::UgvBackToChargingStation:
                     {
-
+                        DoJobUgvBackToChargingStation();
                         break;
                     }
                     case data::schedule::ScheduleCommand::ArmBackToHomePos:
                     {
+                        DoJobArmBackToHomePos();
                         break;
                     }
                 }
@@ -2473,13 +2477,13 @@ void yf::sys::nw_sys::GetScheduleCommand(const int& id)
     {
         case 1:
         {
-            nw_status_ptr_->db_cur_schedule_command_ = data::schedule::ScheduleCommand::Cleaning;
+            nw_status_ptr_->db_cur_schedule_command_ = data::schedule::ScheduleCommand::CleaningJob;
             break;
         }
 
         case 2:
         {
-            nw_status_ptr_->db_cur_schedule_command_ = data::schedule::ScheduleCommand::UgvBackToDocking;
+            nw_status_ptr_->db_cur_schedule_command_ = data::schedule::ScheduleCommand::UgvBackToChargingStation;
             break;
         }
 
@@ -2582,6 +2586,44 @@ void yf::sys::nw_sys::UpdateDbErrorLog()
 
     /// For Ugv
 
+}
+
+void yf::sys::nw_sys::DoJobUgvBackToChargingStation()
+{
+    // DB: update schedule_job & schedule_job_log
+
+    /// Do job
+    // 1. ugv changes map & its init_pos
+    mir100_ptr_->ClearErrorState();
+    mir100_ptr_->ChangeMapByDBMapStatus();
+    sleep.sec(5);
+    if(mir100_ptr_->WaitForModeId(7,1))
+    {
+        mir100_ptr_->ChangeInitPositionByDBMapStatus();
+    }
+
+    // 2. ugv creates its charging mission.
+    mir100_ptr_->PostMissionForCharging();
+    mir100_ptr_->PostActionsForCharging();
+
+    // 3. ugv goes to charging station
+    cur_mission_guid_ = mir100_ptr_->GetCurMissionGUID();
+    mir100_ptr_->PostMissionQueue(cur_mission_guid_);
+    ///TIME
+    sleep.ms(200);
+    mir100_ptr_->Play();
+
+    // DB: update schedule_job & schedule_job_log
+}
+
+void yf::sys::nw_sys::DoJobArmBackToHomePos()
+{
+    // DB: update schedule_job & schedule_job_log
+
+    // Do job
+    tm5.ArmTask("Post arm_back_home");
+
+    // DB: update schedule_job & schedule_job_log
 }
 
 

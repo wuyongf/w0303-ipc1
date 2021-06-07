@@ -152,12 +152,13 @@ namespace yf
             bool PostActionMove(const std::string& position_guid, const std::string &mission_guid, const int &priority);
             bool PostActionAdjustLocalization(const std::string &mission_guid, const int &priority);
             bool PostActionSpeed(const float& speed, const std::string &mission_guid, const int &priority);
+            bool PostActionDocking(const std::string& docking_position_guid, const std::string &mission_guid, const int &priority);
             bool PostActionCharging(const std::string &mission_guid, const int &priority);
 
-            bool PostMissionCharing();
+            bool PostMissionForCharging();
+            void PostActionsForCharging();
 
-            bool PostActionDocking(const std::string& position_guid, const std::string &mission_guid, const int &priority);
-            std::string GetDockingGUID(const std::string& map_guid);
+            std::string GetDockingPositionGUID(const std::string& map_guid);
 
             std::string GetPositionGUID(const std::string& map_guid, const std::string& position_name);
             std::string GetCurMissionGUID();
@@ -594,9 +595,9 @@ bool yf::ugv::mir::PostMission(const int& model_config_id)
     auto session_info = sql_ptr_->GetSiteInfo(model_config_id);
 
     /// 3. get building---floor info--model name---time
-    auto building_info = sql_ptr_->GetBuildingInfo(model_config_id);
-    auto floor_info = sql_ptr_->GetFloorInfo(model_config_id);
-    auto model_name = sql_ptr_->GetModelName(model_config_id);
+    auto building_info  = sql_ptr_->GetBuildingInfo(model_config_id);
+    auto floor_info     = sql_ptr_->GetFloorInfo(model_config_id);
+    auto model_name     = sql_ptr_->GetModelName(model_config_id);
 
     // time
     sql_ptr_->UpdateTime();
@@ -1861,7 +1862,7 @@ bool yf::ugv::mir::PostMissionForDebugTest(const int &model_config_id)
     auto time = time_year + time_month + time_day + "_" + time_hour + time_min;
 
     /// (1) set cur_mission_name
-    cur_mission_name_ = building_info + "_" + floor_info + "/F_" + model_name + "_" + time + "debug_test";
+    cur_mission_name_ = building_info + "_" + floor_info + "/F_" + model_name + "_" + time + "_DebugTest";
 
     /// (2) get session_id
 
@@ -1986,7 +1987,7 @@ bool yf::ugv::mir::PostActionAdjustLocalization(const std::string &mission_guid,
 }
 
 bool
-yf::ugv::mir::PostActionDocking(const std::string &position_guid, const std::string &mission_guid, const int &priority)
+yf::ugv::mir::PostActionDocking(const std::string &docking_position_guid, const std::string &mission_guid, const int &priority)
 {
     // mission_guid (done)
     // action_type (done)  "move"
@@ -2008,7 +2009,7 @@ yf::ugv::mir::PostActionDocking(const std::string &position_guid, const std::str
     Poco::JSON::Object retries_json;
     Poco::JSON::Object max_linear_speed_json;
 
-    marker_json.set("value", position_guid);
+    marker_json.set("value", docking_position_guid);
     marker_json.set("id", "marker");
 
     marker_type_json.set("value", "mirconst-guid-0000-0001-marker000001");
@@ -2038,9 +2039,9 @@ yf::ugv::mir::PostActionDocking(const std::string &position_guid, const std::str
     return PostMethod(sub_path, action_docking_json);
 }
 
-std::string yf::ugv::mir::GetDockingGUID(const std::string &map_guid)
+std::string yf::ugv::mir::GetDockingPositionGUID(const std::string &map_guid)
 {
-    std::string docking_name = "Docking";
+    std::string docking_name = "ChargingStation";
 
     // /api/v2.0.0/maps/cb4cfe79-8dd6-11eb-a5e3-00012978eb45/positions
 
@@ -2091,7 +2092,7 @@ std::string yf::ugv::mir::GetDockingGUID(const std::string &map_guid)
 
     if(found_flag == false)
     {
-        std::cout << "Please create docking position first!" << std::endl;
+        std::cout << "Please create a charging station first!" << std::endl;
     }
 
     return docking_guid;
@@ -2172,7 +2173,7 @@ bool yf::ugv::mir::PostActionCharging(const std::string &mission_guid, const int
     minimum_percentage_json.set("id", "minimum_percentage");
 
     charge_until_new_mission_json.set("value", true);
-    charge_until_new_mission_json.set("id", "charge_until_new_mission_json");
+    charge_until_new_mission_json.set("id", "charge_until_new_mission");
 
     Poco::JSON::Array parameters_array;
     parameters_array.set(0, minimum_time_json);
@@ -2188,6 +2189,96 @@ bool yf::ugv::mir::PostActionCharging(const std::string &mission_guid, const int
     std::string sub_path = "/api/v2.0.0/missions/" + mission_guid + "/actions";
 
     return PostMethod(sub_path, action_move_json);
+}
+
+bool yf::ugv::mir::PostMissionForCharging()
+{
+    /// 1. get site_id, building_id, floor_id
+    auto site_id        = sql_ptr_->GetSiteIdFromMapStatus();
+    auto building_id    = sql_ptr_->GetBuildingIdFromMapStatus();
+    auto floor_id       = sql_ptr_->GetFloorIdFromMapStatus();
+    /// 2. get site_info, building_info, floor_info
+    auto site_info      = sql_ptr_->GetSiteInfoFromSiteId(site_id);
+    auto building_info  = sql_ptr_->GetBuildingInfoFromBuildingId(building_id);
+    auto floor_info     = sql_ptr_->GetFloorInfoFromFromFloorId(floor_id);
+
+    /// 4. get time
+    sql_ptr_->UpdateTime();
+    auto time_year = sql_ptr_->get_time_element("year");
+    auto time_month = sql_ptr_->get_time_element("month");
+    auto time_day = sql_ptr_->get_time_element("day");
+    auto time_hour = sql_ptr_->get_time_element("hour");
+    auto time_min = sql_ptr_->get_time_element("minute");
+    auto time_sec = sql_ptr_->get_time_element("sec");
+
+    auto time = time_year + time_month + time_day + "_" + time_hour + time_min + "_" + time_sec;
+
+    /// (1) set cur_mission_name
+    cur_mission_name_ = building_info + "_" + floor_info + "/F_UgvBackToChargingStation_" + time;
+
+    /// (2) get session_id
+
+    if(site_info == "hkstp")
+    {
+        cur_session_guid_ = session_guid_HKSTP_;
+    }
+    else if(site_info == "emsd")
+    {
+        cur_session_guid_ = session_guid_EMSD_;
+    }
+    else if(site_info == "ha")
+    {
+        cur_session_guid_ = session_guid_HA_;
+    }
+
+    /// (3) mission creation
+    //@@ input:
+    //   (1) name,       done    12w_2f_handrail_001_20210406_1020
+    //   (2) session_id, done    hkstp  guid: 7aa0de9c-8579-11eb-9840-00012978eb45
+    //   (3) hidden,     done    false
+    //   (4) group_id,   done    Missions guid: mirconst-guid-0000-0011-missiongroup
+
+    Poco::JSON::Object mission;
+
+    mission.set("session_id",cur_session_guid_);
+    mission.set("name",cur_mission_name_);
+
+    mission.set("hidden", hidden_flag_);
+    mission.set("group_id", group_id_);
+
+    return PostMethod("/api/v2.0.0/missions", mission);
+}
+
+void yf::ugv::mir::PostActionsForCharging()
+{
+    /// prerequisite
+    // 1. get mission_guid from REST
+    std::string mission_guid = this->GetCurMissionGUID();
+
+    // 2. map_guid
+    auto map_name = sql_ptr_->GetMapNameFromMapStatus();
+    std::string map_guid = this->GetMapGUID(map_name);
+
+    // 3. docking_position_guid
+    std::string dock_position_guid = this->GetDockingPositionGUID(map_guid);
+
+    /// Actions detail
+    //
+    int priority = 1;
+
+    /// Initialization Ugv Properties
+    // speed
+    this->PostActionSpeed(0.6,mission_guid,priority);
+    priority++;
+    // adjust localization
+    this->PostActionAdjustLocalization(mission_guid,priority);
+    priority++;
+    // go to docking
+    this->PostActionDocking(dock_position_guid,mission_guid,priority);
+    priority++;
+    // charging
+    this->PostActionCharging(mission_guid,priority);
+    priority++;
 }
 
 
