@@ -2086,12 +2086,52 @@ void yf::sys::nw_sys::ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode,
         {
             case data::arm::ToolAngle::Zero:
             {
-                tm5.SetMotorHigh();
+                switch(model_type)
+                {
+                    case data::arm::ModelType::Wall:
+                    {
+                        // get Force Type
+                        auto force_type = tm5.GetForceType(arm_mission_config_id);
+                        switch (force_type)
+                        {
+                            case data::arm::ForceType::via0_z_120N:
+                            {
+//                                tm5.SetMotorHigh();
 
-                std::string command = "Post arm_via0_line";
-                tm5.ArmTask(command);
+                                std::string command = "Post arm_via0_force_120N";
+                                tm5.ArmTask(command);
 
-                tm5.SetMotorLow();
+//                                tm5.SetMotorLow();
+                            }
+                            default:
+                            {
+                                tm5.SetMotorHigh();
+
+                                std::string command = "Post arm_via0_line";
+                                tm5.ArmTask(command);
+
+                                tm5.SetMotorLow();
+                                break;
+                            }
+                        }
+
+                        //Post arm_via0_line_force_120N
+
+
+                        break;
+                    }
+                    default:
+                    {
+                        tm5.SetMotorHigh();
+
+                        std::string command = "Post arm_via0_line";
+                        tm5.ArmTask(command);
+
+                        tm5.SetMotorLow();
+
+                        break;
+                    }
+                }
 
                 break;
             }
@@ -2209,13 +2249,6 @@ void yf::sys::nw_sys::ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode,
                                 tm5.ArmTask(command);
 
                                 tm5.SetMotorLow();
-
-                                break;
-                            }
-                            case data::arm::ForceType::via45_y:
-                            {
-                                std::string command = "Post arm_via45_line_y_no_force";
-                                tm5.ArmTask(command);
 
                                 break;
                             }

@@ -103,7 +103,8 @@ namespace  yf
                 null        = 0,
                 via45_z     = 1,
                 via45_y     = 2,
-                via0_z      = 3
+                via0_z      = 3,
+                via0_z_120N = 4
             };
 
             // for operation area

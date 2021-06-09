@@ -57,7 +57,7 @@ namespace yf
 
             //todo: Arm --- --- Check function 1.
             // function: Initial check the status of Arm.
-            bool CheckArmInitMssionStaus();
+            bool CheckArmInitMissionStatus();
 
             //todo: Arm --- --- Assign Arm Job. Arm Task...
             void AssignArmMission(const std::string& arm_command_str);
@@ -73,7 +73,7 @@ namespace yf
             /// if there is any error, the thread will notify program to unlock.
             void ArmTask(const std::string &arm_command)
             {
-                if(this->CheckArmInitMssionStaus())
+                if(this->CheckArmInitMissionStatus())
                 {
                     // Notify the modbus thread
                     LOG(INFO) << "[ArmTask]: modbus_thread check start...";
@@ -350,7 +350,7 @@ void yf::arm::tm::GetConnectionStatus()
     }
 }
 
-bool yf::arm::tm::CheckArmInitMssionStaus()
+bool yf::arm::tm::CheckArmInitMissionStatus()
 {
     bool check_flag = true;
 
@@ -364,7 +364,7 @@ bool yf::arm::tm::CheckArmInitMssionStaus()
             case yf::data::common::MissionStatus::Error:
             {
                 LOG(INFO) << "robotic arm is error!";
-                LOG(INFO) << "todo: update database(task,schedule)...";
+                LOG(INFO) << "update to database(task,schedule)...";
 
                 // The Arm is Error!
                 arm_mission_continue_flag_ = false;
@@ -375,8 +375,8 @@ bool yf::arm::tm::CheckArmInitMssionStaus()
             case yf::data::common::MissionStatus::EStop:
             {
                 LOG(INFO) << "robotic arm has been e-stopped!";
-                LOG(INFO) << "todo: update database(task,schedule)...";
-                LOG(INFO) << "todo: wait 3 minutes for resume!";
+                LOG(INFO) << "update database(task,schedule)...";
+                LOG(INFO) << "wait 3 minutes for resume!";
 
                 // The Arm is E-Stop!
                 arm_mission_continue_flag_ = false;
@@ -1238,6 +1238,10 @@ yf::data::arm::ForceType yf::arm::tm::GetForceType(const int &arm_mission_config
         case 3:
         {
             return data::arm::ForceType::via0_z;
+        }
+        case 4:
+        {
+            return data::arm::ForceType::via0_z_120N;
         }
     }
 }
