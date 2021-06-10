@@ -84,8 +84,8 @@ namespace yf
             void UpdateDbScheduleBeforeTask (const int& cur_schedule_id);
             void UpdateDbScheduleAfterTask (const int& cur_schedule_id);
 
-            void thread_WaitForPauseArm();
-            void thread_WaitForResumeArm();
+            void thread_WaitForPauseArm();    // if ugv has error, need to pause Arm.
+            void thread_WaitForResumeArm();   // if ugv is executing mission and has no error
             void thread_WaitForCancelUgvMission();
 
             void UpdateDbJobBeforeTask (const int& cur_job_id);
@@ -835,10 +835,10 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
                     bool arm_config_stage_success_flag = false;
                     int last_valid_order;
 
-                    arm_wait_plc003_success_flag = this->WaitForUgvPLCRegisterInt(3,1,2);
+                    arm_wait_plc003_success_flag = this->WaitForUgvPLCRegisterInt(3,1,5);
 
                     ///TIME
-                    sleep.ms(200);
+                    sleep.ms(500);
 
                     if(arm_wait_plc003_success_flag == true)
                     {
@@ -846,6 +846,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
                         auto cur_order = mir100_ptr_->GetPLCRegisterIntValue(2);
 
                         /// check arm config is valid or not
+
                         int  cur_arm_config_id = sql_ptr_->GetArmConfigId(cur_model_config_id_, cur_order);
                         int  is_valid = sql_ptr_->GetArmConfigIsValid(cur_arm_config_id);
                         LOG(INFO) << "current arm config is_valid:" << is_valid;
@@ -1811,7 +1812,17 @@ bool yf::sys::nw_sys::WaitForUgvPLCRegisterInt(const int &plc_register, const in
         /// IPC1 waits too long.
         if(!sql_ptr_->isFutureTime(time_future, sql_ptr_->TimeNow()))
         {
-            LOG(INFO) << "The PLC Register has not changed.";
+            LOG(INFO) << "Wait for PLC " << plc_register << " == " << value << " failed!";
+
+            return false;
+        }
+
+        /// Or Ugv has error.
+        mir100_ptr_->RetrieveUgvCurrentMissionState();
+        if(nw_status_ptr_->ugv_mission_status_ == data::common::UgvState::Error)
+        {
+            LOG(INFO) << "Wait for PLC " << plc_register << " == " << value << " failed!";
+            LOG(INFO) << "Ugv has Error!";
 
             return false;
         }
