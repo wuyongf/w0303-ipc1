@@ -88,6 +88,7 @@ namespace yf
             void thread_WaitForResumeArm();   // if ugv is executing mission and has no error
             void thread_WaitForCancelUgvMission();
 
+
             void UpdateDbJobBeforeTask (const int& cur_job_id);
             void UpdateDbJobAfterTask (const int& cur_job_id);
 
