@@ -84,10 +84,9 @@ namespace yf
             void UpdateDbScheduleBeforeTask (const int& cur_schedule_id);
             void UpdateDbScheduleAfterTask (const int& cur_schedule_id);
 
-            void thread_WaitForPauseArm();    // if ugv has error, need to pause Arm.
+            void thread_WaitForPauseArm();    // if ugv has error
             void thread_WaitForResumeArm();   // if ugv is executing mission and has no error
             void thread_WaitForCancelUgvMission();
-
 
             void UpdateDbJobBeforeTask (const int& cur_job_id);
             void UpdateDbJobAfterTask (const int& cur_job_id);
@@ -772,6 +771,8 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
     //  e.g {3,4,5}
     cur_valid_indexes_ = sql_ptr_->GetValidIndexes(cur_model_config_id_);
 
+    int cur_order = 0;
+    int pre_order = 0;
 
     /// 2. Assign Ugv Mission
     //
@@ -839,12 +840,21 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
                     arm_wait_plc003_success_flag = this->WaitForUgvPLCRegisterInt(3,1,5);
 
                     ///TIME
-                    sleep.ms(500);
+                    sleep.ms(200);
 
                     if(arm_wait_plc003_success_flag == true)
                     {
                         /// get current order
-                        auto cur_order = mir100_ptr_->GetPLCRegisterIntValue(2);
+
+                        while(cur_order == pre_order)
+                        {
+                            cur_order = mir100_ptr_->GetPLCRegisterIntValue(2);
+
+                            ///TIME
+                            sleep.ms(200);
+                        }
+
+                        pre_order = cur_order;
 
                         /// check arm config is valid or not
 
@@ -1026,6 +1036,9 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
                                                 // 2.5 post back_to_standby_position.
                                                 tm5.ArmTask("Move_to standby_p0");
 
+                                                /// Comparison real_lm_pos & ref_lm_pos
+                                                //tm5.IsLMPosDeviation(ref_landmark_pos, real_landmark_pos);
+
                                                 // 2.6 get TF
                                                 // 2.7 calculate the new via_points
 
@@ -1059,6 +1072,9 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
                                                 // back to safety position
                                                 tm5.ArmTask("Post arm_back_to_safety");
 
+                                                ///TIME
+                                                sleep.ms(200);
+
                                                 continue;
                                             }
                                         }
@@ -1091,7 +1107,9 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
                                     ///
 
                                     ///TIME
-                                    sleep.ms(300);
+                                    sleep.ms(500);
+
+                                    LOG(INFO) << "check bug 1" ;
 
                                     /// Last valid order
                                     if(cur_order == cur_last_valid_order_)
@@ -1118,6 +1136,8 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
                                         cur_tool_angle_ = data::arm::ToolAngle::Zero;
                                     }
 
+                                    LOG(INFO) << "check bug 2" ;
+
                                     /// For the end of each arm config. Check arm is alright or not
                                     // todo:
                                     //  check if arm is still connected
@@ -1125,9 +1145,14 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
                                             nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::Error ||
                                             nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::EStop;
 
+                                    LOG(INFO) << "check bug 3" ;
+
                                     if( nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Disconnected ||
                                         arm_mission_failed_status )
                                     {
+
+                                        LOG(INFO) << "check bug 4" ;
+
                                         arm_mission_success_flag    = false;
                                         mission_continue_flag       = false;
                                         mir100_ptr_->SetPLCRegisterIntValue(4,3); // error message
@@ -1803,7 +1828,7 @@ bool yf::sys::nw_sys::WaitForUgvPLCRegisterInt(const int &plc_register, const in
         if (value != result)
         {
             ///TIME
-            sleep.ms(200);
+            sleep.ms(1000);
         }
         else
         {

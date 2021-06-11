@@ -138,6 +138,10 @@ namespace yf
                                                     const yf::data::arm::Point3d& ref_landmark_pos,
                                                     const yf::data::arm::Point3d& real_landmark_pos);
 
+        public: /// Safety Methods
+
+            bool IsLMPosDeviation(const yf::data::arm::Point3d& ref_landmark_pos,
+                                  const yf::data::arm::Point3d& real_landmark_pos);
 
         protected:
 
@@ -1244,4 +1248,13 @@ yf::data::arm::ForceType yf::arm::tm::GetForceType(const int &arm_mission_config
             return data::arm::ForceType::via0_z_120N;
         }
     }
+}
+
+bool yf::arm::tm::IsLMPosDeviation(const yf::data::arm::Point3d &ref_landmark_pos,
+                                   const yf::data::arm::Point3d &real_landmark_pos)
+{
+
+
+    // if error too significant
+    return true;
 }
