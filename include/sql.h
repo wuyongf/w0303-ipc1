@@ -3251,6 +3251,7 @@ std::string yf::sql::sql_server::GetFloorInfoFromFromFloorId(const int &floor_id
 void yf::sql::sql_server::FillTasksForCurJob(const int &cur_job_id)
 {
     // For each job, insert a new task_group.
+    // insert into data_schedule_job_task_TaskGroup (name) values ('NewTaskGroup')
 
     // job_id,/task_group/, task_order, ugv_mission_config_id, arm_config_id, status.  ready.
 
