@@ -747,6 +747,9 @@ void yf::sys::nw_sys::DoJobs(const int &cur_schedule_id)
 void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
 {
     /// 0. Initialization
+
+    // Fill table schedule_job_task
+    sql_ptr_->FillTasksForCurJob(cur_job_id);
     //
     bool mission_success_flag = false;
     bool ugv_mission_success_flag = false;
@@ -1036,9 +1039,6 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
                                                 // 2.5 post back_to_standby_position.
                                                 tm5.ArmTask("Move_to standby_p0");
 
-                                                /// Comparison real_lm_pos & ref_lm_pos
-                                                //tm5.IsLMPosDeviation(ref_landmark_pos, real_landmark_pos);
-
                                                 // 2.6 get TF
                                                 // 2.7 calculate the new via_points
 
@@ -1056,16 +1056,16 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
 
                                                 real_via_approach_point = tm5.GetRealPointByLM(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].ref_landmark_pos, real_lm_pos_);
 
-                                                arm_mission_configs[n].via_approach_pos.x = real_via_approach_point.x;
-                                                arm_mission_configs[n].via_approach_pos.y = real_via_approach_point.y;
-                                                arm_mission_configs[n].via_approach_pos.z = real_via_approach_point.z;
+                                                arm_mission_configs[n].via_approach_pos.x  = real_via_approach_point.x;
+                                                arm_mission_configs[n].via_approach_pos.y  = real_via_approach_point.y;
+                                                arm_mission_configs[n].via_approach_pos.z  = real_via_approach_point.z;
                                                 arm_mission_configs[n].via_approach_pos.rx = real_via_approach_point.rx;
                                                 arm_mission_configs[n].via_approach_pos.ry = real_via_approach_point.ry;
                                                 arm_mission_configs[n].via_approach_pos.rz = real_via_approach_point.rz;
                                             }
                                             else
                                             {
-                                                LOG(INFO) << "Cannot find Landmark! cur_arm_mission_config aborted!!";
+                                                LOG(INFO) << "Cannot find Landmark! Skip cur_arm_mission_config!!";
 
                                                 // back to standby_point
                                                 tm5.ArmTask("Move_to standby_p0");
@@ -1077,6 +1077,31 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
 
                                                 continue;
                                             }
+
+                                            /// Comparison real_lm_pos & ref_lm_pos. Check whether error is too significant
+                                            if(tm5.IsLMPosDeviation(arm_mission_configs[n].ref_landmark_pos, real_lm_pos_))
+                                            {
+
+                                                // error too significant, skip current arm mission config!
+
+                                                LOG(INFO) << "Error too significant! Skip cur_arm_mission_config!!";
+
+                                                // back to standby_point
+                                                tm5.ArmTask("Move_to standby_p0");
+                                                // back to safety position
+                                                tm5.ArmTask("Post arm_back_to_safety");
+
+                                                ///TIME
+                                                sleep.ms(200);
+
+                                                //todo: upload to sys_schedule_job_task
+                                                // job_id, task_order, task_mode, ugv_config_id, arm_config_id,
+                                                // status (in process, finish, error)
+
+                                                continue;
+
+                                            }
+
                                         }
 
 

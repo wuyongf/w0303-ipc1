@@ -1253,8 +1253,26 @@ yf::data::arm::ForceType yf::arm::tm::GetForceType(const int &arm_mission_config
 bool yf::arm::tm::IsLMPosDeviation(const yf::data::arm::Point3d &ref_landmark_pos,
                                    const yf::data::arm::Point3d &real_landmark_pos)
 {
+    float std_error_rx = 4.0;
+    float std_error_ry = 3.0;
+    float std_error_rz = 5.0;
 
+    // consider rx, ry, rz for now...
+    float deviation_rx = 0;
+    float deviation_ry = 0;
+    float deviation_rz = 0;
 
-    // if error too significant
-    return true;
+    deviation_rx = std::abs(std::abs(ref_landmark_pos.rx) - std::abs(real_landmark_pos.rx));
+    deviation_ry = std::abs(std::abs(ref_landmark_pos.ry) - std::abs(real_landmark_pos.ry));
+    deviation_rz = std::abs(std::abs(ref_landmark_pos.rz) - std::abs(real_landmark_pos.rz));
+
+    if(deviation_rx >= std_error_rx || deviation_ry >= std_error_ry || deviation_rz >= std_error_rz)
+    {
+        // if error too significant
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }

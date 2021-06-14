@@ -100,7 +100,14 @@ namespace yf
             void UpdateJobData(const int& cur_job_id, const int& job_status);
             void UpdateJobLog(const int& cur_job_id, const int& job_status);
 
-            // Task
+            /// Task
+
+            // fill task table
+            void FillTasksForCurJob(const int& cur_job_id);
+            int GetUgvMissionConfigId(const int& model_config_id, const int& order);
+
+            void InsertTaskDetails(const int& job_id, const int& order, const int& ugv_mission_config_id, const int& arm_config_id);
+            void UpdateTaskElement();
             //
             int GetTaskCommand(const int& cur_task_id);
 
@@ -3236,6 +3243,98 @@ std::string yf::sql::sql_server::GetFloorInfoFromFromFloorId(const int &floor_id
 
         return floor_str;
     };
+}
+
+
+///\brief fill the table "sys_schedule_job_task"
+///
+void yf::sql::sql_server::FillTasksForCurJob(const int &cur_job_id)
+{
+    // For each job, insert a new task_group.
+
+    // job_id,/task_group/, task_order, ugv_mission_config_id, arm_config_id, status.  ready.
+
+    // status: ready --> in process --> finish
+    // in process --> error --> fixing/in process -->finish
+
+    // based on cur_job_id. get model_config_id
+    auto model_config_id = this->GetModelConfigId(cur_job_id);
+    // get mission_num
+    auto mission_num = this->GetUgvMissionConfigNum(model_config_id);
+
+    for (int order = 1; order <= mission_num; order++)
+    {
+        // get ugv_mission_config_id & arm_config_id
+        auto arm_config_id = this->GetArmConfigId(model_config_id,order);
+        auto ugv_mission_config_id = this->GetUgvMissionConfigId(model_config_id,order);
+        // insert each order.
+        InsertTaskDetails(cur_job_id,order,ugv_mission_config_id,arm_config_id);
+    }
+}
+
+int yf::sql::sql_server::GetUgvMissionConfigId(const int &model_config_id, const int &order)
+{
+// query string
+    std::string query_update;
+
+    // input
+    std::string model_config_id_str = std::to_string(model_config_id);
+    std::string cur_order_str = std::to_string(order);
+
+    // output
+    int ugv_mission_config_id;
+
+    //"SELECT arm_config_id FROM data_ugv_mission_config where model_config_id = 1"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT ID FROM data_ugv_mission_config where model_config_id = " + model_config_id_str + "AND mission_order = " + cur_order_str ;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            ugv_mission_config_id = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return ugv_mission_config_id;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return 0;
+    };
+}
+
+void yf::sql::sql_server::InsertTaskDetails(const int &job_id, const int &order, const int &ugv_mission_config_id,
+                                            const int &arm_config_id)
+{
+    std::string query_update;
+
+    try
+    {
+        Connect();
+
+
+        query_update = "INSERT INTO sys_schedule_job_task(job_id, task_order, status, ugv_mission_config_id, arm_config_id, created_date) "
+                       "VALUES (" + std::to_string(job_id) + "," + std::to_string(order) +","+ std::to_string(1) +","+ std::to_string(ugv_mission_config_id)+","+ std::to_string(arm_config_id)+",'"+ TimeNow() + "')";
+
+
+        nanodbc::execute(conn_,query_update);
+
+        Disconnect();
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+    }
 }
 
 
