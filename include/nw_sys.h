@@ -74,7 +74,7 @@ namespace yf
         public: /// Methods for two main functions
 
             void DoJobs(const int& cur_schedule_id);
-            void DoTasks(const int& cur_job_id, const int& next_job_id);
+            void DoTasks(const int& cur_job_id, const int& task_group_id);
 
             void DoJobUgvBackToChargingStation();
             void DoJobArmBackToHomePos();
@@ -698,16 +698,35 @@ void yf::sys::nw_sys::DoJobs(const int &cur_schedule_id)
         nw_status_ptr_->db_cur_job_id = cur_job_id;
 
         // record the job status
-        // TODO: (1) Update Job Log
-        sql_ptr_->UpdateJobData(cur_job_id, 2);
-        sql_ptr_->UpdateJobLog(cur_job_id, 2);
+
+        /// (0) Fill table schedule_job_task
+        sql_ptr_->FillTaskTableForCurJob(cur_job_id);
+        nw_status_ptr_->db_cur_task_group_id = sql_ptr_->GetLatestTaskGroupId();
+
+        /// (1) Update Job Table & Job Log (Insert job_log_id & Update task_group_id)
+        sql_ptr_->UpdateJobTable(cur_job_id, 2);
+        sql_ptr_->InsertNewJobLog(cur_job_id, 2);
+        nw_status_ptr_->db_cur_job_log_id = sql_ptr_->GetLatestJobLogId();
+
+        sql_ptr_->UpdateJobLogTaskGroupId(nw_status_ptr_->db_cur_job_log_id, nw_status_ptr_->db_cur_task_group_id);
 
         // TODO: (2) Execute the job!
-        DoTasks(cur_job_id,next_job_id);
+        DoTasks(cur_job_id, nw_status_ptr_->db_cur_task_group_id);
 
         // TODO: (3)
         //  a. Break the loop or not?
         //  b. Record Each Job STATUS.
+        if(nw_status_ptr_->cur_job_success_flag == true)
+        {
+            // current job finished!
+            sql_ptr_->UpdateJobLog(nw_status_ptr_->db_cur_job_log_id, 3);
+        }
+        else
+        {
+            // current job error!
+            sql_ptr_->UpdateJobLog(nw_status_ptr_->db_cur_job_log_id, 5);
+        }
+
         bool arm_mission_failed_status = nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::Error ||
                                          nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::EStop;
 
@@ -744,14 +763,11 @@ void yf::sys::nw_sys::DoJobs(const int &cur_schedule_id)
     }
 }
 
-void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
+void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
 {
     /// 0. Initialization
-
-    // Fill table schedule_job_task
-    sql_ptr_->FillTaskTableForCurJob(cur_job_id);
     //
-    bool mission_success_flag = false;
+    nw_status_ptr_->cur_job_success_flag = false;
     bool ugv_mission_success_flag = false;
     bool arm_mission_success_flag = false;
 
@@ -907,6 +923,9 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
                                         mission_continue_flag       = false;
                                     }
                                 }
+
+                                /// Update Each order's Status as Finished.
+                                sql_ptr_->UpdateEachTaskStatus(task_group_id, cur_order, 3);
 
                                 break;
                             }
@@ -1075,6 +1094,9 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
                                                 ///TIME
                                                 sleep.ms(200);
 
+                                                /// Update Each order's Status as Error.
+                                                sql_ptr_->UpdateEachTaskStatus(task_group_id, cur_order, 5);
+
                                                 continue;
                                             }
 
@@ -1093,6 +1115,9 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
 
                                                 ///TIME
                                                 sleep.ms(200);
+
+                                                /// Update Each order's Status as Error.
+                                                sql_ptr_->UpdateEachTaskStatus(task_group_id, cur_order, 5);
 
                                                 //todo: upload to sys_schedule_job_task
                                                 // job_id, task_order, task_mode, ugv_config_id, arm_config_id,
@@ -1181,12 +1206,19 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
                                         arm_mission_success_flag    = false;
                                         mission_continue_flag       = false;
                                         mir100_ptr_->SetPLCRegisterIntValue(4,3); // error message
+
+                                        /// Update Each order's Status as Error.
+                                        sql_ptr_->UpdateEachTaskStatus(task_group_id, cur_order, 5);
+
                                         continue;
                                     }
                                     else
                                     {
                                         /// info mir100 the arm has finished
                                         mir100_ptr_->SetPLCRegisterIntValue(1,0);
+
+                                        /// Update Each order's Status as Finished.
+                                        sql_ptr_->UpdateEachTaskStatus(task_group_id, cur_order, 3);
                                     }
 
                                     /// For Last order -- Need to decide how to break the loop
@@ -1245,14 +1277,14 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
 
     if(arm_mission_success_flag == true && ugv_mission_success_flag == true)
     {
-        mission_success_flag = true;
+        nw_status_ptr_->cur_job_success_flag = true;
 
         mir100_ptr_->SetPLCRegisterIntValue(4,0);
     }
     else
     {
         // something is wrong.
-        mission_success_flag = false;
+        nw_status_ptr_->cur_job_success_flag = false;
     }
 
     mir100_ptr_->Pause();
@@ -1622,8 +1654,8 @@ void yf::sys::nw_sys::UpdateDbCurJobStatusAndLog()
     if( nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::Idle ||
         nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::Finish)
     {
-        sql_ptr_->UpdateJobData(nw_status_ptr_->db_cur_job_id, 3);
-        sql_ptr_->UpdateJobLog(nw_status_ptr_->db_cur_job_id, 3);
+        sql_ptr_->UpdateJobTable(nw_status_ptr_->db_cur_job_log_id, 3);
+        sql_ptr_->UpdateJobLog(nw_status_ptr_->db_cur_job_log_id, 3);
     }
 
     if( nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::Error ||
@@ -1631,8 +1663,8 @@ void yf::sys::nw_sys::UpdateDbCurJobStatusAndLog()
     {
         // error
         //
-        sql_ptr_->UpdateJobData(nw_status_ptr_->db_cur_job_id, 5);
-        sql_ptr_->UpdateJobLog(nw_status_ptr_->db_cur_job_id, 5);
+        sql_ptr_->UpdateJobTable(nw_status_ptr_->db_cur_job_log_id, 5);
+        sql_ptr_->UpdateJobLog(nw_status_ptr_->db_cur_job_log_id, 5);
     }
 }
 

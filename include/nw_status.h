@@ -47,6 +47,12 @@ namespace yf
 
             int db_cur_job_id;
 
+            int db_cur_job_log_id;
+
+            int db_cur_task_group_id;
+
+            bool cur_job_success_flag = false;
+
             int db_cur_task_id;
 
             bool cur_task_continue_flag = false;

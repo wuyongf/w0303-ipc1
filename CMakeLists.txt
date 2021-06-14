@@ -151,5 +151,5 @@ target_link_libraries(arm_setup_ref_lm_pos PUBLIC glog::glog nanodbc modbus Poco
 add_executable(str_parse_test1 "useful-functions/str_parse_test1.cpp" "include/net_w0303_server.h")
 target_link_libraries(str_parse_test1 PUBLIC glog::glog nanodbc modbus Poco::Foundation Poco::Net Poco::XML Poco::Zip Poco::Data Poco::JSON)
 
-add_executable(al_test "useful-functions/al_test.cpp" )
+add_executable(al_test "useful-functions/al_test.cpp" useful-functions/test0000.cpp useful-functions/test0000.h)
 target_link_libraries(al_test PUBLIC glog::glog nanodbc modbus Poco::Foundation Poco::Net Poco::XML Poco::Zip Poco::Data Poco::JSON)

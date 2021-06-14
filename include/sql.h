@@ -95,10 +95,15 @@ namespace yf
 
             void UpdateScheduleLog(const int& schedule_id, const int& schedule_status);
 
-            // Job
+            /// Job & JobLog
             //
-            void UpdateJobData(const int& cur_job_id, const int& job_status);
-            void UpdateJobLog(const int& cur_job_id, const int& job_status);
+            void UpdateJobTable(const int& cur_job_id, const int& job_status);
+
+            void InsertNewJobLog(const int& cur_job_id, const int& job_status);
+            int  GetLatestJobLogId();
+
+            void UpdateJobLog(const int& cur_job_log_id, const int& job_status);
+            void UpdateJobLogTaskGroupId(const int& cur_job_log_id, const int& task_group_id);
 
             /// Task
 
@@ -106,13 +111,14 @@ namespace yf
             void FillTaskTableForCurJob(const int& cur_job_id);
 
             void InsertNewTaskGroup();
-            int  GetLatestNewTaskGroupId();
+            int  GetLatestTaskGroupId();
 
-            int GetUgvMissionConfigId(const int& model_config_id, const int& order);
+            int  GetUgvMissionConfigId(const int& model_config_id, const int& order);
 
             void InsertTaskDetails(const int& job_id,const int& task_group_id, const int& order,
                                    const int& ugv_mission_config_id, const int& arm_config_id);
-            void UpdateTaskElement();
+
+            void UpdateEachTaskStatus(const int& task_group_id, const int& task_order, const int& task_status);
 
 
             //
@@ -1121,7 +1127,7 @@ void yf::sql::sql_server::UpdateDeviceMissionStatusLog(const std::string &device
     }
 }
 
-void yf::sql::sql_server::UpdateJobData(const int &cur_job_id, const int &job_status)
+void yf::sql::sql_server::UpdateJobTable(const int &cur_job_id, const int &job_status)
 {
     std::string status_str = std::to_string(job_status);
     std::string id_str = std::to_string(cur_job_id);
@@ -1176,54 +1182,18 @@ void yf::sql::sql_server::UpdateJobData(const int &cur_job_id, const int &job_st
     }
 }
 
-void yf::sql::sql_server::UpdateJobLog(const int &cur_job_id, const int &job_status)
+void yf::sql::sql_server::UpdateJobLog(const int &cur_job_log_id, const int &job_status)
 {
-    std::string status_str = std::to_string(job_status);
-    std::string job_id_str = std::to_string(cur_job_id);
     std::string query_update;
 
     try
     {
         Connect();
 
-        switch (job_status) {
-            case 2: // in processing
-            {
-                query_update = "INSERT INTO sys_schedule_job_log(job_id, actual_start, status) VALUES (" +
-                               job_id_str + ",'" + TimeNow() + "'," + status_str + ")";
-                break;
-            }
+        query_update =
+                "UPDATE sys_schedule_job_log SET status = " + std::to_string(job_status) + ", actual_end='" + TimeNow() +
+                "' WHERE ID = " + std::to_string(cur_job_log_id) ;
 
-            case 3: // finish
-            {
-                query_update =
-                        "UPDATE sys_schedule_job_log SET status = " + status_str + ", actual_end='" + TimeNow() +
-                        "' WHERE job_id = " + job_id_str + " AND status=2";
-                break;
-            }
-
-            case 4: // cancel
-            {
-                query_update =
-                        "UPDATE sys_schedule_job_log SET status = " + status_str + ", actual_end='" + TimeNow() +
-                        "' WHERE job_id = " + job_id_str + " AND status=2";
-                break;
-            }
-
-            case 5: // error
-            {
-                query_update = "UPDATE sys_schedule_job_log SET status = " + status_str + ", actual_end='" + TimeNow() +
-                               "' WHERE job_id = " + job_id_str ;
-                break;
-            }
-
-            case 6: // pause
-            {
-                query_update = query_update = "UPDATE sys_schedule_job_log SET status = " + status_str + ", actual_end='" + TimeNow() +
-                                              "' WHERE job_id = " + job_id_str ;
-                break;
-            }
-        }
 
         nanodbc::execute(conn_,query_update);
 
@@ -3259,7 +3229,7 @@ void yf::sql::sql_server::FillTaskTableForCurJob(const int &cur_job_id)
 {
     // For each job, insert a new task_group.
     this->InsertNewTaskGroup();
-    int task_group_id = this->GetLatestNewTaskGroupId();
+    int task_group_id = this->GetLatestTaskGroupId();
 
     // job_id,/task_group/, task_order, ugv_mission_config_id, arm_config_id, status.  ready.
 
@@ -3370,7 +3340,7 @@ void yf::sql::sql_server::InsertNewTaskGroup()
     }
 }
 
-int yf::sql::sql_server::GetLatestNewTaskGroupId()
+int yf::sql::sql_server::GetLatestTaskGroupId()
 {
     // SELECT TOP 1 [ID] FROM data_schedule_job_task_TaskGroup ORDER BY ID DESC
 
@@ -3405,6 +3375,113 @@ int yf::sql::sql_server::GetLatestNewTaskGroupId()
 
         return 0;
     };
+}
+
+void yf::sql::sql_server::UpdateJobLogTaskGroupId(const int &cur_job_log_id, const int &task_group_id)
+{
+
+    std::string query_update;
+
+    try
+    {
+        Connect();
+
+        query_update = query_update = "UPDATE sys_schedule_job_log SET task_group_id = " + std::to_string(task_group_id) + " WHERE ID = " + std::to_string(cur_job_log_id) ;
+
+
+        nanodbc::execute(conn_,query_update);
+
+        Disconnect();
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+    }
+}
+
+void yf::sql::sql_server::InsertNewJobLog(const int &cur_job_id, const int &job_status)
+{
+    std::string query_update;
+
+    //"SELECT ID FROM schedule_table where status=1 AND planned_start > '2021-02-06 11:10:08.000'"
+    try
+    {
+        Connect();
+
+            query_update = "INSERT INTO sys_schedule_job_log(job_id, actual_start, status) VALUES (" +
+                   std::to_string(cur_job_id) + ",'" + TimeNow() + "'," + std::to_string(job_status) + ")";
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        Disconnect();
+
+        return ;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+    }
+
+}
+
+int yf::sql::sql_server::GetLatestJobLogId()
+{
+    // SELECT TOP 1 [ID] FROM data_schedule_job_task_TaskGroup ORDER BY ID DESC
+
+    std::string query_update;
+
+    // output
+    int job_log_id;
+
+    //"SELECT arm_config_id FROM data_ugv_mission_config where model_config_id = 1"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT TOP 1 [ID] FROM sys_schedule_job_log ORDER BY ID DESC ";
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            job_log_id = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return job_log_id;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return 0;
+    };
+}
+
+void yf::sql::sql_server::UpdateEachTaskStatus(const int& task_group_id, const int& task_order, const int &task_status)
+{
+    std::string query_update;
+
+    try
+    {
+        Connect();
+
+        query_update = query_update = "UPDATE sys_schedule_job_task SET status = " + std::to_string(task_status) + " WHERE task_group_id = " + std::to_string(task_group_id) + "AND task_order = " + std::to_string(task_order);
+
+        nanodbc::execute(conn_,query_update);
+
+        Disconnect();
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+    }
 }
 
 
