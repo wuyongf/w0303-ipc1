@@ -749,7 +749,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& next_job_id)
     /// 0. Initialization
 
     // Fill table schedule_job_task
-    sql_ptr_->FillTasksForCurJob(cur_job_id);
+    sql_ptr_->FillTaskTableForCurJob(cur_job_id);
     //
     bool mission_success_flag = false;
     bool ugv_mission_success_flag = false;

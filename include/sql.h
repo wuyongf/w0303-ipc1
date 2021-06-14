@@ -102,12 +102,19 @@ namespace yf
 
             /// Task
 
-            // fill task table
-            void FillTasksForCurJob(const int& cur_job_id);
+            /// Fill task table
+            void FillTaskTableForCurJob(const int& cur_job_id);
+
+            void InsertNewTaskGroup();
+            int  GetLatestNewTaskGroupId();
+
             int GetUgvMissionConfigId(const int& model_config_id, const int& order);
 
-            void InsertTaskDetails(const int& job_id, const int& order, const int& ugv_mission_config_id, const int& arm_config_id);
+            void InsertTaskDetails(const int& job_id,const int& task_group_id, const int& order,
+                                   const int& ugv_mission_config_id, const int& arm_config_id);
             void UpdateTaskElement();
+
+
             //
             int GetTaskCommand(const int& cur_task_id);
 
@@ -3248,10 +3255,11 @@ std::string yf::sql::sql_server::GetFloorInfoFromFromFloorId(const int &floor_id
 
 ///\brief fill the table "sys_schedule_job_task"
 ///
-void yf::sql::sql_server::FillTasksForCurJob(const int &cur_job_id)
+void yf::sql::sql_server::FillTaskTableForCurJob(const int &cur_job_id)
 {
     // For each job, insert a new task_group.
-    // insert into data_schedule_job_task_TaskGroup (name) values ('NewTaskGroup')
+    this->InsertNewTaskGroup();
+    int task_group_id = this->GetLatestNewTaskGroupId();
 
     // job_id,/task_group/, task_order, ugv_mission_config_id, arm_config_id, status.  ready.
 
@@ -3269,7 +3277,7 @@ void yf::sql::sql_server::FillTasksForCurJob(const int &cur_job_id)
         auto arm_config_id = this->GetArmConfigId(model_config_id,order);
         auto ugv_mission_config_id = this->GetUgvMissionConfigId(model_config_id,order);
         // insert each order.
-        InsertTaskDetails(cur_job_id,order,ugv_mission_config_id,arm_config_id);
+        InsertTaskDetails(cur_job_id,task_group_id,order,ugv_mission_config_id,arm_config_id);
     }
 }
 
@@ -3313,8 +3321,8 @@ int yf::sql::sql_server::GetUgvMissionConfigId(const int &model_config_id, const
     };
 }
 
-void yf::sql::sql_server::InsertTaskDetails(const int &job_id, const int &order, const int &ugv_mission_config_id,
-                                            const int &arm_config_id)
+void yf::sql::sql_server::InsertTaskDetails(const int &job_id, const int& task_group_id, const int &order,
+                                            const int &ugv_mission_config_id,const int &arm_config_id)
 {
     std::string query_update;
 
@@ -3323,8 +3331,8 @@ void yf::sql::sql_server::InsertTaskDetails(const int &job_id, const int &order,
         Connect();
 
 
-        query_update = "INSERT INTO sys_schedule_job_task(job_id, task_order, status, ugv_mission_config_id, arm_config_id, created_date) "
-                       "VALUES (" + std::to_string(job_id) + "," + std::to_string(order) +","+ std::to_string(1) +","+ std::to_string(ugv_mission_config_id)+","+ std::to_string(arm_config_id)+",'"+ TimeNow() + "')";
+        query_update = "INSERT INTO sys_schedule_job_task(job_id, task_group_id, task_order, status, ugv_mission_config_id, arm_config_id, create_date) "
+                       "VALUES (" + std::to_string(job_id) + "," + std::to_string(task_group_id) + ","+ std::to_string(order) +","+ std::to_string(1) +","+ std::to_string(ugv_mission_config_id)+","+ std::to_string(arm_config_id)+",'"+ TimeNow() + "')";
 
 
         nanodbc::execute(conn_,query_update);
@@ -3336,6 +3344,67 @@ void yf::sql::sql_server::InsertTaskDetails(const int &job_id, const int &order,
         std::cerr << e.what() << std::endl;
         std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
     }
+}
+
+void yf::sql::sql_server::InsertNewTaskGroup()
+{
+    std::string query_update;
+
+    //"SELECT ID FROM schedule_table where status=1 AND planned_start > '2021-02-06 11:10:08.000'"
+    try
+    {
+        Connect();
+
+        query_update = "insert into data_schedule_job_task_TaskGroup (name) values ('NewTaskGroup')";
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        Disconnect();
+
+        return ;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+    }
+}
+
+int yf::sql::sql_server::GetLatestNewTaskGroupId()
+{
+    // SELECT TOP 1 [ID] FROM data_schedule_job_task_TaskGroup ORDER BY ID DESC
+
+    std::string query_update;
+
+    // output
+    int task_group_id;
+
+    //"SELECT arm_config_id FROM data_ugv_mission_config where model_config_id = 1"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT TOP 1 [ID] FROM data_schedule_job_task_TaskGroup ORDER BY ID DESC ";
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            task_group_id = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return task_group_id;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return 0;
+    };
 }
 
 
