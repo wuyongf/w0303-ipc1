@@ -92,6 +92,8 @@ namespace yf
 
             bool InitialStatusCheckForMission(const int& timeout_min);
 
+            std::deque<yf::data::arm::MissionConfig> ConfigureRedoArmMission(const int& task_group_id, const int & order, const int& origin_model_config_id);
+
             std::deque<yf::data::arm::MissionConfig> ConfigureArmMission(const int& model_config_id, const int & order);
 //
             yf::data::arm::ModelType GetModelType(const int& model_config_id);
@@ -1275,4 +1277,86 @@ bool yf::arm::tm::IsLMPosDeviation(const yf::data::arm::Point3d &ref_landmark_po
     {
         return false;
     }
+}
+
+std::deque<yf::data::arm::MissionConfig>
+yf::arm::tm::ConfigureRedoArmMission(const int &task_group_id, const int &order, const int& origin_model_config_id)
+{
+    std::deque<yf::data::arm::MissionConfig> arm_mission_configs;
+
+    int arm_config_id = sql_ptr_->GetRedoArmConfigId(task_group_id, order);
+
+    // arm_mission_config_num
+    std::deque<int> arm_mission_config_ids = sql_ptr_->GetArmMissionConfigIds(arm_config_id);
+
+    int arm_mission_config_num = arm_mission_config_ids.size();
+
+    for (int n = 0; n < arm_mission_config_num; n++)
+    {
+        int arm_mission_config_id = arm_mission_config_ids[n];
+
+        // start config each arm_mission
+
+        data::arm::MissionConfig mission_config;
+
+        /// -1. id
+        mission_config.id = arm_mission_config_id;
+
+        /// 0. model_type
+        mission_config.model_type = this->GetModelType(origin_model_config_id);
+
+        /// 1. task_mode
+        mission_config.task_mode = this->GetTaskMode(origin_model_config_id);
+
+        /// 2. operation_area
+        mission_config.operation_area = this->GetOperationArea(arm_config_id);
+
+        /// 3. current tool
+        mission_config.cur_tool = this->GetCurrentTool();
+
+        /// 4. mission_tool
+        mission_config.mission_tool = this->GetMissionTool(origin_model_config_id);
+
+        /// 5. tool_angel
+        mission_config.tool_angle = this->GetToolAngle(arm_mission_config_id);
+
+        /// 6. motion_type
+        mission_config.motion_type = this->GetMotionType(arm_mission_config_id);
+
+        /// 7. standby_position
+        mission_config.standby_position = this->GetStandbyPosition(arm_config_id);
+
+        /// 8. landmark_flag
+        mission_config.landmark_flag = this->GetLandmarkFlag(arm_mission_config_id);
+
+        /// 9.(optional) vision_lm_init__position
+        if(mission_config.landmark_flag == true)
+        {
+            mission_config.ref_vision_lm_init_position = this->GetRefVisionLMInitPosition(arm_mission_config_id);
+        }
+
+        /// 10.(optional) ref_landmark_pos
+        if(mission_config.landmark_flag == true)
+        {
+            mission_config.ref_landmark_pos = this->GetRefLandmarkPos(arm_mission_config_id);
+        }
+
+        /// 11. (*required) via_approach_point
+
+        mission_config.via_approach_pos = this->GetViaApproachPoint(arm_mission_config_id);
+
+        /// 12. via_points.
+        mission_config.via_points = this->GetRefViaPoints(mission_config.model_type, mission_config.task_mode,
+                                                          arm_mission_config_id, mission_config.motion_type);
+
+        /// 13. n_via_points
+        mission_config.n_via_points = mission_config.via_points.size();
+
+        /// 14. mission_order
+        mission_config.mission_order = n+1;
+
+        arm_mission_configs.push_back(mission_config);
+    }
+
+    return arm_mission_configs;
 }

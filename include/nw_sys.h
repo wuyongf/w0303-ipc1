@@ -79,6 +79,12 @@ namespace yf
             void DoJobUgvBackToChargingStation();
             void DoJobArmBackToHomePos();
 
+            // REDO JOB
+            void RedoJobErrorPart(const int& cur_schedule_id);
+            // REDO JOB: SQL
+
+
+            //
             void JobsFilter(std::deque<int>& q_ids);
 
             void UpdateDbScheduleBeforeTask (const int& cur_schedule_id);
@@ -592,6 +598,17 @@ void yf::sys::nw_sys::thread_DoSchedules()
                     case data::schedule::ScheduleCommand::ArmBackToHomePos:
                     {
                         DoJobArmBackToHomePos();
+                        break;
+                    }
+                    case data::schedule::ScheduleCommand::RedoCleaningJobErrorPart:
+                    {
+                        // redo job
+                        RedoJobErrorPart(cur_schedule_id);
+                        break;
+                    }
+                    case data::schedule::ScheduleCommand::RedoCleaningJobWhole:
+                    {
+//                      RedoJobErrorPart(cur_schedule_id);
                         break;
                     }
                 }
@@ -2620,6 +2637,18 @@ void yf::sys::nw_sys::GetScheduleCommand(const int& id)
             break;
         }
 
+        case 4:
+        {
+            nw_status_ptr_->db_cur_schedule_command_ = data::schedule::ScheduleCommand::RedoCleaningJobErrorPart;
+            break;
+        }
+
+        case 5:
+        {
+            nw_status_ptr_->db_cur_schedule_command_ = data::schedule::ScheduleCommand::RedoCleaningJobWhole;
+            break;
+        }
+
     }
 }
 
@@ -2751,6 +2780,538 @@ void yf::sys::nw_sys::DoJobArmBackToHomePos()
     tm5.ArmTask("Post arm_back_home");
 
     // DB: update schedule_job & schedule_job_log
+}
+
+void yf::sys::nw_sys::RedoJobErrorPart(const int &cur_schedule_id)
+{
+    // filter, Re-Design the table "ugv_mission_config_redo"
+
+    // get task_group_id
+    int task_group_id = sql_ptr_->GetTaskGroupIdFromScheduleTable(cur_schedule_id);
+
+    sql_ptr_->FillUgvMissionConfigRedoTable(task_group_id);
+
+    // get job_id from job_log
+    int origin_job_id = sql_ptr_->GetJobIdFromJobLog(task_group_id);
+
+
+    //
+    /// 0. Initialization
+    //
+    nw_status_ptr_->cur_job_success_flag = false;
+    bool ugv_mission_success_flag = false;
+    bool arm_mission_success_flag = false;
+
+    bool arm_sub_mission_success_flag = false;
+
+    /// 1. Initialization
+    //
+    //  1.1 Get cur_model_config_id From DB
+    //  1.2 Get related variables
+    cur_model_config_id_    = sql_ptr_->GetModelConfigId(origin_job_id);
+    cur_mission_num_        = sql_ptr_->GetFailedTaskIds(task_group_id).size();
+    cur_model_type_         = tm5.GetModelType(cur_model_config_id_);
+    cur_task_mode_          = tm5.GetTaskMode(cur_model_config_id_);
+
+    //  1.3 Get Valid Order For Arm Configs
+    //  e.g. {0,0,0,1,1,1}
+    cur_valid_result_queue_ = sql_ptr_->GetRedoArmConfigValidResultQueue(task_group_id);
+    cur_first_valid_order_  = sql_ptr_->GetRedoFirstValidOrder(task_group_id);
+    cur_last_valid_order_   = sql_ptr_->GetRedoLastValidOrder(task_group_id);
+    //  e.g {3,4,5}
+    cur_valid_indexes_ = sql_ptr_->GetRedoValidIndexes(task_group_id);
+
+    int cur_order = 0;
+    int pre_order = 0;
+
+    /// 2. Assign Ugv Mission
+    //
+    //  2.1. Ugv: post a new mission via REST
+    mir100_ptr_->PostRedoMission(cur_model_config_id_);
+    //  2.2. Ugv: post actions via REST
+    mir100_ptr_->PostRedoActions(cur_model_config_id_,task_group_id);
+    //  2.3  Ugv: get current mission_guid
+    cur_mission_guid_ = mir100_ptr_->GetCurMissionGUID();
+
+    /// 3. Initial Status Checking
+    //
+    bool arm_init_status_check_success_flag = tm5.InitialStatusCheckForMission(2);
+    bool ugv_init_status_check_success_flag = mir100_ptr_->InitialStatusCheckForMission(2);
+
+    /// 3.1 Start executing a mission, which is a model_config (n ugv_mission_configs and n arm_configs)
+    if (arm_init_status_check_success_flag == true &&
+        ugv_init_status_check_success_flag == true)
+    {
+        // kick off mir missions.
+        mir100_ptr_->PostMissionQueue(cur_mission_guid_);
+        ///TIME
+        sleep.ms(200);
+        mir100_ptr_->Play();
+
+        /// \brief
+        ///
+        /// while ugv mission has not finished, keep assigning arm mission config and executing arm mission.
+        /// for ugv mission finish info, please refer to PLC Register Assignment.
+        bool mission_continue_flag = true;
+
+        while (mission_continue_flag)
+        {
+            // while mir's mission has not finished
+            // if plc4 ==2 || plc4 == 3 --> break
+            // if plc4 !=2 && plc4 != 3 ===> continue
+            while(  mir100_ptr_->GetPLCRegisterIntValue(4) != 2 &&
+                    mir100_ptr_->GetPLCRegisterIntValue(4) != 3)
+            {
+                ///TIME
+                sleep.ms(200);
+
+                /// b.1 Initialization
+                bool ugv_mission_continue_flag = false;
+
+                bool arm_mission_continue_flag = false;
+                bool arm_wait_plc003_success_flag = false;
+                bool arm_wait_plc001_success_flag = false;
+
+                /// b.2 ugv_mission_status_check
+                // keep checking
+                // if plc004 == 1 and then we know mir mission is executing ;
+                // if plc004 == 3 and then we know mir mission is error;
+                ugv_mission_continue_flag = mir100_ptr_->MissionStatusCheck(2);
+
+                if(ugv_mission_continue_flag == true)
+                {
+                    /// stage 0: check arm config is valid or not
+                    /// stage 1: if it is valid, configuring arm mission
+                    /// stage 2: execute arm mission
+
+                    bool arm_config_stage_success_flag = false;
+                    int last_valid_order;
+
+                    arm_wait_plc003_success_flag = this->WaitForUgvPLCRegisterInt(3,1,5);
+
+                    ///TIME
+                    sleep.ms(200);
+
+                    if(arm_wait_plc003_success_flag == true)
+                    {
+                        /// get current order
+
+                        while(cur_order == pre_order)
+                        {
+                            cur_order = mir100_ptr_->GetPLCRegisterIntValue(2);
+
+                            ///TIME
+                            sleep.ms(200);
+                        }
+
+                        pre_order = cur_order;
+
+                        /// check arm config is valid or not
+
+                        int  cur_arm_config_id = sql_ptr_->GetRedoArmConfigId(cur_model_config_id_, cur_order);
+                        int  is_valid = sql_ptr_->GetArmConfigIsValid(cur_arm_config_id);
+                        LOG(INFO) << "current arm config is_valid:" << is_valid;
+
+                        switch(is_valid)
+                        {
+                            case 0: // invalid
+                            {
+                                // arm configure stage has finished
+                                // notify mir100 and ipc
+                                mir100_ptr_->SetPLCRegisterIntValue(3,0);
+
+                                // wait for executing flag/signal.
+                                arm_wait_plc001_success_flag = this->WaitForUgvPLCRegisterInt(1,1,5);
+
+                                if(arm_wait_plc001_success_flag == true)
+                                {
+                                    /// TIME
+                                    sleep.ms(200);
+                                    mir100_ptr_->SetPLCRegisterIntValue(1,0);
+                                }
+                                else
+                                {
+                                    LOG(INFO) << "mission failed at step 2: wait for plc001 == 1";
+
+                                    arm_mission_success_flag = false;
+                                    mission_continue_flag = false;
+                                    break;
+                                }
+
+                                /// Last order
+                                if(cur_order == cur_mission_num_)
+                                {
+                                    sleep.ms(1000);
+                                    /// ipc1 loop
+                                    // set arm_mission_success_flag
+
+                                    arm_mission_success_flag = true;
+
+                                    // set ugv_mission_success_flag
+                                    if(mir100_ptr_->GetPLCRegisterIntValue(4) == 2)
+                                    {
+                                        ugv_mission_success_flag    = true;
+                                        mission_continue_flag       = false;
+                                    }
+                                }
+
+//                                /// Update Each order's Status as Finished.
+//                                sql_ptr_->UpdateEachTaskStatus(task_group_id, cur_order, 3);
+
+                                break;
+                            }
+                            case 1: // valid
+                            {
+                                ///
+                                LOG(INFO) << "configure redo arm mission   [Start!]";
+                                auto arm_mission_configs = tm5.ConfigureRedoArmMission(task_group_id, cur_order, cur_model_config_id_);
+                                LOG(INFO) << "configure redo arm mission   [Finished!]";
+
+                                cur_operation_area_ =  arm_mission_configs[0].operation_area;
+
+                                /// find last valid order
+                                // input: cur_order, which is the cur_valid_order!
+                                /// get_cur_valid_order
+                                /// get_last_valid_order
+                                if(cur_order == cur_first_valid_order_)
+                                {
+                                    last_valid_order = cur_order;
+                                }
+                                else
+                                {
+                                    std::vector<int>::iterator cur_valid_index_index = std::find(cur_valid_indexes_.begin(), cur_valid_indexes_.end(), cur_order-1);
+
+                                    auto last_valid_order_index = cur_valid_index_index - cur_valid_indexes_.begin() - 1;
+
+                                    last_valid_order = cur_valid_indexes_[last_valid_order_index] + 1;
+                                }
+
+                                /// get last operation area
+                                int  last_arm_config_id = sql_ptr_->GetRedoArmConfigId(task_group_id, last_valid_order);
+                                auto last_operation_area = tm5.GetOperationArea(last_arm_config_id);
+
+                                // arm configure stage has finished
+                                // notify mir100 and ipc
+                                mir100_ptr_->SetPLCRegisterIntValue(3,0);
+                                arm_config_stage_success_flag = true;
+
+                                // wait for executing flag/signal.
+                                arm_wait_plc001_success_flag = this->WaitForUgvPLCRegisterInt(1,1,5);
+
+                                if(arm_wait_plc001_success_flag == true)
+                                {
+                                    //todo:
+                                    // Start Monitoring Arm Status!!!
+                                    // 1. Wait for jumping out of the loop, done
+                                    // 2. Wait for pausing MiR mission
+
+                                    /// b.3.2 start executing arm mission
+
+                                    /// First order, pick the pad
+                                    if(cur_order == cur_first_valid_order_)
+                                    {
+                                        cur_tool_angle_ = data::arm::ToolAngle::Zero;
+#if 1 /// Disable For Testing
+                                        this->ArmPickTool(cur_task_mode_);
+
+                                        sleep.ms(200);
+
+                                        if(cur_task_mode_ == data::arm::TaskMode::Mopping)
+                                        {
+                                            this->ArmPickPad();
+
+                                            sleep.ms(200);
+
+                                            this->ArmAbsorbWater();
+                                        }
+#endif
+                                    }
+
+                                    /// For each order, move to safety position first.
+                                    //
+                                    if(cur_order == cur_first_valid_order_ )
+                                    {
+                                        this->ArmSetOperationArea(cur_operation_area_);
+                                        tm5.ArmTask("Post arm_home_to_safety");
+                                    }
+                                    else
+                                    {
+                                        // if cur_operation_area is not equal to last one, move to safety position first.
+                                        if(cur_operation_area_ != last_operation_area)
+                                        {
+                                            tm5.ArmTask("Post arm_safety_to_front_p1");
+
+                                            this->ArmSetOperationArea(cur_operation_area_);
+                                            tm5.ArmTask("Post arm_home_to_safety");
+                                        }
+                                    }
+
+                                    /// Loop all the arm_mission_configs
+                                    for (int n = 0; n < arm_mission_configs.size(); n++)
+                                    {
+                                        // 1. move to standby_position
+                                        //  1.1 get standby_point_str
+                                        auto standby_point = arm_mission_configs[n].standby_position;
+                                        std::string standby_point_str = this->ArmGetPointStr(standby_point);
+                                        //  1.2 set standby_point
+                                        tm5.ArmTask("Set standby_p0 = "+standby_point_str);
+                                        //  1.3 move to standby_point
+                                        tm5.ArmTask("Move_to standby_p0");
+
+                                        // 3. check&set tool_angle
+                                        this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
+
+                                        // 2. check landmark_or_not?
+                                        if(arm_mission_configs[n].landmark_flag == true)
+                                        {
+                                            // 2.1 init_lm_vision_position.
+                                            //  2.1.1 retrieve init_lm_vision_position_str
+                                            std::string ref_vision_lm_init_position_str = this->ArmGetPointStr(arm_mission_configs[n].ref_vision_lm_init_position);
+                                            //  2.1.2 set init_lm_vision_position
+                                            tm5.ArmTask("Set vision_lm_init_p0 = " + ref_vision_lm_init_position_str);
+                                            //  2.1.3 move_to init_lm_vision_position
+                                            tm5.ArmTask("Move_to vision_lm_init_p0");
+
+                                            // 2.2 execute vision_find_landmark
+                                            tm5.ArmTask("Post vision_find_landmark");
+
+                                            // 2.3 check find_landmark_flag
+                                            tm5.ArmTask("Post get_find_landmark_flag");
+
+                                            if(tm5.GetFindLandmarkFlag() == true)
+                                            {
+                                                LOG(INFO) << "Find Landmark!";
+
+                                                // 2.4 get real_landmark_pos
+                                                tm5.ArmTask("Post get_landmark_pos_str");
+                                                real_lm_pos_ = tm5.GetRealLandmarkPos();
+
+                                                // 2.5 post back_to_standby_position.
+                                                tm5.ArmTask("Move_to standby_p0");
+
+                                                // 2.6 get TF
+                                                // 2.7 calculate the new via_points
+
+                                                std::deque<yf::data::arm::Point3d> real_via_points;
+
+                                                real_via_points = tm5.GetRealViaPoints(arm_mission_configs[n].via_points, arm_mission_configs[n].ref_landmark_pos, real_lm_pos_);
+
+                                                arm_mission_configs[n].via_points.clear();
+
+                                                arm_mission_configs[n].via_points = real_via_points;
+
+                                                // 2.8 calculate the real approach point
+
+                                                yf::data::arm::Point3d real_via_approach_point;
+
+                                                real_via_approach_point = tm5.GetRealPointByLM(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].ref_landmark_pos, real_lm_pos_);
+
+                                                arm_mission_configs[n].via_approach_pos.x  = real_via_approach_point.x;
+                                                arm_mission_configs[n].via_approach_pos.y  = real_via_approach_point.y;
+                                                arm_mission_configs[n].via_approach_pos.z  = real_via_approach_point.z;
+                                                arm_mission_configs[n].via_approach_pos.rx = real_via_approach_point.rx;
+                                                arm_mission_configs[n].via_approach_pos.ry = real_via_approach_point.ry;
+                                                arm_mission_configs[n].via_approach_pos.rz = real_via_approach_point.rz;
+                                            }
+                                            else
+                                            {
+                                                LOG(INFO) << "Cannot find Landmark! Skip cur_arm_mission_config!!";
+
+                                                // back to standby_point
+                                                tm5.ArmTask("Move_to standby_p0");
+                                                // back to safety position
+                                                tm5.ArmTask("Post arm_back_to_safety");
+
+                                                ///TIME
+                                                sleep.ms(200);
+
+//                                                /// Update Each order's Status as Error.
+//                                                sql_ptr_->UpdateEachTaskStatus(task_group_id, cur_order, 5);
+
+                                                continue;
+                                            }
+
+                                            /// Comparison real_lm_pos & ref_lm_pos. Check whether error is too significant
+                                            if(tm5.IsLMPosDeviation(arm_mission_configs[n].ref_landmark_pos, real_lm_pos_))
+                                            {
+
+                                                // error too significant, skip current arm mission config!
+
+                                                LOG(INFO) << "Error too significant! Skip cur_arm_mission_config!!";
+
+                                                // back to standby_point
+                                                tm5.ArmTask("Move_to standby_p0");
+                                                // back to safety position
+                                                tm5.ArmTask("Post arm_back_to_safety");
+
+                                                ///TIME
+                                                sleep.ms(200);
+
+//                                                /// Update Each order's Status as Error.
+//                                                sql_ptr_->UpdateEachTaskStatus(task_group_id, cur_order, 5);
+
+                                                //todo: upload to sys_schedule_job_task
+                                                // job_id, task_order, task_mode, ugv_config_id, arm_config_id,
+                                                // status (in process, finish, error)
+
+                                                continue;
+
+                                            }
+
+                                        }
+
+
+
+                                        // 4. check motion_type, decide which motion.
+                                        // 5. assign n_via_points.
+                                        std::string n_via_points_str = std::to_string(arm_mission_configs[n].n_via_points);
+                                        tm5.ArmTask("Set n_points = " + n_via_points_str);
+
+                                        // 6. set approach_point
+                                        this->ArmSetApproachPoint(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].tool_angle);
+
+                                        // 7. set via_points
+                                        this->ArmSetViaPoints(arm_mission_configs[n].via_points, arm_mission_configs[n].tool_angle);
+
+                                        // 8. post via_points
+                                        this->ArmPostViaPoints(cur_task_mode_, arm_mission_configs[n].tool_angle, arm_mission_configs[n].model_type, arm_mission_configs[n].id);
+
+                                        // 9. post return standby_position
+                                        tm5.ArmTask("Move_to standby_p0");
+                                    }
+
+                                    ///TIME
+                                    sleep.ms(200);
+
+                                    // 10. post return safety.
+                                    tm5.ArmTask("Post arm_back_to_safety");
+                                    ///
+
+                                    ///TIME
+                                    sleep.ms(500);
+
+                                    /// Last valid order
+                                    if(cur_order == cur_last_valid_order_)
+                                    {
+                                        /// arm motion
+
+                                        // back to home first
+                                        tm5.ArmTask("Post arm_safety_to_home");
+#if 1 /// Disable For Testing
+                                        // remove pad if its necessary
+                                        if (cur_task_mode_ == data::arm::TaskMode::Mopping)
+                                        {
+                                            if (cur_tool_angle_ == data::arm::ToolAngle::FortyFive)
+                                            {
+                                                tm5.ArmTask("Post tool_angle_0");
+                                            }
+
+                                            this->ArmRemovePad();
+                                        }
+
+                                        // place the tool
+                                        this->ArmPlaceTool(cur_task_mode_);
+#endif
+                                        cur_tool_angle_ = data::arm::ToolAngle::Zero;
+                                    }
+
+                                    /// For the end of each arm config. Check arm is alright or not
+                                    // todo:
+                                    //  check if arm is still connected
+                                    bool arm_mission_failed_status =
+                                            nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::Error ||
+                                            nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::EStop;
+
+                                    if( nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Disconnected ||
+                                        arm_mission_failed_status )
+                                    {
+
+                                        arm_mission_success_flag    = false;
+                                        mission_continue_flag       = false;
+                                        mir100_ptr_->SetPLCRegisterIntValue(4,3); // error message
+
+//                                        /// Update Each order's Status as Error.
+//                                        sql_ptr_->UpdateEachTaskStatus(task_group_id, cur_order, 5);
+
+                                        continue;
+                                    }
+                                    else
+                                    {
+                                        /// info mir100 the arm has finished
+                                        mir100_ptr_->SetPLCRegisterIntValue(1,0);
+
+//                                        /// Update Each order's Status as Finished.
+//                                        sql_ptr_->UpdateEachTaskStatus(task_group_id, cur_order, 3);
+                                    }
+
+                                    /// For Last order -- Need to decide how to break the loop
+                                    if(cur_order == cur_mission_num_)
+                                    {
+                                        sleep.ms(1000);
+                                        /// ipc1 loop
+                                        // set arm_mission_success_flag
+                                        arm_mission_success_flag = true;
+
+                                        // set ugv_mission_success_flag
+                                        if(mir100_ptr_->GetPLCRegisterIntValue(4) == 2)
+                                        {
+                                            ugv_mission_success_flag    = true;
+                                            mission_continue_flag       = false;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    LOG(INFO) << "mission failed at step 2: wait for plc001 == 1";
+
+                                    arm_mission_success_flag = false;
+                                    mission_continue_flag = false;
+                                    break;
+                                }
+
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        LOG(INFO) << "mission failed at step 1: wait for plc003 == 1";
+
+                        arm_mission_success_flag = false;
+                        mission_continue_flag = false;
+                        break;
+                    }
+                }
+                else
+                {
+                    LOG(INFO) << "ugv mission failed.";
+
+                    ugv_mission_success_flag = false;
+                    mission_continue_flag = false;
+                    break;
+                }
+            }
+        }
+    }
+    else
+    {
+        LOG(INFO) << "mission failed at initial status check.";
+    }
+
+    if(arm_mission_success_flag == true && ugv_mission_success_flag == true)
+    {
+        nw_status_ptr_->cur_job_success_flag = true;
+
+        mir100_ptr_->SetPLCRegisterIntValue(4,0);
+    }
+    else
+    {
+        // something is wrong.
+        nw_status_ptr_->cur_job_success_flag = false;
+    }
+
+    mir100_ptr_->Pause();
+
 }
 
 

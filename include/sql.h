@@ -86,10 +86,10 @@ namespace yf
 
             void GetScheduleExecTime(const int& id);
 
-            // Filter
+            /// Filter
             // int GetTaskMode(const int& model_config_id);
 
-            // Schedule
+            /// Schedule
             //
             void UpdateScheduleData(const int& schedule_id, const int& schedule_status);
 
@@ -114,15 +114,33 @@ namespace yf
             int  GetLatestTaskGroupId();
 
             int  GetUgvMissionConfigId(const int& model_config_id, const int& order);
+            std::string GetUgvMissionConfigPositionName(const int& model_config_id, const int& order);
 
             void InsertTaskDetails(const int& job_id,const int& task_group_id, const int& order,
-                                   const int& ugv_mission_config_id, const int& arm_config_id);
+                                   const int& ugv_mission_config_id, const int& arm_config_id,
+                                   const std::string& position_name);
 
             void UpdateEachTaskStatus(const int& task_group_id, const int& task_order, const int& task_status);
 
+            /// Consuming Task Table
+
+            std::string GetTaskTableElement(const int& failed_task_id, const std::string& element);
+
+
+            /// Redo Job
+            int GetTaskGroupIdFromScheduleTable(const int& cur_schedule_id);
+            std::vector<int> GetFailedTaskIds(const int& task_group_id);
+
+            void InsertNewRedoTask(const int& task_group_id, const int& order,
+                                   const std::string& ugv_mission_config_id, const std::string& arm_config_id,
+                                   const std::string& position_name);
+
+            void FillUgvMissionConfigRedoTable(const int& task_group_id);
+
+            int GetJobIdFromJobLog(const int& task_group_id);
 
             //
-            int GetTaskCommand(const int& cur_task_id);
+            int  GetTaskCommand(const int& cur_task_id);
 
             void UpdateTaskData(const int& cur_task_id, const int& task_status);
             void UpdateTaskLog(const int& cur_task_id, const int& task_status);
@@ -197,6 +215,16 @@ namespace yf
 
             // Ref Landmark Pos Configuration
             void InsertRefLandmarkPos(const int& arm_mission_config_id, const yf::data::arm::Point3d& pos);
+
+            /// Ugv_mission_config_redo
+
+            std::vector<int> GetRedoArmConfigValidResultQueue(const int& task_group_id);
+            int GetRedoFirstValidOrder(const int& task_group_id);
+            int GetRedoLastValidOrder(const int& task_group_id);
+            std::vector<int> GetRedoValidIndexes(const int& task_group_id);
+
+            int GetRedoArmConfigId(const int& task_group_id, const int& cur_order);
+            std::deque<std::string> GetRedoUgvMissionConfigPositionNames(const int& task_group_id);
 
 
             /// Ugv_mission_config
@@ -3246,8 +3274,9 @@ void yf::sql::sql_server::FillTaskTableForCurJob(const int &cur_job_id)
         // get ugv_mission_config_id & arm_config_id
         auto arm_config_id = this->GetArmConfigId(model_config_id,order);
         auto ugv_mission_config_id = this->GetUgvMissionConfigId(model_config_id,order);
+        auto position_name = this->GetUgvMissionConfigPositionName(model_config_id,order);
         // insert each order.
-        InsertTaskDetails(cur_job_id,task_group_id,order,ugv_mission_config_id,arm_config_id);
+        InsertTaskDetails(cur_job_id,task_group_id,order,ugv_mission_config_id,arm_config_id,position_name);
     }
 }
 
@@ -3292,7 +3321,8 @@ int yf::sql::sql_server::GetUgvMissionConfigId(const int &model_config_id, const
 }
 
 void yf::sql::sql_server::InsertTaskDetails(const int &job_id, const int& task_group_id, const int &order,
-                                            const int &ugv_mission_config_id,const int &arm_config_id)
+                                            const int &ugv_mission_config_id,const int &arm_config_id,
+                                            const std::string& position_name)
 {
     std::string query_update;
 
@@ -3301,8 +3331,8 @@ void yf::sql::sql_server::InsertTaskDetails(const int &job_id, const int& task_g
         Connect();
 
 
-        query_update = "INSERT INTO sys_schedule_job_task(job_id, task_group_id, task_order, status, ugv_mission_config_id, arm_config_id, create_date) "
-                       "VALUES (" + std::to_string(job_id) + "," + std::to_string(task_group_id) + ","+ std::to_string(order) +","+ std::to_string(1) +","+ std::to_string(ugv_mission_config_id)+","+ std::to_string(arm_config_id)+",'"+ TimeNow() + "')";
+        query_update = "INSERT INTO sys_schedule_job_task(job_id, task_group_id, task_order, status, ugv_mission_config_id, arm_config_id, position_name, create_date) "
+                       "VALUES (" + std::to_string(job_id) + "," + std::to_string(task_group_id) + ","+ std::to_string(order) +","+ std::to_string(1) +","+ std::to_string(ugv_mission_config_id)+","+ std::to_string(arm_config_id)+",'"+ position_name +"','"+ TimeNow() + "')";
 
 
         nanodbc::execute(conn_,query_update);
@@ -3483,6 +3513,399 @@ void yf::sql::sql_server::UpdateEachTaskStatus(const int& task_group_id, const i
         std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
     }
 }
+
+int yf::sql::sql_server::GetTaskGroupIdFromScheduleTable(const int& cur_schedule_id)
+{
+    // query string
+    std::string query_update;
+
+    // output
+    int task_group_id;
+
+    //"SELECT arm_config_id FROM data_ugv_mission_config where model_config_id = 1"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT task_group_id FROM sys_schedule where ID = " + std::to_string(cur_schedule_id) ;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            task_group_id = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return task_group_id;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return 0;
+    };
+}
+
+std::vector<int> yf::sql::sql_server::GetFailedTaskIds(const int &task_group_id)
+{
+    // output
+    std::vector<int> failed_q;
+
+    // query string
+    std::string query_update;
+
+    //"SELECT arm_config_id FROM data_ugv_mission_config where model_config_id = 1"
+    try
+    {
+        Connect();
+
+        query_update = "select ID From sys_schedule_job_task Where task_group_id = " + std::to_string(task_group_id) + " And status != 3" ;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            int failed_id = result.get<int>(0);
+
+            failed_q.push_back(failed_id);
+        };
+
+        Disconnect();
+
+        return failed_q;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return failed_q;
+    };
+}
+
+std::string yf::sql::sql_server::GetUgvMissionConfigPositionName(const int &model_config_id, const int &order)
+{
+    // query string
+    std::string query_update;
+
+    // input
+    std::string model_config_id_str = std::to_string(model_config_id);
+    std::string cur_order_str = std::to_string(order);
+
+    // output
+    std::string position_name;
+
+    //"SELECT arm_config_id FROM data_ugv_mission_config where model_config_id = 1"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT position_name FROM data_ugv_mission_config where model_config_id = " + model_config_id_str + "AND mission_order = " + cur_order_str ;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            position_name = result.get<std::string>(0);
+        };
+
+        Disconnect();
+
+        return position_name;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return position_name;
+    };
+}
+
+std::string yf::sql::sql_server::GetTaskTableElement(const int &failed_task_id, const std::string &element)
+{
+    // query string
+    std::string query_update;
+
+    // output
+    std::string element_result;
+
+    //"SELECT arm_config_id FROM data_ugv_mission_config where model_config_id = 1"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT " + element + " FROM sys_schedule_job_task Where ID = " + std::to_string(failed_task_id) ;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            element_result = result.get<std::string>(0);
+        };
+
+        Disconnect();
+
+        return element_result;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return element_result;
+    };
+}
+
+void
+yf::sql::sql_server::InsertNewRedoTask(const int &task_group_id, const int &order, const std::string &ugv_mission_config_id,
+                                       const std::string &arm_config_id, const std::string &position_name)
+{
+    std::string query_update;
+
+    try
+    {
+        Connect();
+
+
+        query_update = "INSERT INTO data_ugv_mission_config_redo(task_group_id, mission_order, ugv_mission_config_id, arm_config_id, position_name) "
+                       "VALUES (" + std::to_string(task_group_id) + ","+ std::to_string(order) +","+ ugv_mission_config_id+","+ arm_config_id+",'"+ position_name +"')";
+
+
+        nanodbc::execute(conn_,query_update);
+
+        Disconnect();
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+    }
+}
+
+void yf::sql::sql_server::FillUgvMissionConfigRedoTable(const int& task_group_id)
+{
+    // filter, Re-Design the table "ugv_mission_config_redo"
+
+    //  check status. filter ID with status == 3.
+    std::vector<int> failed_ids = this->GetFailedTaskIds(task_group_id);
+
+    // fill table ugv_mission_config_redo
+    for(int n = 0 ; n < failed_ids.size(); n++)
+    {
+        // 1. task_group_id
+        // 2. mission_order
+        int mission_order = n+1;
+        // 3. ugv_mission_config_id
+        std::string ugv_mission_config_id_str = this->GetTaskTableElement(failed_ids[n], "ugv_mission_config_id");
+        // 4. arm_config_id
+        std::string arm_config_id_str = this->GetTaskTableElement(failed_ids[n], "arm_config_id");
+        // 5. position_name
+        std::string position_name = this->GetTaskTableElement(failed_ids[n], "position_name");
+
+        this->InsertNewRedoTask(task_group_id,mission_order,ugv_mission_config_id_str,arm_config_id_str,position_name);
+    }
+}
+
+int yf::sql::sql_server::GetJobIdFromJobLog(const int& task_group_id)
+{
+    // query string
+    std::string query_update;
+
+    // output
+    int job_id;
+
+    //"SELECT arm_config_id FROM data_ugv_mission_config where model_config_id = 1"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT job_id FROM sys_schedule_job_log where task_group_id = " + std::to_string(task_group_id) ;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            job_id = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return job_id;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return 0;
+    };
+}
+
+std::vector<int> yf::sql::sql_server::GetRedoArmConfigValidResultQueue(const int &task_group_id)
+{
+    std::vector<int> valid_q;
+
+    int total_mission_config_num = this->GetFailedTaskIds(task_group_id).size();
+
+    for (int n = 1; n < total_mission_config_num+1 ; n++)
+    {
+        int cur_arm_config_id = this->GetRedoArmConfigId(task_group_id,n);
+
+        int is_valid = this->GetArmConfigIsValid(cur_arm_config_id);
+
+        valid_q.push_back(is_valid);
+    }
+
+    return valid_q;
+}
+
+int yf::sql::sql_server::GetRedoArmConfigId(const int &task_group_id, const int &cur_order)
+{
+    // query string
+    std::string query_update;
+
+    // input
+    std::string task_group_id_str = std::to_string(task_group_id);
+    std::string cur_order_str = std::to_string(cur_order);
+
+    // output
+    int arm_config_id;
+
+    //"SELECT arm_config_id FROM data_ugv_mission_config where model_config_id = 1"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT arm_config_id FROM data_ugv_mission_config_redo where task_group_id = " + task_group_id_str + "AND mission_order = " + cur_order_str ;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            arm_config_id = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return arm_config_id;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return 0;
+    };
+}
+
+int yf::sql::sql_server::GetRedoFirstValidOrder(const int &task_group_id)
+{
+    std::vector<int> valid_q = this->GetRedoArmConfigValidResultQueue(task_group_id);
+
+    // find the first valid order!
+    std::vector<int>::iterator first_valid_index = std::find(valid_q.begin(), valid_q.end(), 1);
+
+    int first_valid_order = first_valid_index-valid_q.begin() + 1;
+
+    return first_valid_order;
+}
+
+int yf::sql::sql_server::GetRedoLastValidOrder(const int &task_group_id)
+{
+    std::vector<int> valid_q = this->GetArmConfigValidResultQueue(task_group_id);
+
+    std::vector<int> is_valid = {1};
+
+    // find the first valid order!
+    std::vector<int>::iterator last_valid_index = std::find_end(valid_q.begin(), valid_q.end(), is_valid.begin(), is_valid.end());
+
+    int last_valid_order = last_valid_index-valid_q.begin() + 1;
+
+    return last_valid_order;
+}
+
+std::vector<int> yf::sql::sql_server::GetRedoValidIndexes(const int &task_group_id)
+{
+    auto valid_result_queue = this->GetRedoArmConfigValidResultQueue(task_group_id);
+
+    /// valid_indexes
+    std::vector<int> valid_indexes;
+
+    std::vector<int>::iterator first_index = std::find(valid_result_queue.begin(), valid_result_queue.end(), 1);
+
+    if(first_index == std::end(valid_result_queue))
+    {
+        std::cout << "there is no any valid index"<< std::endl;
+    }
+    else
+    {
+        //todo: for loop, find all valid index. push back to valid_indexes
+
+        std::vector<int>::iterator iter = valid_result_queue.begin();
+
+        while ((iter = std::find_if(iter, valid_result_queue.end(), IsOne)) != valid_result_queue.end())
+        {
+            // Do something with iter
+            valid_indexes.push_back(iter-valid_result_queue.begin());
+
+            iter++;
+        }
+    }
+    return valid_indexes;
+}
+
+std::deque<std::string> yf::sql::sql_server::GetRedoUgvMissionConfigPositionNames(const int &task_group_id)
+{
+    // query string
+    std::string query_update;
+
+    // input
+    std::string task_group_id_str = std::to_string(task_group_id);
+
+    // output
+    std::deque<std::string> position_names;
+
+    //"SELECT position_name FROM data_ugv_mission_config where model_config_id = 1 ORDER BY mission_order"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT position_name FROM data_ugv_mission_config_redo where task_group_id = " + task_group_id_str + " ORDER BY mission_order" ;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            auto position_name = result.get<std::string>(0);
+
+            position_names.push_back(position_name);
+        };
+
+        Disconnect();
+
+        return position_names;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return position_names;
+    };
+}
+
+
 
 
 

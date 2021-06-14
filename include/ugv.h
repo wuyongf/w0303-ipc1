@@ -144,6 +144,9 @@ namespace yf
             bool PostMission(const int& model_config_id);
             void PostActions(const int& model_config_id);
 
+            bool PostRedoMission(const int& origin_model_config_id);
+            void PostRedoActions(const int& origin_model_config_id, const int& task_group_id);
+
             bool PostMissionForDebugTest(const int& model_config_id);
             void PostActionsForDebugTest(const int& model_config_id);
 
@@ -2278,6 +2281,149 @@ void yf::ugv::mir::PostActionsForCharging()
     priority++;
     // charging
     this->PostActionCharging(mission_guid,priority);
+    priority++;
+}
+
+bool yf::ugv::mir::PostRedoMission(const int &origin_model_config_id)
+{
+    /// based on model_config_id, mission_order, position_name, create a ugv mission.
+
+    /// 1. get positions.
+//    auto position_names = sql_ptr_->GetUgvMissionConfigPositionNames(model_config_id);
+
+    /// 2. get session.
+    auto session_info = sql_ptr_->GetSiteInfo(origin_model_config_id);
+
+    /// 3. get building---floor info--model name---time
+    auto building_info  = sql_ptr_->GetBuildingInfo(origin_model_config_id);
+    auto floor_info     = sql_ptr_->GetFloorInfo(origin_model_config_id);
+    auto model_name     = sql_ptr_->GetModelName(origin_model_config_id);
+
+    // time
+    sql_ptr_->UpdateTime();
+    auto time_year = sql_ptr_->get_time_element("year");
+    auto time_month = sql_ptr_->get_time_element("month");
+    auto time_day = sql_ptr_->get_time_element("day");
+    auto time_hour = sql_ptr_->get_time_element("hour");
+    auto time_min = sql_ptr_->get_time_element("minute");
+
+    auto time = time_year + time_month + time_day + "_" + time_hour + time_min;
+
+    /// (1) set cur_mission_name
+    cur_mission_name_ = building_info + "_" + floor_info + "/F_" + model_name + "_" + "Redo_"+ time;
+
+    /// (2) get session_id
+
+    if(session_info == "hkstp")
+    {
+        cur_session_guid_ = session_guid_HKSTP_;
+    }
+    else if(session_info == "emsd")
+    {
+        cur_session_guid_ = session_guid_EMSD_;
+    }
+    else if(session_info == "ha")
+    {
+        cur_session_guid_ = session_guid_HA_;
+    }
+
+    /// (3) mission creation
+    //@@ input:
+    //   (1) name,       done    12w_2f_handrail_001_20210406_1020
+    //   (2) session_id, done    hkstp  guid: 7aa0de9c-8579-11eb-9840-00012978eb45
+    //   (3) hidden,     done    false
+    //   (4) group_id,   done    Missions guid: mirconst-guid-0000-0011-missiongroup
+
+    Poco::JSON::Object mission;
+
+    mission.set("session_id",cur_session_guid_);
+    mission.set("name",cur_mission_name_);
+
+    mission.set("hidden", hidden_flag_);
+    mission.set("group_id", group_id_);
+
+    return PostMethod("/api/v2.0.0/missions", mission);
+}
+
+void yf::ugv::mir::PostRedoActions(const int& origin_model_config_id, const int &task_group_id)
+{
+// 1. get mission_guid from REST
+    std::string mission_guid = this->GetCurMissionGUID();
+
+    // 2. get position_names from DB, based on task_group_id
+    std::deque<std::string> position_names = sql_ptr_->GetRedoUgvMissionConfigPositionNames(task_group_id);
+
+    // 3.
+    // 3.a. get map name from db.
+    auto model_id = sql_ptr_->GetModelId(origin_model_config_id);
+    auto map_id = sql_ptr_->GetMapIdFromModelId(model_id);
+    auto map_name = sql_ptr_->GetMapElement(map_id,"map_name");
+    // 3.b. based on map_name, retrieve map_guid from REST.
+    std::string map_guid = this->GetMapGUID(map_name);
+
+    /// Actions detail
+    ///
+    int total_position_num = sql_ptr_->GetFailedTaskIds(task_group_id).size();
+    int priority = 1;
+
+    /// (1) Set Ugv Mission Start Flag
+    this->PostActionSetPLC(4,1,mission_guid,priority);
+    priority++;
+
+    /// (2) Initialization Stage
+    this->PostActionSetPLC(1,0,mission_guid,priority);
+    priority++;
+    this->PostActionSetPLC(2,0,mission_guid,priority);
+    priority++;
+    this->PostActionSetPLC(3,0,mission_guid,priority);
+    priority++;
+
+    /// Initialization Ugv Properties
+    // speed
+    this->PostActionSpeed(0.6,mission_guid,priority);
+    priority++;
+    // adjust localization
+    this->PostActionAdjustLocalization(mission_guid,priority);
+    priority++;
+
+    /// (3) For loop, mission details
+    //
+    // get mission_name from REST. mission_order from db
+    for (int mission_count = 1; mission_count <= total_position_num; mission_count++)
+    {
+        /// a. get position name.
+        std::string position_name = position_names[mission_count-1];
+
+        //todo: get position_guid
+
+        /// b. position_guid
+        std::string position_guid = this->GetPositionGUID(map_guid,position_name);
+
+        //1. get ugv_mission_config_id, based on mission_count,
+        // prepare: mission_config_id
+        //
+        //@@ input: position_guid, mission_guid(done)
+        //
+        this->PostActionSetPLC(2,mission_count,mission_guid,priority);
+        priority++;
+
+        this->PostActionSetPLC(3,1,mission_guid,priority);
+        priority++;
+
+        this->PostActionMove(position_guid, mission_guid, priority);
+        priority++;
+
+        this->PostActionSetPLC(1,1,mission_guid,priority);
+        priority++;
+
+        this->PostActionWaitPLC(1,0,mission_guid,priority);
+        priority++;
+
+    }
+
+    /// (4) Set Ugv Mission Finish Flag
+    //
+    this->PostActionSetPLC(4,2,mission_guid,priority);
     priority++;
 }
 

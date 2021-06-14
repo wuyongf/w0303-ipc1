@@ -20,6 +20,11 @@ int main()
 /// For IPC1
     std::shared_ptr<yf::sql::sql_server> sql = std::make_shared<yf::sql::sql_server>("SQL Server","192.168.7.127","NW_mobile_robot_sys","sa","NWcadcam2021");
 
+//    auto failed_q = sql->GetFailedTaskIds(10);
+
+    sql->FillUgvMissionConfigRedoTable(8047);
+
+
     sql->FillTaskTableForCurJob(10050);
 
 
