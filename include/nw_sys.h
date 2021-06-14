@@ -604,11 +604,12 @@ void yf::sys::nw_sys::thread_DoSchedules()
                     {
                         // redo job
                         RedoJobErrorPart(cur_schedule_id);
+
                         break;
                     }
                     case data::schedule::ScheduleCommand::RedoCleaningJobWhole:
                     {
-//                      RedoJobErrorPart(cur_schedule_id);
+                        RedoJobErrorPart(cur_schedule_id);
                         break;
                     }
                 }
@@ -3298,16 +3299,23 @@ void yf::sys::nw_sys::RedoJobErrorPart(const int &cur_schedule_id)
         LOG(INFO) << "mission failed at initial status check.";
     }
 
+    int job_log_id = sql_ptr_->GetJobLogId(task_group_id);
+
     if(arm_mission_success_flag == true && ugv_mission_success_flag == true)
     {
         nw_status_ptr_->cur_job_success_flag = true;
 
         mir100_ptr_->SetPLCRegisterIntValue(4,0);
+
+        // Mark job_log_id status as finished
+        sql_ptr_->UpdateJobLog(job_log_id, 3);
+
     }
     else
     {
         // something is wrong.
         nw_status_ptr_->cur_job_success_flag = false;
+
     }
 
     mir100_ptr_->Pause();

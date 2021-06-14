@@ -226,6 +226,7 @@ namespace yf
             int GetRedoArmConfigId(const int& task_group_id, const int& cur_order);
             std::deque<std::string> GetRedoUgvMissionConfigPositionNames(const int& task_group_id);
 
+            int GetJobLogId(const int& task_group_id);
 
             /// Ugv_mission_config
             int GetUgvMissionConfigNum(const int& model_config_id);
@@ -3902,6 +3903,45 @@ std::deque<std::string> yf::sql::sql_server::GetRedoUgvMissionConfigPositionName
         std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
 
         return position_names;
+    };
+}
+
+int yf::sql::sql_server::GetJobLogId(const int &task_group_id)
+{
+    // query string
+    std::string query_update;
+
+    // input
+    std::string task_group_id_str = std::to_string(task_group_id);
+
+    // output
+    int job_log_id;
+
+    //"SELECT arm_config_id FROM data_ugv_mission_config where model_config_id = 1"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT ID FROM sys_schedule_job_log where task_group_id = " + task_group_id_str  ;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            job_log_id = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return job_log_id;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return 0;
     };
 }
 
