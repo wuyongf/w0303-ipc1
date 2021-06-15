@@ -171,6 +171,11 @@ namespace yf
 
             int GetModelConfigElement(const int& model_config_id, const std::string& element);
 
+            // Arm Debug
+            void InsertNewArmLMError(const float& delta_x,const float& delta_y, const float& delta_z,
+                                     const float &delta_rx, const float &delta_ry, const float &delta_rz,
+                                     const int& is_error);
+
             /// Arm_mission_config
             //
             int GetArmConfigId(const int& model_config_id, const int& cur_order);
@@ -3943,6 +3948,33 @@ int yf::sql::sql_server::GetJobLogId(const int &task_group_id)
 
         return 0;
     };
+}
+
+void yf::sql::sql_server::InsertNewArmLMError(const float &delta_x, const float &delta_y, const float &delta_z,
+                                              const float &delta_rx, const float &delta_ry, const float &delta_rz,
+                                              const int &is_error)
+{
+    std::string query_update;
+
+    try
+    {
+        Connect();
+
+
+        query_update = "INSERT INTO data_arm_debug_lm_error(delta_x, delta_y, delta_z,delta_rx, delta_ry, delta_rz, is_error) "
+                       "VALUES (" + std::to_string(delta_x) + ","+ std::to_string(delta_y) +","+ std::to_string(delta_z)+","+
+                                    std::to_string(delta_rx) + ","+ std::to_string(delta_ry) +","+ std::to_string(delta_rz)+","+
+                                    std::to_string(is_error) +")";
+
+        nanodbc::execute(conn_,query_update);
+
+        Disconnect();
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+    }
 }
 
 

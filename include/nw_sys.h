@@ -698,20 +698,9 @@ void yf::sys::nw_sys::DoJobs(const int &cur_schedule_id)
     while (q_job_ids.size() != 0)
     {
         int cur_job_id;
-        int next_job_id;
 
         cur_job_id = q_job_ids.front();
         q_job_ids.pop_front();
-
-        /// Find Next Job Id
-        if(q_job_ids.size() != 0)
-        {
-            next_job_id = q_job_ids.front();
-        }
-        else
-        {
-            next_job_id = -1;
-        }
 
         nw_status_ptr_->db_cur_job_id = cur_job_id;
 
@@ -1177,8 +1166,6 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                     ///TIME
                                     sleep.ms(500);
 
-                                    LOG(INFO) << "check bug 1" ;
-
                                     /// Last valid order
                                     if(cur_order == cur_last_valid_order_)
                                     {
@@ -1204,8 +1191,6 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                         cur_tool_angle_ = data::arm::ToolAngle::Zero;
                                     }
 
-                                    LOG(INFO) << "check bug 2" ;
-
                                     /// For the end of each arm config. Check arm is alright or not
                                     // todo:
                                     //  check if arm is still connected
@@ -1213,13 +1198,10 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                             nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::Error ||
                                             nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::EStop;
 
-                                    LOG(INFO) << "check bug 3" ;
 
                                     if( nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Disconnected ||
                                         arm_mission_failed_status )
                                     {
-
-                                        LOG(INFO) << "check bug 4" ;
 
                                         arm_mission_success_flag    = false;
                                         mission_continue_flag       = false;
