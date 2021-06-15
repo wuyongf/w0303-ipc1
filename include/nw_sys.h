@@ -80,7 +80,7 @@ namespace yf
             void DoJobArmBackToHomePos();
 
             // REDO JOB
-            void RedoJobErrorPart(const int& cur_schedule_id);
+            void RedoJob(const int& cur_schedule_id,const yf::data::schedule::ScheduleCommand& redo_command);
             // REDO JOB: SQL
 
 
@@ -603,13 +603,13 @@ void yf::sys::nw_sys::thread_DoSchedules()
                     case data::schedule::ScheduleCommand::RedoCleaningJobErrorPart:
                     {
                         // redo job
-                        RedoJobErrorPart(cur_schedule_id);
+                        RedoJob(cur_schedule_id,nw_status_ptr_->db_cur_schedule_command_);
 
                         break;
                     }
                     case data::schedule::ScheduleCommand::RedoCleaningJobWhole:
                     {
-                        RedoJobErrorPart(cur_schedule_id);
+                        RedoJob(cur_schedule_id,nw_status_ptr_->db_cur_schedule_command_);
                         break;
                     }
                 }
@@ -727,11 +727,13 @@ void yf::sys::nw_sys::DoJobs(const int &cur_schedule_id)
         {
             // current job finished!
             sql_ptr_->UpdateJobLog(nw_status_ptr_->db_cur_job_log_id, 3);
+            sql_ptr_->UpdateJobTable(nw_status_ptr_->db_cur_job_id,3);
         }
         else
         {
             // current job error!
             sql_ptr_->UpdateJobLog(nw_status_ptr_->db_cur_job_log_id, 5);
+            sql_ptr_->UpdateJobTable(nw_status_ptr_->db_cur_job_id,5);
         }
 
         bool arm_mission_failed_status = nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::Error ||
@@ -2765,14 +2767,27 @@ void yf::sys::nw_sys::DoJobArmBackToHomePos()
     // DB: update schedule_job & schedule_job_log
 }
 
-void yf::sys::nw_sys::RedoJobErrorPart(const int &cur_schedule_id)
+void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedule::ScheduleCommand& redo_command)
 {
     // filter, Re-Design the table "ugv_mission_config_redo"
 
     // get task_group_id
     int task_group_id = sql_ptr_->GetTaskGroupIdFromScheduleTable(cur_schedule_id);
 
-    sql_ptr_->FillUgvMissionConfigRedoTable(task_group_id);
+    switch (redo_command)
+    {
+        case data::schedule::ScheduleCommand::RedoCleaningJobErrorPart:
+        {
+            sql_ptr_->FillUMCRedoTableErrorPart(task_group_id);
+            break;
+        }
+        case data::schedule::ScheduleCommand::RedoCleaningJobWhole:
+        {
+            sql_ptr_->FillUMCRedoTableWhole(task_group_id);
+            break;
+        }
+    }
+
 
     // get job_id from job_log
     int origin_job_id = sql_ptr_->GetJobIdFromJobLog(task_group_id);

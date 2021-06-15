@@ -130,12 +130,16 @@ namespace yf
             /// Redo Job
             int GetTaskGroupIdFromScheduleTable(const int& cur_schedule_id);
             std::vector<int> GetFailedTaskIds(const int& task_group_id);
+            std::vector<int> GetWholeTaskIds(const int& task_group_id);
+
+
 
             void InsertNewRedoTask(const int& task_group_id, const int& order,
                                    const std::string& ugv_mission_config_id, const std::string& arm_config_id,
                                    const std::string& position_name);
 
-            void FillUgvMissionConfigRedoTable(const int& task_group_id);
+            void FillUMCRedoTableErrorPart(const int& task_group_id);
+            void FillUMCRedoTableWhole(const int& task_group_id);
 
             int GetJobIdFromJobLog(const int& task_group_id);
 
@@ -3696,7 +3700,7 @@ yf::sql::sql_server::InsertNewRedoTask(const int &task_group_id, const int &orde
     }
 }
 
-void yf::sql::sql_server::FillUgvMissionConfigRedoTable(const int& task_group_id)
+void yf::sql::sql_server::FillUMCRedoTableErrorPart(const int& task_group_id)
 {
     // filter, Re-Design the table "ugv_mission_config_redo"
 
@@ -3974,6 +3978,68 @@ void yf::sql::sql_server::InsertNewArmLMError(const float &delta_x, const float 
     {
         std::cerr << e.what() << std::endl;
         std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+    }
+}
+
+std::vector<int> yf::sql::sql_server::GetWholeTaskIds(const int &task_group_id)
+{
+    // output
+    std::vector<int> failed_q;
+
+    // query string
+    std::string query_update;
+
+    //"SELECT arm_config_id FROM data_ugv_mission_config where model_config_id = 1"
+    try
+    {
+        Connect();
+
+        query_update = "select ID From sys_schedule_job_task Where task_group_id = " + std::to_string(task_group_id)  ;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            int failed_id = result.get<int>(0);
+
+            failed_q.push_back(failed_id);
+        };
+
+        Disconnect();
+
+        return failed_q;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return failed_q;
+    };
+}
+
+void yf::sql::sql_server::FillUMCRedoTableWhole(const int &task_group_id)
+{
+    // filter, Re-Design the table "ugv_mission_config_redo"
+
+    //  check status. filter ID with status == 3.
+    std::vector<int> failed_ids = this->GetWholeTaskIds(task_group_id);
+
+    // fill table ugv_mission_config_redo
+    for(int n = 0 ; n < failed_ids.size(); n++)
+    {
+        // 1. task_group_id
+        // 2. mission_order
+        int mission_order = n+1;
+        // 3. ugv_mission_config_id
+        std::string ugv_mission_config_id_str = this->GetTaskTableElement(failed_ids[n], "ugv_mission_config_id");
+        // 4. arm_config_id
+        std::string arm_config_id_str = this->GetTaskTableElement(failed_ids[n], "arm_config_id");
+        // 5. position_name
+        std::string position_name = this->GetTaskTableElement(failed_ids[n], "position_name");
+
+        this->InsertNewRedoTask(task_group_id,mission_order,ugv_mission_config_id_str,arm_config_id_str,position_name);
     }
 }
 
