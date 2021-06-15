@@ -26,10 +26,11 @@ namespace yf
             void set_plain_edge_points(const data::arm::Point3d& p1, const data::arm::Point3d& p2,
                                        const data::arm::Point3d& p3, const data::arm::Point3d& p4);
 
-            std::deque<yf::data::arm::Point3d> get_mop_via_points(const yf::data::arm::MotionType &motion_type,
-                                                                  const std::deque<yf::data::arm::Point3d>& ref_path_init_points,
-                                                                  const int& layer,
-                                                                  float& step_ratio_horizontal);
+            std::deque<yf::data::arm::Point3d> get_mop_via_points(  const yf::data::arm::ModelType& model_type,
+                                                                    const yf::data::arm::MotionType &motion_type,
+                                                                    const std::deque<yf::data::arm::Point3d>& ref_path_init_points,
+                                                                    const int& layer,
+                                                                    float& step_ratio_horizontal);
 
             std::deque<yf::data::arm::Point3d> get_uvc_via_points(const yf::data::arm::MotionType& motion_type,
                                                                   const std::deque<yf::data::arm::Point3d>& ref_path_init_points,
@@ -483,10 +484,11 @@ void yf::algorithm::cleaning_motion::set_plain_edge_points(const yf::data::arm::
 }
 
 std::deque<yf::data::arm::Point3d>
-yf::algorithm::cleaning_motion::get_mop_via_points(const yf::data::arm::MotionType& motion_type,
-                                                   const std::deque<yf::data::arm::Point3d>& ref_path_init_points,
-                                                   const int& layer,
-                                                   float& step_ratio_horizontal)
+yf::algorithm::cleaning_motion::get_mop_via_points( const yf::data::arm::ModelType& model_type,
+                                                    const yf::data::arm::MotionType& motion_type,
+                                                    const std::deque<yf::data::arm::Point3d>& ref_path_init_points,
+                                                    const int& layer,
+                                                    float& step_ratio_horizontal)
 {
     // Initialization
     std::deque<yf::data::arm::Point3d> via_points;
@@ -591,14 +593,25 @@ yf::algorithm::cleaning_motion::get_mop_via_points(const yf::data::arm::MotionTy
             }
 
             /// 2. add on reverse via points
-
-            auto via_points_reverse = via_points;
-
-            std::reverse(via_points_reverse.begin(),via_points_reverse.end());
-
-            for(int n = 0 ; n < via_points_reverse.size() ; n++)
+            switch (model_type)
             {
-                via_points.push_back(via_points_reverse[n]);
+                case yf::data::arm::ModelType::Skirting:
+                {
+                    break;
+                }
+                default:
+                {
+                    auto via_points_reverse = via_points;
+
+                    std::reverse(via_points_reverse.begin(),via_points_reverse.end());
+
+                    for(int n = 0 ; n < via_points_reverse.size() ; n++)
+                    {
+                        via_points.push_back(via_points_reverse[n]);
+                    }
+
+                    break;
+                }
             }
 
             break;

@@ -780,7 +780,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
     bool ugv_mission_success_flag = false;
     bool arm_mission_success_flag = false;
 
-    bool arm_sub_mission_success_flag = false;
+
 
     /// 1. Initialization
     //
@@ -840,6 +840,8 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
             while(  mir100_ptr_->GetPLCRegisterIntValue(4) != 2 &&
                     mir100_ptr_->GetPLCRegisterIntValue(4) != 3)
             {
+                bool arm_sub_mission_success_flag = true;
+
                 ///TIME
                 sleep.ms(200);
 
@@ -1095,6 +1097,8 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                             {
                                                 LOG(INFO) << "Cannot find Landmark! Skip cur_arm_mission_config!!";
 
+                                                arm_sub_mission_success_flag = false;
+
                                                 // back to standby_point
                                                 tm5.ArmTask("Move_to standby_p0");
                                                 // back to safety position
@@ -1102,9 +1106,6 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
 
                                                 ///TIME
                                                 sleep.ms(200);
-
-                                                /// Update Each order's Status as Error.
-                                                sql_ptr_->UpdateEachTaskStatus(task_group_id, cur_order, 5);
 
                                                 continue;
                                             }
@@ -1117,6 +1118,8 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
 
                                                 LOG(INFO) << "Error too significant! Skip cur_arm_mission_config!!";
 
+                                                arm_sub_mission_success_flag = false;
+
                                                 // back to standby_point
                                                 tm5.ArmTask("Move_to standby_p0");
                                                 // back to safety position
@@ -1124,9 +1127,6 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
 
                                                 ///TIME
                                                 sleep.ms(200);
-
-                                                /// Update Each order's Status as Error.
-                                                sql_ptr_->UpdateEachTaskStatus(task_group_id, cur_order, 5);
 
                                                 //todo: upload to sys_schedule_job_task
                                                 // job_id, task_order, task_mode, ugv_config_id, arm_config_id,
@@ -1223,6 +1223,12 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                         sql_ptr_->UpdateEachTaskStatus(task_group_id, cur_order, 3);
                                     }
 
+                                    if(arm_sub_mission_success_flag == false)
+                                    {
+                                        /// Update Each order's Status as Error.
+                                        sql_ptr_->UpdateEachTaskStatus(task_group_id, cur_order, 5);
+                                    }
+
                                     /// For Last order -- Need to decide how to break the loop
                                     if(cur_order == cur_mission_num_)
                                     {
@@ -1279,9 +1285,20 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
 
     if(arm_mission_success_flag == true && ugv_mission_success_flag == true)
     {
-        nw_status_ptr_->cur_job_success_flag = true;
+        // check all statuses of the task_group_id == 3
+        if(sql_ptr_->CheckFailedTaskNo(task_group_id) == 0)
+        {
+            nw_status_ptr_->cur_job_success_flag = true;
 
-        mir100_ptr_->SetPLCRegisterIntValue(4,0);
+            mir100_ptr_->SetPLCRegisterIntValue(4,0);
+        }
+        else
+        {
+            // something is wrong.
+            nw_status_ptr_->cur_job_success_flag = false;
+
+            mir100_ptr_->SetPLCRegisterIntValue(4,3);
+        }
     }
     else
     {
@@ -2786,6 +2803,10 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
             sql_ptr_->FillUMCRedoTableWhole(task_group_id);
             break;
         }
+        default:
+        {
+            return;
+        }
     }
 
 
@@ -2800,7 +2821,7 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
     bool ugv_mission_success_flag = false;
     bool arm_mission_success_flag = false;
 
-    bool arm_sub_mission_success_flag = false;
+    bool arm_sub_mission_success_flag = true;
 
     /// 1. Initialization
     //
@@ -2906,7 +2927,7 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
 
                         /// check arm config is valid or not
 
-                        int  cur_arm_config_id = sql_ptr_->GetRedoArmConfigId(cur_model_config_id_, cur_order);
+                        int  cur_arm_config_id = sql_ptr_->GetRedoArmConfigId(task_group_id, cur_order);
                         int  is_valid = sql_ptr_->GetArmConfigIsValid(cur_arm_config_id);
                         LOG(INFO) << "current arm config is_valid:" << is_valid;
 
@@ -3115,6 +3136,7 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
                                             {
                                                 LOG(INFO) << "Cannot find Landmark! Skip cur_arm_mission_config!!";
 
+                                                arm_sub_mission_success_flag = false;
                                                 // back to standby_point
                                                 tm5.ArmTask("Move_to standby_p0");
                                                 // back to safety position
@@ -3137,6 +3159,7 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
 
                                                 LOG(INFO) << "Error too significant! Skip cur_arm_mission_config!!";
 
+                                                arm_sub_mission_success_flag = false;
                                                 // back to standby_point
                                                 tm5.ArmTask("Move_to standby_p0");
                                                 // back to safety position
@@ -3300,18 +3323,35 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
 
     if(arm_mission_success_flag == true && ugv_mission_success_flag == true)
     {
-        nw_status_ptr_->cur_job_success_flag = true;
+        if(arm_sub_mission_success_flag == true)
+        {
+            nw_status_ptr_->cur_job_success_flag = true;
 
-        mir100_ptr_->SetPLCRegisterIntValue(4,0);
+            mir100_ptr_->SetPLCRegisterIntValue(4,0);
 
-        // Mark job_log_id status as finished
-        sql_ptr_->UpdateJobLog(job_log_id, 3);
+            // Mark job_log_id status as finished
+            sql_ptr_->UpdateJobLog(job_log_id, 3);
+        }
+        else
+        {
+            nw_status_ptr_->cur_job_success_flag = false;
+
+            mir100_ptr_->SetPLCRegisterIntValue(4,3);
+
+            // Mark job_log_id status as finished
+            sql_ptr_->UpdateJobLog(job_log_id, 5);
+        }
 
     }
     else
     {
         // something is wrong.
         nw_status_ptr_->cur_job_success_flag = false;
+
+        mir100_ptr_->SetPLCRegisterIntValue(4,3);
+
+        // Mark job_log_id status as finished
+        sql_ptr_->UpdateJobLog(job_log_id, 5);
 
     }
 

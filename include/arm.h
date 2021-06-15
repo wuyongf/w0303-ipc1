@@ -1105,7 +1105,7 @@ yf::arm::tm::GetRefViaPoints(const yf::data::arm::ModelType& model_type, const y
     {
         case data::arm::TaskMode::Mopping:
         {
-            via_points = al_clean_motion.get_mop_via_points(motion_type, ref_path_init_points, layer, step_ratio_horizontal);
+            via_points = al_clean_motion.get_mop_via_points(model_type,motion_type, ref_path_init_points, layer, step_ratio_horizontal);
             break;
         }
         case data::arm::TaskMode::UVCScanning:

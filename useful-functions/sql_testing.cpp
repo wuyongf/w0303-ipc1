@@ -21,8 +21,18 @@ int main()
     std::shared_ptr<yf::sql::sql_server> sql = std::make_shared<yf::sql::sql_server>("SQL Server","192.168.7.127","NW_mobile_robot_sys","sa","NWcadcam2021");
 
 //    auto failed_q = sql->GetFailedTaskIds(10);
+    auto cur_first_valid_order_  = sql->GetRedoFirstValidOrder(26);
+    auto cur_last_valid_order_   = sql->GetRedoLastValidOrder(26);
+    //  e.g {3,4,5}
+    auto cur_valid_indexes_ = sql->GetRedoValidIndexes(26);
 
-    sql->FillUgvMissionConfigRedoTable(8047);
+
+
+    sql->GetRedoArmConfigValidResultQueue(26);
+
+    auto size = sql->GetFailedTaskIds(26).size();
+
+    sql->FillUMCRedoTableErrorPart(8047);
 
 
     sql->FillTaskTableForCurJob(10050);

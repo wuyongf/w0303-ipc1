@@ -126,6 +126,7 @@ namespace yf
 
             std::string GetTaskTableElement(const int& failed_task_id, const std::string& element);
 
+            int CheckFailedTaskNo(const int& task_group_id);
 
             /// Redo Job
             int GetTaskGroupIdFromScheduleTable(const int& cur_schedule_id);
@@ -3832,7 +3833,7 @@ int yf::sql::sql_server::GetRedoFirstValidOrder(const int &task_group_id)
 
 int yf::sql::sql_server::GetRedoLastValidOrder(const int &task_group_id)
 {
-    std::vector<int> valid_q = this->GetArmConfigValidResultQueue(task_group_id);
+    std::vector<int> valid_q = this->GetRedoArmConfigValidResultQueue(task_group_id);
 
     std::vector<int> is_valid = {1};
 
@@ -4041,6 +4042,45 @@ void yf::sql::sql_server::FillUMCRedoTableWhole(const int &task_group_id)
 
         this->InsertNewRedoTask(task_group_id,mission_order,ugv_mission_config_id_str,arm_config_id_str,position_name);
     }
+}
+
+int yf::sql::sql_server::CheckFailedTaskNo(const int &task_group_id)
+{
+    // query string
+    std::string query_update;
+
+    // input
+    std::string task_group_id_str = std::to_string(task_group_id);
+
+    // output
+    int failed_task_no;
+
+    //"SELECT arm_config_id FROM data_ugv_mission_config where model_config_id = 1"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT COUNT(1) FROM sys_schedule_job_task WHERE status != 3 and task_group_id = " + task_group_id_str  ;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            failed_task_no = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return failed_task_no;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return 0;
+    };
 }
 
 
