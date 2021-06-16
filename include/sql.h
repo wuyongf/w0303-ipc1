@@ -134,13 +134,13 @@ namespace yf
             std::vector<int> GetWholeTaskIds(const int& task_group_id);
 
 
-
+            int  GetLatestRedoTaskId();
             void InsertNewRedoTask(const int& task_group_id, const int& order,
                                    const std::string& ugv_mission_config_id, const std::string& arm_config_id,
                                    const std::string& position_name);
 
-            void FillUMCRedoTableErrorPart(const int& task_group_id);
-            void FillUMCRedoTableWhole(const int& task_group_id);
+            std::vector<int> FillUMCRedoTableErrorPart(const int& task_group_id);
+            std::vector<int> FillUMCRedoTableWhole(const int& task_group_id);
 
             int GetJobIdFromJobLog(const int& task_group_id);
 
@@ -234,7 +234,7 @@ namespace yf
             std::vector<int> GetRedoValidIndexes(const int& task_group_id);
 
             int GetRedoArmConfigId(const int& task_group_id, const int& cur_order);
-            std::deque<std::string> GetRedoUgvMissionConfigPositionNames(const int& task_group_id);
+            std::deque<std::string> GetRedoUgvMissionConfigPositionNames(const std::vector<int>& redo_ids);
 
             int GetJobLogId(const int& task_group_id);
 
@@ -3701,9 +3701,11 @@ yf::sql::sql_server::InsertNewRedoTask(const int &task_group_id, const int &orde
     }
 }
 
-void yf::sql::sql_server::FillUMCRedoTableErrorPart(const int& task_group_id)
+std::vector<int> yf::sql::sql_server::FillUMCRedoTableErrorPart(const int& task_group_id)
 {
     // filter, Re-Design the table "ugv_mission_config_redo"
+
+    std::vector<int> redo_ids;
 
     //  check status. filter ID with status == 3.
     std::vector<int> failed_ids = this->GetFailedTaskIds(task_group_id);
@@ -3722,7 +3724,13 @@ void yf::sql::sql_server::FillUMCRedoTableErrorPart(const int& task_group_id)
         std::string position_name = this->GetTaskTableElement(failed_ids[n], "position_name");
 
         this->InsertNewRedoTask(task_group_id,mission_order,ugv_mission_config_id_str,arm_config_id_str,position_name);
+
+        auto redo_id = this->GetLatestRedoTaskId();
+
+        redo_ids.push_back(redo_id);
     }
+
+    return redo_ids;
 }
 
 int yf::sql::sql_server::GetJobIdFromJobLog(const int& task_group_id)
@@ -3875,45 +3883,45 @@ std::vector<int> yf::sql::sql_server::GetRedoValidIndexes(const int &task_group_
     return valid_indexes;
 }
 
-std::deque<std::string> yf::sql::sql_server::GetRedoUgvMissionConfigPositionNames(const int &task_group_id)
+std::deque<std::string> yf::sql::sql_server::GetRedoUgvMissionConfigPositionNames(const std::vector<int>& redo_ids)
 {
     // query string
     std::string query_update;
 
-    // input
-    std::string task_group_id_str = std::to_string(task_group_id);
-
     // output
     std::deque<std::string> position_names;
 
-    //"SELECT position_name FROM data_ugv_mission_config where model_config_id = 1 ORDER BY mission_order"
-    try
+    for(int n = 0; n < redo_ids.size() ; n++)
     {
-        Connect();
-
-        query_update = "SELECT position_name FROM data_ugv_mission_config_redo where task_group_id = " + task_group_id_str + " ORDER BY mission_order" ;
-
-        auto result = nanodbc::execute(conn_,query_update);
-
-        // if there are new schedules available, sql module will mark down all the available schedule ids
-        while(result.next())
+        //"SELECT position_name FROM data_ugv_mission_config where model_config_id = 1 ORDER BY mission_order"
+        try
         {
-            auto position_name = result.get<std::string>(0);
+            Connect();
 
-            position_names.push_back(position_name);
+            query_update = "SELECT position_name FROM data_ugv_mission_config_redo where ID = " + std::to_string(redo_ids[n]) ;
+
+            auto result = nanodbc::execute(conn_,query_update);
+
+            // if there are new schedules available, sql module will mark down all the available schedule ids
+            while(result.next())
+            {
+                auto position_name = result.get<std::string>(0);
+
+                position_names.push_back(position_name);
+            };
+
+            Disconnect();
+
+        }
+        catch (std::exception& e)
+        {
+            std::cerr << e.what() << std::endl;
+            std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
         };
-
-        Disconnect();
-
-        return position_names;
     }
-    catch (std::exception& e)
-    {
-        std::cerr << e.what() << std::endl;
-        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
 
-        return position_names;
-    };
+    return position_names;
+
 }
 
 int yf::sql::sql_server::GetJobLogId(const int &task_group_id)
@@ -4020,9 +4028,11 @@ std::vector<int> yf::sql::sql_server::GetWholeTaskIds(const int &task_group_id)
     };
 }
 
-void yf::sql::sql_server::FillUMCRedoTableWhole(const int &task_group_id)
+std::vector<int> yf::sql::sql_server::FillUMCRedoTableWhole(const int &task_group_id)
 {
     // filter, Re-Design the table "ugv_mission_config_redo"
+
+    std::vector<int> redo_ids;
 
     //  check status. filter ID with status == 3.
     std::vector<int> failed_ids = this->GetWholeTaskIds(task_group_id);
@@ -4041,7 +4051,13 @@ void yf::sql::sql_server::FillUMCRedoTableWhole(const int &task_group_id)
         std::string position_name = this->GetTaskTableElement(failed_ids[n], "position_name");
 
         this->InsertNewRedoTask(task_group_id,mission_order,ugv_mission_config_id_str,arm_config_id_str,position_name);
+
+        auto redo_id = this->GetLatestRedoTaskId();
+
+        redo_ids.push_back(redo_id);
     }
+
+    return redo_ids;
 }
 
 int yf::sql::sql_server::CheckFailedTaskNo(const int &task_group_id)
@@ -4073,6 +4089,43 @@ int yf::sql::sql_server::CheckFailedTaskNo(const int &task_group_id)
         Disconnect();
 
         return failed_task_no;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return 0;
+    };
+}
+
+int yf::sql::sql_server::GetLatestRedoTaskId()
+{
+    // SELECT TOP 1 [ID] FROM data_schedule_job_task_TaskGroup ORDER BY ID DESC
+
+    std::string query_update;
+
+    // output
+    int job_log_id;
+
+    //"SELECT arm_config_id FROM data_ugv_mission_config where model_config_id = 1"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT TOP 1 [ID] FROM data_ugv_mission_config_redo ORDER BY ID DESC ";
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            job_log_id = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return job_log_id;
     }
     catch (std::exception& e)
     {

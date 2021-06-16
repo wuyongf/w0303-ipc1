@@ -723,6 +723,7 @@ void yf::sys::nw_sys::DoJobs(const int &cur_schedule_id)
         // TODO: (3)
         //  a. Break the loop or not?
         //  b. Record Each Job STATUS.
+
         if(nw_status_ptr_->cur_job_success_flag == true)
         {
             // current job finished!
@@ -887,6 +888,8 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                         pre_order = cur_order;
 
                         /// check arm config is valid or not
+
+                        sleep.ms(500);
 
                         int  cur_arm_config_id = sql_ptr_->GetArmConfigId(cur_model_config_id_, cur_order);
                         int  is_valid = sql_ptr_->GetArmConfigIsValid(cur_arm_config_id);
@@ -1669,13 +1672,13 @@ void yf::sys::nw_sys::UpdateDbCurTaskStatusAndLog()
 
 void yf::sys::nw_sys::UpdateDbCurJobStatusAndLog()
 {
-    // currently, only consider arm mission status.
-    if( nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::Idle ||
-        nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::Finish)
-    {
-        sql_ptr_->UpdateJobTable(nw_status_ptr_->db_cur_job_log_id, 3);
-        sql_ptr_->UpdateJobLog(nw_status_ptr_->db_cur_job_log_id, 3);
-    }
+//    // currently, only consider arm mission status.
+//    if( nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::Idle ||
+//        nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::Finish)
+//    {
+//        sql_ptr_->UpdateJobTable(nw_status_ptr_->db_cur_job_log_id, 3);
+//        sql_ptr_->UpdateJobLog(nw_status_ptr_->db_cur_job_log_id, 3);
+//    }
 
     if( nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::Error ||
         nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::EStop)
@@ -2791,16 +2794,18 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
     // get task_group_id
     int task_group_id = sql_ptr_->GetTaskGroupIdFromScheduleTable(cur_schedule_id);
 
+    std::vector<int> redo_ids;
+
     switch (redo_command)
     {
         case data::schedule::ScheduleCommand::RedoCleaningJobErrorPart:
         {
-            sql_ptr_->FillUMCRedoTableErrorPart(task_group_id);
+            redo_ids = sql_ptr_->FillUMCRedoTableErrorPart(task_group_id);
             break;
         }
         case data::schedule::ScheduleCommand::RedoCleaningJobWhole:
         {
-            sql_ptr_->FillUMCRedoTableWhole(task_group_id);
+            redo_ids = sql_ptr_->FillUMCRedoTableWhole(task_group_id);
             break;
         }
         default:
@@ -2828,7 +2833,7 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
     //  1.1 Get cur_model_config_id From DB
     //  1.2 Get related variables
     cur_model_config_id_    = sql_ptr_->GetModelConfigId(origin_job_id);
-    cur_mission_num_        = sql_ptr_->GetFailedTaskIds(task_group_id).size();
+    cur_mission_num_        = redo_ids.size();
     cur_model_type_         = tm5.GetModelType(cur_model_config_id_);
     cur_task_mode_          = tm5.GetTaskMode(cur_model_config_id_);
 
@@ -2848,7 +2853,7 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
     //  2.1. Ugv: post a new mission via REST
     mir100_ptr_->PostRedoMission(cur_model_config_id_);
     //  2.2. Ugv: post actions via REST
-    mir100_ptr_->PostRedoActions(cur_model_config_id_,task_group_id);
+    mir100_ptr_->PostRedoActions(cur_model_config_id_,redo_ids);
     //  2.3  Ugv: get current mission_guid
     cur_mission_guid_ = mir100_ptr_->GetCurMissionGUID();
 
@@ -3258,6 +3263,8 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
                                     }
                                     else
                                     {
+                                        sleep.ms(500);
+
                                         /// info mir100 the arm has finished
                                         mir100_ptr_->SetPLCRegisterIntValue(1,0);
 

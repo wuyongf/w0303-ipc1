@@ -145,7 +145,7 @@ namespace yf
             void PostActions(const int& model_config_id);
 
             bool PostRedoMission(const int& origin_model_config_id);
-            void PostRedoActions(const int& origin_model_config_id, const int& task_group_id);
+            void PostRedoActions(const int& origin_model_config_id, const std::vector<int>& redo_ids);
 
             bool PostMissionForDebugTest(const int& model_config_id);
             void PostActionsForDebugTest(const int& model_config_id);
@@ -2345,13 +2345,13 @@ bool yf::ugv::mir::PostRedoMission(const int &origin_model_config_id)
     return PostMethod("/api/v2.0.0/missions", mission);
 }
 
-void yf::ugv::mir::PostRedoActions(const int& origin_model_config_id, const int &task_group_id)
+void yf::ugv::mir::PostRedoActions(const int& origin_model_config_id, const std::vector<int>& redo_ids)
 {
 // 1. get mission_guid from REST
     std::string mission_guid = this->GetCurMissionGUID();
 
     // 2. get position_names from DB, based on task_group_id
-    std::deque<std::string> position_names = sql_ptr_->GetRedoUgvMissionConfigPositionNames(task_group_id);
+    std::deque<std::string> position_names = sql_ptr_->GetRedoUgvMissionConfigPositionNames(redo_ids);
 
     // 3.
     // 3.a. get map name from db.
@@ -2363,7 +2363,7 @@ void yf::ugv::mir::PostRedoActions(const int& origin_model_config_id, const int 
 
     /// Actions detail
     ///
-    int total_position_num = sql_ptr_->GetFailedTaskIds(task_group_id).size();
+    int total_position_num = redo_ids.size();
     int priority = 1;
 
     /// (1) Set Ugv Mission Start Flag
