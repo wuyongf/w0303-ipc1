@@ -877,7 +877,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                     {
                         /// get current order
 
-                        while(cur_order == pre_order)
+                        while(cur_order == pre_order || cur_order == 0)
                         {
                             cur_order = mir100_ptr_->GetPLCRegisterIntValue(2);
 
@@ -889,7 +889,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
 
                         /// check arm config is valid or not
 
-                        sleep.ms(500);
+                        sleep.ms(1000);
 
                         int  cur_arm_config_id = sql_ptr_->GetArmConfigId(cur_model_config_id_, cur_order);
                         int  is_valid = sql_ptr_->GetArmConfigIsValid(cur_arm_config_id);
