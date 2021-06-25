@@ -13,6 +13,19 @@
 4. For IPC1 program, the "Get/Post/Put Method" will cout the result. Need to fine tune.
 
 ***
+
+<details open>
+<summary>Install</summary>
+
+Python >= 3.6.0 required with all [requirements.txt](https://github.com/ultralytics/yolov5/blob/master/requirements.txt) dependencies installed:
+<!-- $ sudo apt update && apt install -y libgl1-mesa-glx libsm6 libxext6 libxrender-dev -->
+```bash
+$ git clone https://github.com/ultralytics/yolov5
+$ cd yolov5
+$ pip install -r requirements.txt
+```
+</details>
+
 2021/03/16
 
 HA Onsite Setting
