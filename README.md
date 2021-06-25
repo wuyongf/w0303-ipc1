@@ -12,6 +12,7 @@
 3. Upload Wiring Diagram (Electric)
 4. For IPC1 program, the "Get/Post/Put Method" will cout the result. Need to fine tune.
 
+[comment]: <> (details template)
 <details open>
 <summary>Todo List</summary>
 
@@ -34,7 +35,16 @@ $ git clone https://github.com/ultralytics/yolov5
 $ cd yolov5
 $ pip install -r requirements.txt
 ```
+
+```asm
+testing
+```
+
+
 </details>
+
+
+
 
 2021/03/16
 
