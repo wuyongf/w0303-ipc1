@@ -110,6 +110,15 @@ Eigen::Matrix4f points2TMat(float* point)
 
 int main() {
 
+
+    float arr_ref_tag[6] = { -443.66, -66.02, -15.34, 179.67, 0.33,90.87};
+
+    Eigen::Matrix4f a = points2TMat(arr_ref_tag);
+
+
+
+#if 0
+
     Eigen::Matrix3f Ra;
 
     Ra << 1,   0,    0,
@@ -148,6 +157,8 @@ int main() {
 
 
     std::cout << "R_real is: " << R_real(1) << std::endl;
+
+#endif
 
     return 1;
 }
