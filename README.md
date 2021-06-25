@@ -18,7 +18,7 @@
 
 1. Fine tune the program.
 2. Sort out an overall workflow
-
+3. workflow for vision_rs module.
 
 </details>
 
@@ -39,7 +39,6 @@ $ pip install -r requirements.txt
 ```asm
 testing
 ```
-
 
 </details>
 
