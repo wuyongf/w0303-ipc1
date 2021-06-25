@@ -13,7 +13,7 @@
 4. For IPC1 program, the "Get/Post/Put Method" will cout the result. Need to fine tune.
 
 <details open>
-<summary>Todo List</summary>
+<summary>**Todo List**</summary>
 
 1. Fine tune the program.
 2. Sort out an overall workflow
