@@ -12,10 +12,20 @@
 3. Upload Wiring Diagram (Electric)
 4. For IPC1 program, the "Get/Post/Put Method" will cout the result. Need to fine tune.
 
+<details open>
+<summary>Todo List</summary>
+
+1. Fine tune the program.
+2. Sort out an overall workflow
+
+
+</details>
+
+
 ***
 
 <details open>
-<summary>Install</summary>
+<summary>Template</summary>
 
 Python >= 3.6.0 required with all [requirements.txt](https://github.com/ultralytics/yolov5/blob/master/requirements.txt) dependencies installed:
 <!-- $ sudo apt update && apt install -y libgl1-mesa-glx libsm6 libxext6 libxrender-dev -->
