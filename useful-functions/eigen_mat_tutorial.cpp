@@ -108,12 +108,46 @@ Eigen::Matrix4f points2TMat(float* point)
 
 }
 
+struct rs_point
+{
+    float x;
+    float y;
+    float z; // depth
+};
+
+
 int main() {
 
+    // ref_pc_whole: reference point clouds.
 
-    float arr_ref_tag[6] = { -443.66, -66.02, -15.34, 179.67, 0.33,90.87};
+    // ref_arm_pos1, ref_arm_pos2, ref_arm_pos3, ... ref_arm_posN
+
+    // 1 arm_config_id --- n ref_pos_ID
+
+    // 1 ref_pos_id --- 1 point_cloud
+
+#if 0
+    std::vector<rs_point> pc_part1;
+
+    rs_point point1;
+
+    point1.x = 0;
+    point1.y = 1;
+    point1.z = 2;
+
+    pc_part1.push_back(point1);
+
+#endif
+
+    // --->input:  arm_config_id. & post rs_ref_arm_pos
+
+
+
+    float arr_ref_tag[6] = { -365.90, 576.41, 330.63, 146.09, -3.33, -177.89 };
 
     Eigen::Matrix4f a = points2TMat(arr_ref_tag);
+
+    std::cout << "T is: " << std::endl <<  a << std::endl;
 
 
 
@@ -156,7 +190,7 @@ int main() {
     Eigen::MatrixXf R_real = T_real.block(0,3 ,3,1);
 
 
-    std::cout << "R_real is: " << R_real(1) << std::endl;
+    std::cout << "R_real is: "  << R_real(1) << std::endl;
 
 #endif
 
