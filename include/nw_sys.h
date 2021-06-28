@@ -83,7 +83,6 @@ namespace yf
             void RedoJob(const int& cur_schedule_id,const yf::data::schedule::ScheduleCommand& redo_command);
             // REDO JOB: SQL
 
-
             //
             void JobsFilter(std::deque<int>& q_ids);
 
@@ -1028,7 +1027,6 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                 continue;
 
                                             }
-
                                         }
 
 

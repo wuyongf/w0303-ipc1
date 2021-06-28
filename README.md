@@ -8,7 +8,7 @@ This program establishes communication among robotic arm(tm5-900), ugv(mir100) a
 2. Arm Module (Motion/Action/Status)
 3. Ugv Module (Motion/Mission/Status)
 4. Database Module (detailed functions implementation)
-**5. Vision Module (Image Process/Status)**
+5. **Todo: Vision Module (Image Process/Status)** 
 
 ## Usage
 
@@ -22,12 +22,6 @@ This program establishes communication among robotic arm(tm5-900), ugv(mir100) a
     (1) DoSchedules()
 
     (2) WaitSchedules()
-
-**Todo:** 
-1. Upload the whole program to Google Drive
-2. Upload Communication Diagram (TCP/IP)
-3. Upload Wiring Diagram (Electric)
-4. For IPC1 program, the "Get/Post/Put Method" will cout the result. Need to fine tune.
 
 [comment]: <> (details template)
 <details open>
