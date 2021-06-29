@@ -59,8 +59,8 @@ namespace yf
             int  ArmGetAbsorbType();
 
             void ArmSetOperationArea(const yf::data::arm::OperationArea& operation_area);
-            void ArmSetToolAngle(const yf::data::arm::TaskMode& task_mode ,const yf::data::arm::ToolAngle& tool_angle);
-            void ArmSetApproachPoint(const yf::data::arm::Point3d& approach_point,const yf::data::arm::ToolAngle& tool_angle);
+            void ArmSetToolAngle(const yf::data::arm::TaskMode& task_mode, const yf::data::arm::ToolAngle& tool_angle);
+            void ArmSetApproachPoint(const yf::data::arm::Point3d& approach_point, const yf::data::arm::ToolAngle& tool_angle);
             void ArmSetViaPoints(const std::deque<yf::data::arm::Point3d>& via_points, const yf::data::arm::ToolAngle& tool_angle);
             void ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode, const yf::data::arm::ToolAngle& tool_angle, const yf::data::arm::ModelType& model_type, const int& arm_mission_config_id);
 
@@ -183,7 +183,7 @@ namespace yf
             // schedule_flag
             bool schedule_flag_ = true;
 
-            ///wait schedule
+            /// wait schedule
             //
             // (1) control flag
             bool wait_schedule_flag = true;
@@ -525,7 +525,7 @@ void yf::sys::nw_sys::thread_DoSchedules()
 
             if( nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Disconnected || arm_mission_failed_status )
             {
-                LOG(INFO) << "[thread_DoSchedules]: abort current schedules...";
+                LOG(INFO) << "[thread_DoSchedules]: Abort current schedules...";
                 q_schedule_ids.clear();
             }
         }
