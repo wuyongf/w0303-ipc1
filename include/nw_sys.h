@@ -42,9 +42,11 @@ namespace yf
 
             void thread_DoSchedules();
 
+        private:
+
             void thread_IPCServerStartup(std::shared_ptr<IPCServer>& server_ptr, bool& server_flag);
 
-        public:
+        public: //todo:
 
             void WaitSchedulesInitialCheck();
 
@@ -81,28 +83,19 @@ namespace yf
 
             // REDO JOB
             void RedoJob(const int& cur_schedule_id,const yf::data::schedule::ScheduleCommand& redo_command);
-            // REDO JOB: SQL
 
             //
             void JobsFilter(std::deque<int>& q_ids);
 
-            void UpdateDbScheduleBeforeTask (const int& cur_schedule_id);
-            void UpdateDbScheduleAfterTask (const int& cur_schedule_id);
-
+            //todo:
             void thread_WaitForPauseArm();    // if ugv has error
             void thread_WaitForResumeArm();   // if ugv is executing mission and has no error
             void thread_WaitForCancelUgvMission();
 
-            void UpdateDbJobBeforeTask (const int& cur_job_id);
-            void UpdateDbJobAfterTask (const int& cur_job_id);
-
-            void UpdateDbTaskBeforeTask (const int& cur_task_id);
-            void UpdateDbTaskAfterTask (const int& cur_task_id);
-
-            void UpdateDbDeviceStatusBeforeTask (const int& cur_job_id);
-            void UpdateDbDeviceStatusAfterTask (const int& cur_job_id);
-
         protected: /// SQL Related
+
+            void UpdateDbScheduleBeforeTask (const int& cur_schedule_id);
+            void UpdateDbScheduleAfterTask  (const int& cur_schedule_id);
 
             void UpdateDbDeviceArmConnectionStatus();
             void UpdateDbDeviceArmMissionStatus();
@@ -115,6 +108,26 @@ namespace yf
 
             void GetSysControlMode();
             void GetScheduleCommand(const int&id);
+
+        private: /// Web Status Manager
+
+            // properties
+            bool web_status_flag_ = false;
+
+            // methods
+            void thread_WebStatusManager();
+
+            void thread_Web_UgvBatteryPercentage(bool& web_status_flag,
+                                                 const int& sleep_duration);
+
+            void thread_Web_UgvCurPosition(const bool& web_status_flag,
+                                           const int& sleep_duration);
+
+        private: /// threads handle for Web Status Manager
+
+            std::thread th_web_status_manager_;
+            std::thread th_web_ugv_battery_;
+            std::thread th_web_ugv_position_;
 
         private: /// Time Sleep Class
 
@@ -137,13 +150,6 @@ namespace yf
             // ipc2
             yf::ipc2::raspberry pi4;
 
-            // Schedule
-            // Data Structure:
-            // Schedule - Job(each model & a task_mode) - Task(each ugv_mission_config_id & arm_config)
-            yf::data::common::MissionStatus db_cur_schedule_status_;
-            yf::data::common::MissionStatus db_cur_job_status_;
-            yf::data::common::MissionStatus db_cur_task_status_;
-
             // ipc server
             std::shared_ptr<IPCServer> ipc_server_ptr_;
 
@@ -153,30 +159,7 @@ namespace yf
             std::thread th_ipc_server_;
 
             std::thread th_wait_schedules_;
-
             std::thread th_do_schedules_;
-
-
-        private: /// Web Status Manager
-
-            // properties
-            bool web_status_flag_ = false;
-
-            // methods
-            void thread_WebStatusManager();
-
-            void thread_Web_UgvBatteryPercentage(bool& web_status_flag,
-                                                 const int& sleep_duration);
-
-            void thread_Web_UgvCurPosition(const bool& web_status_flag,
-                                           const int& sleep_duration);
-
-        private: /// threads handle for Web Status Manager
-
-            std::thread th_web_status_manager_;
-            std::thread th_web_ugv_battery_;
-            std::thread th_web_ugv_position_;
-
 
         private: /// Overall Control --- thread wait_schedules and do_schedules
 
@@ -481,6 +464,9 @@ void yf::sys::nw_sys::thread_DoSchedules()
                     }
                     case data::schedule::ScheduleCommand::UgvBackToChargingStation:
                     {
+                        // prerequisite
+                        // 1. Input data in DB (dock_info)
+                        // 2. position name in MiR website: ChargingStation
                         DoJobUgvBackToChargingStation();
                         break;
                     }
@@ -513,7 +499,7 @@ void yf::sys::nw_sys::thread_DoSchedules()
             }
 
             // TODO: (3)
-            //  a. break the shcedule loop or not?
+            //  a. break the schedule loop or not?
             //  b. (done above) Update Schedule Status after job. Record status and update to SQL Server
 
             // For Arm
@@ -645,7 +631,7 @@ void yf::sys::nw_sys::DoJobs(const int &cur_schedule_id)
 
     // No more jobs
     //
-    // Cout the result
+    // cout the result
 
     if(nw_status_ptr_->arm_mission_status == data::common::MissionStatus::Idle)
     {
@@ -2677,6 +2663,8 @@ void yf::sys::nw_sys::DoJobArmBackToHomePos()
 
 void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedule::ScheduleCommand& redo_command)
 {
+    //todo: ugv should change map first!
+
     // filter, Re-Design the table "ugv_mission_config_redo"
 
     // get task_group_id
