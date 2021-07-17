@@ -8,14 +8,28 @@ int main()
 {
 
     yf::algorithm::cleaning_motion al_motion;
+    yf::algorithm::arm_path al_path;
 
     yf::data::arm::Point3d p1;
     yf::data::arm::Point3d p2;
     yf::data::arm::Point3d p3;
 
-    p1.x = 0.8143;  p1.y = 0.2435; p1.z = 0.9293; p1.rx = -162.17; p1.ry = -2.01; p1.rz = -89.74;
-    p2.x = 0.35;    p2.y = 0.1966; p2.z = 0.2511; p2.rx = -163.02; p2.ry = -2.01; p2.rz = -89.58;
-    p3.x = 0.616;   p3.y = 0.4733; p3.z = 0.3517; p3.rx = -161.62; p3.ry = -1.62; p3.rz = -93.82;
+//    p1.x = -292.85;  p1.y = 832.61; p1.z = -280.7; p1.rx = 63.11; p1.ry = -6.73; p1.rz = -178.71;
+    p2.x = -342.19;    p2.y = 937.58; p2.z = 199.02; p2.rx = -138.35; p2.ry = 1.93; p2.rz = 3.74;
+//    p3.x = -179;   p3.y = 835.21; p3.z = -294.12; p3.rx = 63.1; p3.ry = -6.72; p3.rz = -178.71;
+
+    p1.x = 256.9412;  p1.y = -587.6964; p1.z = 297.4424; p1.rx = 78.93827; p1.ry = -12.85326; p1.rz = -6.041916;
+    p3.x = 71.2;   p3.y = -537.06; p3.z = 662.53; p3.rx = -117.96; p3.ry = 7.65; p3.rz = -175.88;
+
+    auto T_up = al_path.points2TMat(p1);
+
+//    auto T_down = al_path.points2TMat(p2);
+
+    auto T_up2 = al_path.points2TMat(p3);
+
+    std::cout << "T_up: " << std::endl << T_up <<std::endl;
+//    std::cout << "T2" << T_down <<std::endl;
+    std::cout << "T_up2: " << std::endl <<  T_up2 <<std::endl;
 
     std::deque<yf::data::arm::Point3d> points;
     std::deque<yf::data::arm::Point3d> via_points;

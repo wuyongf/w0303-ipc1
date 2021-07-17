@@ -579,25 +579,29 @@ void yf::sys::nw_sys::DoJobs(const int &cur_schedule_id)
 
         nw_status_ptr_->db_cur_job_id = cur_job_id;
 
-        // record the job status
+        /// Record the job status to DB
 
-        /// (0) Fill table schedule_job_task
+        // 1. Fill table "schedule_job_task"
         sql_ptr_->FillTaskTableForCurJob(cur_job_id);
         nw_status_ptr_->db_cur_task_group_id = sql_ptr_->GetLatestTaskGroupId();
 
-        /// (1) Update Job Table & Job Log (Insert job_log_id & Update task_group_id)
+        // 2. Update Job Table & Job Log (Insert job_log_id & Update task_group_id)
+        // 2.1 Update table "sys_schedule_job"
         sql_ptr_->UpdateJobTable(cur_job_id, 2);
+
+        // 2.2 Insert job_log_id & Update task_group_id in table "sys_schedule_job_log"
         sql_ptr_->InsertNewJobLog(cur_job_id, 2);
         nw_status_ptr_->db_cur_job_log_id = sql_ptr_->GetLatestJobLogId();
-
         sql_ptr_->UpdateJobLogTaskGroupId(nw_status_ptr_->db_cur_job_log_id, nw_status_ptr_->db_cur_task_group_id);
 
-        // TODO: (2) Execute the job!
+        /// Execute Each job!
         DoTasks(cur_job_id, nw_status_ptr_->db_cur_task_group_id);
 
-        // TODO: (3)
+        /// Job Result Handler
         //  a. Break the loop or not?
         //  b. Record Each Job STATUS.
+
+        LOG(INFO) << "update current jobs status and log...";
 
         if(nw_status_ptr_->cur_job_success_flag == true)
         {
@@ -612,22 +616,24 @@ void yf::sys::nw_sys::DoJobs(const int &cur_schedule_id)
             sql_ptr_->UpdateJobTable(nw_status_ptr_->db_cur_job_id,5);
         }
 
-        bool arm_mission_failed_status = nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::Error ||
+        bool arm_program_stop_status = nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::Error ||
                                          nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::EStop;
 
-        if( nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Disconnected || arm_mission_failed_status )
+        if( nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Disconnected || arm_program_stop_status )
         {
-            LOG(INFO) << "abort current jobs...";
+            LOG(INFO) << "Arm Disconnected. Cancel the rest of jobs...";
             q_job_ids.clear();
 
+            // current job error!
+            sql_ptr_->UpdateJobLog(nw_status_ptr_->db_cur_job_log_id, 5);
+            sql_ptr_->UpdateJobTable(nw_status_ptr_->db_cur_job_id,5);
+
+            /// Update Table "sys_status_error_log", informing USER
             UpdateDbErrorLog();
         }
-
-        // record and update current job status
-        LOG(INFO) << "update current jobs status and log...";
-        UpdateDbCurJobStatusAndLog();                  // todo: what about cancel Status?
-
     }
+
+//    LOG(INFO) << "No more jobs...";
 
     // No more jobs
     //
@@ -635,12 +641,7 @@ void yf::sys::nw_sys::DoJobs(const int &cur_schedule_id)
 
     if(nw_status_ptr_->arm_mission_status == data::common::MissionStatus::Idle)
     {
-        LOG(INFO) << "All Jobs are done";
-
-        auto time_now = sql_ptr_->TimeNow();
-
-        std::cout << "no job now!" << std::endl;
-        std::cout << "current time: " << time_now << std::endl;
+        LOG(INFO) << "All jobs are done";
     }
     else
     {
@@ -650,15 +651,13 @@ void yf::sys::nw_sys::DoJobs(const int &cur_schedule_id)
 
 void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
 {
-    /// 0. Initialization
+    /// 0. Initialization --- flow control
     //
     nw_status_ptr_->cur_job_success_flag = false;
     bool ugv_mission_success_flag = false;
     bool arm_mission_success_flag = false;
 
-
-
-    /// 1. Initialization
+    /// 1. Initialization --- model info
     //
     //  1.1 Get cur_model_config_id From DB
     //  1.2 Get related variables
@@ -736,9 +735,9 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
 
                 if(ugv_mission_continue_flag == true)
                 {
-                    /// stage 0: check arm config is valid or not
-                    /// stage 1: if it is valid, configuring arm mission
-                    /// stage 2: execute arm mission
+                    /// step 0: check arm config is valid or not
+                    /// step 1: if it is valid, configuring arm mission
+                    /// step 2: execute arm mission
 
                     bool arm_config_stage_success_flag = false;
                     int last_valid_order;
@@ -1014,7 +1013,6 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
 
                                             }
                                         }
-
 
 
                                         // 4. check motion_type, decide which motion.
@@ -2663,9 +2661,19 @@ void yf::sys::nw_sys::DoJobArmBackToHomePos()
 
 void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedule::ScheduleCommand& redo_command)
 {
-    //todo: ugv should change map first!
+    /// Ugv needs to change the map first!
+    mir100_ptr_->ClearErrorState();
 
-    // filter, Re-Design the table "ugv_mission_config_redo"
+    mir100_ptr_->ChangeMapByDBMapStatus();
+
+    sleep.sec(5);
+
+    if(mir100_ptr_->WaitForModeId(7,1))
+    {
+        mir100_ptr_->ChangeInitPositionByDBMapStatus();
+    }
+
+    /// filter, Re-Design the table "ugv_mission_config_redo"
 
     // get task_group_id
     int task_group_id = sql_ptr_->GetTaskGroupIdFromScheduleTable(cur_schedule_id);
@@ -2694,8 +2702,6 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
     // get job_id from job_log
     int origin_job_id = sql_ptr_->GetJobIdFromJobLog(task_group_id);
 
-
-    //
     /// 0. Initialization
     //
     nw_status_ptr_->cur_job_success_flag = false;

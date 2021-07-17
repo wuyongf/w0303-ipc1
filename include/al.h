@@ -109,7 +109,7 @@ namespace yf
                                                          const yf::data::arm::Point3d& real_landmark_pos);
 
 
-        private:
+        public:
 
             float d2r(const float& degree);
             float r2d(const float& radian);

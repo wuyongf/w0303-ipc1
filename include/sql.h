@@ -152,6 +152,7 @@ namespace yf
 
             /// Error Log
             void UpdateErrorLog(const int& error_code, const std::string& error_description);
+            void UpdateErrorLog1(const int& error_code, const nanodbc::string& error_description);
             void UpdateSysAdvice(const int& advice_index);
 
             // Device Status
@@ -2954,9 +2955,6 @@ int yf::sql::sql_server::GetScheduleCommand(const int &id)
 
 void yf::sql::sql_server::UpdateErrorLog(const int& error_code, const std::string &error_description)
 {
-
-
-
     std::string query_update;
 
     try
@@ -4134,6 +4132,29 @@ int yf::sql::sql_server::GetLatestRedoTaskId()
 
         return 0;
     };
+}
+
+void yf::sql::sql_server::UpdateErrorLog1(const int &error_code, const nanodbc::string &error_description)
+{
+    nanodbc::string query_update;
+
+    try
+    {
+        Connect();
+
+
+        query_update = "INSERT INTO sys_status_error_log(error_code, error_description, created_date) VALUES (" + std::to_string(error_code) + ",'" + error_description +"','"+ TimeNow() + "')";
+
+
+        nanodbc::execute(conn_,query_update);
+
+        Disconnect();
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+    }
 }
 
 
