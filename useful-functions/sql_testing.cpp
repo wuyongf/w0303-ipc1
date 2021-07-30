@@ -22,11 +22,12 @@ int main()
 
 
     // upload chinese character.
-    nanodbc::string error_description = "手臂錯誤!!";
+//    nanodbc::string error_description = "手臂錯誤!!";
 //    std::string error_description = "Arm Error!";
-    NANODBC_TEXT("");
-    NANODBC_TEXT("123");
-    sql->UpdateErrorLog1(2,error_description);
+//    NANODBC_TEXT("");
+
+//    sql->UpdateErrorLog1(2,error_description);
+    sql->UpdateErrorLog1(2,NANODBC_TEXT("123"));
 
 
 //    auto failed_q = sql->GetFailedTaskIds(10);
