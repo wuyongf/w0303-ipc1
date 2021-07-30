@@ -903,134 +903,210 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                         }
                                     }
 
+                                    bool amc_skip_flag = true;
+
                                     /// Loop all the arm_mission_configs
                                     for (int n = 0; n < arm_mission_configs.size(); n++)
                                     {
-                                        // 1. move to standby_position
-                                        //  1.1 get standby_point_str
-                                        auto standby_point = arm_mission_configs[n].standby_position;
-                                        std::string standby_point_str = this->ArmGetPointStr(standby_point);
-                                        //  1.2 set standby_point
-                                        tm5.ArmTask("Set standby_p0 = "+standby_point_str);
-                                        //  1.3 move to standby_point
-                                        tm5.ArmTask("Move_to standby_p0");
-
-                                        // 3. check&set tool_angle
-                                        this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
-
-                                        // 2. check landmark_or_not?
-                                        if(arm_mission_configs[n].landmark_flag == true)
+                                        switch (n)
                                         {
-                                            // 2.1 init_lm_vision_position.
-                                            //  2.1.1 retrieve init_lm_vision_position_str
-                                            std::string ref_vision_lm_init_position_str = this->ArmGetPointStr(arm_mission_configs[n].ref_vision_lm_init_position);
-                                            //  2.1.2 set init_lm_vision_position
-                                            tm5.ArmTask("Set vision_lm_init_p0 = " + ref_vision_lm_init_position_str);
-                                            //  2.1.3 move_to init_lm_vision_position
-                                            tm5.ArmTask("Move_to vision_lm_init_p0");
-
-                                            // 2.2 execute vision_find_landmark
-                                            tm5.ArmTask("Post vision_find_landmark");
-
-                                            // 2.3 check find_landmark_flag
-                                            tm5.ArmTask("Post get_find_landmark_flag");
-
-                                            if(tm5.GetFindLandmarkFlag() == true)
+                                            // for the first arm mission config, checking the landmark first.
+                                            case 0:
                                             {
-                                                LOG(INFO) << "Find Landmark!";
-
-                                                // 2.4 get real_landmark_pos
-                                                tm5.ArmTask("Post get_landmark_pos_str");
-                                                real_lm_pos_ = tm5.GetRealLandmarkPos();
-
-                                                // 2.5 post back_to_standby_position.
+                                                // 1. move to standby_position
+                                                //  1.1 get standby_point_str
+                                                auto standby_point = arm_mission_configs[n].standby_position;
+                                                std::string standby_point_str = this->ArmGetPointStr(standby_point);
+                                                //  1.2 set standby_point
+                                                tm5.ArmTask("Set standby_p0 = "+standby_point_str);
+                                                //  1.3 move to standby_point
                                                 tm5.ArmTask("Move_to standby_p0");
 
-                                                // 2.6 get TF
-                                                // 2.7 calculate the new via_points
+                                                // 3. check&set tool_angle
+                                                this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
 
-                                                std::deque<yf::data::arm::Point3d> real_via_points;
+                                                //todo: which vision job?? default vision job is landmark
+                                                /// scan landmark, mark down the record
+                                                ///
+                                                if(arm_mission_configs[n].landmark_flag == true)
+                                                {
+                                                    // 2.1 init_lm_vision_position.
+                                                    //  2.1.1 retrieve init_lm_vision_position_str
+                                                    std::string ref_vision_lm_init_position_str = this->ArmGetPointStr(arm_mission_configs[n].ref_vision_lm_init_position);
+                                                    //  2.1.2 set init_lm_vision_position
+                                                    tm5.ArmTask("Set vision_lm_init_p0 = " + ref_vision_lm_init_position_str);
+                                                    //  2.1.3 move_to init_lm_vision_position
+                                                    tm5.ArmTask("Move_to vision_lm_init_p0");
 
-                                                real_via_points = tm5.GetRealViaPoints(arm_mission_configs[n].via_points, arm_mission_configs[n].ref_landmark_pos, real_lm_pos_);
+                                                    // 2.2 execute vision_find_landmark
+                                                    tm5.ArmTask("Post vision_find_landmark");
 
-                                                arm_mission_configs[n].via_points.clear();
+                                                    // 2.3 check find_landmark_flag
+                                                    tm5.ArmTask("Post get_find_landmark_flag");
 
-                                                arm_mission_configs[n].via_points = real_via_points;
+                                                    if(tm5.GetFindLandmarkFlag() == true)
+                                                    {
+                                                        LOG(INFO) << "Find Landmark!";
+                                                        amc_skip_flag = false;
 
-                                                // 2.8 calculate the real approach point
+                                                        // 2.4 get real_landmark_pos
+                                                        tm5.ArmTask("Post get_landmark_pos_str");
+                                                        real_lm_pos_ = tm5.GetRealLandmarkPos();
 
-                                                yf::data::arm::Point3d real_via_approach_point;
+                                                        // 2.5 post back_to_standby_position.
+                                                        tm5.ArmTask("Move_to standby_p0");
 
-                                                real_via_approach_point = tm5.GetRealPointByLM(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].ref_landmark_pos, real_lm_pos_);
+                                                        // 2.6 get TF
+                                                        // 2.7 calculate the new via_points
 
-                                                arm_mission_configs[n].via_approach_pos.x  = real_via_approach_point.x;
-                                                arm_mission_configs[n].via_approach_pos.y  = real_via_approach_point.y;
-                                                arm_mission_configs[n].via_approach_pos.z  = real_via_approach_point.z;
-                                                arm_mission_configs[n].via_approach_pos.rx = real_via_approach_point.rx;
-                                                arm_mission_configs[n].via_approach_pos.ry = real_via_approach_point.ry;
-                                                arm_mission_configs[n].via_approach_pos.rz = real_via_approach_point.rz;
+                                                        std::deque<yf::data::arm::Point3d> real_via_points;
+
+                                                        real_via_points = tm5.GetRealViaPoints(arm_mission_configs[n].via_points, arm_mission_configs[n].ref_landmark_pos, real_lm_pos_);
+
+                                                        arm_mission_configs[n].via_points.clear();
+
+                                                        arm_mission_configs[n].via_points = real_via_points;
+
+                                                        // 2.8 calculate the real approach point
+
+                                                        yf::data::arm::Point3d real_via_approach_point;
+
+                                                        real_via_approach_point = tm5.GetRealPointByLM(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].ref_landmark_pos, real_lm_pos_);
+
+                                                        arm_mission_configs[n].via_approach_pos.x  = real_via_approach_point.x;
+                                                        arm_mission_configs[n].via_approach_pos.y  = real_via_approach_point.y;
+                                                        arm_mission_configs[n].via_approach_pos.z  = real_via_approach_point.z;
+                                                        arm_mission_configs[n].via_approach_pos.rx = real_via_approach_point.rx;
+                                                        arm_mission_configs[n].via_approach_pos.ry = real_via_approach_point.ry;
+                                                        arm_mission_configs[n].via_approach_pos.rz = real_via_approach_point.rz;
+                                                    }
+                                                    else
+                                                    {
+                                                        LOG(INFO) << "Cannot find Landmark! Skip cur_arm_mission_config!!";
+
+                                                        arm_sub_mission_success_flag = false;
+
+                                                        LOG(INFO) << "Skip the whole arm mission configs!";
+                                                        amc_skip_flag = true;
+
+                                                        // back to standby_point
+                                                        tm5.ArmTask("Move_to standby_p0");
+                                                        // back to safety position
+                                                        tm5.ArmTask("Post arm_back_to_safety");
+
+                                                        ///TIME
+                                                        sleep.ms(200);
+
+                                                        continue;
+                                                    }
+
+                                                    /// Comparison real_lm_pos & ref_lm_pos. Check whether error is too significant
+                                                    if(tm5.IsLMPosDeviation(arm_mission_configs[n].ref_landmark_pos, real_lm_pos_))
+                                                    {
+                                                        // error too significant, skip current arm mission config!
+
+                                                        LOG(INFO) << "Error too significant! Skip cur_arm_mission_config!!";
+
+                                                        arm_sub_mission_success_flag = false;
+
+                                                        LOG(INFO) << "Skip the whole arm mission configs!";
+                                                        amc_skip_flag = true;
+
+                                                        // back to standby_point
+                                                        tm5.ArmTask("Move_to standby_p0");
+                                                        // back to safety position
+                                                        tm5.ArmTask("Post arm_back_to_safety");
+
+                                                        ///TIME
+                                                        sleep.ms(200);
+
+                                                        //todo: upload to sys_schedule_job_task
+                                                        // job_id, task_order, task_mode, ugv_config_id, arm_config_id,
+                                                        // status (in process, finish, error)
+
+                                                        continue;
+
+                                                    }
+                                                }
+                                                break;
                                             }
-                                            else
+                                            default:
                                             {
-                                                LOG(INFO) << "Cannot find Landmark! Skip cur_arm_mission_config!!";
+                                                // if not detect the landmark, just skip the arm mission config.
+                                                if(amc_skip_flag)
+                                                {
+                                                    continue;
+                                                }
+                                                else
+                                                {
+#if 0
+                                                    // 1. move to standby_position
+                                                    //  1.1 get standby_point_str
+                                                    auto standby_point = arm_mission_configs[n].standby_position;
+                                                    std::string standby_point_str = this->ArmGetPointStr(standby_point);
+                                                    //  1.2 set standby_point
+                                                    tm5.ArmTask("Set standby_p0 = "+standby_point_str);
+                                                    //  1.3 move to standby_point
+                                                    tm5.ArmTask("Move_to standby_p0");
+#endif
 
-                                                arm_sub_mission_success_flag = false;
+                                                    // 3. check&set tool_angle
+                                                    this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
+#if 0
+                                                    // 2.5 post back_to_standby_position.
+                                                    tm5.ArmTask("Move_to standby_p0");
+#endif
+                                                    // 2.6 get TF
+                                                    // 2.7 calculate the new via_points
 
-                                                // back to standby_point
-                                                tm5.ArmTask("Move_to standby_p0");
-                                                // back to safety position
-                                                tm5.ArmTask("Post arm_back_to_safety");
+                                                    std::deque<yf::data::arm::Point3d> real_via_points;
 
-                                                ///TIME
-                                                sleep.ms(200);
+                                                    real_via_points = tm5.GetRealViaPoints(arm_mission_configs[n].via_points, arm_mission_configs[n].ref_landmark_pos, real_lm_pos_);
 
-                                                continue;
-                                            }
+                                                    arm_mission_configs[n].via_points.clear();
 
-                                            /// Comparison real_lm_pos & ref_lm_pos. Check whether error is too significant
-                                            if(tm5.IsLMPosDeviation(arm_mission_configs[n].ref_landmark_pos, real_lm_pos_))
-                                            {
+                                                    arm_mission_configs[n].via_points = real_via_points;
 
-                                                // error too significant, skip current arm mission config!
+                                                    // 2.8 calculate the real approach point
 
-                                                LOG(INFO) << "Error too significant! Skip cur_arm_mission_config!!";
+                                                    yf::data::arm::Point3d real_via_approach_point;
 
-                                                arm_sub_mission_success_flag = false;
+                                                    real_via_approach_point = tm5.GetRealPointByLM(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].ref_landmark_pos, real_lm_pos_);
 
-                                                // back to standby_point
-                                                tm5.ArmTask("Move_to standby_p0");
-                                                // back to safety position
-                                                tm5.ArmTask("Post arm_back_to_safety");
+                                                    arm_mission_configs[n].via_approach_pos.x  = real_via_approach_point.x;
+                                                    arm_mission_configs[n].via_approach_pos.y  = real_via_approach_point.y;
+                                                    arm_mission_configs[n].via_approach_pos.z  = real_via_approach_point.z;
+                                                    arm_mission_configs[n].via_approach_pos.rx = real_via_approach_point.rx;
+                                                    arm_mission_configs[n].via_approach_pos.ry = real_via_approach_point.ry;
+                                                    arm_mission_configs[n].via_approach_pos.rz = real_via_approach_point.rz;
 
-                                                ///TIME
-                                                sleep.ms(200);
-
-                                                //todo: upload to sys_schedule_job_task
-                                                // job_id, task_order, task_mode, ugv_config_id, arm_config_id,
-                                                // status (in process, finish, error)
-
-                                                continue;
-
+                                                }
                                             }
                                         }
 
+                                        if(amc_skip_flag)
+                                        {
+                                            continue;
+                                        }
+                                        else
+                                        {
+                                            // 4. check motion_type, decide which motion.
+                                            // 5. assign n_via_points.
+                                            std::string n_via_points_str = std::to_string(arm_mission_configs[n].n_via_points);
+                                            tm5.ArmTask("Set n_points = " + n_via_points_str);
 
-                                        // 4. check motion_type, decide which motion.
-                                        // 5. assign n_via_points.
-                                        std::string n_via_points_str = std::to_string(arm_mission_configs[n].n_via_points);
-                                        tm5.ArmTask("Set n_points = " + n_via_points_str);
+                                            // 6. set approach_point
+                                            this->ArmSetApproachPoint(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].tool_angle);
 
-                                        // 6. set approach_point
-                                        this->ArmSetApproachPoint(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].tool_angle);
+                                            // 7. set via_points
+                                            this->ArmSetViaPoints(arm_mission_configs[n].via_points, arm_mission_configs[n].tool_angle);
 
-                                        // 7. set via_points
-                                        this->ArmSetViaPoints(arm_mission_configs[n].via_points, arm_mission_configs[n].tool_angle);
+                                            // 8. post via_points
+                                            this->ArmPostViaPoints(cur_task_mode_, arm_mission_configs[n].tool_angle, arm_mission_configs[n].model_type, arm_mission_configs[n].id);
 
-                                        // 8. post via_points
-                                        this->ArmPostViaPoints(cur_task_mode_, arm_mission_configs[n].tool_angle, arm_mission_configs[n].model_type, arm_mission_configs[n].id);
-
-                                        // 9. post return standby_position
-                                        tm5.ArmTask("Move_to standby_p0");
+                                            // 9. post return standby_position
+                                            tm5.ArmTask("Move_to standby_p0");
+                                        }
                                     }
 
                                     ///TIME
