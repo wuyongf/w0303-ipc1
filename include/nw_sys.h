@@ -2379,6 +2379,11 @@ void yf::sys::nw_sys::ArmPickPad()
             tm5.ArmTask("Post pick_large_pad");
             break;
         }
+        case data::arm::ModelType::Wall:
+        {
+            tm5.ArmTask("Post pick_large_pad");
+            break;
+        }
         default:
         {
             tm5.ArmTask("Post pick_small_pad");
@@ -2412,6 +2417,11 @@ void yf::sys::nw_sys::ArmRemovePad()
             break;
         }
         case data::arm::ModelType::Skirting:
+        {
+            tm5.ArmTask("Post remove_large_pad");
+            break;
+        }
+        case data::arm::ModelType::Wall:
         {
             tm5.ArmTask("Post remove_large_pad");
             break;
