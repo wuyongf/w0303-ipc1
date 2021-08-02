@@ -135,12 +135,17 @@ private:
 private:
 
     void parse_landmark_pos_str(std::string& msg);
+    void parse_small_pad_no_str(std::string& msg);
+    void parse_large_pad_no_str(std::string& msg);
 
 public:
 
     bool get_find_landmark_flag();
 
     yf::data::arm::Point3d get_landmark_pos();
+
+    int get_small_pad_no();
+    int get_large_pad_no();
 
 /// IPC2 Methods
 //
@@ -187,6 +192,10 @@ protected:
 
     bool find_landmark_flag = false;
     yf::data::arm::Point3d landmark_pos;
+
+    // for consumables
+    int small_pad_no = 0;
+    int large_pad_no = 0;
 
     //for ipc2
     std::shared_ptr<yf::net::connection<CustomMsgTypes>> client_ipc2;
@@ -335,6 +344,8 @@ protected:
             // 2.2 Arm Info
             auto index_find_landmark_flag   = latest_msg.find("find_landmark_flag = ");
             auto index_landmark_pos_str     = latest_msg.find("landmark_pos_str = ");
+            auto index_small_pad_no         = latest_msg.find("small_pad_no = ");
+            auto index_large_pad_no         = latest_msg.find("large_pad_no = ");
 
 //            ///TIME
 //            std::this_thread::sleep_for(std::chrono::milliseconds(50)); // wait 50 ms
@@ -426,6 +437,17 @@ protected:
             if(index_landmark_pos_str != std::string::npos)
             {
                 this->parse_landmark_pos_str(latest_msg);
+            }
+
+            // 3.3 consumables info
+            if(index_small_pad_no != std::string::npos)
+            {
+                this->parse_small_pad_no_str(latest_msg);
+            }
+
+            if(index_large_pad_no != std::string::npos)
+            {
+                this->parse_large_pad_no_str(latest_msg);
             }
         }
     }
@@ -531,4 +553,38 @@ void IPCServer::set_thread_modbus_notified()
 void IPCServer::set_thread_modbus_blocked()
 {
     notify_flag_ = false;
+}
+
+void IPCServer::parse_small_pad_no_str(std::string &msg)
+{
+    auto index_left_curly_bracket = msg.find("{");
+    auto index_right_curly_bracket = msg.find("}");
+
+    auto s = msg.substr(index_left_curly_bracket+1,index_right_curly_bracket-1 );
+
+    small_pad_no = std::stoi(s);
+
+    return;
+}
+
+void IPCServer::parse_large_pad_no_str(std::string &msg)
+{
+    auto index_left_curly_bracket = msg.find("{");
+    auto index_right_curly_bracket = msg.find("}");
+
+    auto s = msg.substr(index_left_curly_bracket+1,index_right_curly_bracket-1 );
+
+    large_pad_no = std::stoi(s);
+
+    return;
+}
+
+int IPCServer::get_small_pad_no()
+{
+    return small_pad_no;
+}
+
+int IPCServer::get_large_pad_no()
+{
+    return large_pad_no;
 }

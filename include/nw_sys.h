@@ -60,6 +60,8 @@ namespace yf
             void ArmAbsorbWater();
             int  ArmGetAbsorbType();
 
+            void ArmCheckPadNo();
+
             void ArmSetOperationArea(const yf::data::arm::OperationArea& operation_area);
             void ArmSetToolAngle(const yf::data::arm::TaskMode& task_mode, const yf::data::arm::ToolAngle& tool_angle);
             void ArmSetApproachPoint(const yf::data::arm::Point3d& approach_point, const yf::data::arm::ToolAngle& tool_angle);
@@ -123,11 +125,17 @@ namespace yf
             void thread_Web_UgvCurPosition(const bool& web_status_flag,
                                            const int& sleep_duration);
 
+            void thread_Web_DeviceConnectionMissionStatus(const bool& web_status_flag,
+                                                          const int& sleep_duration);
+
+
+
         private: /// threads handle for Web Status Manager
 
             std::thread th_web_status_manager_;
             std::thread th_web_ugv_battery_;
             std::thread th_web_ugv_position_;
+            std::thread th_web_ugv_connection_mission_status_;
 
         private: /// Time Sleep Class
 
@@ -876,6 +884,10 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                         if(cur_task_mode_ == data::arm::TaskMode::Mopping)
                                         {
                                             this->ArmPickPad();
+
+                                            sleep.ms(200);
+
+                                            this->ArmCheckPadNo();
 
                                             sleep.ms(200);
 
@@ -1680,6 +1692,7 @@ void yf::sys::nw_sys::WaitSchedulesInitialCheck()
     bool arm_init_status_check_continue_flag = true;
     bool arm_init_position_check_continue_flag = true;
 
+    bool consumables_init_check_continue_flag = true;
 
     // Initial Check Loop.
     //
@@ -1808,12 +1821,30 @@ void yf::sys::nw_sys::WaitSchedulesInitialCheck()
         bool ugv_init_check_continue_flag = false;
         LOG(INFO) << "[thread_WaitSchedules]: 1.3.3 check ugv   [Complete]";
 
+
+        if(nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Connected)
+        {
+            LOG(INFO) << "[thread_WaitSchedules]: 1.3.4 check consumables   [Start]";
+            this->ArmCheckPadNo();
+            if(nw_status_ptr_->small_pad_no != 0 && nw_status_ptr_->large_pad_no != 0)
+            {
+                consumables_init_check_continue_flag = false;
+                LOG(INFO) << "[thread_WaitSchedules]: 1.3.4 check consumables   [Complete]";
+            }
+            else
+            {
+                LOG(INFO) << "[thread_WaitSchedules]: 1.3.4 check consumables: Please refill consumables!   [Uncompleted]";
+                sql_ptr_->UpdateSysAdvice(9);
+            }
+        }
+
         LOG(INFO) << "[thread_WaitSchedules]: 1.3 check functions   [Complete]";
 
         // check the initial_check_flag
         if(sys_init_check_continue_flag == false &&
            arm_init_check_continue_flag == false &&
-           ugv_init_check_continue_flag == false )
+           ugv_init_check_continue_flag == false &&
+           consumables_init_check_continue_flag == false)
         {
             init_check_continue_flag = false;
         }
@@ -2454,6 +2485,7 @@ void yf::sys::nw_sys::thread_WebStatusManager()
     /// duration for each thread
     int duration_min_ugv_battery = 10;
     int duration_sec_ugv_pos = 10;
+    int duration_sec_ugv_connection_mission_status = 5;
 
     /// each thread's control flag
     web_status_flag_ = true;
@@ -2464,6 +2496,10 @@ void yf::sys::nw_sys::thread_WebStatusManager()
 
     th_web_ugv_position_ = std::thread(&nw_sys::thread_Web_UgvCurPosition, this,
                                        std::ref(web_status_flag_),std::move(duration_sec_ugv_pos));
+
+    th_web_ugv_connection_mission_status_ = std::thread(&nw_sys::thread_Web_DeviceConnectionMissionStatus, this,
+                                                        std::ref(web_status_flag_),
+                                                        std::move(duration_sec_ugv_connection_mission_status));
 
     /// Duration: 1 minute
     while (schedule_flag_ == true)
@@ -2674,8 +2710,7 @@ void yf::sys::nw_sys::UpdateDbErrorLog()
         case data::common::ConnectionStatus::Disconnected:
         {
             //L"手臂未連接，請聯係管理員！"
-            std::string error_description = "Arm Disconnected. Please ask Admin for help!";
-            sql_ptr_->UpdateErrorLog(0,error_description);
+            sql_ptr_->UpdateErrorLog(2);
             break;
         }
     }
@@ -2685,16 +2720,14 @@ void yf::sys::nw_sys::UpdateDbErrorLog()
     {
         case data::common::MissionStatus::Error:
         {
-//            std::wstring error_description = L"手臂運行錯誤，請聯係管理員！";
-            std::string error_description = "Arm has Error. Please ask Admin for help!";
-            sql_ptr_->UpdateErrorLog(1,error_description);
+//          "手臂運行錯誤，請聯係管理員！";
+            sql_ptr_->UpdateErrorLog(1);
             break;
         }
         case data::common::MissionStatus::EStop:
         {
-//            std::wstring error_description = L"手臂已急停，請聯係管理員！";
-            std::string error_description = "Arm has been Emergency Stop. Please ask Admin for help!";
-            sql_ptr_->UpdateErrorLog(2,error_description);
+//          手臂已急停，請聯係管理員！";
+            sql_ptr_->UpdateErrorLog(5);
             break;
         }
         default:
@@ -3011,6 +3044,10 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
                                         if(cur_task_mode_ == data::arm::TaskMode::Mopping)
                                         {
                                             this->ArmPickPad();
+
+                                            sleep.ms(200);
+
+                                            this->ArmCheckPadNo();
 
                                             sleep.ms(200);
 
@@ -3332,6 +3369,70 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
 
     mir100_ptr_->Pause();
 
+}
+
+void yf::sys::nw_sys::thread_Web_DeviceConnectionMissionStatus(const bool &web_status_flag, const int &sleep_duration)
+{
+    sleep.sec(sleep_duration);
+
+    while(web_status_flag)
+    {
+        /// 1. mir100
+
+        /// 1.1. ping mir 192.168.7.34
+        /// 1.2. if success, update mir connection status
+        if(mir100_ptr_->IsConnected())
+        {
+            nw_status_ptr_->ugv_connection_status_ = data::common::ConnectionStatus::Connected;
+            sql_ptr_->UpdateDeviceConnectionStatus("ugv", 1);
+        }
+        else
+        {
+            nw_status_ptr_->ugv_connection_status_ = data::common::ConnectionStatus::Disconnected;
+            sql_ptr_->UpdateDeviceConnectionStatus("ugv", 0);
+        }
+
+        /// 1.3. get mir mission status from REST API
+        /// 1.4. update mir mission status
+        mir100_ptr_->RetrieveUgvCurrentMissionState();
+
+        /// 2. arm
+        // 2.1 connection status
+        // 2.2 mission status
+        tm5.UpdateSQLArmStatus();
+
+        sleep.sec(sleep_duration);
+    }
+}
+
+void yf::sys::nw_sys::ArmCheckPadNo()
+{
+    // check if there is any small/large pad
+    if(tm5.GetSmallPadExistFlag() == false)
+    {
+        nw_status_ptr_->small_pad_no = 0;
+        sql_ptr_->UpdatePadNo("small_pad", nw_status_ptr_->small_pad_no );
+    }
+    else
+    {
+        // get small pad no
+        tm5.ArmTask("Post get_small_pad_no");
+        nw_status_ptr_->small_pad_no = tm5.GetSmallPadNo();
+        sql_ptr_->UpdatePadNo("small_pad", nw_status_ptr_->small_pad_no );
+    }
+
+    if(tm5.GetLargePadExistFlag() == false)
+    {
+        nw_status_ptr_->large_pad_no = 0;
+        sql_ptr_->UpdatePadNo("large_pad", nw_status_ptr_->large_pad_no );
+    }
+    else
+    {
+        // get large pad no
+        tm5.ArmTask("Post get_large_pad_no");
+        nw_status_ptr_->large_pad_no = tm5.GetLargePadNo();
+        sql_ptr_->UpdatePadNo("large_pad", nw_status_ptr_->large_pad_no );
+    }
 }
 
 

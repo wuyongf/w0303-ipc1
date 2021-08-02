@@ -60,6 +60,10 @@ namespace yf
             /// For A Schedule
             yf::data::schedule::ScheduleCommand db_cur_schedule_command_;
 
+            /// For Consumables
+            int small_pad_no = 5;
+            int large_pad_no = 4;
+
         public:
 
             int ArmMissionStatusForSQL();

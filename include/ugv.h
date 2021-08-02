@@ -98,10 +98,10 @@ namespace yf
 
         public: /// Layer 1: Interact with Basic GET/POST/PUT/Delete Methods
 
-            // (1) done: Get Connection Status
-            // (2) todo: update to nw_status
-            // (3) todo: update to database
+            // Connection Status
             bool IsConnected();
+
+            // Get Mission Status From RestAPI
 
             int   GetPLCRegisterIntValue(const int& plc_register);
             float GetPLCRegisterFloatValue(const int& plc_register);
@@ -117,7 +117,7 @@ namespace yf
             // (1) check mission continue flag
             bool MissionStatusCheck(const int& timeout_min);
             
-            // (2) current ugv mission state
+            // (2) current ugv mission state / mission status
             void RetrieveUgvCurrentMissionState();
 
             // a. Initial status check for mission
@@ -1269,6 +1269,10 @@ float yf::ugv::mir::GetPLCRegisterFloatValue(const int &plc_register)
     return value;
 }
 
+///\brief
+/// 1. Get Ugv Mission Status from RestAPI
+/// 2. Update nw_status
+/// 3. Update database
 void yf::ugv::mir::RetrieveUgvCurrentMissionState() 
 {
     int state = this->GetStateId();
@@ -1288,31 +1292,37 @@ void yf::ugv::mir::RetrieveUgvCurrentMissionState()
         case 3:
         {
             nw_status_ptr_->ugv_mission_status_ = yf::data::common::UgvState::Ready;
+            sql_ptr_->UpdateDeviceMissionStatus("ugv", 1);
             break;
         }
         case 4:
         {
             nw_status_ptr_->ugv_mission_status_ = yf::data::common::UgvState::Pause;
+            sql_ptr_->UpdateDeviceMissionStatus("ugv", 4);
             break;
         }
         case 5:
         {
             nw_status_ptr_->ugv_mission_status_ = yf::data::common::UgvState::Executing;
+            sql_ptr_->UpdateDeviceMissionStatus("ugv", 2);
             break;
         }
         case 6:
         {
             nw_status_ptr_->ugv_mission_status_ = yf::data::common::UgvState::Aborted;
+            sql_ptr_->UpdateDeviceMissionStatus("ugv", 5);
             break;
         }
         case 7:
         {
             nw_status_ptr_->ugv_mission_status_ = yf::data::common::UgvState::Completed;
+            sql_ptr_->UpdateDeviceMissionStatus("ugv", 3);
             break;
         }
         case 10:
         {
             nw_status_ptr_->ugv_mission_status_ = yf::data::common::UgvState::EmergencyStop;
+            sql_ptr_->UpdateDeviceMissionStatus("ugv", 7);
             break;
         }
         case 11:
@@ -1323,6 +1333,7 @@ void yf::ugv::mir::RetrieveUgvCurrentMissionState()
         case 12:
         {
             nw_status_ptr_->ugv_mission_status_ = yf::data::common::UgvState::Error;
+            sql_ptr_->UpdateDeviceMissionStatus("ugv", 6);
             break;
         }
     }

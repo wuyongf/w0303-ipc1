@@ -151,9 +151,11 @@ namespace yf
             void UpdateTaskLog(const int& cur_task_id, const int& task_status);
 
             /// Error Log
-            void UpdateErrorLog(const int& error_code, const std::string& error_description);
-            void UpdateErrorLog1(const int& error_code, const nanodbc::string& error_description);
+            void UpdateErrorLog(const int& error_code);
             void UpdateSysAdvice(const int& advice_index);
+
+            /// Status Bar: Consumables
+            void UpdatePadNo(const std::string& consumable_name, const int& pad_no);
 
             // Device Status
             //
@@ -2953,7 +2955,7 @@ int yf::sql::sql_server::GetScheduleCommand(const int &id)
     }
 }
 
-void yf::sql::sql_server::UpdateErrorLog(const int& error_code, const std::string &error_description)
+void yf::sql::sql_server::UpdateErrorLog(const int& error_code)
 {
     std::string query_update;
 
@@ -2962,7 +2964,7 @@ void yf::sql::sql_server::UpdateErrorLog(const int& error_code, const std::strin
         Connect();
 
 
-        query_update = "INSERT INTO sys_status_error_log(error_code, error_description, created_date) VALUES (" + std::to_string(error_code) + ",'" + error_description +"','"+ TimeNow() + "')";
+        query_update = "INSERT INTO sys_status_error_log(error_code, error_description, created_date) VALUES (" + std::to_string(error_code) + ",'"+ TimeNow() + "')";
 
 
         nanodbc::execute(conn_,query_update);
@@ -4134,17 +4136,17 @@ int yf::sql::sql_server::GetLatestRedoTaskId()
     };
 }
 
-void yf::sql::sql_server::UpdateErrorLog1(const int &error_code, const nanodbc::string &error_description)
+void yf::sql::sql_server::UpdatePadNo(const std::string &consumable_name,
+                                      const int &pad_no)
 {
-    nanodbc::string query_update;
+    std::string pad_no_str = std::to_string(pad_no);
+    std::string query_update;
 
     try
     {
         Connect();
 
-
-        query_update = "INSERT INTO sys_status_error_log(error_code, error_description, created_date) VALUES (" + std::to_string(error_code) + ",'" + error_description +"','"+ TimeNow() + "')";
-
+        query_update = "UPDATE sys_status_consumable SET unused_no = " + pad_no_str + ", modified_date='" + TimeNow() + "' WHERE consumable_name = '"+ consumable_name +"'" ;
 
         nanodbc::execute(conn_,query_update);
 
@@ -4156,6 +4158,8 @@ void yf::sql::sql_server::UpdateErrorLog1(const int &error_code, const nanodbc::
         std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
     }
 }
+
+
 
 
 

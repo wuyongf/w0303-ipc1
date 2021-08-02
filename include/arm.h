@@ -104,6 +104,9 @@ namespace yf
 
             yf::data::arm::Tool GetCurrentTool();
 
+            bool GetSmallPadExistFlag();
+            bool GetLargePadExistFlag();
+
             yf::data::arm::Tool GetMissionTool(const int& model_config_id);
 
             yf::data::arm::ToolAngle GetToolAngle(const int& arm_mission_config_id);
@@ -130,6 +133,10 @@ namespace yf
 
             yf::data::arm::Point3d GetRealLandmarkPos();
 
+            // consumables
+            int GetSmallPadNo();
+            int GetLargePadNo();
+
         public: // algorithm
 
             std::deque<yf::data::arm::Point3d> GetRealViaPoints(const std::deque<yf::data::arm::Point3d>& original_via_points,
@@ -140,14 +147,15 @@ namespace yf
                                                     const yf::data::arm::Point3d& ref_landmark_pos,
                                                     const yf::data::arm::Point3d& real_landmark_pos);
 
-        public: /// Safety Methods
-
+        public:
+            /// Safety Methods
             bool IsLMPosDeviation(const yf::data::arm::Point3d& ref_landmark_pos,
                                   const yf::data::arm::Point3d& real_landmark_pos);
+            /// Arm Connection Mission Status
+            void UpdateSQLArmStatus();
 
         protected:
 
-            void UpdateSQLArmStatus();
             void UpdateSQLScheduleStatus();
 
             void RetrieveArmCurrentMissionStatus();
@@ -669,27 +677,33 @@ void yf::arm::tm::UpdateSQLArmStatus()
             break;
         }
 
-        case yf::data::common::MissionStatus::Pause:
+        case yf::data::common::MissionStatus::Finish:
         {
             mission_status = 3;
             break;
         }
 
-        case yf::data::common::MissionStatus::Finish:
+        case yf::data::common::MissionStatus::Pause:
         {
             mission_status = 4;
             break;
         }
 
-        case yf::data::common::MissionStatus::Error:
+        case yf::data::common::MissionStatus::Cancel:
         {
             mission_status = 5;
             break;
         }
 
-        case yf::data::common::MissionStatus::EStop:
+        case yf::data::common::MissionStatus::Error:
         {
             mission_status = 6;
+            break;
+        }
+
+        case yf::data::common::MissionStatus::EStop:
+        {
+            mission_status = 7;
             break;
         }
     }
@@ -1375,4 +1389,45 @@ yf::arm::tm::ConfigureRedoArmMission(const int &task_group_id, const int &order,
     }
 
     return arm_mission_configs;
+}
+
+int yf::arm::tm::GetSmallPadNo()
+{
+    return ipc_server_ptr_->get_small_pad_no();
+}
+
+int yf::arm::tm::GetLargePadNo()
+{
+    return ipc_server_ptr_->get_large_pad_no();
+}
+
+bool yf::arm::tm::GetSmallPadExistFlag()
+{
+    int no_small_pad = tm_modbus.get_control_box_DI(9);
+    int no_large_pad = tm_modbus.get_control_box_DI(6);
+
+    if(no_small_pad == 1)
+    {
+        // there is no any small pad
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+bool yf::arm::tm::GetLargePadExistFlag()
+{
+    int no_large_pad = tm_modbus.get_control_box_DI(6);
+
+    if(no_large_pad == 1)
+    {
+        // there is no any small pad
+        return false;
+    }
+    else
+    {
+        return true;
+    }
 }
