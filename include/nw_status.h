@@ -64,6 +64,9 @@ namespace yf
             int small_pad_no = 5;
             int large_pad_no = 4;
 
+            const int small_pad_total = 5;
+            const int large_pad_total = 4;
+
         public:
 
             int ArmMissionStatusForSQL();

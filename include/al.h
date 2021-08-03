@@ -599,6 +599,10 @@ yf::algorithm::cleaning_motion::get_mop_via_points( const yf::data::arm::ModelTy
                 {
                     break;
                 }
+                case yf::data::arm::ModelType::Windows:
+                {
+                    break;
+                }
                 default:
                 {
                     auto via_points_reverse = via_points;

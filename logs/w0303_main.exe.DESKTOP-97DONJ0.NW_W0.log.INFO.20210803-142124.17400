@@ -1,0 +1,482 @@
+Log file created at: 2021/08/03 14:21:24
+Running on machine: DESKTOP-97DONJ0
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I0803 14:21:24.935429  4788 arm.h:342] wait for arm connection...
+I0803 14:21:25.885540  4788 arm.h:344] arm connected.
+I0803 14:21:25.885540  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: TM5-900
+I0803 14:21:27.098647 11612 nw_sys.h:400] [thread_DoSchedules]: lock!
+I0803 14:21:27.613103 18380 nw_sys.h:342] [thread_WaitSchedules]: Start!
+I0803 14:21:27.613103 18380 nw_sys.h:344] [thread_WaitSchedules]: stage 1 --- Wait for Database Available Schedules
+I0803 14:21:27.614105 18380 nw_sys.h:351] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Start]
+I0803 14:21:27.614105 18380 nw_sys.h:1714] [thread_WaitSchedules]: 1.1 update sys control mode
+I0803 14:21:27.623104 18380 nw_sys.h:1717] [thread_WaitSchedules]: 1.2 update all devices status
+I0803 14:21:27.623104 18380 nw_sys.h:1719] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0803 14:21:27.761237  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0803 14:21:27.843750 18380 arm.h:586] arm is idle.
+I0803 14:21:27.843750 18380 nw_sys.h:1722] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0803 14:21:27.844750 18380 nw_sys.h:1724] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0803 14:21:27.844750 18380 nw_sys.h:1730] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0803 14:21:27.854750 18380 nw_sys.h:1768] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0803 14:21:27.854750 18380 nw_sys.h:1770] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0803 14:21:27.854750 18380 nw_sys.h:1778] [thread_WaitSchedules]: 1.3.2 check arm   [Complete]
+I0803 14:21:27.854750 18380 nw_sys.h:1833] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0803 14:21:27.854750 18380 nw_sys.h:1835] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0803 14:21:27.854750 18380 nw_sys.h:1840] [thread_WaitSchedules]: 1.3.4 check consumables   [Start]
+I0803 14:21:28.049865 18380 arm.h:79] [ArmTask]: modbus_thread check start...
+I0803 14:21:28.050866 18380 arm.h:730] [IPC1 ---> Arm]: Post get_small_pad_no
+I0803 14:21:28.079777  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_small_pad_no, Arm Running
+I0803 14:21:28.142030  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: small_pad_no = {5}
+I0803 14:21:28.203150  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_small_pad_no, Arm Finish
+I0803 14:21:28.349347  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0803 14:21:28.414685 18380 arm.h:586] arm is idle.
+I0803 14:21:28.414685 18380 arm.h:87] [ArmTask]: modbus_thread check finished...
+I0803 14:21:28.562721 18380 arm.h:79] [ArmTask]: modbus_thread check start...
+I0803 14:21:28.563720 18380 arm.h:730] [IPC1 ---> Arm]: Post get_large_pad_no
+I0803 14:21:28.596782  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_large_pad_no, Arm Running
+I0803 14:21:28.685035  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: large_pad_no = {4}
+I0803 14:21:28.749029  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_large_pad_no, Arm Finish
+I0803 14:21:28.905571  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0803 14:21:28.982570 18380 arm.h:586] arm is idle.
+I0803 14:21:28.982570 18380 arm.h:87] [ArmTask]: modbus_thread check finished...
+I0803 14:21:28.990569 18380 nw_sys.h:1845] [thread_WaitSchedules]: 1.3.4 check consumables   [Complete]
+I0803 14:21:28.990569 18380 nw_sys.h:1854] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0803 14:21:28.990569 18380 nw_sys.h:1869] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0803 14:21:28.990569 18380 nw_sys.h:1870] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0803 14:21:30.526262 18380 nw_sys.h:353] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Complete]
+I0803 14:21:30.526262 18380 nw_sys.h:356] [thread_wait_schedules]: wait for incoming schedules...
+I0803 14:21:31.056725 18380 nw_sys.h:351] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Start]
+I0803 14:21:31.056725 18380 nw_sys.h:1714] [thread_WaitSchedules]: 1.1 update sys control mode
+I0803 14:21:31.068724 18380 nw_sys.h:1717] [thread_WaitSchedules]: 1.2 update all devices status
+I0803 14:21:31.070227 18380 nw_sys.h:1719] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0803 14:21:31.298753 18380 arm.h:586] arm is idle.
+I0803 14:21:31.298753 18380 nw_sys.h:1722] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0803 14:21:31.298753 18380 nw_sys.h:1724] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0803 14:21:31.298753 18380 nw_sys.h:1730] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0803 14:21:31.312762 18380 nw_sys.h:1768] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0803 14:21:31.312762 18380 nw_sys.h:1770] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0803 14:21:31.312762 18380 nw_sys.h:1778] [thread_WaitSchedules]: 1.3.2 check arm   [Complete]
+I0803 14:21:31.312762 18380 nw_sys.h:1833] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0803 14:21:31.312762 18380 nw_sys.h:1835] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0803 14:21:31.312762 18380 nw_sys.h:1840] [thread_WaitSchedules]: 1.3.4 check consumables   [Start]
+I0803 14:21:31.487066 18380 arm.h:79] [ArmTask]: modbus_thread check start...
+I0803 14:21:31.487066 18380 arm.h:730] [IPC1 ---> Arm]: Post get_small_pad_no
+I0803 14:21:31.497089  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_small_pad_no, Arm Running
+I0803 14:21:31.551749  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: small_pad_no = {5}
+I0803 14:21:31.637373  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_small_pad_no, Arm Finish
+I0803 14:21:31.815634  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0803 14:21:31.872844 18380 arm.h:586] arm is idle.
+I0803 14:21:31.872844 18380 arm.h:87] [ArmTask]: modbus_thread check finished...
+I0803 14:21:32.026367 18380 arm.h:79] [ArmTask]: modbus_thread check start...
+I0803 14:21:32.026367 18380 arm.h:730] [IPC1 ---> Arm]: Post get_large_pad_no
+I0803 14:21:32.035369  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_large_pad_no, Arm Running
+I0803 14:21:32.093994  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: large_pad_no = {4}
+I0803 14:21:32.146996  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_large_pad_no, Arm Finish
+I0803 14:21:32.352994  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0803 14:21:32.442067 18380 arm.h:586] arm is idle.
+I0803 14:21:32.442595 18380 arm.h:87] [ArmTask]: modbus_thread check finished...
+I0803 14:21:32.451311 18380 nw_sys.h:1845] [thread_WaitSchedules]: 1.3.4 check consumables   [Complete]
+I0803 14:21:32.451311 18380 nw_sys.h:1854] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0803 14:21:32.451311 18380 nw_sys.h:1869] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0803 14:21:32.451311 18380 nw_sys.h:1870] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0803 14:21:33.979346 18380 nw_sys.h:353] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Complete]
+I0803 14:21:33.979346 18380 nw_sys.h:356] [thread_wait_schedules]: wait for incoming schedules...
+I0803 14:21:34.493058 18380 nw_sys.h:351] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Start]
+I0803 14:21:34.493058 18380 nw_sys.h:1714] [thread_WaitSchedules]: 1.1 update sys control mode
+I0803 14:21:34.508052 18380 nw_sys.h:1717] [thread_WaitSchedules]: 1.2 update all devices status
+I0803 14:21:34.509054 18380 nw_sys.h:1719] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0803 14:21:34.727349 18380 arm.h:586] arm is idle.
+I0803 14:21:34.727349 18380 nw_sys.h:1722] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0803 14:21:34.728346 18380 nw_sys.h:1724] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0803 14:21:34.728346 18380 nw_sys.h:1730] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0803 14:21:34.742477 18380 nw_sys.h:1768] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0803 14:21:34.742477 18380 nw_sys.h:1770] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0803 14:21:34.742477 18380 nw_sys.h:1778] [thread_WaitSchedules]: 1.3.2 check arm   [Complete]
+I0803 14:21:34.742477 18380 nw_sys.h:1833] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0803 14:21:34.742477 18380 nw_sys.h:1835] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0803 14:21:34.742477 18380 nw_sys.h:1840] [thread_WaitSchedules]: 1.3.4 check consumables   [Start]
+I0803 14:21:34.933610 18380 arm.h:79] [ArmTask]: modbus_thread check start...
+I0803 14:21:34.933610 18380 arm.h:730] [IPC1 ---> Arm]: Post get_small_pad_no
+I0803 14:21:34.941447  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_small_pad_no, Arm Running
+I0803 14:21:34.996551  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: small_pad_no = {5}
+I0803 14:21:35.053349  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_small_pad_no, Arm Finish
+I0803 14:21:35.259322  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0803 14:21:35.288553 18380 arm.h:586] arm is idle.
+I0803 14:21:35.289077 18380 arm.h:87] [ArmTask]: modbus_thread check finished...
+I0803 14:21:35.466964 18380 arm.h:79] [ArmTask]: modbus_thread check start...
+I0803 14:21:35.466964 18380 arm.h:730] [IPC1 ---> Arm]: Post get_large_pad_no
+I0803 14:21:35.474962  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_large_pad_no, Arm Running
+I0803 14:21:35.522552  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: large_pad_no = {4}
+I0803 14:21:35.566011  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_large_pad_no, Arm Finish
+I0803 14:21:35.804625  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0803 14:21:35.888499 18380 arm.h:586] arm is idle.
+I0803 14:21:35.889503 18380 arm.h:87] [ArmTask]: modbus_thread check finished...
+I0803 14:21:35.907506 18380 nw_sys.h:1845] [thread_WaitSchedules]: 1.3.4 check consumables   [Complete]
+I0803 14:21:35.908501 18380 nw_sys.h:1854] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0803 14:21:35.908501 18380 nw_sys.h:1869] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0803 14:21:35.908501 18380 nw_sys.h:1870] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0803 14:21:37.444972 18380 nw_sys.h:353] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Complete]
+I0803 14:21:37.444972 18380 nw_sys.h:356] [thread_wait_schedules]: wait for incoming schedules...
+I0803 14:21:37.962226 18380 nw_sys.h:351] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Start]
+I0803 14:21:37.962226 18380 nw_sys.h:1714] [thread_WaitSchedules]: 1.1 update sys control mode
+I0803 14:21:37.984213 18380 nw_sys.h:1717] [thread_WaitSchedules]: 1.2 update all devices status
+I0803 14:21:37.984213 18380 nw_sys.h:1719] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0803 14:21:38.239205 18380 arm.h:586] arm is idle.
+I0803 14:21:38.239205 18380 nw_sys.h:1722] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0803 14:21:38.239205 18380 nw_sys.h:1724] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0803 14:21:38.239205 18380 nw_sys.h:1730] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0803 14:21:38.252208 18380 nw_sys.h:1768] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0803 14:21:38.252208 18380 nw_sys.h:1770] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0803 14:21:38.252208 18380 nw_sys.h:1778] [thread_WaitSchedules]: 1.3.2 check arm   [Complete]
+I0803 14:21:38.252208 18380 nw_sys.h:1833] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0803 14:21:38.253208 18380 nw_sys.h:1835] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0803 14:21:38.253208 18380 nw_sys.h:1840] [thread_WaitSchedules]: 1.3.4 check consumables   [Start]
+I0803 14:21:38.454360 18380 arm.h:79] [ArmTask]: modbus_thread check start...
+I0803 14:21:38.455358 18380 arm.h:730] [IPC1 ---> Arm]: Post get_small_pad_no
+I0803 14:21:38.482971  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_small_pad_no, Arm Running
+I0803 14:21:38.527154  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: small_pad_no = {5}
+I0803 14:21:38.593282  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_small_pad_no, Arm Finish
+I0803 14:21:38.769197  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0803 14:21:38.854629 18380 arm.h:586] arm is idle.
+I0803 14:21:38.855628 18380 arm.h:87] [ArmTask]: modbus_thread check finished...
+I0803 14:21:38.977700 18380 arm.h:79] [ArmTask]: modbus_thread check start...
+I0803 14:21:38.977700 18380 arm.h:730] [IPC1 ---> Arm]: Post get_large_pad_no
+I0803 14:21:39.006713  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_large_pad_no, Arm Running
+I0803 14:21:39.073666  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: large_pad_no = {4}
+I0803 14:21:39.128468  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_large_pad_no, Arm Finish
+I0803 14:21:39.333859  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0803 14:21:39.426684 18380 arm.h:586] arm is idle.
+I0803 14:21:39.426684 18380 arm.h:87] [ArmTask]: modbus_thread check finished...
+I0803 14:21:39.434545 18380 nw_sys.h:1845] [thread_WaitSchedules]: 1.3.4 check consumables   [Complete]
+I0803 14:21:39.435065 18380 nw_sys.h:1854] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0803 14:21:39.435065 18380 nw_sys.h:1869] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0803 14:21:39.435065 18380 nw_sys.h:1870] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0803 14:21:40.956470 18380 nw_sys.h:353] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Complete]
+I0803 14:21:40.956470 18380 nw_sys.h:356] [thread_wait_schedules]: wait for incoming schedules...
+I0803 14:21:41.474419 18380 nw_sys.h:351] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Start]
+I0803 14:21:41.474419 18380 nw_sys.h:1714] [thread_WaitSchedules]: 1.1 update sys control mode
+I0803 14:21:41.484421 18380 nw_sys.h:1717] [thread_WaitSchedules]: 1.2 update all devices status
+I0803 14:21:41.484421 18380 nw_sys.h:1719] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0803 14:21:41.702076 18380 arm.h:586] arm is idle.
+I0803 14:21:41.703064 18380 nw_sys.h:1722] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0803 14:21:41.703064 18380 nw_sys.h:1724] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0803 14:21:41.703064 18380 nw_sys.h:1730] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0803 14:21:41.719058 18380 nw_sys.h:1768] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0803 14:21:41.719058 18380 nw_sys.h:1770] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0803 14:21:41.719058 18380 nw_sys.h:1778] [thread_WaitSchedules]: 1.3.2 check arm   [Complete]
+I0803 14:21:41.719058 18380 nw_sys.h:1833] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0803 14:21:41.719058 18380 nw_sys.h:1835] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0803 14:21:41.719058 18380 nw_sys.h:1840] [thread_WaitSchedules]: 1.3.4 check consumables   [Start]
+I0803 14:21:41.914561 18380 arm.h:79] [ArmTask]: modbus_thread check start...
+I0803 14:21:41.914561 18380 arm.h:730] [IPC1 ---> Arm]: Post get_small_pad_no
+I0803 14:21:41.922560  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_small_pad_no, Arm Running
+I0803 14:21:41.979406  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: small_pad_no = {5}
+I0803 14:21:42.061722  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_small_pad_no, Arm Finish
+I0803 14:21:42.249830  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0803 14:21:42.338717 18380 arm.h:586] arm is idle.
+I0803 14:21:42.338717 18380 arm.h:87] [ArmTask]: modbus_thread check finished...
+I0803 14:21:42.532802 18380 arm.h:79] [ArmTask]: modbus_thread check start...
+I0803 14:21:42.532802 18380 arm.h:730] [IPC1 ---> Arm]: Post get_large_pad_no
+I0803 14:21:42.539914  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_large_pad_no, Arm Running
+I0803 14:21:42.593477  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: large_pad_no = {4}
+I0803 14:21:42.657804  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_large_pad_no, Arm Finish
+I0803 14:21:42.866425  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0803 14:21:42.953200 18380 arm.h:586] arm is idle.
+I0803 14:21:42.953200 18380 arm.h:87] [ArmTask]: modbus_thread check finished...
+I0803 14:21:42.965759 18380 nw_sys.h:1845] [thread_WaitSchedules]: 1.3.4 check consumables   [Complete]
+I0803 14:21:42.965759 18380 nw_sys.h:1854] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0803 14:21:42.965759 18380 nw_sys.h:1869] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0803 14:21:42.966756 18380 nw_sys.h:1870] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0803 14:21:44.497364 18380 nw_sys.h:353] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Complete]
+I0803 14:21:44.497364 18380 nw_sys.h:356] [thread_wait_schedules]: wait for incoming schedules...
+I0803 14:21:45.026715 18380 nw_sys.h:351] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Start]
+I0803 14:21:45.026715 18380 nw_sys.h:1714] [thread_WaitSchedules]: 1.1 update sys control mode
+I0803 14:21:45.036242 18380 nw_sys.h:1717] [thread_WaitSchedules]: 1.2 update all devices status
+I0803 14:21:45.036242 18380 nw_sys.h:1719] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0803 14:21:45.257863 18380 arm.h:586] arm is idle.
+I0803 14:21:45.257863 18380 nw_sys.h:1722] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0803 14:21:45.258863 18380 nw_sys.h:1724] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0803 14:21:45.258863 18380 nw_sys.h:1730] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0803 14:21:45.279088 18380 nw_sys.h:1768] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0803 14:21:45.279088 18380 nw_sys.h:1770] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0803 14:21:45.279088 18380 nw_sys.h:1778] [thread_WaitSchedules]: 1.3.2 check arm   [Complete]
+I0803 14:21:45.279088 18380 nw_sys.h:1833] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0803 14:21:45.279088 18380 nw_sys.h:1835] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0803 14:21:45.279088 18380 nw_sys.h:1840] [thread_WaitSchedules]: 1.3.4 check consumables   [Start]
+I0803 14:21:45.493350 18380 arm.h:79] [ArmTask]: modbus_thread check start...
+I0803 14:21:45.493350 18380 arm.h:730] [IPC1 ---> Arm]: Post get_small_pad_no
+I0803 14:21:45.500151  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_small_pad_no, Arm Running
+I0803 14:21:45.553567  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: small_pad_no = {5}
+I0803 14:21:45.610101  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_small_pad_no, Arm Finish
+I0803 14:21:45.851132  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0803 14:21:45.911368 18380 arm.h:586] arm is idle.
+I0803 14:21:45.911368 18380 arm.h:87] [ArmTask]: modbus_thread check finished...
+I0803 14:21:46.090433 18380 arm.h:79] [ArmTask]: modbus_thread check start...
+I0803 14:21:46.090433 18380 arm.h:730] [IPC1 ---> Arm]: Post get_large_pad_no
+I0803 14:21:46.120519  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_large_pad_no, Arm Running
+I0803 14:21:46.174408  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: large_pad_no = {4}
+I0803 14:21:46.238044  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_large_pad_no, Arm Finish
+I0803 14:21:46.414705  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0803 14:21:46.473102 18380 arm.h:586] arm is idle.
+I0803 14:21:46.473102 18380 arm.h:87] [ArmTask]: modbus_thread check finished...
+I0803 14:21:46.485113 18380 nw_sys.h:1845] [thread_WaitSchedules]: 1.3.4 check consumables   [Complete]
+I0803 14:21:46.485113 18380 nw_sys.h:1854] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0803 14:21:46.485113 18380 nw_sys.h:1869] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0803 14:21:46.485113 18380 nw_sys.h:1870] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0803 14:21:48.030737 18380 nw_sys.h:353] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Complete]
+I0803 14:21:48.030737 18380 nw_sys.h:356] [thread_wait_schedules]: wait for incoming schedules...
+I0803 14:21:48.561753 18380 nw_sys.h:351] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Start]
+I0803 14:21:48.561753 18380 nw_sys.h:1714] [thread_WaitSchedules]: 1.1 update sys control mode
+I0803 14:21:48.574750 18380 nw_sys.h:1717] [thread_WaitSchedules]: 1.2 update all devices status
+I0803 14:21:48.574750 18380 nw_sys.h:1719] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0803 14:21:48.796198 18380 arm.h:586] arm is idle.
+I0803 14:21:48.796198 18380 nw_sys.h:1722] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0803 14:21:48.796198 18380 nw_sys.h:1724] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0803 14:21:48.796198 18380 nw_sys.h:1730] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0803 14:21:48.806193 18380 nw_sys.h:1768] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0803 14:21:48.806193 18380 nw_sys.h:1770] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0803 14:21:48.806193 18380 nw_sys.h:1778] [thread_WaitSchedules]: 1.3.2 check arm   [Complete]
+I0803 14:21:48.806193 18380 nw_sys.h:1833] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0803 14:21:48.806193 18380 nw_sys.h:1835] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0803 14:21:48.806193 18380 nw_sys.h:1840] [thread_WaitSchedules]: 1.3.4 check consumables   [Start]
+I0803 14:21:49.001724 18380 arm.h:79] [ArmTask]: modbus_thread check start...
+I0803 14:21:49.002723 18380 arm.h:730] [IPC1 ---> Arm]: Post get_small_pad_no
+I0803 14:21:49.012396  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_small_pad_no, Arm Running
+I0803 14:21:49.075106  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: small_pad_no = {5}
+I0803 14:21:49.134721  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_small_pad_no, Arm Finish
+I0803 14:21:49.339365  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0803 14:21:49.425030 18380 arm.h:586] arm is idle.
+I0803 14:21:49.425030 18380 arm.h:87] [ArmTask]: modbus_thread check finished...
+I0803 14:21:49.602916 18380 arm.h:79] [ArmTask]: modbus_thread check start...
+I0803 14:21:49.602916 18380 arm.h:730] [IPC1 ---> Arm]: Post get_large_pad_no
+I0803 14:21:49.610911  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_large_pad_no, Arm Running
+I0803 14:21:49.666122  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: large_pad_no = {4}
+I0803 14:21:49.756582  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_large_pad_no, Arm Finish
+I0803 14:21:49.928117  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0803 14:21:49.985889 18380 arm.h:586] arm is idle.
+I0803 14:21:49.985889 18380 arm.h:87] [ArmTask]: modbus_thread check finished...
+I0803 14:21:49.998888 18380 nw_sys.h:1845] [thread_WaitSchedules]: 1.3.4 check consumables   [Complete]
+I0803 14:21:49.998888 18380 nw_sys.h:1854] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0803 14:21:49.998888 18380 nw_sys.h:1869] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0803 14:21:49.998888 18380 nw_sys.h:1870] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0803 14:21:51.530782 18380 nw_sys.h:353] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Complete]
+I0803 14:21:51.530782 18380 nw_sys.h:356] [thread_wait_schedules]: wait for incoming schedules...
+I0803 14:21:52.072629 18380 nw_sys.h:351] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Start]
+I0803 14:21:52.072629 18380 nw_sys.h:1714] [thread_WaitSchedules]: 1.1 update sys control mode
+I0803 14:21:52.079629 18380 nw_sys.h:1717] [thread_WaitSchedules]: 1.2 update all devices status
+I0803 14:21:52.079629 18380 nw_sys.h:1719] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0803 14:21:52.317415 18380 arm.h:586] arm is idle.
+I0803 14:21:52.317415 18380 nw_sys.h:1722] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0803 14:21:52.317415 18380 nw_sys.h:1724] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0803 14:21:52.318414 18380 nw_sys.h:1730] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0803 14:21:52.328414 18380 nw_sys.h:1768] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0803 14:21:52.328414 18380 nw_sys.h:1770] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0803 14:21:52.328414 18380 nw_sys.h:1778] [thread_WaitSchedules]: 1.3.2 check arm   [Complete]
+I0803 14:21:52.328414 18380 nw_sys.h:1833] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0803 14:21:52.328414 18380 nw_sys.h:1835] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0803 14:21:52.328414 18380 nw_sys.h:1840] [thread_WaitSchedules]: 1.3.4 check consumables   [Start]
+I0803 14:21:52.499464 18380 arm.h:79] [ArmTask]: modbus_thread check start...
+I0803 14:21:52.499464 18380 arm.h:730] [IPC1 ---> Arm]: Post get_small_pad_no
+I0803 14:21:52.507462  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_small_pad_no, Arm Running
+I0803 14:21:52.563444  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: small_pad_no = {5}
+I0803 14:21:52.621161  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_small_pad_no, Arm Finish
+I0803 14:21:52.831883  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0803 14:21:52.888100 18380 arm.h:586] arm is idle.
+I0803 14:21:52.888100 18380 arm.h:87] [ArmTask]: modbus_thread check finished...
+I0803 14:21:53.070969 18380 arm.h:79] [ArmTask]: modbus_thread check start...
+I0803 14:21:53.071974 18380 arm.h:730] [IPC1 ---> Arm]: Post get_large_pad_no
+I0803 14:21:53.079967  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_large_pad_no, Arm Running
+I0803 14:21:53.138279  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: large_pad_no = {4}
+I0803 14:21:53.227598  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_large_pad_no, Arm Finish
+I0803 14:21:53.430886  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0803 14:21:53.516065 18380 arm.h:586] arm is idle.
+I0803 14:21:53.516065 18380 arm.h:87] [ArmTask]: modbus_thread check finished...
+I0803 14:21:53.525066 18380 nw_sys.h:1845] [thread_WaitSchedules]: 1.3.4 check consumables   [Complete]
+I0803 14:21:53.525066 18380 nw_sys.h:1854] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0803 14:21:53.526067 18380 nw_sys.h:1869] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0803 14:21:53.526067 18380 nw_sys.h:1870] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0803 14:21:55.049270 18380 nw_sys.h:353] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Complete]
+I0803 14:21:55.049270 18380 nw_sys.h:356] [thread_wait_schedules]: wait for incoming schedules...
+I0803 14:21:55.565068 18380 nw_sys.h:351] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Start]
+I0803 14:21:55.565068 18380 nw_sys.h:1714] [thread_WaitSchedules]: 1.1 update sys control mode
+I0803 14:21:55.572072 18380 nw_sys.h:1717] [thread_WaitSchedules]: 1.2 update all devices status
+I0803 14:21:55.572072 18380 nw_sys.h:1719] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0803 14:21:55.801204 18380 arm.h:586] arm is idle.
+I0803 14:21:55.801204 18380 nw_sys.h:1722] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0803 14:21:55.801204 18380 nw_sys.h:1724] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0803 14:21:55.801204 18380 nw_sys.h:1730] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0803 14:21:55.813005 18380 nw_sys.h:1768] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0803 14:21:55.813005 18380 nw_sys.h:1770] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0803 14:21:55.813005 18380 nw_sys.h:1778] [thread_WaitSchedules]: 1.3.2 check arm   [Complete]
+I0803 14:21:55.813005 18380 nw_sys.h:1833] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0803 14:21:55.813005 18380 nw_sys.h:1835] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0803 14:21:55.813005 18380 nw_sys.h:1840] [thread_WaitSchedules]: 1.3.4 check consumables   [Start]
+I0803 14:21:56.018826 18380 arm.h:79] [ArmTask]: modbus_thread check start...
+I0803 14:21:56.019825 18380 arm.h:730] [IPC1 ---> Arm]: Post get_small_pad_no
+I0803 14:21:56.028825  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_small_pad_no, Arm Running
+I0803 14:21:56.084278  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: small_pad_no = {5}
+I0803 14:21:56.166244  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_small_pad_no, Arm Finish
+I0803 14:21:56.310446  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0803 14:21:56.397234 18380 arm.h:586] arm is idle.
+I0803 14:21:56.397234 18380 arm.h:87] [ArmTask]: modbus_thread check finished...
+I0803 14:21:56.547981 18380 arm.h:79] [ArmTask]: modbus_thread check start...
+I0803 14:21:56.547981 18380 arm.h:730] [IPC1 ---> Arm]: Post get_large_pad_no
+I0803 14:21:56.555922  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_large_pad_no, Arm Running
+I0803 14:21:56.611716  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: large_pad_no = {4}
+I0803 14:21:56.670481  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_large_pad_no, Arm Finish
+I0803 14:21:56.846506  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0803 14:21:56.905862 18380 arm.h:586] arm is idle.
+I0803 14:21:56.905862 18380 arm.h:87] [ArmTask]: modbus_thread check finished...
+I0803 14:21:56.914347 18380 nw_sys.h:1845] [thread_WaitSchedules]: 1.3.4 check consumables   [Complete]
+I0803 14:21:56.914347 18380 nw_sys.h:1854] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0803 14:21:56.914347 18380 nw_sys.h:1869] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0803 14:21:56.914347 18380 nw_sys.h:1870] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0803 14:21:58.434487 18380 nw_sys.h:353] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Complete]
+I0803 14:21:58.434487 18380 nw_sys.h:356] [thread_wait_schedules]: wait for incoming schedules...
+I0803 14:21:58.964227 18380 nw_sys.h:351] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Start]
+I0803 14:21:58.964227 18380 nw_sys.h:1714] [thread_WaitSchedules]: 1.1 update sys control mode
+I0803 14:21:58.971227 18380 nw_sys.h:1717] [thread_WaitSchedules]: 1.2 update all devices status
+I0803 14:21:58.971227 18380 nw_sys.h:1719] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0803 14:21:59.221943 18380 arm.h:586] arm is idle.
+I0803 14:21:59.221943 18380 nw_sys.h:1722] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0803 14:21:59.222944 18380 nw_sys.h:1724] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0803 14:21:59.222944 18380 nw_sys.h:1730] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0803 14:21:59.233141 18380 nw_sys.h:1768] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0803 14:21:59.233141 18380 nw_sys.h:1770] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0803 14:21:59.233141 18380 nw_sys.h:1778] [thread_WaitSchedules]: 1.3.2 check arm   [Complete]
+I0803 14:21:59.233141 18380 nw_sys.h:1833] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0803 14:21:59.233141 18380 nw_sys.h:1835] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0803 14:21:59.233141 18380 nw_sys.h:1840] [thread_WaitSchedules]: 1.3.4 check consumables   [Start]
+I0803 14:21:59.429162 18380 arm.h:79] [ArmTask]: modbus_thread check start...
+I0803 14:21:59.429162 18380 arm.h:730] [IPC1 ---> Arm]: Post get_small_pad_no
+I0803 14:21:59.436482  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_small_pad_no, Arm Running
+I0803 14:21:59.497959  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: small_pad_no = {5}
+I0803 14:21:59.551373  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_small_pad_no, Arm Finish
+I0803 14:21:59.757558  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0803 14:21:59.813585 18380 arm.h:586] arm is idle.
+I0803 14:21:59.813585 18380 arm.h:87] [ArmTask]: modbus_thread check finished...
+I0803 14:21:59.997730 18380 arm.h:79] [ArmTask]: modbus_thread check start...
+I0803 14:21:59.997730 18380 arm.h:730] [IPC1 ---> Arm]: Post get_large_pad_no
+I0803 14:22:00.005730  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_large_pad_no, Arm Running
+I0803 14:22:00.076786  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: large_pad_no = {4}
+I0803 14:22:00.131790  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_large_pad_no, Arm Finish
+I0803 14:22:00.309865  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0803 14:22:00.395428 18380 arm.h:586] arm is idle.
+I0803 14:22:00.396428 18380 arm.h:87] [ArmTask]: modbus_thread check finished...
+I0803 14:22:00.406920 18380 nw_sys.h:1845] [thread_WaitSchedules]: 1.3.4 check consumables   [Complete]
+I0803 14:22:00.406920 18380 nw_sys.h:1854] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0803 14:22:00.406920 18380 nw_sys.h:1869] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0803 14:22:00.406920 18380 nw_sys.h:1870] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0803 14:22:01.936889 18380 nw_sys.h:353] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Complete]
+I0803 14:22:01.936889 18380 nw_sys.h:356] [thread_wait_schedules]: wait for incoming schedules...
+I0803 14:22:02.450654 18380 nw_sys.h:351] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Start]
+I0803 14:22:02.450654 18380 nw_sys.h:1714] [thread_WaitSchedules]: 1.1 update sys control mode
+I0803 14:22:02.461652 18380 nw_sys.h:1717] [thread_WaitSchedules]: 1.2 update all devices status
+I0803 14:22:02.461652 18380 nw_sys.h:1719] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0803 14:22:02.684674 18380 arm.h:586] arm is idle.
+I0803 14:22:02.685688 18380 nw_sys.h:1722] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0803 14:22:02.685688 18380 nw_sys.h:1724] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0803 14:22:02.685688 18380 nw_sys.h:1730] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0803 14:22:02.701673 18380 nw_sys.h:1768] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0803 14:22:02.701673 18380 nw_sys.h:1770] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0803 14:22:02.701673 18380 nw_sys.h:1778] [thread_WaitSchedules]: 1.3.2 check arm   [Complete]
+I0803 14:22:02.701673 18380 nw_sys.h:1833] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0803 14:22:02.701673 18380 nw_sys.h:1835] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0803 14:22:02.702672 18380 nw_sys.h:1840] [thread_WaitSchedules]: 1.3.4 check consumables   [Start]
+I0803 14:22:02.898893 18380 arm.h:79] [ArmTask]: modbus_thread check start...
+I0803 14:22:02.898893 18380 arm.h:730] [IPC1 ---> Arm]: Post get_small_pad_no
+I0803 14:22:02.909483  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_small_pad_no, Arm Running
+I0803 14:22:02.961347  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: small_pad_no = {5}
+I0803 14:22:03.021347  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_small_pad_no, Arm Finish
+I0803 14:22:03.254300  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0803 14:22:03.283211 18380 arm.h:586] arm is idle.
+I0803 14:22:03.283746 18380 arm.h:87] [ArmTask]: modbus_thread check finished...
+I0803 14:22:03.434602 18380 arm.h:79] [ArmTask]: modbus_thread check start...
+I0803 14:22:03.434602 18380 arm.h:730] [IPC1 ---> Arm]: Post get_large_pad_no
+I0803 14:22:03.443264  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_large_pad_no, Arm Running
+I0803 14:22:03.498997  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: large_pad_no = {4}
+I0803 14:22:03.556306  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_large_pad_no, Arm Finish
+I0803 14:22:03.735033  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0803 14:22:03.819027 18380 arm.h:586] arm is idle.
+I0803 14:22:03.820035 18380 arm.h:87] [ArmTask]: modbus_thread check finished...
+I0803 14:22:03.829026 18380 nw_sys.h:1845] [thread_WaitSchedules]: 1.3.4 check consumables   [Complete]
+I0803 14:22:03.829026 18380 nw_sys.h:1854] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0803 14:22:03.829026 18380 nw_sys.h:1869] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0803 14:22:03.830025 18380 nw_sys.h:1870] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0803 14:22:05.354714 18380 nw_sys.h:353] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Complete]
+I0803 14:22:05.354714 18380 nw_sys.h:356] [thread_wait_schedules]: wait for incoming schedules...
+I0803 14:22:05.883059 18380 nw_sys.h:351] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Start]
+I0803 14:22:05.883059 18380 nw_sys.h:1714] [thread_WaitSchedules]: 1.1 update sys control mode
+I0803 14:22:05.892060 18380 nw_sys.h:1717] [thread_WaitSchedules]: 1.2 update all devices status
+I0803 14:22:05.893059 18380 nw_sys.h:1719] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0803 14:22:06.119642 18380 arm.h:586] arm is idle.
+I0803 14:22:06.119642 18380 nw_sys.h:1722] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0803 14:22:06.119642 18380 nw_sys.h:1724] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0803 14:22:06.119642 18380 nw_sys.h:1730] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0803 14:22:06.132798 18380 nw_sys.h:1768] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0803 14:22:06.133322 18380 nw_sys.h:1770] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0803 14:22:06.133322 18380 nw_sys.h:1778] [thread_WaitSchedules]: 1.3.2 check arm   [Complete]
+I0803 14:22:06.133322 18380 nw_sys.h:1833] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0803 14:22:06.133322 18380 nw_sys.h:1835] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0803 14:22:06.133322 18380 nw_sys.h:1840] [thread_WaitSchedules]: 1.3.4 check consumables   [Start]
+I0803 14:22:06.323593 18380 arm.h:79] [ArmTask]: modbus_thread check start...
+I0803 14:22:06.323593 18380 arm.h:730] [IPC1 ---> Arm]: Post get_small_pad_no
+I0803 14:22:06.331594  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_small_pad_no, Arm Running
+I0803 14:22:06.385993  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: small_pad_no = {5}
+I0803 14:22:06.448542  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_small_pad_no, Arm Finish
+I0803 14:22:06.682013  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0803 14:22:06.772959 18380 arm.h:586] arm is idle.
+I0803 14:22:06.772959 18380 arm.h:87] [ArmTask]: modbus_thread check finished...
+I0803 14:22:06.953778 18380 arm.h:79] [ArmTask]: modbus_thread check start...
+I0803 14:22:06.953778 18380 arm.h:730] [IPC1 ---> Arm]: Post get_large_pad_no
+I0803 14:22:06.961689  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_large_pad_no, Arm Running
+I0803 14:22:07.016952  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: large_pad_no = {4}
+I0803 14:22:07.079828  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_large_pad_no, Arm Finish
+I0803 14:22:07.319208  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0803 14:22:07.402209 18380 arm.h:586] arm is idle.
+I0803 14:22:07.402209 18380 arm.h:87] [ArmTask]: modbus_thread check finished...
+I0803 14:22:07.413208 18380 nw_sys.h:1845] [thread_WaitSchedules]: 1.3.4 check consumables   [Complete]
+I0803 14:22:07.413208 18380 nw_sys.h:1854] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0803 14:22:07.413208 18380 nw_sys.h:1869] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0803 14:22:07.413208 18380 nw_sys.h:1870] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0803 14:22:08.942374 18380 nw_sys.h:353] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Complete]
+I0803 14:22:08.942374 18380 nw_sys.h:356] [thread_wait_schedules]: wait for incoming schedules...
+I0803 14:22:09.485033 18380 nw_sys.h:351] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Start]
+I0803 14:22:09.485033 18380 nw_sys.h:1714] [thread_WaitSchedules]: 1.1 update sys control mode
+I0803 14:22:09.493963 18380 nw_sys.h:1717] [thread_WaitSchedules]: 1.2 update all devices status
+I0803 14:22:09.493963 18380 nw_sys.h:1719] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0803 14:22:09.724313 18380 arm.h:586] arm is idle.
+I0803 14:22:09.724313 18380 nw_sys.h:1722] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0803 14:22:09.725327 18380 nw_sys.h:1724] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0803 14:22:09.725327 18380 nw_sys.h:1730] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0803 14:22:09.740433 18380 nw_sys.h:1768] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0803 14:22:09.740433 18380 nw_sys.h:1770] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0803 14:22:09.740433 18380 nw_sys.h:1778] [thread_WaitSchedules]: 1.3.2 check arm   [Complete]
+I0803 14:22:09.740433 18380 nw_sys.h:1833] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0803 14:22:09.740433 18380 nw_sys.h:1835] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0803 14:22:09.740947 18380 nw_sys.h:1840] [thread_WaitSchedules]: 1.3.4 check consumables   [Start]
+I0803 14:22:09.904742 18380 arm.h:79] [ArmTask]: modbus_thread check start...
+I0803 14:22:09.904742 18380 arm.h:730] [IPC1 ---> Arm]: Post get_small_pad_no
+I0803 14:22:09.912745  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_small_pad_no, Arm Running
+I0803 14:22:09.969039  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: small_pad_no = {5}
+I0803 14:22:10.026063  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_small_pad_no, Arm Finish
+I0803 14:22:10.239084  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0803 14:22:10.296941 18380 arm.h:586] arm is idle.
+I0803 14:22:10.297477 18380 arm.h:87] [ArmTask]: modbus_thread check finished...
+I0803 14:22:10.473431 18380 arm.h:79] [ArmTask]: modbus_thread check start...
+I0803 14:22:10.473431 18380 arm.h:730] [IPC1 ---> Arm]: Post get_large_pad_no
+I0803 14:22:10.516886  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_large_pad_no, Arm Running
+I0803 14:22:10.565187  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: large_pad_no = {4}
+I0803 14:22:10.668637  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Post get_large_pad_no, Arm Finish
+I0803 14:22:10.815632  1452 net_w0303_server.h:334] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0803 14:22:10.881633 18380 arm.h:586] arm is idle.
+I0803 14:22:10.882640 18380 arm.h:87] [ArmTask]: modbus_thread check finished...
+I0803 14:22:10.901633 18380 nw_sys.h:1845] [thread_WaitSchedules]: 1.3.4 check consumables   [Complete]
+I0803 14:22:10.901633 18380 nw_sys.h:1854] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0803 14:22:10.901633 18380 nw_sys.h:1869] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0803 14:22:10.901633 18380 nw_sys.h:1870] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0803 14:22:12.437952 18380 nw_sys.h:353] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Complete]
+I0803 14:22:12.437952 18380 nw_sys.h:356] [thread_wait_schedules]: wait for incoming schedules...
+I0803 14:22:12.966778 18380 nw_sys.h:371] [thread_WaitSchedules]: notify thread_DoSchedules
+I0803 14:22:12.966778 11612 nw_sys.h:403] [thread_DoSchedules]: unlock!
+I0803 14:22:13.026775 18380 nw_sys.h:383] [thread_WaitSchedules]: lock!
+I0803 14:23:03.338768 11612 nw_sys.h:558] Do Jobs...

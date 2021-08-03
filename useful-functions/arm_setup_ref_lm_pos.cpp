@@ -53,7 +53,8 @@ int main()
 
     tm5.WaitForConnection();
 
-    tm5.ArmTask("Post vision_find_landmark");
+//    tm5.ArmTask("Post vision_find_landmark");
+    tm5.ArmTask("Post vision_find_light_landmark");
 
     tm5.ArmTask("Post get_find_landmark_flag");
 
