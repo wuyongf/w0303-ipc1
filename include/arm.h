@@ -1269,6 +1269,8 @@ yf::data::arm::ForceType yf::arm::tm::GetForceType(const int &arm_mission_config
 bool yf::arm::tm::IsLMPosDeviation(const yf::data::arm::Point3d &ref_landmark_pos,
                                    const yf::data::arm::Point3d &real_landmark_pos)
 {
+    float std_error_x = 150;
+
     float std_error_rx = 4.0;
     float std_error_ry = 3.0;
     float std_error_rz = 5.0;
@@ -1292,7 +1294,8 @@ bool yf::arm::tm::IsLMPosDeviation(const yf::data::arm::Point3d &ref_landmark_po
     deviation_z = std::abs(std::abs(ref_landmark_pos.z) - std::abs(real_landmark_pos.z));
 
 
-    if(deviation_rx >= std_error_rx || deviation_ry >= std_error_ry || deviation_rz >= std_error_rz)
+    if(deviation_rx >= std_error_rx || deviation_ry >= std_error_ry || deviation_rz >= std_error_rz ||
+        deviation_x >= std_error_x)
     {
         // for debug
         sql_ptr_->InsertNewArmLMError(deviation_x,deviation_y,deviation_z,deviation_rx,deviation_ry,deviation_rz,1);

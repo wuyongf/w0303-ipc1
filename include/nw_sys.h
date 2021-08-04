@@ -2786,12 +2786,33 @@ void yf::sys::nw_sys::DoJobUgvBackToChargingStation()
 
 void yf::sys::nw_sys::DoJobArmBackToHomePos()
 {
-    // DB: update schedule_job & schedule_job_log
+    // 1. arm back to home position
+    // 2. check whether there is a tool
+    // 3. if yes, place the corresponding tool
 
     // Do job
     tm5.ArmTask("Post arm_back_home");
 
-    // DB: update schedule_job & schedule_job_log
+    auto arm_current_tool = tm5.GetCurrentTool();
+
+    switch (arm_current_tool)
+    {
+        case data::arm::Tool::None:
+        {
+            break;
+        }
+        case data::arm::Tool::UvcLed:
+        {
+            tm5.ArmTask("Post place_uvc");
+            break;
+        }
+        case data::arm::Tool::Brush:
+        {
+            tm5.ArmTask("Post place_mop");
+            break;
+        }
+    }
+
 }
 
 void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedule::ScheduleCommand& redo_command)
@@ -3440,7 +3461,7 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
 
             mir100_ptr_->SetPLCRegisterIntValue(4,0);
 
-            // Mark job_log_id status as finished
+            // Mark job_log_id status as error
             sql_ptr_->UpdateJobLog(job_log_id, 3);
         }
         else
@@ -3449,7 +3470,7 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
 
             mir100_ptr_->SetPLCRegisterIntValue(4,3);
 
-            // Mark job_log_id status as finished
+            // Mark job_log_id status as error
             sql_ptr_->UpdateJobLog(job_log_id, 5);
         }
 
