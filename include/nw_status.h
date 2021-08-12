@@ -26,7 +26,7 @@ namespace yf
             yf::data::common::MissionStatus         arm_mission_status      = yf::data::common::MissionStatus::Null;
 
             // ugv status
-            yf::data::common::ConnectionStatus      ugv_connection_status_;
+            yf::data::common::ConnectionStatus      ugv_connection_status_ = data::common::ConnectionStatus::Disconnected;
             yf::data::common::UgvState              ugv_mission_status_;
 
             // ipc2--pi4 status

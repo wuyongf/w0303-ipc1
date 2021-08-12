@@ -1,0 +1,2018 @@
+Log file created at: 2021/08/10 10:03:19
+Running on machine: DESKTOP-97DONJ0
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I0810 10:03:19.378919  6764 arm.h:349] wait for arm connection...
+I0810 10:04:05.091261 10184 net_w0303_server.h:334] [IPC1 <--- Arm]: TM5-900
+I0810 10:04:05.091261  6764 arm.h:351] arm connected.
+I0810 10:04:06.281697  6660 nw_sys.h:409] [thread_DoSchedules]: lock!
+I0810 10:04:06.796460 10768 nw_sys.h:351] [thread_WaitSchedules]: Start!
+I0810 10:04:06.796460 10768 nw_sys.h:353] [thread_WaitSchedules]: stage 1 --- Wait for Database Available Schedules
+I0810 10:04:06.796460 10768 nw_sys.h:360] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Start]
+I0810 10:04:06.796460 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:04:06.796460 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:04:06.796460 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:04:06.905840 10184 net_w0303_server.h:334] [IPC1 <--- Arm]: Get Status, Arm Idle
+I0810 10:04:06.952704 10768 arm.h:602] arm is idle.
+I0810 10:04:06.952704 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:04:06.952704 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:04:06.952704 10768 nw_sys.h:1782] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Recovery
+I0810 10:04:06.952704 10768 nw_sys.h:1783] [thread_WaitSchedules]: 1.3.1.1 wait for Auto Mode
+I0810 10:05:15.716022 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:05:15.716022 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:05:15.716022 10768 nw_sys.h:1806] [thread_WaitSchedules]: 1.3.2 check arm   [Complete]
+I0810 10:05:15.716022 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:05:15.716022 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:05:15.716022 10768 nw_sys.h:1868] [thread_WaitSchedules]: 1.3.4 check consumables   [Start]
+I0810 10:05:15.772913 10768 nw_sys.h:1878] [thread_WaitSchedules]: 1.3.4 check consumables: Please refill consumables!   [Uncompleted]
+I0810 10:05:15.788539 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:05:15.788539 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:05:15.788539 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:05:17.312985 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:05:17.333236 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:05:17.333236 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:05:17.389294 10768 arm.h:314] robotic arm project is not running!
+I0810 10:05:17.389294 10768 net_w0303_server.h:245] Removing Arm. client [10000]
+I0810 10:05:17.389294 10768 arm.h:746] [IPC1 ---> Arm]: Get Status
+I0810 10:05:17.510352 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:05:17.510352 10768 arm.h:512] arm mission aborted
+I0810 10:05:17.520413 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:05:17.520413 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:05:17.520413 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:05:17.530473 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:05:17.530473 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:05:17.530473 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:05:17.530473 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:05:17.530473 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:05:17.530473 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:05:17.530473 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:05:19.068650 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:05:19.088878 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:05:19.088878 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:05:19.149650 10768 arm.h:314] robotic arm project is not running!
+I0810 10:05:19.149650 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:05:19.150679 10768 arm.h:512] arm mission aborted
+I0810 10:05:19.150679 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:05:19.150679 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:05:19.150679 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:05:19.150679 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:05:19.150679 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:05:19.150679 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:05:19.150679 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:05:19.150679 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:05:19.150679 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:05:19.150679 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:05:20.693954 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:05:20.709585 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:05:20.709585 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:05:20.766623 10768 arm.h:314] robotic arm project is not running!
+I0810 10:05:20.766623 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:05:20.766623 10768 arm.h:512] arm mission aborted
+I0810 10:05:20.766623 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:05:20.766623 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:05:20.766623 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:05:20.782248 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:05:20.782248 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:05:20.782248 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:05:20.782248 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:05:20.782248 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:05:20.782248 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:05:20.782248 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:05:22.316478 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:05:22.316478 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:05:22.316478 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:05:22.378973 10768 arm.h:314] robotic arm project is not running!
+I0810 10:05:22.378973 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:05:22.378973 10768 arm.h:512] arm mission aborted
+I0810 10:05:22.378973 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:05:22.378973 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:05:22.378973 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:05:22.394608 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:05:22.394608 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:05:22.394608 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:05:22.394608 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:05:22.394608 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:05:22.394608 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:05:22.394608 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:05:23.939030 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:05:23.939030 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:05:23.939030 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:05:23.985914 10768 arm.h:314] robotic arm project is not running!
+I0810 10:05:23.985914 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:05:23.985914 10768 arm.h:512] arm mission aborted
+I0810 10:05:23.985914 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:05:23.985914 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:05:23.985914 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:05:24.001540 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:05:24.001540 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:05:24.001540 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:05:24.001540 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:05:24.001540 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:05:24.001540 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:05:24.001540 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:05:25.545459 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:05:25.562536 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:05:25.563076 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:05:25.607021 10768 arm.h:314] robotic arm project is not running!
+I0810 10:05:25.607548 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:05:25.608603 10768 arm.h:512] arm mission aborted
+I0810 10:05:25.609129 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:05:25.609656 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:05:25.609656 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:05:25.621256 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:05:25.621256 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:05:25.621775 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:05:25.621775 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:05:25.621775 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:05:25.621775 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:05:25.622869 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:05:27.154834 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:05:27.176651 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:05:27.176651 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:05:27.235793 10768 arm.h:314] robotic arm project is not running!
+I0810 10:05:27.235793 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:05:27.237344 10768 arm.h:512] arm mission aborted
+I0810 10:05:27.237344 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:05:27.237344 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:05:27.237344 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:05:27.247386 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:05:27.247386 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:05:27.247386 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:05:27.247386 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:05:27.247386 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:05:27.247386 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:05:27.247386 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:05:28.771375 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:05:28.791640 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:05:28.791640 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:05:28.852699 10768 arm.h:314] robotic arm project is not running!
+I0810 10:05:28.852710 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:05:28.852710 10768 arm.h:512] arm mission aborted
+I0810 10:05:28.852710 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:05:28.852710 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:05:28.852710 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:05:28.855733 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:05:28.855733 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:05:28.855733 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:05:28.855733 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:05:28.855733 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:05:28.855733 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:05:28.855733 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:05:30.395406 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:05:30.395925 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:05:30.395925 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:05:30.446341 10768 arm.h:314] robotic arm project is not running!
+I0810 10:05:30.446341 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:05:30.446341 10768 arm.h:512] arm mission aborted
+I0810 10:05:30.446341 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:05:30.446341 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:05:30.446341 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:05:30.456382 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:05:30.456382 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:05:30.456382 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:05:30.456382 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:05:30.460896 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:05:30.460896 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:05:30.460896 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:05:31.987447 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:05:31.987447 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:05:31.987447 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:05:32.049944 10768 arm.h:314] robotic arm project is not running!
+I0810 10:05:32.049944 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:05:32.049944 10768 arm.h:512] arm mission aborted
+I0810 10:05:32.049944 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:05:32.049944 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:05:32.049944 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:05:32.065569 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:05:32.065569 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:05:32.065569 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:05:32.065569 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:05:32.065569 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:05:32.065569 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:05:32.065569 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:05:33.597604 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:05:33.597604 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:05:33.597604 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:05:33.644471 10768 arm.h:314] robotic arm project is not running!
+I0810 10:05:33.644471 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:05:33.644471 10768 arm.h:512] arm mission aborted
+I0810 10:05:33.644471 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:05:33.644471 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:05:33.644471 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:05:33.660101 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:05:33.660101 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:05:33.660101 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:05:33.660101 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:05:33.660101 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:05:33.660101 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:05:33.660101 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:05:35.201787 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:05:35.217417 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:05:35.217417 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:05:35.279906 10768 arm.h:314] robotic arm project is not running!
+I0810 10:05:35.279906 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:05:35.279906 10768 arm.h:512] arm mission aborted
+I0810 10:05:35.279906 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:05:35.279906 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:05:35.279906 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:05:35.279906 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:05:35.279906 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:05:35.279906 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:05:35.279906 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:05:35.279906 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:05:35.279906 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:05:35.279906 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:05:36.821621 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:05:36.821621 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:05:36.821621 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:05:36.868499 10768 arm.h:314] robotic arm project is not running!
+I0810 10:05:36.868499 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:05:36.868499 10768 arm.h:512] arm mission aborted
+I0810 10:05:36.868499 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:05:36.868499 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:05:36.868499 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:05:36.884130 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:05:36.884130 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:05:36.884130 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:05:36.884130 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:05:36.884130 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:05:36.884130 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:05:36.884130 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:05:38.442584 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:05:38.442584 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:05:38.442584 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:05:38.498386 10768 arm.h:314] robotic arm project is not running!
+I0810 10:05:38.498386 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:05:38.499426 10768 arm.h:512] arm mission aborted
+I0810 10:05:38.499951 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:05:38.500471 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:05:38.500471 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:05:38.512446 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:05:38.512446 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:05:38.512446 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:05:38.512446 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:05:38.512446 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:05:38.512446 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:05:38.513983 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:05:40.042245 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:05:40.052786 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:05:40.053318 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:05:40.088407 10768 arm.h:314] robotic arm project is not running!
+I0810 10:05:40.088929 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:05:40.089978 10768 arm.h:512] arm mission aborted
+I0810 10:05:40.089978 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:05:40.090505 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:05:40.090505 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:05:40.101141 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:05:40.101141 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:05:40.101672 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:05:40.101672 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:05:40.102198 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:05:40.102198 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:05:40.102725 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:05:41.621364 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:05:41.621364 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:05:41.621364 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:05:41.683871 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:05:41.683871 10768 arm.h:512] arm mission aborted
+I0810 10:05:41.683871 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:05:41.683871 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:05:41.683871 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:05:41.699501 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:05:41.699501 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:05:41.699501 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:05:41.699501 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:05:41.699501 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:05:41.699501 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:05:41.699501 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:05:43.240670 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:05:43.241176 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:05:43.241176 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:05:43.325138 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:05:43.325138 10768 arm.h:512] arm mission aborted
+I0810 10:05:43.326179 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:05:43.326701 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:05:43.326701 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:05:43.336041 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:05:43.336552 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:05:43.336552 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:05:43.337076 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:05:43.337076 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:05:43.337596 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:05:43.337596 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:05:44.874456 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:05:44.894731 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:05:44.894731 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:05:44.965483 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:05:44.965483 10768 arm.h:512] arm mission aborted
+I0810 10:05:44.965483 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:05:44.965483 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:05:44.965483 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:05:44.975605 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:05:44.975605 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:05:44.985647 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:05:44.985647 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:05:44.985647 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:05:44.985647 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:05:44.985647 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:05:46.515026 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:05:46.535261 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:05:46.535261 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:05:46.595983 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:05:46.595983 10768 arm.h:512] arm mission aborted
+I0810 10:05:46.595983 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:05:46.595983 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:05:46.595983 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:05:46.606025 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:05:46.606025 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:05:46.606025 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:05:46.606025 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:05:46.606025 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:05:46.606025 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:05:46.606025 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:05:48.140462 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:05:48.157239 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:05:48.157239 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:05:48.212661 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:05:48.212661 10768 arm.h:512] arm mission aborted
+I0810 10:05:48.212661 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:05:48.212661 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:05:48.212661 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:05:48.243048 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:05:48.243048 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:05:48.243048 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:05:48.253243 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:05:48.253243 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:05:48.253243 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:05:48.253243 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:05:49.818775 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:05:49.825592 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:05:49.825592 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:05:49.894913 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:05:49.894913 10768 arm.h:512] arm mission aborted
+I0810 10:05:49.894913 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:05:49.899466 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:05:49.899466 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:05:49.929852 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:05:49.929852 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:05:49.929852 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:05:49.935483 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:05:49.940037 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:05:49.940037 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:05:49.940037 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:05:51.482172 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:05:51.488998 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:05:51.488998 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:05:51.549175 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:05:51.549682 10768 arm.h:512] arm mission aborted
+I0810 10:05:51.550787 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:05:51.551317 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:05:51.551852 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:05:51.565168 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:05:51.565168 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:05:51.565168 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:05:51.565168 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:05:51.565168 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:05:51.565168 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:05:51.565168 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:05:53.116966 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:05:53.137233 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:05:53.137233 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:05:53.193282 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:05:53.193282 10768 arm.h:512] arm mission aborted
+I0810 10:05:53.193282 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:05:53.193282 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:05:53.193282 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:05:53.203316 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:05:53.203316 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:05:53.203316 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:05:53.203316 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:05:53.203316 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:05:53.203316 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:05:53.203316 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:05:54.643728 10184 net_w0303_server.h:334] [IPC1 <--- Arm]: TM5-900
+I0810 10:05:54.743628 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:05:54.749897 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:05:54.749897 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:05:54.812580 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:05:54.812580 10768 arm.h:512] arm mission aborted
+I0810 10:05:54.812580 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:05:54.812580 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:05:54.812580 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:05:54.828198 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:05:54.828198 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:05:54.828198 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:05:54.828198 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:05:54.828198 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:05:54.828198 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:05:54.828198 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:05:56.351541 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:05:56.371798 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:05:56.371798 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:05:56.432391 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:05:56.432391 10768 arm.h:512] arm mission aborted
+I0810 10:05:56.432391 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:05:56.432391 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:05:56.432391 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:05:56.442425 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:05:56.442425 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:05:56.442425 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:05:56.442425 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:05:56.442425 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:05:56.442425 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:05:56.442425 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:05:57.971442 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:05:57.971554 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:05:57.971554 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:05:58.031785 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:05:58.031785 10768 arm.h:512] arm mission aborted
+I0810 10:05:58.031785 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:05:58.031785 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:05:58.031785 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:05:58.041822 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:05:58.041822 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:05:58.041822 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:05:58.041822 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:05:58.041822 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:05:58.041822 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:05:58.041822 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:05:59.582473 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:05:59.582473 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:05:59.582473 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:05:59.644970 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:05:59.644970 10768 arm.h:512] arm mission aborted
+I0810 10:05:59.644970 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:05:59.644970 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:05:59.644970 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:05:59.676229 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:05:59.676229 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:05:59.676229 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:05:59.676229 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:05:59.676229 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:05:59.676229 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:05:59.676229 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:01.211820 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:01.211820 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:01.211820 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:01.258690 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:01.258690 10768 arm.h:512] arm mission aborted
+I0810 10:06:01.258690 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:01.258690 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:01.258690 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:01.274319 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:01.274319 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:01.274319 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:01.274319 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:01.274319 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:01.274319 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:01.274319 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:02.802074 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:02.817703 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:02.817703 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:02.864459 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:02.864985 10768 arm.h:512] arm mission aborted
+I0810 10:06:02.868788 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:02.869376 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:02.869907 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:02.879312 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:02.879312 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:02.879843 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:02.880869 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:02.880869 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:02.880869 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:02.880869 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:04.401455 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:04.404989 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:04.404989 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:04.451874 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:04.451874 10768 arm.h:512] arm mission aborted
+I0810 10:06:04.451874 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:04.451874 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:04.451874 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:04.451874 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:04.451874 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:04.451874 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:04.451874 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:04.451874 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:04.451874 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:04.451874 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:05.995781 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:06.015996 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:06.015996 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:06.086673 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:06.086673 10768 arm.h:512] arm mission aborted
+I0810 10:06:06.086673 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:06.086673 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:06.086673 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:06.106832 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:06.106832 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:06.106832 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:06.106832 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:06.106832 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:06.106832 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:06.106832 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:07.629129 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:07.629129 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:07.629129 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:07.689575 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:07.689575 10768 arm.h:512] arm mission aborted
+I0810 10:06:07.689575 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:07.689575 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:07.689575 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:07.699613 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:07.699613 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:07.699613 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:07.699613 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:07.699613 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:07.699613 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:07.699613 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:09.235873 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:09.256055 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:09.256055 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:09.316319 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:09.316319 10768 arm.h:512] arm mission aborted
+I0810 10:06:09.316319 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:09.316319 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:09.316319 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:09.326349 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:09.326349 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:09.326349 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:09.326349 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:09.326349 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:09.326349 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:09.326349 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:10.848903 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:10.848903 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:10.848903 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:10.909386 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:10.909386 10768 arm.h:512] arm mission aborted
+I0810 10:06:10.909386 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:10.909386 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:10.909386 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:10.919416 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:10.919416 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:10.919416 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:10.919416 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:10.919416 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:10.919416 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:10.919416 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:12.441485 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:12.447746 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:12.448264 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:12.505054 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:12.505054 10768 arm.h:512] arm mission aborted
+I0810 10:06:12.505561 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:12.505561 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:12.505561 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:12.505561 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:12.505561 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:12.505561 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:12.505561 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:12.505561 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:12.505561 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:12.505561 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:14.047631 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:14.067884 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:14.067884 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:14.137593 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:14.137593 10768 arm.h:512] arm mission aborted
+I0810 10:06:14.137593 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:14.137593 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:14.137593 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:14.147647 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:14.147647 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:14.147647 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:14.147647 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:14.147647 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:14.147647 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:14.147647 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:15.685791 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:15.687804 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:15.687804 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:15.748369 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:15.748369 10768 arm.h:512] arm mission aborted
+I0810 10:06:15.748369 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:15.748369 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:15.748369 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:15.758404 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:15.758404 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:15.758404 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:15.758404 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:15.758404 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:15.758404 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:15.758404 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:17.288825 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:17.297205 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:17.297205 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:17.361346 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:17.361927 10768 arm.h:512] arm mission aborted
+I0810 10:06:17.365689 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:17.368618 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:17.369843 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:17.389189 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:17.389189 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:17.390260 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:17.390260 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:17.390787 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:17.391324 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:17.391861 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:18.932029 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:18.952841 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:18.952841 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:19.013209 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:19.013722 10768 arm.h:512] arm mission aborted
+I0810 10:06:19.013722 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:19.013722 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:19.013722 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:19.023747 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:19.023747 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:19.023747 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:19.023747 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:19.023747 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:19.023747 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:19.023747 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:20.543797 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:20.543848 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:20.543848 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:20.604617 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:20.604617 10768 arm.h:512] arm mission aborted
+I0810 10:06:20.604617 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:20.604617 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:20.604617 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:20.624809 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:20.624809 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:20.624809 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:20.624809 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:20.624809 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:20.634896 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:20.634896 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:22.168651 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:22.168651 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:22.168651 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:22.238924 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:22.238924 10768 arm.h:512] arm mission aborted
+I0810 10:06:22.238924 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:22.238924 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:22.238924 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:22.256222 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:22.256222 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:22.256750 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:22.257272 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:22.257272 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:22.257795 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:22.257795 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:23.792063 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:23.799803 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:23.800312 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:23.861708 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:23.861708 10768 arm.h:512] arm mission aborted
+I0810 10:06:23.861708 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:23.861708 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:23.861708 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:23.871757 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:23.871757 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:23.871757 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:23.871757 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:23.871757 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:23.871757 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:23.876775 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:25.403542 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:25.423790 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:25.423790 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:25.484421 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:25.484421 10768 arm.h:512] arm mission aborted
+I0810 10:06:25.484421 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:25.484421 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:25.484421 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:25.494472 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:25.494472 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:25.494472 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:25.494472 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:25.494472 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:25.494472 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:25.494472 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:27.023309 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:27.043490 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:27.043490 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:27.104203 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:27.104203 10768 arm.h:512] arm mission aborted
+I0810 10:06:27.104203 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:27.104203 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:27.104203 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:27.124382 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:27.124382 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:27.124382 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:27.124382 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:27.124382 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:27.124382 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:27.124382 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:28.662854 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:28.672953 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:28.672953 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:28.738371 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:28.738371 10768 arm.h:512] arm mission aborted
+I0810 10:06:28.738371 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:28.738371 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:28.738371 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:28.748397 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:28.748397 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:28.748397 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:28.748397 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:28.748397 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:28.748397 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:28.748397 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:30.278898 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:30.299100 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:30.299100 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:30.359815 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:30.359815 10768 arm.h:512] arm mission aborted
+I0810 10:06:30.359815 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:30.359815 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:30.359815 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:30.369854 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:30.369854 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:30.369854 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:30.369854 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:30.369854 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:30.369854 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:30.369854 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:31.907779 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:31.917735 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:31.918253 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:31.971850 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:31.971850 10768 arm.h:512] arm mission aborted
+I0810 10:06:31.971850 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:31.971850 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:31.971850 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:31.987468 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:31.987468 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:31.987468 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:31.987468 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:31.987468 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:31.987468 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:31.987468 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:33.516784 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:33.516784 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:33.516784 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:33.579282 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:33.579282 10768 arm.h:512] arm mission aborted
+I0810 10:06:33.579282 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:33.579282 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:33.579282 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:33.610528 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:33.610528 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:33.610528 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:33.610528 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:33.610528 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:33.610528 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:33.610528 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:35.133095 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:35.148726 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:35.148726 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:35.195597 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:35.195597 10768 arm.h:512] arm mission aborted
+I0810 10:06:35.195597 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:35.211238 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:35.211238 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:35.226842 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:35.226842 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:35.226842 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:35.226842 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:35.226842 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:35.226842 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:35.226842 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:36.751507 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:36.771852 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:36.771852 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:36.832509 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:36.832509 10768 arm.h:512] arm mission aborted
+I0810 10:06:36.832509 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:36.832509 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:36.832509 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:36.842547 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:36.842547 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:36.842547 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:36.842547 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:36.842547 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:36.842547 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:36.842547 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:38.375020 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:38.390260 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:38.390260 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:38.437497 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:38.438050 10768 arm.h:512] arm mission aborted
+I0810 10:06:38.438050 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:38.438050 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:38.438050 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:38.458258 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:38.458258 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:38.458258 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:38.467798 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:38.468336 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:38.468336 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:38.468336 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:39.998663 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:40.018965 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:40.018965 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:40.070562 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:40.070562 10768 arm.h:512] arm mission aborted
+I0810 10:06:40.070562 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:40.070562 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:40.070562 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:40.074127 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:40.074127 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:40.074127 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:40.074127 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:40.074127 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:40.074127 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:40.074127 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:41.604764 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:41.613080 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:41.613080 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:41.670974 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:41.670974 10768 arm.h:512] arm mission aborted
+I0810 10:06:41.670974 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:41.670974 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:41.670974 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:41.670974 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:41.670974 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:41.670974 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:41.670974 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:41.670974 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:41.670974 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:41.670974 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:43.215451 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:43.231101 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:43.231101 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:43.291548 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:43.291548 10768 arm.h:512] arm mission aborted
+I0810 10:06:43.291548 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:43.291548 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:43.291548 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:43.301595 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:43.301595 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:43.301595 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:43.301595 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:43.301595 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:43.301595 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:43.311650 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:44.834220 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:44.849838 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:44.849838 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:44.896710 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:44.896710 10768 arm.h:512] arm mission aborted
+I0810 10:06:44.896710 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:44.896710 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:44.896710 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:44.896710 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:44.896710 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:44.896710 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:44.896710 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:44.896710 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:44.896710 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:44.896710 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:46.427425 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:46.443049 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:46.443049 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:46.489923 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:46.489923 10768 arm.h:512] arm mission aborted
+I0810 10:06:46.489923 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:46.489923 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:46.489923 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:46.505545 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:46.505545 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:46.505545 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:46.505545 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:46.505545 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:46.505545 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:46.505545 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:48.026685 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:48.026685 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:48.026685 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:48.073552 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:48.073552 10768 arm.h:512] arm mission aborted
+I0810 10:06:48.073552 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:48.073552 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:48.073552 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:48.089185 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:48.089185 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:48.089185 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:48.089185 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:48.089185 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:48.089185 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:48.089185 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:49.635746 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:49.656072 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:49.656072 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:49.716317 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:49.716317 10768 arm.h:512] arm mission aborted
+I0810 10:06:49.716317 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:49.716317 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:49.716317 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:49.726368 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:49.726368 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:49.726368 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:49.726368 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:49.726368 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:49.726368 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:49.726368 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:51.261085 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:51.261085 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:51.261085 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:51.320160 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:51.322970 10768 arm.h:512] arm mission aborted
+I0810 10:06:51.323498 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:51.324015 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:51.324015 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:51.332366 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:51.332366 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:51.332873 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:51.332873 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:51.332873 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:51.332873 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:51.332873 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:52.859503 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:52.872684 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:52.872684 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:52.919577 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:52.919577 10768 arm.h:512] arm mission aborted
+I0810 10:06:52.919577 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:52.919577 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:52.919577 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:52.935199 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:52.935199 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:52.935199 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:52.935199 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:52.935199 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:52.935199 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:52.935199 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:54.458930 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:54.458930 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:54.458930 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:54.505801 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:54.505801 10768 arm.h:512] arm mission aborted
+I0810 10:06:54.505801 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:54.505801 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:54.505801 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:54.521432 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:54.521432 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:54.521432 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:54.521432 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:54.521432 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:54.521432 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:54.521432 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:56.056000 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:56.056000 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:56.056000 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:56.102869 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:56.102869 10768 arm.h:512] arm mission aborted
+I0810 10:06:56.102869 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:56.102869 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:56.102869 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:56.118501 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:56.118501 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:56.118501 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:56.118501 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:56.118501 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:56.118501 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:56.118501 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:57.650979 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:57.650979 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:57.650979 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:57.697849 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:57.697849 10768 arm.h:512] arm mission aborted
+I0810 10:06:57.697849 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:57.697849 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:57.697849 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:57.713480 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:57.713480 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:57.713480 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:57.713480 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:57.713480 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:57.713480 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:57.713480 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:06:59.263476 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:06:59.283844 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:06:59.283844 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:06:59.343762 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:06:59.343902 10768 arm.h:512] arm mission aborted
+I0810 10:06:59.347451 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:06:59.348927 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:06:59.350232 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:06:59.374281 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:06:59.374281 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:06:59.374281 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:06:59.374281 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:06:59.374281 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:06:59.374281 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:06:59.374281 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:00.911669 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:00.919013 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:00.919536 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:00.982028 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:00.982028 10768 arm.h:512] arm mission aborted
+I0810 10:07:00.983059 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:00.983585 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:00.984093 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:07:00.993422 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:00.993932 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:00.993932 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:00.994458 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:00.994976 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:00.994976 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:00.995503 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:02.516983 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:02.524724 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:02.524724 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:02.581717 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:02.581717 10768 arm.h:512] arm mission aborted
+I0810 10:07:02.597990 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:02.597990 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:02.597990 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:07:02.597990 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:02.597990 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:02.597990 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:02.597990 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:02.613703 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:02.614212 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:02.614212 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:04.134749 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:04.134749 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:04.134749 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:04.197248 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:04.197248 10768 arm.h:512] arm mission aborted
+I0810 10:07:04.197248 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:04.197248 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:04.197248 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:07:04.212872 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:04.212872 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:04.212872 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:04.212872 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:04.212872 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:04.212872 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:04.212872 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:05.753096 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:05.773294 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:05.773294 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:05.834005 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:05.834005 10768 arm.h:512] arm mission aborted
+I0810 10:07:05.834005 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:05.834005 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:05.834005 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:05.834005 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:05.834005 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:05.834005 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:05.834005 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:05.834005 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:05.834005 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:07.374126 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:07.384160 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:07.384160 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:07.434545 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:07.434545 10768 arm.h:512] arm mission aborted
+I0810 10:07:07.434545 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:07.434545 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:07.434545 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:07.434545 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:07.434545 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:07.434545 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:07.434545 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:07.434545 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:07.434545 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:08.972777 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:08.972777 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:08.972777 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:09.019646 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:09.019646 10768 arm.h:512] arm mission aborted
+I0810 10:07:09.019646 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:09.019646 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:09.019646 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:09.019646 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:09.019646 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:09.019646 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:09.019646 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:09.019646 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:09.019646 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:10.551681 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:10.561705 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:10.561705 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:10.608604 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:10.608604 10768 arm.h:512] arm mission aborted
+I0810 10:07:10.608604 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:10.608604 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:10.608604 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:10.608604 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:10.608604 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:10.608604 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:10.608604 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:10.608604 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:10.608604 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:12.144531 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:12.164861 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:12.164861 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:12.216537 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:12.217067 10768 arm.h:512] arm mission aborted
+I0810 10:07:12.220623 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:12.225015 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:12.226258 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:12.227515 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:12.228272 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:12.229421 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:12.229421 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:12.229943 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:12.229943 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:13.766091 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:13.766091 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:13.766091 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:13.812963 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:13.812963 10768 arm.h:512] arm mission aborted
+I0810 10:07:13.812963 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:13.812963 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:13.812963 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:13.812963 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:13.812963 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:13.812963 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:13.812963 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:13.812963 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:13.812963 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:15.349126 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:15.349126 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:15.349126 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:15.395996 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:15.395996 10768 arm.h:512] arm mission aborted
+I0810 10:07:15.395996 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:15.395996 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:15.395996 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:15.395996 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:15.395996 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:15.395996 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:15.395996 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:15.395996 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:15.395996 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:16.932297 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:16.932297 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:16.932297 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:16.994796 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:16.994796 10768 arm.h:512] arm mission aborted
+I0810 10:07:16.994796 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:16.994796 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:16.994796 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:16.994796 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:16.994796 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:16.994796 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:16.994796 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:16.994796 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:16.994796 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:18.527678 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:18.527678 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:18.527678 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:18.585680 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:18.586189 10768 arm.h:512] arm mission aborted
+I0810 10:07:18.586189 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:18.586189 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:18.586189 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:18.586189 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:18.586189 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:18.586189 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:18.586189 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:18.586189 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:18.586189 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:20.123412 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:20.143610 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:20.143610 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:20.204195 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:20.204195 10768 arm.h:512] arm mission aborted
+I0810 10:07:20.204195 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:20.209245 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:20.209245 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:20.209245 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:20.209245 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:20.209245 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:20.209245 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:20.209245 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:20.209245 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:21.742223 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:21.749691 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:21.749691 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:21.804332 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:21.804332 10768 arm.h:512] arm mission aborted
+I0810 10:07:21.805902 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:21.805902 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:21.806423 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:21.806423 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:21.806944 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:21.806944 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:21.807461 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:21.807984 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:21.807984 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:23.329839 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:23.339874 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:23.339874 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:23.397099 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:23.397612 10768 arm.h:512] arm mission aborted
+I0810 10:07:23.397612 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:23.397612 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:23.397612 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:23.397612 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:23.397612 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:23.397612 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:23.397612 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:23.397612 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:23.397612 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:24.924067 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:24.929657 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:24.929657 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:24.975395 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:24.975395 10768 arm.h:512] arm mission aborted
+I0810 10:07:24.975903 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:24.975903 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:24.975903 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:24.975903 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:24.975903 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:24.975903 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:24.975903 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:24.975903 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:24.975903 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:26.508477 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:26.508997 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:26.508997 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:26.556454 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:26.556986 10768 arm.h:512] arm mission aborted
+I0810 10:07:26.558045 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:26.558573 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:26.559100 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:07:26.572402 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:26.572402 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:26.572402 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:26.572402 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:26.572402 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:26.572402 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:26.572402 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:28.126145 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:28.126658 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:28.126658 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:28.186561 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:28.187078 10768 arm.h:512] arm mission aborted
+I0810 10:07:28.187078 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:28.187078 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:28.187078 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:07:28.196607 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:28.196607 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:28.196607 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:28.196607 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:28.196607 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:28.196607 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:28.196607 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:29.739140 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:29.759421 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:29.759421 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:29.819679 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:29.819679 10768 arm.h:512] arm mission aborted
+I0810 10:07:29.819679 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:29.819679 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:29.819679 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:07:29.829720 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:29.829720 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:29.829720 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:29.829720 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:29.829720 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:29.829720 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:29.829720 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:31.352344 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:31.372633 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:31.372633 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:31.433332 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:31.433332 10768 arm.h:512] arm mission aborted
+I0810 10:07:31.433332 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:31.433332 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:31.443363 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:07:31.462576 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:31.462585 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:31.463096 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:31.463096 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:31.463624 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:31.463624 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:31.464200 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:32.996840 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:33.017187 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:33.017187 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:33.073772 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:33.073772 10768 arm.h:512] arm mission aborted
+I0810 10:07:33.074857 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:33.075382 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:33.075889 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:07:33.084669 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:33.084669 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:33.085194 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:33.085709 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:33.085709 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:33.085709 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:33.085709 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:34.603945 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:34.605520 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:34.605520 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:34.652405 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:34.652405 10768 arm.h:512] arm mission aborted
+I0810 10:07:34.652405 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:34.652405 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:34.652405 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:07:34.668032 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:34.668032 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:34.668032 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:34.668032 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:34.668032 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:34.668032 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:34.683662 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:36.229254 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:36.229254 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:36.229254 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:36.276139 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:36.276139 10768 arm.h:512] arm mission aborted
+I0810 10:07:36.276139 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:36.276139 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:36.276139 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:07:36.276139 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:36.276139 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:36.276139 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:36.276139 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:36.276139 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:36.276139 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:36.276139 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:37.813441 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:37.829066 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:37.829066 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:37.875936 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:37.875936 10768 arm.h:512] arm mission aborted
+I0810 10:07:37.875936 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:37.875936 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:37.875936 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:07:37.891569 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:37.891569 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:37.891569 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:37.907196 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:37.907196 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:37.907196 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:37.907196 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:39.453191 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:39.473424 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:39.473424 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:39.534036 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:39.534036 10768 arm.h:512] arm mission aborted
+I0810 10:07:39.534036 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:39.534036 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:39.534036 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:07:39.544077 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:39.544077 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:39.544077 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:39.544077 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:39.544077 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:39.544077 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:39.544077 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:41.072232 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:41.082320 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:41.082320 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:41.142665 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:41.142665 10768 arm.h:512] arm mission aborted
+I0810 10:07:41.142665 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:41.142665 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:41.142665 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:07:41.152791 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:41.152791 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:41.152791 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:41.152791 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:41.152791 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:41.152791 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:41.152791 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:42.680307 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:42.689667 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:42.689667 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:42.742727 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:42.742727 10768 arm.h:512] arm mission aborted
+I0810 10:07:42.742727 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:42.742727 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:42.742727 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:07:42.771809 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:42.771809 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:42.771809 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:42.771809 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:42.771809 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:42.771809 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:42.771809 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:44.323683 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:44.339309 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:44.339309 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:44.386183 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:44.386183 10768 arm.h:512] arm mission aborted
+I0810 10:07:44.386183 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:44.386183 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:44.386183 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:07:44.401810 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:44.401810 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:44.401810 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:44.401810 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:44.401810 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:44.401810 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:44.401810 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:45.926909 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:45.926909 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:45.926909 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:45.973778 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:45.973778 10768 arm.h:512] arm mission aborted
+I0810 10:07:45.973778 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:45.973778 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:45.973778 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:07:45.989405 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:45.989405 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:45.989405 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:45.989405 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:45.989405 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:45.989405 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:45.989405 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:47.522197 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:47.522197 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:47.522197 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:47.569075 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:47.569075 10768 arm.h:512] arm mission aborted
+I0810 10:07:47.569075 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:47.569075 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:47.569075 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:07:47.584705 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:47.600332 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:47.600332 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:47.600332 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:47.600332 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:47.600332 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:47.600332 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:49.162387 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:49.171312 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:49.171838 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:49.237265 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:49.237265 10768 arm.h:512] arm mission aborted
+I0810 10:07:49.237265 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:49.237265 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:49.237265 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:07:49.247295 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:49.247295 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:49.247295 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:49.247295 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:49.247295 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:49.247295 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:49.247295 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:50.794759 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:50.794759 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:50.794759 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:50.855041 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:50.855041 10768 arm.h:512] arm mission aborted
+I0810 10:07:50.855041 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:50.855041 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:50.855041 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:07:50.875846 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:50.875846 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:50.875846 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:50.875846 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:50.875846 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:50.875846 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:50.875846 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:52.416256 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:52.428805 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:52.428805 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:52.481267 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:52.481819 10768 arm.h:512] arm mission aborted
+I0810 10:07:52.483983 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:52.484570 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:52.485651 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:07:52.502604 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:52.502604 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:52.502604 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:52.502604 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:52.504117 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:52.504117 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:52.504117 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:54.031561 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:54.051976 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:54.051976 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:54.112534 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:54.113055 10768 arm.h:512] arm mission aborted
+I0810 10:07:54.113571 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:54.114090 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:54.114609 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:07:54.123394 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:54.123912 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:54.123912 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:54.124431 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:54.124431 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:54.124949 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:54.124949 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:55.642879 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:55.642879 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:55.642879 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:55.689741 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:55.689741 10768 arm.h:512] arm mission aborted
+I0810 10:07:55.689741 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:55.689741 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:55.689741 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:07:55.689741 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:55.689741 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:55.689741 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:55.689741 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:55.689741 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:55.689741 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:55.689741 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:57.234081 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:57.259672 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:57.259672 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:57.306557 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:57.306557 10768 arm.h:512] arm mission aborted
+I0810 10:07:57.306557 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:57.306557 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:57.306557 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:07:57.322185 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:57.322185 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:57.322185 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:57.322185 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:57.322185 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:57.337805 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:57.337805 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:07:58.867805 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:07:58.888137 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:07:58.888137 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:07:58.948350 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:07:58.948350 10768 arm.h:512] arm mission aborted
+I0810 10:07:58.948350 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:07:58.948350 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:07:58.948350 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:07:58.958380 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:07:58.958380 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:07:58.958380 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:07:58.958380 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:07:58.958380 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:07:58.968452 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:07:58.968452 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:08:00.492738 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:08:00.512984 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:08:00.512984 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:08:00.574250 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:08:00.574250 10768 arm.h:512] arm mission aborted
+I0810 10:08:00.574250 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:08:00.574250 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:08:00.574250 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:08:00.614779 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:08:00.615284 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:08:00.619441 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:08:00.619441 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:08:00.619441 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:08:00.619441 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:08:00.619441 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:08:02.153738 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:08:02.170094 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:08:02.170094 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:08:02.218366 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:08:02.218366 10768 arm.h:512] arm mission aborted
+I0810 10:08:02.218366 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:08:02.218366 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:08:02.218366 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:08:02.241889 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:08:02.242430 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:08:02.242430 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:08:02.242950 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:08:02.243475 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:08:02.243475 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:08:02.243997 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:08:03.772038 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:08:03.772038 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:08:03.772038 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:08:03.818913 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:08:03.818913 10768 arm.h:512] arm mission aborted
+I0810 10:08:03.818913 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:08:03.818913 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:08:03.818913 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:08:03.834533 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:08:03.834533 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:08:03.834533 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:08:03.834533 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:08:03.834533 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:08:03.834533 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:08:03.834533 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:08:05.362876 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:08:05.362876 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:08:05.362876 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:08:05.409745 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:08:05.409745 10768 arm.h:512] arm mission aborted
+I0810 10:08:05.409745 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:08:05.409745 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:08:05.409745 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:08:05.425374 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:08:05.425374 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:08:05.425374 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:08:05.440999 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:08:05.440999 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:08:05.440999 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:08:05.440999 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:08:06.995249 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:08:07.011613 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:08:07.011613 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:08:07.058284 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:08:07.058917 10768 arm.h:512] arm mission aborted
+I0810 10:08:07.062784 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:08:07.068595 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:08:07.069799 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:08:07.096279 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:08:07.096279 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:08:07.098423 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:08:07.103188 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:08:07.103706 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:08:07.104244 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:08:07.104773 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:08:08.635533 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:08:08.645627 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:08:08.645627 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:08:08.696023 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:08:08.696023 10768 arm.h:512] arm mission aborted
+I0810 10:08:08.696023 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:08:08.696023 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:08:08.696023 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:08:08.706058 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:08:08.706058 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:08:08.706058 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:08:08.706058 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:08:08.706058 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:08:08.706058 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:08:08.706058 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:08:10.241823 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:08:10.247920 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:08:10.247920 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:08:10.305114 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:08:10.305627 10768 arm.h:512] arm mission aborted
+I0810 10:08:10.305627 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:08:10.305627 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:08:10.305627 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:08:10.327051 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:08:10.327051 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:08:10.330672 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:08:10.331192 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:08:10.333249 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:08:10.333249 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:08:10.333249 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:08:11.855129 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:08:11.867959 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:08:11.867959 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:08:11.914844 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:08:11.914844 10768 arm.h:512] arm mission aborted
+I0810 10:08:11.914844 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:08:11.914844 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:08:11.914844 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:08:11.946103 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:08:11.946103 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:08:11.946103 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:08:11.946103 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:08:11.946103 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:08:11.946103 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:08:11.946103 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:08:13.482038 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:08:13.497660 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:08:13.497660 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:08:13.544528 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:08:13.544528 10768 arm.h:512] arm mission aborted
+I0810 10:08:13.544528 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:08:13.544528 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:08:13.544528 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:08:13.560165 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:08:13.560165 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:08:13.560165 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:08:13.560165 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:08:13.560165 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:08:13.560165 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:08:13.560165 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:08:15.102268 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:08:15.102268 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:08:15.102268 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:08:15.164765 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:08:15.164765 10768 arm.h:512] arm mission aborted
+I0810 10:08:15.164765 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:08:15.164765 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:08:15.164765 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:08:15.196022 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:08:15.196022 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:08:15.196022 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:08:15.196022 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:08:15.196022 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:08:15.196022 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:08:15.196022 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:08:16.731712 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:08:16.731712 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:08:16.731712 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:08:16.778580 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:08:16.778580 10768 arm.h:512] arm mission aborted
+I0810 10:08:16.778580 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:08:16.778580 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:08:16.778580 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:08:16.794209 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:08:16.794209 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:08:16.794209 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:08:16.794209 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:08:16.794209 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:08:16.794209 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:08:16.794209 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:08:18.335202 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:08:18.355469 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:08:18.355469 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:08:18.411955 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:08:18.411955 10768 arm.h:512] arm mission aborted
+I0810 10:08:18.411955 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:08:18.411955 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:08:18.411955 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:08:18.428145 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:08:18.428145 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:08:18.428145 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:08:18.428145 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:08:18.428145 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:08:18.428145 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:08:18.428145 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:08:19.971560 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:08:19.981137 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:08:19.981137 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:08:20.033200 10768 arm.h:314] robotic arm project is not running!
+I0810 10:08:20.033200 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:08:20.034765 10768 arm.h:512] arm mission aborted
+I0810 10:08:20.036829 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:08:20.036829 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:08:20.036829 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:08:20.036829 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:08:20.036829 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:08:20.036829 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:08:20.036829 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:08:20.036829 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:08:20.036829 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:08:20.036829 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:08:21.585047 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:08:21.595151 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:08:21.595151 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:08:21.645478 10768 arm.h:314] robotic arm project is not running!
+I0810 10:08:21.645478 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:08:21.645478 10768 arm.h:512] arm mission aborted
+I0810 10:08:21.645478 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:08:21.645478 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:08:21.645478 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:08:21.655573 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:08:21.655573 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:08:21.655573 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:08:21.655573 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:08:21.655573 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:08:21.655573 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:08:21.655573 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:08:23.184760 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:08:23.205022 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:08:23.208074 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:08:23.265628 10768 arm.h:314] robotic arm project is not running!
+I0810 10:08:23.265628 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:08:23.268684 10768 arm.h:512] arm mission aborted
+I0810 10:08:23.275738 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:08:23.275738 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:08:23.278795 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:08:23.288841 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:08:23.288841 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:08:23.288841 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:08:23.288841 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:08:23.295856 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:08:23.295856 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:08:23.295856 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:08:24.822680 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:08:24.842957 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:08:24.842957 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:08:24.903606 10768 arm.h:314] robotic arm project is not running!
+I0810 10:08:24.903606 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:08:24.903606 10768 arm.h:512] arm mission aborted
+I0810 10:08:24.913719 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:08:24.913719 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:08:24.913719 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:08:24.923818 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:08:24.923818 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:08:24.923818 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:08:24.923818 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:08:24.923818 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:08:24.923818 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:08:24.933856 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:08:26.459437 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:08:26.459947 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:08:26.459947 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:08:26.515565 10768 arm.h:314] robotic arm project is not running!
+I0810 10:08:26.516111 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:08:26.518848 10768 arm.h:512] arm mission aborted
+I0810 10:08:26.524313 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:08:26.524821 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:08:26.525048 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:08:26.539969 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:08:26.539969 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:08:26.540491 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:08:26.547884 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:08:26.548410 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:08:26.548933 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:08:26.549453 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:08:28.077306 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:08:28.084205 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:08:28.084726 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:08:28.139351 10768 arm.h:314] robotic arm project is not running!
+I0810 10:08:28.139351 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:08:28.139858 10768 arm.h:512] arm mission aborted
+I0810 10:08:28.139858 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:08:28.139858 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:08:28.139858 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:08:28.155529 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:08:28.156584 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:08:28.157101 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:08:28.164887 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:08:28.164887 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:08:28.165414 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:08:28.165935 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:08:29.684406 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:08:29.694497 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:08:29.694497 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:08:29.736944 10768 arm.h:314] robotic arm project is not running!
+I0810 10:08:29.737453 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:08:29.737453 10768 arm.h:512] arm mission aborted
+I0810 10:08:29.737453 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:08:29.737453 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:08:29.737453 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:08:29.764992 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:08:29.765533 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:08:29.767174 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:08:29.768380 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:08:29.768894 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:08:29.768894 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:08:29.768894 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:08:31.304273 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:08:31.304780 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:08:31.304780 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:08:31.354532 10768 arm.h:314] robotic arm project is not running!
+I0810 10:08:31.355039 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:08:31.355048 10768 arm.h:512] arm mission aborted
+I0810 10:08:31.355048 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:08:31.355048 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:08:31.355048 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:08:31.375216 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:08:31.375216 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:08:31.375216 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:08:31.375216 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:08:31.375216 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:08:31.375216 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:08:31.384754 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:08:32.908919 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:08:32.909425 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:08:32.909425 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:08:32.956806 10768 arm.h:314] robotic arm project is not running!
+I0810 10:08:32.956806 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:08:32.958369 10768 arm.h:512] arm mission aborted
+I0810 10:08:32.962476 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:08:32.963496 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:08:32.963496 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:08:32.973609 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:08:32.973609 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:08:32.973609 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:08:32.973609 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:08:32.973609 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:08:32.973609 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:08:32.973609 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:08:34.513861 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:08:34.514375 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:08:34.514375 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:08:34.574743 10768 arm.h:314] robotic arm project is not running!
+I0810 10:08:34.574743 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:08:34.574743 10768 arm.h:512] arm mission aborted
+I0810 10:08:34.574743 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:08:34.574743 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:08:34.574743 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:08:34.584815 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:08:34.584815 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:08:34.584815 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:08:34.584815 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:08:34.584815 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:08:34.584815 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:08:34.584815 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:08:36.115589 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:08:36.137373 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:08:36.145920 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:08:36.218519 10768 arm.h:314] robotic arm project is not running!
+I0810 10:08:36.219045 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:08:36.219045 10768 arm.h:512] arm mission aborted
+I0810 10:08:36.219045 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:08:36.219045 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:08:36.228605 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:08:36.248972 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:08:36.248972 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:08:36.259559 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:08:36.259559 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:08:36.259559 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:08:36.259559 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:08:36.259559 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:08:37.788837 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:08:37.804459 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:08:37.804459 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:08:37.851366 10768 arm.h:314] robotic arm project is not running!
+I0810 10:08:37.851903 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:08:37.852952 10768 arm.h:512] arm mission aborted
+I0810 10:08:37.860702 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:08:37.861205 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:08:37.861228 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:08:37.863313 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:08:37.863313 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:08:37.863313 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:08:37.863313 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:08:37.863313 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:08:37.863313 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:08:37.863313 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:08:39.413780 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:08:39.429412 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:08:39.429412 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:08:39.476282 10768 arm.h:314] robotic arm project is not running!
+I0810 10:08:39.476282 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:08:39.476282 10768 arm.h:512] arm mission aborted
+I0810 10:08:39.476282 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:08:39.476282 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:08:39.476282 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:08:39.491904 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:08:39.491904 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:08:39.491904 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:08:39.491904 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:08:39.491904 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:08:39.491904 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:08:39.507522 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:08:41.036918 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:08:41.036918 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:08:41.036918 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:08:41.083786 10768 arm.h:314] robotic arm project is not running!
+I0810 10:08:41.083786 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:08:41.083786 10768 arm.h:512] arm mission aborted
+I0810 10:08:41.083786 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:08:41.083786 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:08:41.083786 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:08:41.099411 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:08:41.099411 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:08:41.099411 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:08:41.099411 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:08:41.099411 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:08:41.115036 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:08:41.115036 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:08:42.665521 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:08:42.685840 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:08:42.685840 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:08:42.746469 10768 arm.h:314] robotic arm project is not running!
+I0810 10:08:42.746469 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:08:42.746469 10768 arm.h:512] arm mission aborted
+I0810 10:08:42.746469 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:08:42.746469 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:08:42.746469 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:08:42.756502 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:08:42.756502 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:08:42.756502 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:08:42.756502 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:08:42.756502 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:08:42.756502 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:08:42.756502 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:08:44.295270 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:08:44.302618 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:08:44.302618 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:08:44.343040 10768 arm.h:314] robotic arm project is not running!
+I0810 10:08:44.343040 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:08:44.347914 10768 arm.h:512] arm mission aborted
+I0810 10:08:44.353992 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:08:44.354519 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:08:44.355042 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:08:44.367897 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:08:44.367897 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:08:44.369491 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:08:44.369645 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:08:44.373339 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:08:44.375981 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:08:44.376534 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:08:45.905352 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:08:45.905879 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:08:45.905879 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:08:45.954475 10768 arm.h:314] robotic arm project is not running!
+I0810 10:08:45.954475 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:08:45.954475 10768 arm.h:512] arm mission aborted
+I0810 10:08:45.971920 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:08:45.973384 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:08:45.974794 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:08:45.983536 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:08:45.983536 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:08:45.983536 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:08:45.983536 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:08:45.983536 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:08:45.983536 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:08:45.983536 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:08:47.521322 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode
+I0810 10:08:47.531364 10768 nw_sys.h:1726] [thread_WaitSchedules]: 1.2 update all devices status
+I0810 10:08:47.531364 10768 nw_sys.h:1728] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I0810 10:08:49.042867 10768 arm.h:314] robotic arm project is not running!
+I0810 10:08:49.044484 10768 arm.h:510] ipc knows robotic arm is error!
+I0810 10:08:49.044484 10768 arm.h:512] arm mission aborted
+I0810 10:08:49.052418 10768 nw_sys.h:1731] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I0810 10:08:49.052949 10768 nw_sys.h:1733] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I0810 10:08:49.054491 10768 nw_sys.h:1739] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I0810 10:08:49.054491 10768 nw_sys.h:1796] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I0810 10:08:49.054491 10768 nw_sys.h:1798] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I0810 10:08:49.054491 10768 nw_sys.h:1861] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I0810 10:08:49.054491 10768 nw_sys.h:1863] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I0810 10:08:49.054491 10768 nw_sys.h:1883] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I0810 10:08:49.054491 10768 nw_sys.h:1898] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I0810 10:08:49.054491 10768 nw_sys.h:1899] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I0810 10:08:50.603310 10768 nw_sys.h:1723] [thread_WaitSchedules]: 1.1 update sys control mode

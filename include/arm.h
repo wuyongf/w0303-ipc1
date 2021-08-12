@@ -66,6 +66,8 @@ namespace yf
             // function: keep sending "Get Status" and check the stauts.
             void UpdateArmCurMissionStatus();
 
+            bool IsArmControlBoxPowerOn();
+
             /// \brief
             /// For Each Arm Task
             /// in case of Arm EStop/Error/Disconnected and then block program, we need to start up a thread,
@@ -319,10 +321,17 @@ void yf::arm::tm::ModbusCheckArmStatus()
         // (2) Update nw_sys arm_connection_status
         if(nw_status_ptr_->arm_connection_status == yf::data::common::ConnectionStatus::Connected)
         {
+
+
             // Notify ipc_sever that the arm client has disconnected.
             NetMessageArm("Get Status");
+
             // Update nw_sys arm_connection_status
             GetConnectionStatus();
+
+
+            nw_status_ptr_->arm_connection_status = yf::data::common::ConnectionStatus::Disconnected;
+
         }
     }
 
@@ -491,7 +500,17 @@ void yf::arm::tm::UpdateArmCurMissionStatus()
 
     while (update_flag)
     {
-        // ModbusCheckUgvStatus();
+        if(!IsArmControlBoxPowerOn())
+        {
+            LOG(INFO) << "Arm Control Box Shut Down!";
+
+            nw_status_ptr_->cur_task_continue_flag = false;
+
+            nw_status_ptr_->arm_connection_status = data::common::ConnectionStatus::Disconnected;
+            nw_status_ptr_->arm_mission_status = data::common::MissionStatus::Error;
+
+            return;
+        }
 
         // 1. modbus check and assign the mission status...(Error, E-Stop)
         ModbusCheckArmStatus();
@@ -547,11 +566,20 @@ void yf::arm::tm::UpdateArmCurMissionStatus()
                 {
 
                     ModbusCheckArmStatus();
-                    RetrieveArmCurrentMissionStatus();
+
+                    if(nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Connected)
+                    {
+                        RetrieveArmCurrentMissionStatus();
+                    }
+
                     ///TIME
                     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
                     if(nw_status_ptr_->arm_mission_status != data::common::MissionStatus::Pause)
+                    {
+                        break;
+                    }
+                    if(nw_status_ptr_->arm_connection_status != data::common::ConnectionStatus::Connected)
                     {
                         break;
                     }
@@ -1427,6 +1455,35 @@ bool yf::arm::tm::GetLargePadExistFlag()
     if(no_large_pad == 1)
     {
         // there is no any small pad
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+bool yf::arm::tm::IsArmControlBoxPowerOn()
+{
+    std::string ping_command;
+
+    std::string tm_ip_address = tm_ip_address_;
+
+    //Windows
+    //By using win ping method.
+
+    int ping_request_no = 1;
+
+    int ping_timeout = 800; //ms
+
+    ping_command =  "ping " + tm_ip_address +
+                    " -n " + std::to_string(ping_request_no) +
+                    " -w " + std::to_string(ping_timeout);
+
+    const char* cstr_ping_command = ping_command.c_str();
+
+    if (system( cstr_ping_command ) )
+    {
         return false;
     }
     else

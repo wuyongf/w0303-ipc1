@@ -258,6 +258,12 @@ void yf::sys::nw_sys::Start()
     nw_status_ptr_ = std::make_shared<yf::status::nw_status>();
     //  0.2 sql
     sql_ptr_       = std::make_shared<yf::sql::sql_server>("SQL Server","192.168.7.127","NW_mobile_robot_sys","sa","NWcadcam2021");
+    //  0.2.1 sql: webpage initialization
+    sql_ptr_->UpdateDeviceConnectionStatus("arm", 0);
+    sql_ptr_->UpdateDeviceConnectionStatus("ugv", 0);
+    sql_ptr_->UpdateDeviceMissionStatus("arm", 6);
+    sql_ptr_->UpdateDeviceMissionStatus("ugv", 6);
+
     //  0.3 ipc_server
     //  establish server and keep updating, keep waiting for devices connection.
     th_ipc_server_ = std::thread(&nw_sys::thread_IPCServerStartup, this, std::ref(ipc_server_ptr_), std::ref(ipc_server_flag_));
@@ -269,7 +275,7 @@ void yf::sys::nw_sys::Start()
 
     // 1.2 block the program, wait for arm connection
     // notify the database.
-    sql_ptr_->UpdateSysAdvice(8);
+    sql_ptr_->UpdateSysAdvice(11);
     tm5.WaitForConnection();
 
     // 1.3 update the connection status to sys_status & database ;
@@ -1731,7 +1737,7 @@ void yf::sys::nw_sys::WaitSchedulesInitialCheck()
             case data::common::SystemMode::Auto:
             {
                 LOG(INFO) << "[thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto";
-                sql_ptr_->UpdateSysAdvice(0);
+                sql_ptr_->UpdateSysAdvice(10);
                 sys_init_check_continue_flag = false;
                 break;
             }
@@ -1740,9 +1746,33 @@ void yf::sys::nw_sys::WaitSchedulesInitialCheck()
             {
                 LOG(INFO) << "[thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Manual";
                 LOG(INFO) << "[thread_WaitSchedules]: 1.3.1.1 wait for Auto Mode";
-                sql_ptr_->UpdateSysAdvice(7);
+
                 while (nw_status_ptr_->sys_control_mode_ != data::common::SystemMode::Auto)
                 {
+                    if(nw_status_ptr_->sys_control_mode_ == data::common::SystemMode::Manual)
+                    {
+                        if(mir100_ptr_->IsConnected())
+                        {
+                            sql_ptr_->UpdateSysAdvice(19);
+                        }
+                        else
+                        {
+                            sql_ptr_->UpdateSysAdvice(20);
+                        }
+                    }
+
+                    if(nw_status_ptr_->sys_control_mode_ == data::common::SystemMode::Recovery)
+                    {
+                        if(nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Connected)
+                        {
+                            sql_ptr_->UpdateSysAdvice(17);
+                        }
+                        else
+                        {
+                            sql_ptr_->UpdateSysAdvice(18);
+                        }
+                    }
+
                     // update sys control mode
                     GetSysControlMode();
 
@@ -1767,6 +1797,49 @@ void yf::sys::nw_sys::WaitSchedulesInitialCheck()
                 }
                 break;
             }
+
+            case data::common::SystemMode::Recovery:
+            {
+                // For user wrong operation
+                if(nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Connected)
+                {
+                    LOG(INFO) << "[thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Recovery";
+                    LOG(INFO) << "[thread_WaitSchedules]: 1.3.1.1 wait for Auto Mode";
+                    sql_ptr_->UpdateSysAdvice(17);
+                    while (nw_status_ptr_->sys_control_mode_ != data::common::SystemMode::Auto)
+                    {
+                        if(nw_status_ptr_->sys_control_mode_ == data::common::SystemMode::Manual)
+                        {
+                            if(mir100_ptr_->IsConnected())
+                            {
+                                sql_ptr_->UpdateSysAdvice(19);
+                            }
+                            else
+                            {
+                                sql_ptr_->UpdateSysAdvice(20);
+                            }
+                        }
+
+                        if(nw_status_ptr_->sys_control_mode_ == data::common::SystemMode::Recovery)
+                        {
+                            if(nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Connected)
+                            {
+                                sql_ptr_->UpdateSysAdvice(17);
+                            }
+                            else
+                            {
+                                sql_ptr_->UpdateSysAdvice(18);
+                            }
+                        }
+
+                        // update sys control mode
+                        GetSysControlMode();
+
+                        ///TIME
+                        sleep.sec(2);
+                    }
+                }
+            }
         }
         LOG(INFO) << "[thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]";
 
@@ -1785,8 +1858,8 @@ void yf::sys::nw_sys::WaitSchedulesInitialCheck()
             {
                 // For Arm Paused too long situation
                 //
-                if ( nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Connected &&
-                     nw_status_ptr_->arm_mission_status == data::common::MissionStatus::Error)
+                if( nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Connected &&
+                    nw_status_ptr_->arm_mission_status == data::common::MissionStatus::Error)
                 {
                     LOG(INFO) << "[thread_WaitSchedules]: 1.3.2.1 Please stop robotic arm project...";
                     sql_ptr_->UpdateSysAdvice(6);
@@ -1798,19 +1871,19 @@ void yf::sys::nw_sys::WaitSchedulesInitialCheck()
                 {
                     LOG(INFO) << "[thread_WaitSchedules]: 1.3.2.2 Arm disconnected...";
                     LOG(INFO) << "[thread_WaitSchedules]: 1.3.2.3 Please switch to Recovery Mode..."; // Ask for recovery mode
-                    sql_ptr_->UpdateSysAdvice(3);
+                    sql_ptr_->UpdateSysAdvice(16);
 
                     if(nw_status_ptr_->sys_control_mode_ == data::common::SystemMode::Recovery)
                     {
                         LOG(INFO) << "[thread_WaitSchedules]: 1.3.2.4 Please play arm project..."; // Ask for recovery mode
-                        sql_ptr_->UpdateSysAdvice(5);
+                        sql_ptr_->UpdateSysAdvice(18);
 
                         tm5.WaitForConnection();
                         // Get Status and update to SQL
                         tm5.GetConnectionStatus();
                         tm5.GetMissionStatus();
 
-                        sql_ptr_->UpdateSysAdvice(1);
+                        sql_ptr_->UpdateSysAdvice(17);
                         LOG(INFO) << "[thread_WaitSchedules]: 1.3.2 check arm   [Complete]";
                     }
                 }
@@ -1842,6 +1915,7 @@ void yf::sys::nw_sys::WaitSchedulesInitialCheck()
         {
             LOG(INFO) << "[thread_WaitSchedules]: 1.3.4 check consumables   [Start]";
             this->ArmCheckPadIsEmpty();
+
             if(nw_status_ptr_->small_pad_no != 0 && nw_status_ptr_->large_pad_no != 0)
             {
                 consumables_init_check_continue_flag = false;
@@ -1850,7 +1924,15 @@ void yf::sys::nw_sys::WaitSchedulesInitialCheck()
             else
             {
                 LOG(INFO) << "[thread_WaitSchedules]: 1.3.4 check consumables: Please refill consumables!   [Uncompleted]";
-                sql_ptr_->UpdateSysAdvice(9);
+                if(nw_status_ptr_->small_pad_no == 0)
+                {
+                    sql_ptr_->UpdateSysAdvice(13);
+                }
+                else if (nw_status_ptr_->large_pad_no == 0)
+                {
+                    sql_ptr_->UpdateSysAdvice(12);
+                }
+
             }
         }
 
@@ -2532,20 +2614,20 @@ void yf::sys::nw_sys::thread_Web_UgvBatteryPercentage(bool &web_status_flag,
 {
     while(web_status_flag)
     {
-        // todo: need to handle how to check whether mir is ON/OFF
-
-        try
+        if(mir100_ptr_->IsConnected())
         {
-            // retrieve data from ugv
-            auto result = mir100_ptr_->GetBatteryPercentage();
-            // update to sql
-            sql_ptr_->UpdateDeviceBatteryCapacity("ugv", result);
+            try
+            {
+                // retrieve data from ugv
+                auto result = mir100_ptr_->GetBatteryPercentage();
+                // update to sql
+                sql_ptr_->UpdateDeviceBatteryCapacity("ugv", result);
+            }
+            catch (std::error_code ec)
+            {
+                std::cerr << "Cannot Get MiR100 Battery Percentage. Will Try Again Later";
+            }
         }
-        catch (std::error_code ec)
-        {
-            std::cerr << "Cannot Get MiR100 Battery Percentage. Will Try Again Later";
-        }
-
 
         sleep.minute(sleep_duration);
     }
@@ -2558,19 +2640,19 @@ void yf::sys::nw_sys::thread_Web_UgvCurPosition(const bool &web_status_flag,
 
     while(web_status_flag)
     {
-        // todo: need to handle how to check whether mir is ON/OFF
-
-
-        try
+        if(mir100_ptr_->IsConnected())
         {
-            // retrieve data from ugv
-            auto result = mir100_ptr_->GetCurPosition();
-            // update to sql
-            sql_ptr_->UpdateDeviceUgvCurPosition(result[0],result[1],result[2]);
-        }
-        catch (std::error_code ec)
-        {
-            std::cerr << "Cannot Get MiR100 Cur Position. Will Try Again Later";
+            try
+            {
+                // retrieve data from ugv
+                auto result = mir100_ptr_->GetCurPosition();
+                // update to sql
+                sql_ptr_->UpdateDeviceUgvCurPosition(result[0],result[1],result[2]);
+            }
+            catch (std::error_code ec)
+            {
+                std::cerr << "Cannot Get MiR100 Cur Position. Will Try Again Later";
+            }
         }
 
         sleep.sec(sleep_duration);
@@ -3510,11 +3592,15 @@ void yf::sys::nw_sys::thread_Web_DeviceConnectionMissionStatus(const bool &web_s
         {
             nw_status_ptr_->ugv_connection_status_ = data::common::ConnectionStatus::Disconnected;
             sql_ptr_->UpdateDeviceConnectionStatus("ugv", 0);
+            sql_ptr_->UpdateDeviceMissionStatus("ugv",6);
         }
 
         /// 1.3. get mir mission status from REST API
         /// 1.4. update mir mission status
-        mir100_ptr_->RetrieveUgvCurrentMissionState();
+        if(mir100_ptr_->IsConnected())
+        {
+            mir100_ptr_->RetrieveUgvCurrentMissionState();
+        }
 
         /// 2. arm
         // 2.1 connection status
