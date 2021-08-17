@@ -303,14 +303,14 @@ bool yf::ugv::mir::doRequest(HTTPClientSession &session,
     respond_status_ = response.getStatus();
     respond_reason_ = response.getReason();
 
-    std::cout << respond_status_ << " " << respond_reason_ << std::endl;
+//    std::cout << respond_status_ << " " << respond_reason_ << std::endl;
 
     if (response.getStatus() != Poco::Net::HTTPResponse::HTTP_UNAUTHORIZED)
     {
         request_result_.clear();
 
         StreamCopier::copyToString(rs, request_result_);
-        std::cout << "result: " << request_result_ << std::endl;
+//        std::cout << "result: " << request_result_ << std::endl;
         return true;
     }
     else

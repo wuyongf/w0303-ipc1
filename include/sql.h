@@ -377,7 +377,7 @@ void yf::sql::sql_server::Connect()
         conn_ = connection;
     }
     catch (std::exception& e)
-    {  
+    {
         std::cerr << e.what() << std::endl;
         std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
     }

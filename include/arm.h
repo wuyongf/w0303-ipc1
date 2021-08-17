@@ -321,8 +321,6 @@ void yf::arm::tm::ModbusCheckArmStatus()
         // (2) Update nw_sys arm_connection_status
         if(nw_status_ptr_->arm_connection_status == yf::data::common::ConnectionStatus::Connected)
         {
-
-
             // Notify ipc_sever that the arm client has disconnected.
             NetMessageArm("Get Status");
 

@@ -1054,9 +1054,6 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                         ///TIME
                                                         sleep.ms(200);
 
-                                                        //todo: upload to sys_schedule_job_task
-                                                        // job_id, task_order, task_mode, ugv_config_id, arm_config_id,
-                                                        // status (in process, finish, error)
 
                                                         continue;
 
@@ -3324,9 +3321,6 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
                                                         ///TIME
                                                         sleep.ms(200);
 
-                                                        //todo: upload to sys_schedule_job_task
-                                                        // job_id, task_order, task_mode, ugv_config_id, arm_config_id,
-                                                        // status (in process, finish, error)
 
                                                         continue;
 
