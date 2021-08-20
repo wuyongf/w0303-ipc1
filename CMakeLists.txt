@@ -19,13 +19,13 @@ find_package(nanodbc CONFIG REQUIRED)
 
 
 ## glog
-set(GLOG_INCLUDE_DIR D:/software/include/glog_x64-windows/include/glog)
-set(GLOG_LIBRARY_DIR D:/software/include/glog_x64-windows/lib)
+#set(GLOG_INCLUDE_DIR D:/software/include/glog_x64-windows/include/glog)
+#set(GLOG_LIBRARY_DIR D:/software/include/glog_x64-windows/lib)
 
-find_package(glog 0.4.0 REQUIRED)
+find_package(glog CONFIG REQUIRED)
 
-include_directories(${GLOG_INCLUDE_DIR})
-link_directories(${GLOG_LIBRARY_DIR})
+#include_directories(${GLOG_INCLUDE_DIR})
+#link_directories(${GLOG_LIBRARY_DIR})
 
 ## modbus
 find_package(libmodbus CONFIG REQUIRED)
@@ -34,13 +34,16 @@ find_package(libmodbus CONFIG REQUIRED)
 find_package(Poco CONFIG REQUIRED Foundation Net XML Zip Data JSON)
 
 ## Eigen3 library
-include_directories( "D:/software/include/Eigen3" )
+find_package(Eigen3 CONFIG REQUIRED)
+#include_directories( "D:/software/include/Eigen3" )
 #
 #find_package(Eigen3 CONFIG REQUIRED)
 #target_link_libraries(main PRIVATE Eigen3::Eigen)
 
 ## Boost library
-if (1)
+find_package(Boost 1.76.0 )
+
+if (0)
 
     set(BOOST_ROOT D:/software/include/boost_1_75_0)
     set(BOOSTROOT D:/software/include/boost_1_75_0)
