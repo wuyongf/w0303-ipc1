@@ -1257,20 +1257,20 @@ int yf::sql::sql_server::GetSysControlMode()
     {
         Connect();
 
-        query_update = "SELECT control_mode FROM sys_status where ID = 1 AND name = 'nw_sys' ";
+        query_update = "SELECT control_mode FROM sys_status where name = 'nw_sys' ";
 
-        std::string sys_control_mode;
+        int sys_control_mode;
 
         auto result = nanodbc::execute(conn_,query_update);
 
         while(result.next())
         {
-            sys_control_mode = result.get<std::string>(0, "null");
+            sys_control_mode = result.get<int>(0);
         };
 
         Disconnect();
 
-        return std::stoi(sys_control_mode);
+        return sys_control_mode;
     }
     catch (std::exception& e)
     {

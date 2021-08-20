@@ -1952,10 +1952,12 @@ void yf::sys::nw_sys::WaitSchedulesInitialCheck()
         LOG(INFO) << "[thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm";
 
         UpdateDbDeviceArmConnectionStatus();
-        UpdateDbDeviceArmMissionStatus();
-
         ///TIME
-        sleep.ms(1500);
+        sleep.ms(500);
+
+        UpdateDbDeviceArmMissionStatus();
+        ///TIME
+        sleep.ms(1000);
     }
 }
 
