@@ -6,7 +6,7 @@ project (w0303)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Packages
+# Packages via manager
 
 find_package(OpenCV REQUIRED)
 find_package(nanodbc CONFIG REQUIRED)
@@ -18,6 +18,8 @@ find_package(Eigen3 CONFIG REQUIRED)
 #find_package(PCL 1.11.1 REQUIRED)
 
 include_directories( ${OpenCV_INCLUDE_DIRS} )
+
+# Package via local
 
 if (1)
 
