@@ -15,11 +15,10 @@ find_package(libmodbus CONFIG REQUIRED)
 find_package(Poco CONFIG REQUIRED Foundation Net XML Zip Data JSON)
 find_package(Eigen3 CONFIG REQUIRED)
 #find_package(Boost 1.75.0 )
-#find_package(PCL 1.11.1 REQUIRED)
 
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
-# Package via local
+# Package (build from source)
 
 if (1)
 
@@ -41,6 +40,15 @@ if (1)
     add_definitions( -DBOOST_ALL_NO_LIB )
 
 endif ()
+
+## 2. PCL
+## reference: https://github.com/PointCloudLibrary/pcl/issues/4462
+
+#set(PCL_DIR "C:/src/vcpkg/installed/x64-windows/share/pcl/PCLConfig.cmake")
+#find_package(PCL 1.11.1 REQUIRED)
+
+#set(PCL_DIR "D:/software/include/PCL 1.11.1/cmake/PCLConfig.cmake")
+#find_package(PCL 1.11.1 REQUIRED)
 
 # Add source to this project's executable.
 
