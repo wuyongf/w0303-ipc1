@@ -129,3 +129,4 @@ target_link_libraries(str_parse_test1 PUBLIC glog::glog nanodbc modbus Poco::Fou
 add_executable(al_test "useful-functions/al_test.cpp" )
 target_link_libraries(al_test PUBLIC glog::glog nanodbc modbus Poco::Foundation Poco::Net Poco::XML Poco::Zip Poco::Data Poco::JSON)
 
+
