@@ -53,8 +53,8 @@ int main()
 
     tm5.WaitForConnection();
 
-//    tm5.ArmTask("Post vision_find_landmark");
-    tm5.ArmTask("Post vision_find_light_landmark");
+    tm5.ArmTask("Post vision_find_landmark");
+//    tm5.ArmTask("Post vision_find_light_landmark");
 
     tm5.ArmTask("Post get_find_landmark_flag");
 
@@ -76,7 +76,7 @@ int main()
     //
     // @@ input: arm_mission_config_id
 
-    int arm_mission_config_id = 11166;
+    int arm_mission_config_id = 10139;
 
     sql_ptr_->InsertRefLandmarkPos(arm_mission_config_id,lm_pos);
 

@@ -2594,9 +2594,9 @@ void yf::sys::nw_sys::thread_WebStatusManager()
     th_web_ugv_position_ = std::thread(&nw_sys::thread_Web_UgvCurPosition, this,
                                        std::ref(web_status_flag_),std::move(duration_sec_ugv_pos));
 
-    th_web_ugv_connection_mission_status_ = std::thread(&nw_sys::thread_Web_DeviceConnectionMissionStatus, this,
-                                                        std::ref(web_status_flag_),
-                                                        std::move(duration_sec_ugv_connection_mission_status));
+    // th_web_ugv_connection_mission_status_ = std::thread(&nw_sys::thread_Web_DeviceConnectionMissionStatus, this,
+    //                                                    std::ref(web_status_flag_),
+    //                                                    std::move(duration_sec_ugv_connection_mission_status));
 
     /// Duration: 1 minute
     while (schedule_flag_ == true)
@@ -3578,24 +3578,23 @@ void yf::sys::nw_sys::thread_Web_DeviceConnectionMissionStatus(const bool &web_s
         /// 1. mir100
 
         /// 1.1. ping mir 192.168.7.34
-        /// 1.2. if success, update mir connection status
+
         if(mir100_ptr_->IsConnected())
         {
+            /// if success
+            /// 1.1.1 update mir connection status
             nw_status_ptr_->ugv_connection_status_ = data::common::ConnectionStatus::Connected;
             sql_ptr_->UpdateDeviceConnectionStatus("ugv", 1);
+
+            /// 1.3. get mir mission status from REST API
+            /// 1.4. update mir mission status
+            mir100_ptr_->RetrieveUgvCurrentMissionState();
         }
         else
         {
             nw_status_ptr_->ugv_connection_status_ = data::common::ConnectionStatus::Disconnected;
             sql_ptr_->UpdateDeviceConnectionStatus("ugv", 0);
             sql_ptr_->UpdateDeviceMissionStatus("ugv",6);
-        }
-
-        /// 1.3. get mir mission status from REST API
-        /// 1.4. update mir mission status
-        if(mir100_ptr_->IsConnected())
-        {
-            mir100_ptr_->RetrieveUgvCurrentMissionState();
         }
 
         /// 2. arm
