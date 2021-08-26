@@ -18,16 +18,17 @@ int main()
     float x,y,z;
     std::vector<float> rpy;
 
-    T_1 << -0.996835046407195, -0.0677783862797646, -0.0415449227665332, -0.386430577813252,
--0.0465233523465405, 0.921124343978953, -0.386478357241104, -0.126936378526671,
-0.0644629191148356, -0.383322362095735, -0.92136230592343, 0.486223171314465,
-0, 0, 0, 1;
+    T_1 <<
+    0.05046230980976, 0.027505482761201, -0.998347135873458, -0.61522105309137,
+    0.99828893302205, -0.0309581557138528, 0.0496064391031465, 0.00238558984407439,
+    -0.0295425370332533, -0.999142152555316, -0.029020639082707, 0.358367748213517,
+    0, 0, 0, 1;
 
-    std::cout << "T_1" << std::endl << T_1 << std::endl;
+    //std::cout << "T_1" << std::endl << T_1 << std::endl;
 
     R_1 = T_1.block(0,0 ,3,3);
 
-    std::cout << "R_1" << std::endl << R_1 << std::endl;
+    //std::cout << "R_1" << std::endl << R_1 << std::endl;
 
     rpy = al.R2rpy(R_1);
 
@@ -42,7 +43,7 @@ int main()
     std::cout << "ry: " << rpy[1] << std::endl;
     std::cout << "rz: " << rpy[2] << std::endl;
 
-
+#if 0
     yf::algorithm::cleaning_motion al_motion;
     yf::algorithm::arm_path al_path;
 
@@ -68,6 +69,7 @@ int main()
     std::cout << "T_up: " << std::endl << T_up <<std::endl;
 //    std::cout << "T2" << T_down <<std::endl;
     std::cout << "T_up2: " << std::endl <<  T_up2 <<std::endl;
+
 
     std::deque<yf::data::arm::Point3d> points;
     std::deque<yf::data::arm::Point3d> via_points;
@@ -137,5 +139,5 @@ int main()
     }
 
 
-
+#endif
 }
