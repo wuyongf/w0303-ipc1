@@ -6,16 +6,41 @@
 
 int main()
 {
-    Eigen::Matrix4f T_wrong;
-    T_wrong.setZero();
+    yf::algorithm::arm_path al;
 
-    T_wrong << -0.960604975327134, 0.154045204495672, -0.231318300937567, -0.372762431763748,
-    0.251921655913191, 0.83412496133583, -0.490684244864715, -0.46634181325209,
-    0.117360813982828, -0.529627816346901, -0.840071910905788, 0.462927498059253,
-    0, 0, 0, 1;
+    // T_1: matrix input
+    Eigen::Matrix4f T_1;
+    Eigen::Matrix3f R_1;
 
-    std::cout << T_wrong << std::endl;
+    T_1.setZero();
+    R_1.setZero();
 
+    float x,y,z;
+    std::vector<float> rpy;
+
+    T_1 << -0.996835046407195, -0.0677783862797646, -0.0415449227665332, -0.386430577813252,
+-0.0465233523465405, 0.921124343978953, -0.386478357241104, -0.126936378526671,
+0.0644629191148356, -0.383322362095735, -0.92136230592343, 0.486223171314465,
+0, 0, 0, 1;
+
+    std::cout << "T_1" << std::endl << T_1 << std::endl;
+
+    R_1 = T_1.block(0,0 ,3,3);
+
+    std::cout << "R_1" << std::endl << R_1 << std::endl;
+
+    rpy = al.R2rpy(R_1);
+
+    x =  T_1(0, 3) * 1000;
+    y =  T_1(1, 3) * 1000;
+    z =  T_1(2, 3) * 1000;
+
+    std::cout << "x: " << x << std::endl;
+    std::cout << "y: " << y << std::endl;
+    std::cout << "z: " << z << std::endl;
+    std::cout << "rx: " << rpy[0] << std::endl;
+    std::cout << "ry: " << rpy[1] << std::endl;
+    std::cout << "rz: " << rpy[2] << std::endl;
 
 
     yf::algorithm::cleaning_motion al_motion;
