@@ -46,7 +46,7 @@ namespace yf
 
             void thread_IPCServerStartup(std::shared_ptr<IPCServer>& server_ptr, bool& server_flag);
 
-        public: //todo:
+        public:
 
             void WaitSchedulesInitialCheck();
 
@@ -1700,20 +1700,29 @@ void yf::sys::nw_sys::GetSysControlMode()
     }
 }
 
+
+///\brief: Sys needs to meet the below conditions
+/// 1.
 void yf::sys::nw_sys::WaitSchedulesInitialCheck()
 {
+    // final flag
     bool init_check_continue_flag = true;
 
+    // sys_control_mode flag
     bool sys_init_check_continue_flag = true;
+
+    // ugv_flag
     bool ugv_init_check_continue_flag = true;
 
+    // arm_flag
     bool arm_init_check_continue_flag = true;
     bool arm_init_status_check_continue_flag = true;
     bool arm_init_position_check_continue_flag = true;
 
+    // consumable_flag
     bool consumables_init_check_continue_flag = true;
 
-    // Initial Check Loop.
+    /// Initial Checking Loop.
     //
     while (init_check_continue_flag)
     {
@@ -1730,7 +1739,6 @@ void yf::sys::nw_sys::WaitSchedulesInitialCheck()
         LOG(INFO) << "[thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]";
         switch (nw_status_ptr_->sys_control_mode_)
         {
-
             case data::common::SystemMode::Auto:
             {
                 LOG(INFO) << "[thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto";
