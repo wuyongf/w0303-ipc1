@@ -106,8 +106,8 @@ namespace yf
 
             yf::data::arm::Tool GetCurrentTool();
 
-            bool GetSmallPadExistFlag();
-            bool GetLargePadExistFlag();
+            bool GetSmallPadIsExist();
+            bool GetLargePadIsExist();
 
             yf::data::arm::Tool GetMissionTool(const int& model_config_id);
 
@@ -1430,14 +1430,13 @@ int yf::arm::tm::GetLargePadNo()
     return ipc_server_ptr_->get_large_pad_no();
 }
 
-bool yf::arm::tm::GetSmallPadExistFlag()
+bool yf::arm::tm::GetSmallPadIsExist()
 {
     int no_small_pad = tm_modbus.get_control_box_DI(9);
-    int no_large_pad = tm_modbus.get_control_box_DI(6);
 
     if(no_small_pad == 1)
     {
-        // there is no any small pad
+        // there is not any small pad
         return false;
     }
     else
@@ -1446,13 +1445,13 @@ bool yf::arm::tm::GetSmallPadExistFlag()
     }
 }
 
-bool yf::arm::tm::GetLargePadExistFlag()
+bool yf::arm::tm::GetLargePadIsExist()
 {
     int no_large_pad = tm_modbus.get_control_box_DI(6);
 
     if(no_large_pad == 1)
     {
-        // there is no any small pad
+        // there is not any large pad
         return false;
     }
     else
@@ -1463,24 +1462,35 @@ bool yf::arm::tm::GetLargePadExistFlag()
 
 bool yf::arm::tm::IsArmControlBoxPowerOn()
 {
-    std::string ping_command;
+    yf::algorithm::Timer timer;
 
+    int fail_no = 0;
+    int try_no = 3;
+
+    std::string ping_command;
     std::string tm_ip_address = tm_ip_address_;
 
     //Windows
     //By using win ping method.
 
     int ping_request_no = 1;
-
-    int ping_timeout = 800; //ms
+    int ping_timeout = 50; //ms
 
     ping_command =  "ping " + tm_ip_address +
-                    " -n " + std::to_string(ping_request_no) +
-                    " -w " + std::to_string(ping_timeout);
+            " -n " + std::to_string(ping_request_no) +
+            " -w " + std::to_string(ping_timeout);
 
     const char* cstr_ping_command = ping_command.c_str();
 
-    if (system( cstr_ping_command ) )
+    for (int i = 1; i <= try_no; i++)
+    {
+        if(system( cstr_ping_command ))
+        {
+            fail_no++;
+        }
+    }
+
+    if(fail_no == try_no)
     {
         return false;
     }

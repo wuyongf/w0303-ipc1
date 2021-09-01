@@ -15,8 +15,8 @@ namespace yf
             virtual ~nw_status(){}
 
             /// For Sys
-            // system mode: auto mode ---> manual mode
-            yf::data::common::SystemMode sys_control_mode_ = yf::data::common::SystemMode::Auto;
+            // system control mode
+            yf::data::common::SystemMode            sys_control_mode_ = yf::data::common::SystemMode::Auto;
 
             // ipc1 status
             yf::data::common::ConnectionStatus      ipc1_connection_status = yf::data::common::ConnectionStatus::Disconnected;
@@ -32,14 +32,6 @@ namespace yf
             // ipc2--pi4 status
             yf::data::common::ConnectionStatus      ipc2_connection_status_;
             yf::data::common::MissionStatus         ipc2_mission_status_;
-
-            // schedule status
-            // database - Schedule - Job - Task current status
-            yf::data::common::MissionStatus db_cur_schedule_status_;
-
-            yf::data::common::MissionStatus db_cur_job_status_;
-
-            yf::data::common::MissionStatus db_cur_task_status;
 
             /// DB properties
 
@@ -67,69 +59,11 @@ namespace yf
             const int small_pad_total = 5;
             const int large_pad_total = 4;
 
-        public:
-
-            int ArmMissionStatusForSQL();
-
-            int ArmConnectionStatusForSQL();
-
+            /// Ugv
+            yf::data::ugv::Status mirStatus;
 
         };
     }
 }
 
-int yf::status::nw_status::ArmMissionStatusForSQL()
-{
-    switch (arm_mission_status)
-    {
-        case yf::data::common::MissionStatus::Idle:
-        {
-            return 1;
-        }
 
-        case yf::data::common::MissionStatus::Running:
-        {
-            return 2;
-        }
-
-        case yf::data::common::MissionStatus::Finish:
-        {
-            return 3;
-        }
-
-        case yf::data::common::MissionStatus::Pause:
-        {
-            return 4;
-        }
-
-        case yf::data::common::MissionStatus::Cancel:
-        {
-            return 5;
-        }
-
-        case yf::data::common::MissionStatus::Error:
-        {
-            return 6;
-        }
-
-        case yf::data::common::MissionStatus::EStop:
-        {
-            return 7;
-        }
-    }
-}
-
-int yf::status::nw_status::ArmConnectionStatusForSQL()
-{
-    switch (arm_connection_status)
-    {
-        case data::common::ConnectionStatus::Connected:
-        {
-            return 1;
-        }
-        case data::common::ConnectionStatus::Disconnected:
-        {
-            return 0;
-        }
-    }
-}

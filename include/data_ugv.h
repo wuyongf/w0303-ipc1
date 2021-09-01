@@ -15,6 +15,30 @@ namespace  yf
     {
         namespace ugv
         {
+            /// modified by YF on 31th Aug, 2021
+
+            struct Position
+            {
+                float x;
+                float y;
+                float theta;
+            };
+
+            struct Status
+            {
+                // properties
+                std::string robot_name;
+                int serial_number;
+
+                int mode_id;
+                int state_id;
+                float battery_percentage;
+
+                Position position;
+            };
+
+            /// previous version
+
             struct MapPosition2d
             {
                 std::string pos_name;
@@ -55,7 +79,6 @@ namespace  yf
                 BasicMotionInfo              basic_motion_info;
                 std::vector<MapPosition2d>   mir_positions;
                 float                        mir_step_distance;
-
             };
         }
     }

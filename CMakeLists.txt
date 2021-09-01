@@ -59,6 +59,8 @@ target_link_libraries(w0303_main PUBLIC glog::glog nanodbc modbus Poco::Foundati
 
 ## for testing
 
+add_executable(header_demo "useful-functions/header_demo.cpp" "useful-functions/header_tutorial.cpp")
+
 # boost_asio
 add_executable (z_boost_tcpip "useful-functions/boost_tcpip.cpp" )
 

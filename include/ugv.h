@@ -544,31 +544,35 @@ int yf::ugv::mir::GetStateId()
 
 bool yf::ugv::mir::IsConnected()
 {
+    yf::algorithm::Timer timer;
+
+    int fail_no = 0;
+    int try_no = 3;
+
     std::string ping_command;
+    std::string tm_ip_address = ip_address_;
 
-    // check whether it is on Windows or Linux
+    //Windows
+    //By using win ping method.
 
-    if(slash == "/")    // linux
-    {
-        //ping -c1 -s1 -w1 192.168.2.113
-        ping_command = "ping -c1 -s1 -w1 " + ip_address_;
-    }
-    else                // windows
-    {
-        //By using win ping method.
+    int ping_request_no = 1;
+    int ping_timeout = 50; //ms
 
-        int ping_request_no = 1;
-
-        int ping_timeout = 800; //ms
-
-        ping_command =  "ping " + ip_address_ +
-                        " -n " + std::to_string(ping_request_no) +
-                        " -w " + std::to_string(ping_timeout);
-    }
+    ping_command =  "ping " + tm_ip_address +
+            " -n " + std::to_string(ping_request_no) +
+            " -w " + std::to_string(ping_timeout);
 
     const char* cstr_ping_command = ping_command.c_str();
 
-    if (system( cstr_ping_command ) )
+    for (int i = 1; i <= try_no; i++)
+    {
+        if(system( cstr_ping_command ))
+        {
+            fail_no++;
+        }
+    }
+
+    if(fail_no == try_no)
     {
         return false;
     }

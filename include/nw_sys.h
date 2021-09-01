@@ -1,22 +1,15 @@
 #pragma once
-// STL
-#include <thread>
-// GLOG
-#include <glog/logging.h>
-// Net
-#include "net.h"
+
+#include <thread>               // STL
+#include <glog/logging.h>       // GLOG
+#include "net.h"                // Net
 #include "net_w0303_server.h"
 #include "net_w0303_client.h"
-// Database
-#include "sql.h"
-// Status & DataTypes
-#include "nw_status.h"
-// Arm
-#include "arm.h"
-// UGV
-#include "ugv.h"
-// IPC2
-#include "ipc2.h"
+#include "sql.h"                // Database
+#include "nw_status.h"          // Status & DataTypes
+#include "arm.h"                // Arm
+#include "ugv.h"                // UGV
+#include "ipc2.h"               // IPC2
 
 namespace yf
 {
@@ -24,7 +17,8 @@ namespace yf
     {
         class nw_sys
         {
-        public: /// Sys Basic Method
+        public:
+            /// Sys Basic Method
 
             // Constructor & Destructor
             nw_sys(const int& ipc_port);
@@ -36,7 +30,8 @@ namespace yf
             // Close the system
             void Close();
 
-        public: /// Two Main Functions
+        public:
+            /// Two Main Functions
 
             void thread_WaitSchedules();
 
@@ -50,7 +45,8 @@ namespace yf
 
             void WaitSchedulesInitialCheck();
 
-        public: /// Arm Methods: based on tm5.ArmTask();
+        public:
+            /// Arm Methods: based on tm5.ArmTask();
 
             void ArmPickTool (const yf::data::arm::TaskMode& task_mode);
             void ArmPlaceTool(const yf::data::arm::TaskMode& task_mode);
@@ -60,9 +56,9 @@ namespace yf
             void ArmAbsorbWater();
             int  ArmGetAbsorbType();
 
-            // for safety
+            // for safety concern
             void ArmCheckPadIsEmpty();
-            // for updating
+            // for updating pad number
             void ArmUpdatePadNo();
 
             void ArmSetOperationArea(const yf::data::arm::OperationArea& operation_area);
@@ -73,12 +69,14 @@ namespace yf
 
             std::string ArmGetPointStr(const yf::data::arm::Point3d& point);
 
-        public: /// Ugv Method: based on REST API
+        public:
+            /// Ugv Method: based on REST API
 
             bool WaitForUgvPLCRegisterInt(const int& plc_register, const int& value, const int& timeout_min);
             bool WaitForUgvPLCRegisterFloat(const int& plc_register, const float& value, const int& timeout_min);
 
-        public: /// Methods for two main functions
+        public:
+            /// Methods for two main functions
 
             void DoJobs(const int& cur_schedule_id);
             void DoTasks(const int& cur_job_id, const int& task_group_id);
@@ -86,18 +84,13 @@ namespace yf
             void DoJobUgvBackToChargingStation();
             void DoJobArmBackToHomePos();
 
-            // REDO JOB
             void RedoJob(const int& cur_schedule_id,const yf::data::schedule::ScheduleCommand& redo_command);
 
             //
             void JobsFilter(std::deque<int>& q_ids);
 
-            //todo:
-            void thread_WaitForPauseArm();    // if ugv has error
-            void thread_WaitForResumeArm();   // if ugv is executing mission and has no error
-            void thread_WaitForCancelUgvMission();
-
-        protected: /// SQL Related
+        protected:
+            /// SQL Related
 
             void UpdateDbScheduleBeforeTask (const int& cur_schedule_id);
             void UpdateDbScheduleAfterTask  (const int& cur_schedule_id);
@@ -114,7 +107,8 @@ namespace yf
             void GetSysControlMode();
             void GetScheduleCommand(const int&id);
 
-        private: /// Web Status Manager
+        private:
+            /// Web Status Manager
 
             // properties
             bool web_status_flag_ = false;
@@ -133,36 +127,30 @@ namespace yf
 
 
 
-        private: /// threads handle for Web Status Manager
+        private:
+            /// threads handle for Web Status Manager
 
             std::thread th_web_status_manager_;
             std::thread th_web_ugv_battery_;
             std::thread th_web_ugv_position_;
             std::thread th_web_ugv_connection_mission_status_;
 
-        private: /// Time Sleep Class
+        private:
+            /// Useful tools
 
             yf::algorithm::TimeSleep sleep;
+            yf::algorithm::Timer timer;
 
         private: /// SYS basic properties
 
-            // shared_ptr: nw_status
-            std::shared_ptr<yf::status::nw_status> nw_status_ptr_;
+            // shared_ptr: nw_status,sql,mir100,ipc_server
+            std::shared_ptr<yf::status::nw_status>  nw_status_ptr_;
+            std::shared_ptr<yf::sql::sql_server>    sql_ptr_;
+            std::shared_ptr<yf::ugv::mir>           mir100_ptr_;
+            std::shared_ptr<IPCServer>              ipc_server_ptr_;
 
-            // shared_ptr: sql
-            std::shared_ptr<yf::sql::sql_server> sql_ptr_;
-
-            // arm
-            yf::arm::tm tm5;
-
-            // shared_ptr: ugv
-            std::shared_ptr<yf::ugv::mir> mir100_ptr_;
-
-            // ipc2
+            yf::arm::tm         tm5;
             yf::ipc2::raspberry pi4;
-
-            // ipc server
-            std::shared_ptr<IPCServer> ipc_server_ptr_;
 
             // flow control variables
             //
@@ -172,7 +160,8 @@ namespace yf
             std::thread th_wait_schedules_;
             std::thread th_do_schedules_;
 
-        private: /// Overall Control --- thread wait_schedules and do_schedules
+        private:
+            /// Overall Control --- thread wait_schedules and do_schedules
 
             // schedule_flag
             bool schedule_flag_ = true;
@@ -1700,275 +1689,6 @@ void yf::sys::nw_sys::GetSysControlMode()
     }
 }
 
-
-///\brief: Sys needs to meet the below conditions
-/// 1.
-void yf::sys::nw_sys::WaitSchedulesInitialCheck()
-{
-    // final flag
-    bool init_check_continue_flag = true;
-
-    // sys_control_mode flag
-    bool sys_init_check_continue_flag = true;
-
-    // ugv_flag
-    bool ugv_init_check_continue_flag = true;
-
-    // arm_flag
-    bool arm_init_check_continue_flag = true;
-    bool arm_init_status_check_continue_flag = true;
-    bool arm_init_position_check_continue_flag = true;
-
-    // consumable_flag
-    bool consumables_init_check_continue_flag = true;
-
-    /// Initial Checking Loop.
-    //
-    while (init_check_continue_flag)
-    {
-        LOG(INFO) << "[thread_WaitSchedules]: 1.1 update sys control mode";
-        GetSysControlMode();
-
-        LOG(INFO) << "[thread_WaitSchedules]: 1.2 update all devices status";
-
-        LOG(INFO) << "[thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status";
-        tm5.UpdateArmCurMissionStatus();
-
-        LOG(INFO) << "[thread_WaitSchedules]: 1.3 check functions   [Start]";
-
-        LOG(INFO) << "[thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]";
-        switch (nw_status_ptr_->sys_control_mode_)
-        {
-            case data::common::SystemMode::Auto:
-            {
-                LOG(INFO) << "[thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto";
-                sql_ptr_->UpdateSysAdvice(10);
-                sys_init_check_continue_flag = false;
-                break;
-            }
-
-            case data::common::SystemMode::Manual:
-            {
-                LOG(INFO) << "[thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Manual";
-                LOG(INFO) << "[thread_WaitSchedules]: 1.3.1.1 wait for Auto Mode";
-
-                while (nw_status_ptr_->sys_control_mode_ != data::common::SystemMode::Auto)
-                {
-                    if(nw_status_ptr_->sys_control_mode_ == data::common::SystemMode::Manual)
-                    {
-                        if(mir100_ptr_->IsConnected())
-                        {
-                            sql_ptr_->UpdateSysAdvice(19);
-                        }
-                        else
-                        {
-                            sql_ptr_->UpdateSysAdvice(20);
-                        }
-                    }
-
-                    if(nw_status_ptr_->sys_control_mode_ == data::common::SystemMode::Recovery)
-                    {
-                        if(nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Connected)
-                        {
-                            sql_ptr_->UpdateSysAdvice(17);
-                        }
-                        else
-                        {
-                            sql_ptr_->UpdateSysAdvice(18);
-                        }
-                    }
-
-                    // update sys control mode
-                    GetSysControlMode();
-
-                    ///TIME
-                    sleep.sec(2);
-                }
-                break;
-            }
-
-            case data::common::SystemMode::ManualSetting:
-            {
-                LOG(INFO) << "[thread_WaitSchedules]: 1.3.1.1 sys_control_mode: ManualSetting";
-                LOG(INFO) << "[thread_WaitSchedules]: 1.3.1.1 wait for Auto Mode";
-                sql_ptr_->UpdateSysAdvice(7);
-                while (nw_status_ptr_->sys_control_mode_ != data::common::SystemMode::Auto)
-                {
-                    // update sys control mode
-                    GetSysControlMode();
-
-                    ///TIME
-                    sleep.sec(2);
-                }
-                break;
-            }
-
-            case data::common::SystemMode::Recovery:
-            {
-                // For user wrong operation
-                if(nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Connected)
-                {
-                    LOG(INFO) << "[thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Recovery";
-                    LOG(INFO) << "[thread_WaitSchedules]: 1.3.1.1 wait for Auto Mode";
-                    sql_ptr_->UpdateSysAdvice(17);
-                    while (nw_status_ptr_->sys_control_mode_ != data::common::SystemMode::Auto)
-                    {
-                        if(nw_status_ptr_->sys_control_mode_ == data::common::SystemMode::Manual)
-                        {
-                            if(mir100_ptr_->IsConnected())
-                            {
-                                sql_ptr_->UpdateSysAdvice(19);
-                            }
-                            else
-                            {
-                                sql_ptr_->UpdateSysAdvice(20);
-                            }
-                        }
-
-                        if(nw_status_ptr_->sys_control_mode_ == data::common::SystemMode::Recovery)
-                        {
-                            if(nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Connected)
-                            {
-                                sql_ptr_->UpdateSysAdvice(17);
-                            }
-                            else
-                            {
-                                sql_ptr_->UpdateSysAdvice(18);
-                            }
-                        }
-
-                        // update sys control mode
-                        GetSysControlMode();
-
-                        ///TIME
-                        sleep.sec(2);
-                    }
-                }
-            }
-        }
-        LOG(INFO) << "[thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]";
-
-        LOG(INFO) << "[thread_WaitSchedules]: 1.3.2 check arm   [Start]";
-        if(arm_init_check_continue_flag)
-        {
-            /// for arm_init_status_check_continue_flag
-
-            if( nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Connected &&
-                nw_status_ptr_->arm_mission_status    == data::common::MissionStatus::Idle)
-            {
-                LOG(INFO) << "[thread_WaitSchedules]: 1.3.2 check arm   [Complete]";
-                arm_init_status_check_continue_flag = false;
-            }
-            else
-            {
-                // For Arm Paused too long situation
-                //
-                if( nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Connected &&
-                    nw_status_ptr_->arm_mission_status == data::common::MissionStatus::Error)
-                {
-                    LOG(INFO) << "[thread_WaitSchedules]: 1.3.2.1 Please stop robotic arm project...";
-                    sql_ptr_->UpdateSysAdvice(6);
-                }
-
-                // For Arm Disconnected situation
-                //
-                if( nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Disconnected)
-                {
-                    LOG(INFO) << "[thread_WaitSchedules]: 1.3.2.2 Arm disconnected...";
-                    LOG(INFO) << "[thread_WaitSchedules]: 1.3.2.3 Please switch to Recovery Mode..."; // Ask for recovery mode
-                    sql_ptr_->UpdateSysAdvice(16);
-
-                    if(nw_status_ptr_->sys_control_mode_ == data::common::SystemMode::Recovery)
-                    {
-                        LOG(INFO) << "[thread_WaitSchedules]: 1.3.2.4 Please play arm project..."; // Ask for recovery mode
-                        sql_ptr_->UpdateSysAdvice(18);
-
-                        tm5.WaitForConnection();
-                        // Get Status and update to SQL
-                        tm5.GetConnectionStatus();
-                        tm5.GetMissionStatus();
-
-                        sql_ptr_->UpdateSysAdvice(17);
-                        LOG(INFO) << "[thread_WaitSchedules]: 1.3.2 check arm   [Complete]";
-                    }
-                }
-            }
-
-            /// for arm_init_position_check_continue_flag
-
-            arm_init_position_check_continue_flag = false;
-
-            /// overall arm flag checking
-
-            if(arm_init_status_check_continue_flag == false &&
-               arm_init_position_check_continue_flag == false)
-            {
-                arm_init_check_continue_flag = false;
-            }
-            else
-            {
-                arm_init_check_continue_flag = true;
-            }
-        }
-
-        LOG(INFO) << "[thread_WaitSchedules]: 1.3.3 check ugv   [Start]";
-        bool ugv_init_check_continue_flag = false;
-        LOG(INFO) << "[thread_WaitSchedules]: 1.3.3 check ugv   [Complete]";
-
-
-        if(nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Connected)
-        {
-            LOG(INFO) << "[thread_WaitSchedules]: 1.3.4 check consumables   [Start]";
-            this->ArmCheckPadIsEmpty();
-
-            if(nw_status_ptr_->small_pad_no != 0 && nw_status_ptr_->large_pad_no != 0)
-            {
-                consumables_init_check_continue_flag = false;
-                LOG(INFO) << "[thread_WaitSchedules]: 1.3.4 check consumables   [Complete]";
-            }
-            else
-            {
-                LOG(INFO) << "[thread_WaitSchedules]: 1.3.4 check consumables: Please refill consumables!   [Uncompleted]";
-                if(nw_status_ptr_->small_pad_no == 0)
-                {
-                    sql_ptr_->UpdateSysAdvice(13);
-                }
-                else if (nw_status_ptr_->large_pad_no == 0)
-                {
-                    sql_ptr_->UpdateSysAdvice(12);
-                }
-
-            }
-        }
-
-        LOG(INFO) << "[thread_WaitSchedules]: 1.3 check functions   [Complete]";
-
-        // check the initial_check_flag
-        if(sys_init_check_continue_flag == false &&
-           arm_init_check_continue_flag == false &&
-           ugv_init_check_continue_flag == false &&
-           consumables_init_check_continue_flag == false)
-        {
-            init_check_continue_flag = false;
-        }
-        else
-        {
-            init_check_continue_flag = true;
-        }
-
-        LOG(INFO) << "[thread_WaitSchedules]: 1.4 Update Status to SQL";
-        LOG(INFO) << "[thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm";
-
-        UpdateDbDeviceArmConnectionStatus();
-        ///TIME
-        sleep.ms(500);
-
-        UpdateDbDeviceArmMissionStatus();
-        ///TIME
-        sleep.ms(1000);
-    }
-}
-
 //@@ input: plc_register: 000-100
 //
 bool yf::sys::nw_sys::WaitForUgvPLCRegisterInt(const int &plc_register, const int &value, const int &timeout_min)
@@ -2606,8 +2326,8 @@ void yf::sys::nw_sys::thread_WebStatusManager()
     //                                                    std::ref(web_status_flag_),
     //                                                    std::move(duration_sec_ugv_connection_mission_status));
 
-    /// Duration: 1 minute
-    while (schedule_flag_ == true)
+    /// Check Duration: 1 minute
+    while (schedule_flag_)
     {
         sleep.minute(1);
     }
@@ -2756,58 +2476,11 @@ void yf::sys::nw_sys::GetScheduleCommand(const int& id)
     }
 }
 
-void yf::sys::nw_sys::thread_WaitForCancelUgvMission()
-{
-    // wait for signal
-
-    // keep checking arm mission status and connection status
-
-    // if arm disconnected or error
-
-    // pause mir first
-
-    // cancel mir current mission
-
-    // reset signal
-
-    // wait for signal
-}
-
-void yf::sys::nw_sys::thread_WaitForPauseArm()
-{
-    // wait for signal
-
-    // keep checking ugv status
-
-    // if ugv e-stop
-
-    // pause Arm
-
-    // Notify thread_WaitForResumeArm()
-
-    // reset signal
-
-    // wait for signal
-}
-
-void yf::sys::nw_sys::thread_WaitForResumeArm()
-{
-    // wait for signal
-
-    // keep checking ugv status
-
-    // if ugv resume
-
-    // replay Arm
-
-    // reset signal
-
-    // wait for signal
-}
+/// Frontend Page "Error Log"
 
 void yf::sys::nw_sys::UpdateDbErrorLog()
 {
-    /// For Arm
+    // For Arm
 
     // Connection Error
     switch (nw_status_ptr_->arm_connection_status)
@@ -2841,9 +2514,10 @@ void yf::sys::nw_sys::UpdateDbErrorLog()
         }
     }
 
-    /// For Ugv
-
+    // For Ugv
 }
+
+/// Frontend Page2 Button "小車回原位"
 
 void yf::sys::nw_sys::DoJobUgvBackToChargingStation()
 {
@@ -2866,12 +2540,13 @@ void yf::sys::nw_sys::DoJobUgvBackToChargingStation()
     // 3. ugv goes to charging station
     cur_mission_guid_ = mir100_ptr_->GetCurMissionGUID();
     mir100_ptr_->PostMissionQueue(cur_mission_guid_);
-    ///TIME
     sleep.ms(200);
     mir100_ptr_->Play();
 
     // DB: update schedule_job & schedule_job_log
 }
+
+/// Frontend Page2 Button "手臂回原位"
 
 void yf::sys::nw_sys::DoJobArmBackToHomePos()
 {
@@ -2903,6 +2578,8 @@ void yf::sys::nw_sys::DoJobArmBackToHomePos()
     }
 
 }
+
+/// Frontend Page4 Button "重做"
 
 void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedule::ScheduleCommand& redo_command)
 {
@@ -3606,8 +3283,8 @@ void yf::sys::nw_sys::thread_Web_DeviceConnectionMissionStatus(const bool &web_s
         }
 
         /// 2. arm
-        // 2.1 connection status
-        // 2.2 mission status
+        /// 2.1 connection status
+        /// 2.2 mission status
         tm5.UpdateSQLArmStatus();
 
         sleep.sec(sleep_duration);
@@ -3617,7 +3294,7 @@ void yf::sys::nw_sys::thread_Web_DeviceConnectionMissionStatus(const bool &web_s
 void yf::sys::nw_sys::ArmCheckPadIsEmpty()
 {
     // check if there is any small/large pad
-    if(tm5.GetSmallPadExistFlag() == false)
+    if(!tm5.GetSmallPadIsExist())
     {
         nw_status_ptr_->small_pad_no = 0;
         sql_ptr_->UpdatePadNo("small_pad", nw_status_ptr_->small_pad_no );
@@ -3628,7 +3305,7 @@ void yf::sys::nw_sys::ArmCheckPadIsEmpty()
         sql_ptr_->UpdatePadNo("small_pad", nw_status_ptr_->small_pad_no );
     }
 
-    if(tm5.GetLargePadExistFlag() == false)
+    if(!tm5.GetLargePadIsExist())
     {
         nw_status_ptr_->large_pad_no = 0;
         sql_ptr_->UpdatePadNo("large_pad", nw_status_ptr_->large_pad_no );
@@ -3643,7 +3320,7 @@ void yf::sys::nw_sys::ArmCheckPadIsEmpty()
 void yf::sys::nw_sys::ArmUpdatePadNo()
 {
     // check if there is any small/large pad
-    if(tm5.GetSmallPadExistFlag() == false)
+    if(!tm5.GetSmallPadIsExist())
     {
         nw_status_ptr_->small_pad_no = 0;
         sql_ptr_->UpdatePadNo("small_pad", nw_status_ptr_->small_pad_no );
@@ -3656,7 +3333,7 @@ void yf::sys::nw_sys::ArmUpdatePadNo()
         sql_ptr_->UpdatePadNo("small_pad", nw_status_ptr_->small_pad_no );
     }
 
-    if(tm5.GetLargePadExistFlag() == false)
+    if(!tm5.GetLargePadIsExist())
     {
         nw_status_ptr_->large_pad_no = 0;
         sql_ptr_->UpdatePadNo("large_pad", nw_status_ptr_->large_pad_no );
@@ -3670,6 +3347,290 @@ void yf::sys::nw_sys::ArmUpdatePadNo()
     }
 }
 
+///\brief: Sys needs to meet the below conditions to finish initial checking
+/// 1.
+/// []system control mode: Auto
+/// []ugv: 1. Startup 2. connection normal 3. battery > 25%
+/// []arm: 1. Startup 2. connection normal
+/// []consumables:
+///     1. large_pad     > 0
+///     2. small_pad     > 0
+///     3. sanitizer     > 20   * sensor???
+
+/**
+ * @note Sys needs to meet the below conditions to finish initial checking
+ *
+ * @brief
+ * @param
+ * @return
+ * */
+void yf::sys::nw_sys::WaitSchedulesInitialCheck()
+{
+    // final flag
+    bool init_check_continue_flag = true;
+
+    // sys_control_mode flag
+    bool sys_init_check_continue_flag = true;
+
+    // ugv_flag
+    bool ugv_init_check_continue_flag = true;
+
+    // arm_flag
+    bool arm_init_check_continue_flag = true;
+    bool arm_init_status_check_continue_flag = true;
+    bool arm_init_position_check_continue_flag = true;
+
+    // consumable_flag
+    bool consumables_init_check_continue_flag = true;
+
+    /// Initial Checking Loop.
+    //
+    while (init_check_continue_flag)
+    {
+        LOG(INFO) << "[thread_WaitSchedules]: 1.1 update sys control mode";
+        GetSysControlMode();
+
+        LOG(INFO) << "[thread_WaitSchedules]: 1.2 update all devices status";
+
+        LOG(INFO) << "[thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status";
+        tm5.UpdateArmCurMissionStatus();
+
+        LOG(INFO) << "[thread_WaitSchedules]: 1.3 check functions   [Start]";
+
+        LOG(INFO) << "[thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]";
+        switch (nw_status_ptr_->sys_control_mode_)
+        {
+            case data::common::SystemMode::Auto:
+            {
+                LOG(INFO) << "[thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto";
+                sql_ptr_->UpdateSysAdvice(10);
+                sys_init_check_continue_flag = false;
+                break;
+            }
+
+            case data::common::SystemMode::Manual:
+            {
+                LOG(INFO) << "[thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Manual";
+                LOG(INFO) << "[thread_WaitSchedules]: 1.3.1.1 wait for Auto Mode";
+
+                while (nw_status_ptr_->sys_control_mode_ != data::common::SystemMode::Auto)
+                {
+                    if(nw_status_ptr_->sys_control_mode_ == data::common::SystemMode::Manual)
+                    {
+                        if(mir100_ptr_->IsConnected())
+                        {
+                            sql_ptr_->UpdateSysAdvice(19);
+                        }
+                        else
+                        {
+                            sql_ptr_->UpdateSysAdvice(20);
+                        }
+                    }
+
+                    if(nw_status_ptr_->sys_control_mode_ == data::common::SystemMode::Recovery)
+                    {
+                        if(nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Connected)
+                        {
+                            sql_ptr_->UpdateSysAdvice(17);
+                        }
+                        else
+                        {
+                            sql_ptr_->UpdateSysAdvice(18);
+                        }
+                    }
+
+                    // update sys control mode
+                    GetSysControlMode();
+
+                    ///TIME
+                    sleep.sec(2);
+                }
+                break;
+            }
+
+            case data::common::SystemMode::ManualSetting:
+            {
+                LOG(INFO) << "[thread_WaitSchedules]: 1.3.1.1 sys_control_mode: ManualSetting";
+                LOG(INFO) << "[thread_WaitSchedules]: 1.3.1.1 wait for Auto Mode";
+                sql_ptr_->UpdateSysAdvice(7);
+                while (nw_status_ptr_->sys_control_mode_ != data::common::SystemMode::Auto)
+                {
+                    // update sys control mode
+                    GetSysControlMode();
+
+                    ///TIME
+                    sleep.sec(2);
+                }
+                break;
+            }
+
+            case data::common::SystemMode::Recovery:
+            {
+                // For user wrong operation
+                if(nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Connected)
+                {
+                    LOG(INFO) << "[thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Recovery";
+                    LOG(INFO) << "[thread_WaitSchedules]: 1.3.1.1 wait for Auto Mode";
+                    sql_ptr_->UpdateSysAdvice(17);
+                    while (nw_status_ptr_->sys_control_mode_ != data::common::SystemMode::Auto)
+                    {
+                        if(nw_status_ptr_->sys_control_mode_ == data::common::SystemMode::Manual)
+                        {
+                            if(mir100_ptr_->IsConnected())
+                            {
+                                sql_ptr_->UpdateSysAdvice(19);
+                            }
+                            else
+                            {
+                                sql_ptr_->UpdateSysAdvice(20);
+                            }
+                        }
+
+                        if(nw_status_ptr_->sys_control_mode_ == data::common::SystemMode::Recovery)
+                        {
+                            if(nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Connected)
+                            {
+                                sql_ptr_->UpdateSysAdvice(17);
+                            }
+                            else
+                            {
+                                sql_ptr_->UpdateSysAdvice(18);
+                            }
+                        }
+
+                        // update sys control mode
+                        GetSysControlMode();
+
+                        ///TIME
+                        sleep.sec(2);
+                    }
+                }
+            }
+        }
+        LOG(INFO) << "[thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]";
+
+        LOG(INFO) << "[thread_WaitSchedules]: 1.3.2 check arm   [Start]";
+        if(arm_init_check_continue_flag)
+        {
+            /// for arm_init_status_check_continue_flag
+
+            if( nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Connected &&
+                nw_status_ptr_->arm_mission_status    == data::common::MissionStatus::Idle)
+            {
+                LOG(INFO) << "[thread_WaitSchedules]: 1.3.2 check arm   [Complete]";
+                arm_init_status_check_continue_flag = false;
+            }
+            else
+            {
+                // For Arm Paused too long situation
+                //
+                if( nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Connected &&
+                    nw_status_ptr_->arm_mission_status == data::common::MissionStatus::Error)
+                {
+                    LOG(INFO) << "[thread_WaitSchedules]: 1.3.2.1 Please stop robotic arm project...";
+                    sql_ptr_->UpdateSysAdvice(6);
+                }
+
+                // For Arm Disconnected situation
+                //
+                if( nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Disconnected)
+                {
+                    LOG(INFO) << "[thread_WaitSchedules]: 1.3.2.2 Arm disconnected...";
+                    LOG(INFO) << "[thread_WaitSchedules]: 1.3.2.3 Please switch to Recovery Mode..."; // Ask for recovery mode
+                    sql_ptr_->UpdateSysAdvice(16);
+
+                    if(nw_status_ptr_->sys_control_mode_ == data::common::SystemMode::Recovery)
+                    {
+                        LOG(INFO) << "[thread_WaitSchedules]: 1.3.2.4 Please play arm project..."; // Ask for recovery mode
+                        sql_ptr_->UpdateSysAdvice(18);
+
+                        tm5.WaitForConnection();
+                        // Get Status and update to SQL
+                        tm5.GetConnectionStatus();
+                        tm5.GetMissionStatus();
+
+                        sql_ptr_->UpdateSysAdvice(17);
+                        LOG(INFO) << "[thread_WaitSchedules]: 1.3.2 check arm   [Complete]";
+                    }
+                }
+            }
+
+            /// for arm_init_position_check_continue_flag
+
+            arm_init_position_check_continue_flag = false;
+
+            /// overall arm flag checking
+
+            if( arm_init_status_check_continue_flag == false &&
+                arm_init_position_check_continue_flag == false)
+            {
+                arm_init_check_continue_flag = false;
+            }
+            else
+            {
+                arm_init_check_continue_flag = true;
+            }
+        }
+
+        LOG(INFO) << "[thread_WaitSchedules]: 1.3.3 check ugv   [Start]";
+        bool ugv_init_check_continue_flag = false;
+        LOG(INFO) << "[thread_WaitSchedules]: 1.3.3 check ugv   [Complete]";
+
+
+        if(nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Connected)
+        {
+            LOG(INFO) << "[thread_WaitSchedules]: 1.3.4 check consumables   [Start]";
+            this->ArmCheckPadIsEmpty();
+
+            if(nw_status_ptr_->small_pad_no != 0 && nw_status_ptr_->large_pad_no != 0)
+            {
+                consumables_init_check_continue_flag = false;
+                LOG(INFO) << "[thread_WaitSchedules]: 1.3.4 check consumables   [Complete]";
+            }
+            else
+            {
+                LOG(INFO) << "[thread_WaitSchedules]: 1.3.4 check consumables: Please refill consumables!   [Uncompleted]";
+                if(nw_status_ptr_->small_pad_no == 0)
+                {
+                    sql_ptr_->UpdateSysAdvice(13);
+                }
+                else if (nw_status_ptr_->large_pad_no == 0)
+                {
+                    sql_ptr_->UpdateSysAdvice(12);
+                }
+
+            }
+        }
+        else
+        {
+            LOG(INFO) << "[thread_WaitSchedules]: 1.3.4 check consumables   [Skip]: Please check the arm's connection status!";
+        }
+
+        LOG(INFO) << "[thread_WaitSchedules]: 1.3 check functions   [Complete]";
+
+        // check the initial_check_flag
+        if( sys_init_check_continue_flag == false &&
+            arm_init_check_continue_flag == false &&
+            ugv_init_check_continue_flag == false &&
+            consumables_init_check_continue_flag == false)
+        {
+            init_check_continue_flag = false;
+        }
+        else
+        {
+            init_check_continue_flag = true;
+        }
+
+        LOG(INFO) << "[thread_WaitSchedules]: 1.4 Update Status to SQL";
+        LOG(INFO) << "[thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm";
+
+        UpdateDbDeviceArmConnectionStatus();
+        sleep.ms(500);
+        UpdateDbDeviceArmMissionStatus();
+        sleep.ms(500);
+
+    }
+}
 
 
 
