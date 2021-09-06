@@ -138,7 +138,7 @@ namespace yf
         };
 
         struct Timer
-                {
+        {
             std::chrono::time_point<std::chrono::steady_clock> start,end;
             std::chrono::duration<float> duration;
 
@@ -155,8 +155,7 @@ namespace yf
                 float ms = duration.count() * 1000.0f;
                 std::cout << "Timer took " << ms << "ms" << std::endl;
             }
-                };
-
+        };
     }
 }
 

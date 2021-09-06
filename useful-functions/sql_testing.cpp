@@ -20,14 +20,9 @@ int main()
 /// For IPC1
     std::shared_ptr<yf::sql::sql_server> sql = std::make_shared<yf::sql::sql_server>("SQL Server","192.168.7.127","NW_mobile_robot_sys","sa","NWcadcam2021");
 
+    auto plan_no = sql->GetAvailableCustomPlan();
 
-    // upload chinese character.
-//    nanodbc::string error_description = "手臂錯誤!!";
-//    std::string error_description = "Arm Error!";
-//    NANODBC_TEXT("");
 
-//    sql->UpdateErrorLog1(2,error_description);
-    sql->UpdateErrorLog1(2,NANODBC_TEXT("123"));
 
 
 //    auto failed_q = sql->GetFailedTaskIds(10);

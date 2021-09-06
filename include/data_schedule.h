@@ -17,7 +17,8 @@ namespace yf
                 UgvBackToChargingStation    = 2,
                 ArmBackToHomePos            = 3,
                 RedoCleaningJobErrorPart    = 4,
-                RedoCleaningJobWhole        = 5
+                RedoCleaningJobWhole        = 5,
+                CustomPlan                  = 6
             };
 
             enum class Location

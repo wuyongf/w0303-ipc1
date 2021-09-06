@@ -30,6 +30,8 @@ int main()
 
 //    std::cout << "docking guid:" << mir100.GetDockingGUID("21bd0de2-b2f7-11eb-bb31-00012978eb45") << std::endl;
 
+    auto status = mir100.GetUgvStatus();
+
 
     mir100.PostMissionForDebugTest(6046);
     mir100.PostActionsForDebugTest(6046);

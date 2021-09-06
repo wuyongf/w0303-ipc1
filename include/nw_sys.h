@@ -122,6 +122,9 @@ namespace yf
             void thread_Web_UgvCurPosition(const bool& web_status_flag,
                                            const int& sleep_duration);
 
+            void thread_Web_UgvStatus(const bool& web_status_flag,
+                                           const int& sleep_duration);
+
             void thread_Web_DeviceConnectionMissionStatus(const bool& web_status_flag,
                                                           const int& sleep_duration);
 
@@ -134,6 +137,7 @@ namespace yf
             std::thread th_web_ugv_battery_;
             std::thread th_web_ugv_position_;
             std::thread th_web_ugv_connection_mission_status_;
+            std::thread th_web_ugv_status_;
 
         private:
             /// Useful tools
@@ -198,7 +202,7 @@ namespace yf
 
         private:
             /// for current job.
-            //
+
             // db info
             int cur_model_config_id_;
 
@@ -230,10 +234,10 @@ namespace yf
     }
 }
 
-//@@
-// 0. This is a constructor
-// 1. Establish a network server: create shared ptr: ipc_server_ptr
-// 2. Assign ipc port for TM network connection.
+///@@
+/// 0. This is a constructor
+/// 1. Establish a network server: create shared ptr: ipc_server_ptr
+/// 2. Assign ipc port for TM network connection.
 yf::sys::nw_sys::nw_sys(const int &ipc_port)
 {
     ipc_server_ptr_ = std::make_shared<IPCServer>(ipc_port);    //e.g. ipc_port: 12345
@@ -243,9 +247,9 @@ void yf::sys::nw_sys::Start()
 {
     /// 0. Initialization
     //
-    //  0.1 nw_status
+    //  0.1 Initialize a nw_status_ptr, for storing the global variables.
     nw_status_ptr_ = std::make_shared<yf::status::nw_status>();
-    //  0.2 sql
+    //  0.2 Initialize a sql_ptr, for interaction with database.
     sql_ptr_       = std::make_shared<yf::sql::sql_server>("SQL Server","192.168.7.127","NW_mobile_robot_sys","sa","NWcadcam2021");
     //  0.2.1 sql: webpage initialization
     sql_ptr_->UpdateDeviceConnectionStatus("arm", 0);
@@ -253,8 +257,7 @@ void yf::sys::nw_sys::Start()
     sql_ptr_->UpdateDeviceMissionStatus("arm", 6);
     sql_ptr_->UpdateDeviceMissionStatus("ugv", 6);
 
-    //  0.3 ipc_server
-    //  establish server and keep updating, keep waiting for devices connection.
+    //  0.3 Establish an ipc_server and keep updating, keep waiting for connection from other device.
     th_ipc_server_ = std::thread(&nw_sys::thread_IPCServerStartup, this, std::ref(ipc_server_ptr_), std::ref(ipc_server_flag_));
 
     /// 1. Initialization --- arm
@@ -491,6 +494,49 @@ void yf::sys::nw_sys::thread_DoSchedules()
                     case data::schedule::ScheduleCommand::RedoCleaningJobWhole:
                     {
                         RedoJob(cur_schedule_id,nw_status_ptr_->db_cur_schedule_command_);
+                        break;
+                    }
+                    case data::schedule::ScheduleCommand::CustomPlan:
+                    {
+                        /// custom_plan: 1-6
+                        auto plan_no = sql_ptr_->GetAvailableCustomPlan();
+
+                        switch (plan_no)
+                        {
+                            case 1:
+                            {
+                                tm5.ArmTask("Post demo1");
+                                sql_ptr_->ResetCustomPlan(1);
+                                break;
+                            }
+                            case 2:
+                            {
+                                tm5.ArmTask("Post demo2");
+                                sql_ptr_->ResetCustomPlan(2);
+                                break;
+                            }
+                            case 3:
+                            {
+                                sql_ptr_->ResetCustomPlan(3);
+                                break;
+                            }
+                            case 4:
+                            {
+                                sql_ptr_->ResetCustomPlan(4);
+                                break;
+                            }
+                            case 5:
+                            {
+                                sql_ptr_->ResetCustomPlan(5);
+                                break;
+                            }
+                            case 6:
+                            {
+                                sql_ptr_->ResetCustomPlan(6);
+                                break;
+                            }
+                        }
+
                         break;
                     }
                 }
@@ -2312,19 +2358,24 @@ void yf::sys::nw_sys::thread_WebStatusManager()
     int duration_sec_ugv_pos = 10;
     int duration_sec_ugv_connection_mission_status = 5;
 
+    int duration_sec_ugv_status = 5;
+
     /// each thread's control flag
     web_status_flag_ = true;
 
     /// kick off each thread
-    th_web_ugv_battery_ = std::thread(&nw_sys::thread_Web_UgvBatteryPercentage, this,
-                                      std::ref(web_status_flag_),std::move(duration_min_ugv_battery));
+    // th_web_ugv_battery_ = std::thread(&nw_sys::thread_Web_UgvBatteryPercentage, this,
+    //                                  std::ref(web_status_flag_),std::move(duration_min_ugv_battery));
 
-    th_web_ugv_position_ = std::thread(&nw_sys::thread_Web_UgvCurPosition, this,
-                                       std::ref(web_status_flag_),std::move(duration_sec_ugv_pos));
+    // th_web_ugv_position_ = std::thread(&nw_sys::thread_Web_UgvCurPosition, this,
+    //                                   std::ref(web_status_flag_),std::move(duration_sec_ugv_pos));
 
     // th_web_ugv_connection_mission_status_ = std::thread(&nw_sys::thread_Web_DeviceConnectionMissionStatus, this,
     //                                                    std::ref(web_status_flag_),
     //                                                    std::move(duration_sec_ugv_connection_mission_status));
+
+    th_web_ugv_position_ = std::thread(&nw_sys::thread_Web_UgvStatus, this,
+                                       std::ref(web_status_flag_),std::move(duration_sec_ugv_status));
 
     /// Check Duration: 1 minute
     while (schedule_flag_)
@@ -2470,6 +2521,12 @@ void yf::sys::nw_sys::GetScheduleCommand(const int& id)
         case 5:
         {
             nw_status_ptr_->db_cur_schedule_command_ = data::schedule::ScheduleCommand::RedoCleaningJobWhole;
+            break;
+        }
+
+        case 6:
+        {
+            nw_status_ptr_->db_cur_schedule_command_ = data::schedule::ScheduleCommand::CustomPlan;
             break;
         }
 
@@ -3629,6 +3686,49 @@ void yf::sys::nw_sys::WaitSchedulesInitialCheck()
         UpdateDbDeviceArmMissionStatus();
         sleep.ms(500);
 
+    }
+}
+
+void yf::sys::nw_sys::thread_Web_UgvStatus(const bool &web_status_flag, const int &sleep_duration)
+{
+    while(web_status_flag)
+    {
+        if(mir100_ptr_->IsConnected())
+        {
+            try
+            {
+                /// Retrieve ugv status
+                auto status = mir100_ptr_->GetUgvStatus();
+
+                /// Update database
+                // 1. battery_percentage
+                sql_ptr_->UpdateDeviceBatteryCapacity("ugv", status.battery_percentage);
+                // 2. position
+                sql_ptr_->UpdateDeviceUgvCurPosition(status.position.x,status.position.y,status.position.orientation);
+                // 3. ugv_connection_status
+                nw_status_ptr_->ugv_connection_status_ = data::common::ConnectionStatus::Connected;
+                sql_ptr_->UpdateDeviceConnectionStatus("ugv", 1);
+                // 4. ugv_mission_status
+                mir100_ptr_->UpdateUgvMissionStatus(status);
+
+            }
+            catch (std::error_code ec)
+            {
+                std::cerr << "Cannot Get Ugv Status. Will Try Again Later";
+            }
+        }
+        else
+        {
+            /// update nw_status and database
+            // 1. nw_status
+            nw_status_ptr_->ugv_connection_status_ = data::common::ConnectionStatus::Disconnected;
+            nw_status_ptr_->ugv_mission_status_ = data::common::UgvState::Error;
+            // 2. database
+            sql_ptr_->UpdateDeviceConnectionStatus("ugv", 0);
+            sql_ptr_->UpdateDeviceMissionStatus("ugv",6);
+        }
+
+        sleep.sec(sleep_duration);
     }
 }
 

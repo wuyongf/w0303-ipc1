@@ -21,23 +21,28 @@ namespace  yf
             {
                 float x;
                 float y;
-                float theta;
+                float orientation;
             };
 
             struct Status
             {
-                // properties
-                std::string robot_name;
-                int serial_number;
-
-                int mode_id;
-                int state_id;
-                float battery_percentage;
-
-                Position position;
+                float       battery_percentage;
+                Position    position;
+                int         state_id;
+                int         mode_id;
             };
 
             /// previous version
+
+            struct UgvBasicInfo
+            {
+                std::string robot_name          = "MiR_201803054";
+                std::string robot_model         = "MiR100";
+                std::string serial_number       = "201803054";
+                std::string mir_version         = "2.10.3.1";
+                std::string ip_address          = "192.168.7.34";
+                uint16_t    server_port_no      = 0;
+            };
 
             struct MapPosition2d
             {
@@ -47,22 +52,12 @@ namespace  yf
                 float pos_theta;
             };
 
-            struct UgvBasicInfo
-            {
-                std::string model_name      = "MiR100";
-                std::string model_serial_no = "xxxxxx";
-                std::string mir_version     = "xx.xx.xx";
-                std::string ip_address      = "xxx.xxx.x.xx";
-                uint16_t    server_port_no     = 0;
-            };
-
             enum class UgvConnectionStatus
             {
                 Disconnected    = 0,
                 Connected       = 1
             };
 
-            //todo: ugv task status
             yf::data::common::MissionStatus UgvTaskStatus;
 
             struct BasicMotionInfo              // preset...
@@ -70,7 +65,6 @@ namespace  yf
                 int speed;                      //  mm/s
                 int acc;                        //  mm/s^2
             };
-
 
             // Mission Config
             struct MotionConfig

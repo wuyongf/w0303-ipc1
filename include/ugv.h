@@ -123,9 +123,9 @@ namespace yf
             // a. Initial status check for mission
             bool InitialStatusCheckForMission(const int& timeout_min);
 
-            // (1) todo: update to nw_status
-            // (2) todo: update to database
-            void UpdateUgvCurState();
+            // 1. update to nw_status
+            // 2. update to database
+            void UpdateUgvMissionStatus(const yf::data::ugv::Status& status);
 
             // (1) check whether
             bool ClearErrorState();
@@ -181,6 +181,8 @@ namespace yf
             int     GetStateId();
             float   GetBatteryPercentage();
             std::vector<float> GetCurPosition();
+
+            yf::data::ugv::Status GetUgvStatus();
 
         public:
             // MiR Mission Control
@@ -2440,6 +2442,121 @@ void yf::ugv::mir::PostRedoActions(const int& origin_model_config_id, const std:
     //
     this->PostActionSetPLC(4,2,mission_guid,priority);
     priority++;
+}
+
+yf::data::ugv::Status yf::ugv::mir::GetUgvStatus()
+{
+    /// Get mir100 status via RestAPI
+
+    GetMethod("/api/v2.0.0/status");
+
+    auto json_result = GetRequestResult();
+
+    Poco::JSON::Parser parser;
+
+    Poco::Dynamic::Var result = parser.parse(json_result);
+
+    Poco::JSON::Object::Ptr object = result.extract<Poco::JSON::Object::Ptr>();
+
+    /// Retrieve all information.
+
+    // 1. battery_percentage
+    auto battery_percentage = object->getValue<float>("battery_percentage");
+
+    // 2. position
+    Poco::JSON::Object::Ptr position_obj = object->getObject("position");
+
+    auto x = position_obj->getValue<float>("x");
+    auto y = position_obj->getValue<float>("y");
+    auto orientation = position_obj->getValue<float>("orientation");
+
+    // 3. state_id
+    auto state_id = object->getValue<int>("state_id");
+
+    // 4. mode_id
+    auto mode_id = object->getValue<int>("mode_id");
+
+    /// Assign mir100 status
+    yf::data::ugv::Status status;
+
+    // 1. battery_status
+    status.battery_percentage = battery_percentage;
+    // 2. position
+    status.position.x = x;
+    status.position.y = x;
+    status.position.orientation = orientation;
+    // 3. state_id
+    status.state_id = state_id;
+    // 4. mode_id
+    status.mode_id  = mode_id;
+
+    return status;
+}
+
+void yf::ugv::mir::UpdateUgvMissionStatus(const yf::data::ugv::Status &status)
+{
+    int state_id = status.state_id;
+
+    switch (state_id)
+    {
+        case 1:
+        {
+            nw_status_ptr_->ugv_mission_status_ = yf::data::common::UgvState::Starting;
+            break;
+        }
+        case 2:
+        {
+            nw_status_ptr_->ugv_mission_status_ = yf::data::common::UgvState::ShuttingDown;
+            break;
+        }
+        case 3:
+        {
+            nw_status_ptr_->ugv_mission_status_ = yf::data::common::UgvState::Ready;
+            sql_ptr_->UpdateDeviceMissionStatus("ugv", 1);
+            break;
+        }
+        case 4:
+        {
+            nw_status_ptr_->ugv_mission_status_ = yf::data::common::UgvState::Pause;
+            sql_ptr_->UpdateDeviceMissionStatus("ugv", 4);
+            break;
+        }
+        case 5:
+        {
+            nw_status_ptr_->ugv_mission_status_ = yf::data::common::UgvState::Executing;
+            sql_ptr_->UpdateDeviceMissionStatus("ugv", 2);
+            break;
+        }
+        case 6:
+        {
+            nw_status_ptr_->ugv_mission_status_ = yf::data::common::UgvState::Aborted;
+            sql_ptr_->UpdateDeviceMissionStatus("ugv", 5);
+            break;
+        }
+        case 7:
+        {
+            nw_status_ptr_->ugv_mission_status_ = yf::data::common::UgvState::Completed;
+            sql_ptr_->UpdateDeviceMissionStatus("ugv", 3);
+            break;
+        }
+        case 10:
+        {
+            nw_status_ptr_->ugv_mission_status_ = yf::data::common::UgvState::EmergencyStop;
+            sql_ptr_->UpdateDeviceMissionStatus("ugv", 7);
+            break;
+        }
+        case 11:
+        {
+            nw_status_ptr_->ugv_mission_status_ = yf::data::common::UgvState::ManualControl;
+            break;
+        }
+        case 12:
+        {
+            nw_status_ptr_->ugv_mission_status_ = yf::data::common::UgvState::Error;
+            sql_ptr_->UpdateDeviceMissionStatus("ugv", 6);
+            break;
+        }
+    }
 }
 
 

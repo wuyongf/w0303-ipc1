@@ -173,6 +173,9 @@ namespace yf
             int GetSysControlMode();
             int GetScheduleCommand(const int& id);
 
+            bool IsSingleCustomPlan();
+            int  GetAvailableCustomPlan();
+            void ResetCustomPlan(const int& plan_no);
 
             // Model_config
             int GetModelConfigId(const int& cur_job_id);
@@ -4147,6 +4150,114 @@ void yf::sql::sql_server::UpdatePadNo(const std::string &consumable_name,
         Connect();
 
         query_update = "UPDATE sys_status_consumable SET unused_no = " + pad_no_str + ", modified_date='" + TimeNow() + "' WHERE consumable_name = '"+ consumable_name +"'" ;
+
+        nanodbc::execute(conn_,query_update);
+
+        Disconnect();
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+    }
+}
+
+int yf::sql::sql_server::GetAvailableCustomPlan()
+{
+    if(!IsSingleCustomPlan())
+    {
+        this->ResetCustomPlan(1);
+        this->ResetCustomPlan(2);
+        this->ResetCustomPlan(3);
+        this->ResetCustomPlan(4);
+        this->ResetCustomPlan(5);
+        this->ResetCustomPlan(6);
+        return 0;
+    }
+    else
+    {
+        std::string query_update;
+
+        // output
+        int plan_no;
+
+        try
+        {
+            Connect();
+
+            query_update = "SELECT TOP 1 [ID] FROM data_schedule_CustomPlan Where status = 1 ";
+
+            auto result = nanodbc::execute(conn_,query_update);
+
+            // if there are new schedules available, sql module will mark down all the available schedule ids
+            while(result.next())
+            {
+                plan_no = result.get<int>(0);
+            };
+
+            Disconnect();
+
+            return plan_no;
+        }
+        catch (std::exception& e)
+        {
+            std::cerr << e.what() << std::endl;
+            std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+            return 0;
+        };
+    }
+}
+
+bool yf::sql::sql_server::IsSingleCustomPlan()
+{
+    std::string query_update;
+
+    // output
+    int plan_no;
+
+    try
+    {
+        Connect();
+
+        query_update = "Select count(ID) FROM data_schedule_CustomPlan Where status = 1";
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        while(result.next())
+        {
+            plan_no = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        if(plan_no == 1)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return false;
+    };
+}
+
+void yf::sql::sql_server::ResetCustomPlan(const int &plan_no)
+{
+    std::string query_update;
+
+    try
+    {
+        Connect();
+
+        query_update = "UPDATE data_schedule_CustomPlan SET status = 0 WHERE ID = " + std::to_string(plan_no) ;
 
         nanodbc::execute(conn_,query_update);
 
