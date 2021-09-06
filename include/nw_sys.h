@@ -3450,7 +3450,8 @@ void yf::sys::nw_sys::WaitSchedulesInitialCheck()
         LOG(INFO) << "[thread_WaitSchedules]: 1.2 update all devices status";
 
         LOG(INFO) << "[thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status";
-        tm5.UpdateArmCurMissionStatus();
+        tm5.ArmTask("Get Status");
+        //tm5.UpdateArmCurMissionStatus();
 
         LOG(INFO) << "[thread_WaitSchedules]: 1.3 check functions   [Start]";
 

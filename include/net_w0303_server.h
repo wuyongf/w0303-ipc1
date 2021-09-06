@@ -134,6 +134,10 @@ private:
 
 private:
 
+    bool IsDeviceAlive(const std::string& ip_address);
+
+private:
+
     void parse_landmark_pos_str(std::string& msg);
     void parse_small_pad_no_str(std::string& msg);
     void parse_large_pad_no_str(std::string& msg);
@@ -505,7 +509,8 @@ void IPCServer::thread_ModbusWaitForNotifyIPC(bool& thread_continue_flag)
         while(notify_flag_ == true)
         {
             // keep checking modbus every 10ms
-            if(arm_modbus.read_isEStop() || arm_modbus.read_isError() || !arm_modbus.read_isProjectRunning())
+            if(arm_modbus.read_isEStop() || arm_modbus.read_isError() || !arm_modbus.read_isProjectRunning() ||
+            !IsDeviceAlive(arm_basic_info.tm_ip_address_))
             {
                 //
                 std::cout << "Got it!!! Arm is Error!!!"<<std::endl;
@@ -587,4 +592,41 @@ int IPCServer::get_small_pad_no()
 int IPCServer::get_large_pad_no()
 {
     return large_pad_no;
+}
+
+bool IPCServer::IsDeviceAlive(const std::string &ip_address)
+{
+    int fail_no = 0;
+    int try_no = 3;
+
+    std::string ping_command;
+
+    //Windows
+    //By using win ping method.
+
+    int ping_request_no = 1;
+    int ping_timeout = 50; //ms
+
+    ping_command =  "ping " + ip_address +
+            " -n " + std::to_string(ping_request_no) +
+            " -w " + std::to_string(ping_timeout);
+
+    const char* cstr_ping_command = ping_command.c_str();
+
+    for (int i = 1; i <= try_no; i++)
+    {
+        if(system( cstr_ping_command ))
+        {
+            fail_no++;
+        }
+    }
+
+    if(fail_no == try_no)
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
 }

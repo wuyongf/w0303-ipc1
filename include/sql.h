@@ -2947,14 +2947,23 @@ int yf::sql::sql_server::GetScheduleCommand(const int &id)
 
         Disconnect();
 
-        return schedule_command;
+        if(schedule_command > 0)
+        {
+            return schedule_command;
+        }
+        else
+        {
+            return 0;
+        }
+
+
     }
     catch (std::exception& e)
     {
         std::cerr << e.what() << std::endl;
         std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
 
-        return -999;
+        return 0;
     }
 }
 

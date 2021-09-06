@@ -66,7 +66,7 @@ namespace yf
             // function: keep sending "Get Status" and check the stauts.
             void UpdateArmCurMissionStatus();
 
-            bool IsArmControlBoxPowerOn();
+            bool IsArmControlBoxAlive();
 
             /// \brief
             /// For Each Arm Task
@@ -333,6 +333,22 @@ void yf::arm::tm::ModbusCheckArmStatus()
         }
     }
 
+    if(!IsArmControlBoxAlive())
+    {
+        LOG(INFO) << "is arm control box dead?";
+
+        nw_status_ptr_->arm_mission_status = yf::data::common::MissionStatus::Error;
+
+        if(nw_status_ptr_->arm_connection_status == yf::data::common::ConnectionStatus::Connected)
+        {
+            // Notify ipc_sever that the arm client has disconnected.
+            NetMessageArm("Get Status");
+
+            nw_status_ptr_->arm_connection_status = yf::data::common::ConnectionStatus::Disconnected;
+
+        }
+    }
+
     #if 0 //tm_modbus.read_isPause()
     if(tm_modbus.read_isPause())
     {
@@ -498,9 +514,9 @@ void yf::arm::tm::UpdateArmCurMissionStatus()
 
     while (update_flag)
     {
-        if(!IsArmControlBoxPowerOn())
+        if(!IsArmControlBoxAlive())
         {
-            LOG(INFO) << "Arm Control Box Shut Down!";
+            LOG(INFO) << "Ping arm control box but not respond.";
 
             nw_status_ptr_->cur_task_continue_flag = false;
 
@@ -1460,7 +1476,7 @@ bool yf::arm::tm::GetLargePadIsExist()
     }
 }
 
-bool yf::arm::tm::IsArmControlBoxPowerOn()
+bool yf::arm::tm::IsArmControlBoxAlive()
 {
     yf::algorithm::Timer timer;
 
