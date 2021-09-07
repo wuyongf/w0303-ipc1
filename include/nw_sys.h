@@ -2494,6 +2494,12 @@ void yf::sys::nw_sys::GetScheduleCommand(const int& id)
 {
     switch (sql_ptr_->GetScheduleCommand(id))
     {
+        case 0:
+        {
+            nw_status_ptr_->db_cur_schedule_command_ = data::schedule::ScheduleCommand::None;
+            break;
+        }
+
         case 1:
         {
             nw_status_ptr_->db_cur_schedule_command_ = data::schedule::ScheduleCommand::CleaningJob;
@@ -3683,10 +3689,9 @@ void yf::sys::nw_sys::WaitSchedulesInitialCheck()
         LOG(INFO) << "[thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm";
 
         UpdateDbDeviceArmConnectionStatus();
-        sleep.ms(500);
+        sleep.ms(250);
         UpdateDbDeviceArmMissionStatus();
-        sleep.ms(500);
-
+        sleep.ms(200);
     }
 }
 

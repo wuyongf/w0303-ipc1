@@ -12,6 +12,8 @@
 
 #include "modbus_tm_cllient.h"
 
+#include <Poco/Net/ICMPClient.h>
+
 class IPCServer : public yf::net::server_interface<CustomMsgTypes>
 {
 public:
@@ -363,7 +365,7 @@ protected:
                 arm_mission_status = yf::data::common::MissionStatus::Error;
                 std::unique_lock<std::mutex> ul_arm_status(mux_arm_Blocking);
                 cv_arm_Blocking.notify_one();
-                std::cout << "IPC know Error command!" << std::endl;
+                LOG(INFO) << "[net_w0303_server.h] ipc1 detected error command!" << std::endl;
             }
             // for running status
             else
@@ -381,7 +383,7 @@ protected:
                 arm_mission_status = yf::data::common::MissionStatus::Running;
                 std::unique_lock<std::mutex> ul_arm_status(mux_arm_Blocking);
                 cv_arm_Blocking.notify_one();
-                std::cout << "IPC know robot is running! " << std::endl;
+                std::cout << "[net_w0303_server.h] ipc1 knew robot is running! " << std::endl;
             }
             // for idle status
             else
@@ -392,7 +394,7 @@ protected:
                 std::unique_lock<std::mutex> ul_arm_status(mux_arm_Blocking);
                 cv_arm_Blocking.notify_one();
 
-                std::cout << "IPC know robot is idle! " << std::endl;
+                std::cout << "[net_w0303_server.h] ipc1 knew robot is idle! " << std::endl;
             }
             // for pause status
             else
@@ -402,7 +404,7 @@ protected:
                 arm_mission_status = yf::data::common::MissionStatus::Pause;
                 std::unique_lock<std::mutex> ul_arm_status(mux_arm_Blocking);
                 cv_arm_Blocking.notify_one();
-                std::cout << "IPC know robot is pause! " << std::endl;
+                std::cout << "[net_w0303_server.h] ipc1 knew robot has been paused! " << std::endl;
 
             }
             // for finish status
@@ -421,7 +423,7 @@ protected:
                 arm_mission_status = yf::data::common::MissionStatus::Finish;
                 std::unique_lock<std::mutex> ul_arm_status(mux_arm_Blocking);
                 cv_arm_Blocking.notify_one();
-                std::cout << "IPC know robot task has finished! " << std::endl;
+                std::cout << "[net_w0303_server.h] ipc1 knew robot task has finished! " << std::endl;
             }
 
             // 3.2 Arm Info
@@ -513,7 +515,7 @@ void IPCServer::thread_ModbusWaitForNotifyIPC(bool& thread_continue_flag)
             !IsDeviceAlive(arm_basic_info.tm_ip_address_))
             {
                 //
-                std::cout << "Got it!!! Arm is Error!!!"<<std::endl;
+                std::cout << "[net_w0303_server.h]: Got it!!! Arm is Error!!!"<<std::endl;
 
                 // if error, notify GetArmMissionStatus()
                 std::unique_lock<std::mutex> ul_arm_status(mux_arm_Blocking);
@@ -596,32 +598,13 @@ int IPCServer::get_large_pad_no()
 
 bool IPCServer::IsDeviceAlive(const std::string &ip_address)
 {
-    int fail_no = 0;
-    int try_no = 3;
+    Poco::Net::AddressFamily family;
 
-    std::string ping_command;
+    Poco::Net::ICMPClient icmpClient(family.IPv4);
 
-    //Windows
-    //By using win ping method.
+    auto result = icmpClient.ping(ip_address,3);
 
-    int ping_request_no = 1;
-    int ping_timeout = 50; //ms
-
-    ping_command =  "ping " + ip_address +
-            " -n " + std::to_string(ping_request_no) +
-            " -w " + std::to_string(ping_timeout);
-
-    const char* cstr_ping_command = ping_command.c_str();
-
-    for (int i = 1; i <= try_no; i++)
-    {
-        if(system( cstr_ping_command ))
-        {
-            fail_no++;
-        }
-    }
-
-    if(fail_no == try_no)
+    if(result == 0)
     {
         return false;
     }

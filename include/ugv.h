@@ -546,35 +546,13 @@ int yf::ugv::mir::GetStateId()
 
 bool yf::ugv::mir::IsConnected()
 {
-    yf::algorithm::Timer timer;
+    Poco::Net::AddressFamily family;
 
-    int fail_no = 0;
-    int try_no = 3;
+    Poco::Net::ICMPClient icmpClient(family.IPv4);
 
-    std::string ping_command;
-    std::string tm_ip_address = ip_address_;
+    auto result = icmpClient.ping(ip_address_,3);
 
-    //Windows
-    //By using win ping method.
-
-    int ping_request_no = 1;
-    int ping_timeout = 50; //ms
-
-    ping_command =  "ping " + tm_ip_address +
-            " -n " + std::to_string(ping_request_no) +
-            " -w " + std::to_string(ping_timeout);
-
-    const char* cstr_ping_command = ping_command.c_str();
-
-    for (int i = 1; i <= try_no; i++)
-    {
-        if(system( cstr_ping_command ))
-        {
-            fail_no++;
-        }
-    }
-
-    if(fail_no == try_no)
+    if(result == 0)
     {
         return false;
     }

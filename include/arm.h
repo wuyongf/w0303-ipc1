@@ -18,6 +18,8 @@
 //algorithm
 #include "../include/al.h"
 
+#include <Poco/Net/ICMPClient.h>
+
 namespace yf
 {
     namespace arm
@@ -538,6 +540,7 @@ void yf::arm::tm::UpdateArmCurMissionStatus()
                 LOG(INFO) << "arm mission aborted";
                 nw_status_ptr_->cur_task_continue_flag = false;
 
+                sql_ptr_->UpdateDeviceMissionStatus("arm", 6);
                 return;
             }
 
@@ -547,6 +550,8 @@ void yf::arm::tm::UpdateArmCurMissionStatus()
 
                 LOG(INFO) << "arm mission aborted";
                 nw_status_ptr_->cur_task_continue_flag = false;
+
+                sql_ptr_->UpdateDeviceMissionStatus("arm", 7);
 
                 return;
             }
@@ -1478,35 +1483,13 @@ bool yf::arm::tm::GetLargePadIsExist()
 
 bool yf::arm::tm::IsArmControlBoxAlive()
 {
-    yf::algorithm::Timer timer;
+    Poco::Net::AddressFamily family;
 
-    int fail_no = 0;
-    int try_no = 3;
+    Poco::Net::ICMPClient icmpClient(family.IPv4);
 
-    std::string ping_command;
-    std::string tm_ip_address = tm_ip_address_;
+    auto result = icmpClient.ping(tm_ip_address_,3);
 
-    //Windows
-    //By using win ping method.
-
-    int ping_request_no = 1;
-    int ping_timeout = 50; //ms
-
-    ping_command =  "ping " + tm_ip_address +
-            " -n " + std::to_string(ping_request_no) +
-            " -w " + std::to_string(ping_timeout);
-
-    const char* cstr_ping_command = ping_command.c_str();
-
-    for (int i = 1; i <= try_no; i++)
-    {
-        if(system( cstr_ping_command ))
-        {
-            fail_no++;
-        }
-    }
-
-    if(fail_no == try_no)
+    if(result == 0)
     {
         return false;
     }

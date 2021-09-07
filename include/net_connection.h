@@ -337,9 +337,10 @@ namespace yf
                 m_socket.async_read_some(boost::asio::buffer(m_msgTemporaryIn.body.data(), m_msgTemporaryIn.body.size()),
                                         [this](std::error_code ec, std::size_t length)
                                         {
-                                            std::cout <<"length: " <<length << std::endl;
+                                            std::cout <<"[net_connection.h] ipc received length: " << length << std::endl;
                                             if (!ec)
                                             {
+                                                std::cout << "[" << id << "] ---> IPC1: ";
                                                 for (int i = 0 ; i < length ; i++)
                                                     std::cout <<m_msgTemporaryIn.body[i];
                                                 // resize the vector based on the length..
