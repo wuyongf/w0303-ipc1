@@ -197,6 +197,15 @@ namespace  yf
                 HandleSurface   = 16
             };
 
+            enum class VisionType
+            {
+                None        =   0,
+                Landmark    =   1,
+                D455        =   2,
+                D435        =   3
+            };
+
+            /// yf: using
             struct MissionConfig
             {
                 int                     id;
@@ -219,7 +228,9 @@ namespace  yf
 
                 Point3d                 standby_position;
 
-                bool                    landmark_flag;
+//                bool                    landmark_flag;
+
+                VisionType              vision_type;
 
                 Point3d                 ref_vision_lm_init_position;
 

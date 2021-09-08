@@ -123,6 +123,8 @@ namespace yf
 
             bool GetLandmarkFlag(const int& arm_mission_config_id);
 
+            yf::data::arm::VisionType GetVisionType(const int& arm_mission_config_id);
+
             yf::data::arm::Point3d GetRefVisionLMInitPosition(const int& arm_mission_config_id);
 
             yf::data::arm::Point3d GetRefLandmarkPos(const int& arm_mission_config_id);
@@ -898,10 +900,10 @@ std::deque<yf::data::arm::MissionConfig> yf::arm::tm::ConfigureArmMission(const 
         /// 2. operation_area
         mission_config.operation_area = this->GetOperationArea(arm_config_id);
 
-        /// 3. current tool
+        /// 3. current tool [???]
         mission_config.cur_tool = this->GetCurrentTool();
 
-        /// 4. mission_tool
+        /// 4. mission_tool (base on task_mode)
         mission_config.mission_tool = this->GetMissionTool(model_config_id);
 
         /// 5. tool_angel
@@ -913,7 +915,27 @@ std::deque<yf::data::arm::MissionConfig> yf::arm::tm::ConfigureArmMission(const 
         /// 7. standby_position
         mission_config.standby_position = this->GetStandbyPosition(arm_config_id);
 
-        /// 8. landmark_flag
+        /// 8. vision_type
+        mission_config.vision_type = this->GetVisionType(arm_mission_config_id);
+
+        switch (mission_config.vision_type)
+        {
+            case data::arm::VisionType::None:
+            {
+                // do nothing
+                break;
+            }
+            case data::arm::VisionType::Landmark:
+            {
+                // a. vision_lm_init__position
+                mission_config.ref_vision_lm_init_position = this->GetRefVisionLMInitPosition(arm_mission_config_id);
+                // b. ref_landmark_pos
+                mission_config.ref_landmark_pos = this->GetRefLandmarkPos(arm_mission_config_id);
+            }
+        }
+
+        #if 0
+        /// 8.2 landmark_flag
         mission_config.landmark_flag = this->GetLandmarkFlag(arm_mission_config_id);
 
         /// 9.(optional) vision_lm_init__position
@@ -927,6 +949,7 @@ std::deque<yf::data::arm::MissionConfig> yf::arm::tm::ConfigureArmMission(const 
         {
             mission_config.ref_landmark_pos = this->GetRefLandmarkPos(arm_mission_config_id);
         }
+        #endif
 
         /// 11. (*required) via_approach_point
 
@@ -1496,5 +1519,30 @@ bool yf::arm::tm::IsArmControlBoxAlive()
     else
     {
         return true;
+    }
+}
+
+yf::data::arm::VisionType yf::arm::tm::GetVisionType(const int &arm_mission_config_id)
+{
+    int vision_type = sql_ptr_->GetVisionType(arm_mission_config_id);
+
+    switch (vision_type)
+    {
+        case 0:
+        {
+            return data::arm::VisionType::None;
+        }
+        case 1:
+        {
+            return data::arm::VisionType::Landmark;
+        }
+        case 2:
+        {
+            return data::arm::VisionType::D455;
+        }
+        case 3:
+        {
+            return data::arm::VisionType::D435;
+        }
     }
 }

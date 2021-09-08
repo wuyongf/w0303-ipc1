@@ -216,6 +216,8 @@ namespace yf
 
             // Landmark Flag
             int GetLandmarkFlag(const int &arm_mission_config_id);
+            // Vision Type
+            int GetVisionType(const int& arm_mission_config_id);
 
             // for ref_path_init_point
             // (1) table "data_arm_points"
@@ -4276,6 +4278,38 @@ void yf::sql::sql_server::ResetCustomPlan(const int &plan_no)
     {
         std::cerr << e.what() << std::endl;
         std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+    }
+}
+
+int yf::sql::sql_server::GetVisionType(const int &arm_mission_config_id)
+{
+    std::string query_update;
+
+    //"SELECT ID FROM schedule_table where status=1 AND planned_start > '2021-02-06 11:10:08.000'"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT vision_type FROM data_arm_mission_config where ID = "+ std::to_string(arm_mission_config_id);
+
+        int output_int;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        while(result.next())
+        {
+            output_int = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return output_int;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+        return 0;
     }
 }
 
