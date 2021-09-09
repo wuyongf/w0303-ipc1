@@ -932,6 +932,16 @@ std::deque<yf::data::arm::MissionConfig> yf::arm::tm::ConfigureArmMission(const 
                 // b. ref_landmark_pos
                 mission_config.ref_landmark_pos = this->GetRefLandmarkPos(arm_mission_config_id);
             }
+            case data::arm::VisionType::D455:
+            {
+                /// 1. Get info from DB
+                //   1.1. get offset_info
+                //   1.2. get set_num
+                //   1.3. get view_nums
+                //   1.4. get all ref_tcp_pos.
+
+
+            }
         }
 
         #if 0
@@ -1510,7 +1520,7 @@ bool yf::arm::tm::IsArmControlBoxAlive()
 
     Poco::Net::ICMPClient icmpClient(family.IPv4);
 
-    auto result = icmpClient.ping(tm_ip_address_,3);
+    auto result = icmpClient.ping(tm_ip_address_,6);
 
     if(result == 0)
     {

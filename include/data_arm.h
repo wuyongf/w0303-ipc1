@@ -26,7 +26,8 @@ namespace  yf
 
             };
 
-            struct Point3d {
+            struct Point3d
+            {
                 float x;
                 float y;
                 float z;
@@ -228,7 +229,7 @@ namespace  yf
 
                 Point3d                 standby_position;
 
-//                bool                    landmark_flag;
+                bool                    landmark_flag;
 
                 VisionType              vision_type;
 
@@ -247,6 +248,13 @@ namespace  yf
                 std::deque<Point3d>     via_points;
 
                 int                     mission_order;
+
+                // yf: for phase2: point clouds
+
+                Point3d                 tcp_offset;     // camera origin
+                int                     set_no;
+                std::vector<int>        view_nums;
+                std::vector<std::vector<int>> ref_tcp_pos_ids;
 
             };
         }

@@ -1114,7 +1114,24 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                 }
                                                 case data::arm::VisionType::D455:
                                                 {
-                                                    //1.  find the TF!
+                                                    ///  b.2 find the TF!
+
+                                                    // 1. retrieve point cloud data in real time and then assign the value
+                                                    //  1.1 move to several points.
+                                                    //  1.2 record the point clouds. (several sets....)
+                                                    //  1.3 save the real_pc_files.
+
+                                                    // 2. compare!
+                                                    // @input:
+
+                                                    // 3. get the TF!
+
+                                                    // 4. set the amc_skip_flag?
+
+                                                    break;
+                                                }
+                                                case data::arm::VisionType::D435:
+                                                {
                                                     break;
                                                 }
                                             }
@@ -1126,12 +1143,15 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                         }
 
                                         /// II:
-                                        // b. check the amc_skip_flag
-                                        //  b.1 if ture, skip current arm_mission_config
-                                        //  b.2 if false, just execute the arm_mission_config
-                                        //    1. initialization
-                                        //    2. base on vision_type: calculate the real_points
-                                        //    3. post the arm_mission_config
+                                        //  check the amc_skip_flag
+                                        //  1. if ture, skip current arm_mission_config
+                                        //  2. if false, just execute the arm_mission_config
+                                        //    2.1. Initialization
+                                        //    2.2. Calculation (base on vision_type: calculate the real_points)
+                                        //      2.2.1 new via_points (real_points)
+                                        //      2.2.2 new approach_point
+                                        //      2.2.3 new n_points
+                                        //    2.3. post the arm_mission_config
 
                                         if(amc_skip_flag)
                                         {
@@ -1139,49 +1159,71 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                         }
                                         else
                                         {
-                                            // 1. Initialization
+                                            /// 2.1 Initialization
 
-                                            // 1.1 check&set tool_angle
+                                            // 2.1.1 check&set tool_angle
                                             this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
 
-                                            // 1.2 calculate the new via_points
 
-                                            std::deque<yf::data::arm::Point3d> real_via_points;
+                                            /// 2.2 Calculation
 
-                                            real_via_points = tm5.GetRealViaPoints(arm_mission_configs[n].via_points, arm_mission_configs[n].ref_landmark_pos, real_lm_pos_);
+                                            switch (arm_mission_configs[n].vision_type)
+                                            {
+                                                case data::arm::VisionType::None:
+                                                {
+                                                    break;
+                                                }
+                                                case data::arm::VisionType::Landmark:
+                                                {
+                                                    // 2.1 calculate the new via_points
 
-                                            arm_mission_configs[n].via_points.clear();
+                                                    std::deque<yf::data::arm::Point3d> real_via_points;
 
-                                            arm_mission_configs[n].via_points = real_via_points;
+                                                    real_via_points = tm5.GetRealViaPoints(arm_mission_configs[n].via_points, arm_mission_configs[n].ref_landmark_pos, real_lm_pos_);
 
-                                            // 1.3 calculate the real approach point
+                                                    arm_mission_configs[n].via_points.clear();
 
-                                            yf::data::arm::Point3d real_via_approach_point;
+                                                    arm_mission_configs[n].via_points = real_via_points;
 
-                                            real_via_approach_point = tm5.GetRealPointByLM(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].ref_landmark_pos, real_lm_pos_);
+                                                    // 2.2 calculate the real approach point
 
-                                            arm_mission_configs[n].via_approach_pos.x  = real_via_approach_point.x;
-                                            arm_mission_configs[n].via_approach_pos.y  = real_via_approach_point.y;
-                                            arm_mission_configs[n].via_approach_pos.z  = real_via_approach_point.z;
-                                            arm_mission_configs[n].via_approach_pos.rx = real_via_approach_point.rx;
-                                            arm_mission_configs[n].via_approach_pos.ry = real_via_approach_point.ry;
-                                            arm_mission_configs[n].via_approach_pos.rz = real_via_approach_point.rz;
+                                                    auto real_via_approach_point = tm5.GetRealPointByLM(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].ref_landmark_pos, real_lm_pos_);
 
-                                            // 4. check motion_type, decide which motion.
-                                            // 5. assign n_via_points.
+                                                    arm_mission_configs[n].via_approach_pos.x  = real_via_approach_point.x;
+                                                    arm_mission_configs[n].via_approach_pos.y  = real_via_approach_point.y;
+                                                    arm_mission_configs[n].via_approach_pos.z  = real_via_approach_point.z;
+                                                    arm_mission_configs[n].via_approach_pos.rx = real_via_approach_point.rx;
+                                                    arm_mission_configs[n].via_approach_pos.ry = real_via_approach_point.ry;
+                                                    arm_mission_configs[n].via_approach_pos.rz = real_via_approach_point.rz;
+
+                                                    break;
+                                                }
+                                                case data::arm::VisionType::D455:
+                                                {
+                                                    break;
+                                                }
+                                                case data::arm::VisionType::D435:
+                                                {
+                                                    break;
+                                                }
+                                            }
+
+                                            /// 2.3 Fire the task and then return standby_p0
+
+                                            // 2.3.1 assign n_via_points.
                                             std::string n_via_points_str = std::to_string(arm_mission_configs[n].n_via_points);
                                             tm5.ArmTask("Set n_points = " + n_via_points_str);
 
-                                            // 6. set approach_point
+                                            // 2.3.2 set approach_point
                                             this->ArmSetApproachPoint(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].tool_angle);
 
-                                            // 7. set via_points
+                                            // 2.3.3 set via_points
                                             this->ArmSetViaPoints(arm_mission_configs[n].via_points, arm_mission_configs[n].tool_angle);
 
-                                            // 8. post via_points
+                                            // 2.3.4 post via_points
                                             this->ArmPostViaPoints(cur_task_mode_, arm_mission_configs[n].tool_angle, arm_mission_configs[n].model_type, arm_mission_configs[n].id);
 
-                                            // 9. post return standby_position
+                                            // 2.3.5 post return standby_position
                                             tm5.ArmTask("Move_to standby_p0");
                                         }
                                     }

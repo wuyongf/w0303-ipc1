@@ -283,6 +283,7 @@ namespace yf
             /// Ugv Initialization for Each Schedule
             std::string GetActivatedMapName();
 
+            /// Phase2 Related
 
         private:
             bool static IsOne(int x){return x == 1;}
