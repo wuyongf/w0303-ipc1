@@ -20,11 +20,14 @@ int main()
 /// For IPC1
     std::shared_ptr<yf::sql::sql_server> sql = std::make_shared<yf::sql::sql_server>("SQL Server","192.168.7.127","NW_mobile_robot_sys","sa","NWcadcam2021");
 
+    auto set_number = sql->GetEachSetViewNumber(11167,3);
+
+    auto offset_id = sql->GetTcpOffsetId("d455");
+
+    auto offset_info = sql->GetTcpOffsetInfo(offset_id);
+
+
     auto plan_no = sql->GetAvailableCustomPlan();
-
-
-
-
 //    auto failed_q = sql->GetFailedTaskIds(10);
     auto cur_first_valid_order_  = sql->GetRedoFirstValidOrder(26);
     auto cur_last_valid_order_   = sql->GetRedoLastValidOrder(26);

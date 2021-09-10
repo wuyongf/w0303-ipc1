@@ -283,7 +283,35 @@ namespace yf
             /// Ugv Initialization for Each Schedule
             std::string GetActivatedMapName();
 
+            ///
             /// Phase2 Related
+            ///
+            // general: basic method
+            float GetTableElement(const std::string& table_name, const std::string& target_str,
+                                  const std::string& condition_name, const std::string& condition_value_str);
+            // for table:
+            // 1. data_arm_VisionType
+            // 2. data_arm_VisionType_Offsets
+
+            // offset info
+            int GetTcpOffsetId(const std::string &vision_type);
+            yf::data::arm::Point3d GetTcpOffsetInfo(const int& offset_id);
+            float GetTcpOffsetElement(const int &offset_id, const std::string &point_element);
+
+            // for table:
+            // 1. data_arm_mc_ref_pc
+
+            int GetSetNumber(const int& arm_mission_config_id);
+
+            int GetEachSetViewNumber(const int& arm_mission_config_id, const int& set_no);
+
+            int GetEachViewRefTcpPosId(const int& arm_mission_config_id, const int& set_no, const int& view_no);
+
+            std::string GetEachViewRefPCFileName(const int& arm_mission_config_id, const int& set_no, const int& view_no);
+
+            int GetEachSetFeatureTypeId(const int& arm_mission_config_id, const int& set_no);
+
+            std::string GetFeatureTypeName(const int& feature_type_id);
 
         private:
             bool static IsOne(int x){return x == 1;}
@@ -4314,6 +4342,377 @@ int yf::sql::sql_server::GetVisionType(const int &arm_mission_config_id)
     }
 }
 
+int yf::sql::sql_server::GetTcpOffsetId(const std::string &vision_type)
+{
+    // query string
+    std::string query;
+
+    // input
+
+    // output
+    int offset_id;
+
+    //"SELECT position_name FROM data_ugv_mission_config where model_config_id = 1 ORDER BY mission_order"
+    try
+    {
+        Connect();
+
+        query = "SELECT offset_id FROM data_arm_VisionType where vision_type = '"+ vision_type + "'" ;
+
+        auto result = nanodbc::execute(conn_, query);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            offset_id = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return offset_id;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return 0;
+    };
+}
+
+yf::data::arm::Point3d yf::sql::sql_server::GetTcpOffsetInfo(const int &offset_id)
+{
+    yf::data::arm::Point3d point3d;
+
+    point3d.x = this->GetTcpOffsetElement(offset_id,"offset_x");
+    point3d.y = this->GetTcpOffsetElement(offset_id,"offset_y");
+    point3d.z = this->GetTcpOffsetElement(offset_id,"offset_z");
+    point3d.rx = this->GetTcpOffsetElement(offset_id,"offset_rx");
+    point3d.ry = this->GetTcpOffsetElement(offset_id,"offset_ry");
+    point3d.rz = this->GetTcpOffsetElement(offset_id,"offset_rz");
+
+    return point3d;
+}
+
+float yf::sql::sql_server::GetTableElement(const std::string &table_name, const std::string &target_str,
+                                           const std::string &condition_name, const std::string &condition_value_str)
+{
+    // query string
+    std::string query;
+
+    // input
+
+    // output
+    float output;
+
+    //"SELECT position_name FROM data_ugv_mission_config where model_config_id = 1 ORDER BY mission_order"
+    try
+    {
+        Connect();
+
+        query = "SELECT "+ target_str +" FROM "+ table_name+" where "+condition_name+" = '"+ condition_value_str + "'" ;
+
+        auto result = nanodbc::execute(conn_, query);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            output = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return output;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return 0;
+    };
+}
+
+float yf::sql::sql_server::GetTcpOffsetElement(const int &offset_id, const std::string &point_element)
+{
+    std::string query;
+
+    std::string offset_id_str = std::to_string(offset_id);
+
+    float element_value;
+
+    //"SELECT ID FROM schedule_table where status=1 AND planned_start > '2021-02-06 11:10:08.000'"
+    try
+    {
+        Connect();
+
+        query = "SELECT " + point_element + " FROM data_arm_VisionType_Offsets where ID = " + offset_id_str;
+
+        auto result = nanodbc::execute(conn_, query);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            element_value = result.get<float>(point_element);
+        };
+
+        Disconnect();
+
+        return element_value;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return 0;
+    };
+}
+
+int yf::sql::sql_server::GetSetNumber(const int &arm_mission_config_id)
+{
+    // SELECT max(set_no) AS current_set_number FROM data_arm_mc_ref_pc where arm_mission_config_id = 11167
+
+    // query string
+    std::string query_update;
+
+    // input
+    std::string arm_mission_config_id_str = std::to_string(arm_mission_config_id);
+
+    // output
+    int set_num;
+
+    try
+    {
+        Connect();
+
+        query_update = "SELECT max(set_no) FROM data_arm_mc_ref_pc where arm_mission_config_id = " + arm_mission_config_id_str ;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            set_num = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return set_num;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return 0;
+    };
+
+}
+
+int yf::sql::sql_server::GetEachSetViewNumber(const int &arm_mission_config_id, const int &set_no)
+{
+    // SELECT max(set_no) AS current_set_number FROM data_arm_mc_ref_pc where arm_mission_config_id = 11167
+
+    // query string
+    std::string query_update;
+
+    // input
+    std::string arm_mission_config_id_str = std::to_string(arm_mission_config_id);
+    std::string set_no_str = std::to_string(set_no);
+    // output
+    int set_num;
+
+    try
+    {
+        Connect();
+
+        query_update = "SELECT max(view_no) FROM data_arm_mc_ref_pc where arm_mission_config_id = " + arm_mission_config_id_str + "AND set_no = " + set_no_str ;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            set_num = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return set_num;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return 0;
+    };
+}
+
+int yf::sql::sql_server::GetEachViewRefTcpPosId(const int &arm_mission_config_id, const int &set_no, const int &view_no)
+{
+    // SELECT max(set_no) AS current_set_number FROM data_arm_mc_ref_pc where arm_mission_config_id = 11167
+
+    // query string
+    std::string query_update;
+
+    // input
+    std::string arm_mission_config_id_str = std::to_string(arm_mission_config_id);
+    std::string set_no_str = std::to_string(set_no);
+    std::string view_no_str = std::to_string(view_no);
+
+    // output
+    int ref_tcp_pos_id;
+
+    try
+    {
+        Connect();
+
+        query_update = "SELECT ref_tcp_pos_id FROM data_arm_mc_ref_pc where arm_mission_config_id = " + arm_mission_config_id_str + "AND set_no = " + set_no_str + "AND view_no = " + view_no_str ;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            ref_tcp_pos_id = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return ref_tcp_pos_id;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return 0;
+    };
+}
+
+std::string
+yf::sql::sql_server::GetEachViewRefPCFileName(const int &arm_mission_config_id, const int &set_no, const int &view_no)
+{
+    // SELECT max(set_no) AS current_set_number FROM data_arm_mc_ref_pc where arm_mission_config_id = 11167
+
+    // query string
+    std::string query_update;
+
+    // input
+    std::string arm_mission_config_id_str = std::to_string(arm_mission_config_id);
+    std::string set_no_str = std::to_string(set_no);
+    std::string view_no_str = std::to_string(view_no);
+
+    // output
+    std::string ref_pc_file_name;
+
+    try
+    {
+        Connect();
+
+        query_update = "SELECT ref_pc_file_name FROM data_arm_mc_ref_pc where arm_mission_config_id = " + arm_mission_config_id_str + "AND set_no = " + set_no_str + "AND view_no = " + view_no_str ;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            ref_pc_file_name = result.get<std::string>(0);
+        };
+
+        Disconnect();
+
+        return ref_pc_file_name;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return 0;
+    };
+}
+
+int yf::sql::sql_server::GetEachSetFeatureTypeId(const int &arm_mission_config_id, const int &set_no)
+{
+    // SELECT max(set_no) AS current_set_number FROM data_arm_mc_ref_pc where arm_mission_config_id = 11167
+
+    // query string
+    std::string query_update;
+
+    // input
+    std::string arm_mission_config_id_str = std::to_string(arm_mission_config_id);
+    std::string set_no_str = std::to_string(set_no);
+    // output
+    int set_num;
+
+    try
+    {
+        Connect();
+
+        query_update = "SELECT max(feature_type_id) FROM data_arm_mc_ref_pc where arm_mission_config_id = " + arm_mission_config_id_str + "AND set_no = " + set_no_str ;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            set_num = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return set_num;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return 0;
+    };
+}
+
+std::string yf::sql::sql_server::GetFeatureTypeName(const int &feature_type_id)
+{
+    // query string
+    std::string query_update;
+
+    // input
+    std::string feature_type_id_str = std::to_string(feature_type_id);
+
+    // output
+    std::string feature_type_name;
+
+    //"SELECT position_name FROM data_ugv_mission_config where model_config_id = 1 ORDER BY mission_order"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT feature_type FROM data_arm_FeatureType where ID = " + feature_type_id_str ;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            feature_type_name = result.get<std::string>(0);
+        };
+
+        Disconnect();
+
+        return feature_type_name;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return feature_type_name;
+    };
+}
 
 
 

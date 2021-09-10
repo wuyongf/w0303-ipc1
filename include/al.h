@@ -402,6 +402,8 @@ yf::algorithm::arm_path::Convert2RealPathByLM(std::vector<std::vector<float>> &o
 
 Eigen::Matrix4f yf::algorithm::arm_path::points2TMat(const yf::data::arm::Point3d &point)
 {
+//    Timer timer;
+
     std::vector<float> vec_point;
 
     vec_point.clear();

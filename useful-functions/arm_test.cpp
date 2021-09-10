@@ -24,8 +24,28 @@
 // IPC2
 #include "../include/ipc2.h"
 
+#include "../include/al.h"
+
+
+void TF_duration_test(yf::arm::tm& tm5)
+{
+
+
+    auto tcp_offset_info = tm5.GetTcpOffsetInfo("d455");
+    //   1.2. get all ref_tcp_pos.
+    auto ref_tcp_pos_ids = tm5.GetRefTcpPosIds(11167);
+
+    yf::algorithm::Timer timer;
+    // 2d vector for TF
+    auto ref_tcp_pos_tfs = tm5.GetRefTcpPosTFs(ref_tcp_pos_ids,tcp_offset_info);
+
+    return;
+}
+
 int main()
 {
+
+
     yf::arm::tm tm5;
 
     std::shared_ptr<IPCServer> ipc_server_ptr_ = std::make_shared<IPCServer>(12345);
@@ -43,12 +63,28 @@ int main()
 
     tm5.Start(ipc_server_ptr_,nw_status_ptr_,sql_ptr_);
 
+    TF_duration_test(tm5);
+
+
+    auto ids = tm5.GetFeatureTypeIds(11167);
+
+
     while (true)
     {
         tm5.ModbusCheckArmStatus();
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
 
+
+
+    /// 2d vector for Transformation Matrix
+    std::vector<std::vector<Eigen::Matrix4f>> ref_tcp_pos_tfs;
+    /// 2d vector for ref_pc_file_name
+    std::vector<std::vector<std::string>> ref_pc_file_names;
+    /// 2d vector for real_pc_file_name
+    std::vector<std::vector<std::string>> real_pc_file_names;
+    /// 1d vector for feature type
+    std::vector<int> feature_type_ids;
 
 //    auto landmark_flag = tm5.GetLandmarkFlag(1);
 //

@@ -99,7 +99,7 @@ namespace yf
             std::deque<yf::data::arm::MissionConfig> ConfigureRedoArmMission(const int& task_group_id, const int & order, const int& origin_model_config_id);
 
             std::deque<yf::data::arm::MissionConfig> ConfigureArmMission(const int& model_config_id, const int & order);
-//
+
             yf::data::arm::ModelType GetModelType(const int& model_config_id);
 
             yf::data::arm::TaskMode GetTaskMode(const int& model_config_id);
@@ -114,7 +114,7 @@ namespace yf
             yf::data::arm::Tool GetMissionTool(const int& model_config_id);
 
             yf::data::arm::ToolAngle GetToolAngle(const int& arm_mission_config_id);
-//
+
             yf::data::arm::MotionType GetMotionType(const int& arm_mission_config_id);
 
             yf::data::arm::ForceType GetForceType(const int& arm_mission_config_id);
@@ -130,8 +130,20 @@ namespace yf
             yf::data::arm::Point3d GetRefLandmarkPos(const int& arm_mission_config_id);
 
             yf::data::arm::Point3d GetViaApproachPoint(const int& arm_mission_config_id);
-//
+
             std::deque<yf::data::arm::Point3d> GetRefViaPoints(const yf::data::arm::ModelType& model_type, const yf::data::arm::TaskMode& task_mode, const int& arm_mission_config_id, const yf::data::arm::MotionType& motion_type);
+
+            /// Phase2 Related
+            yf::data::arm::Point3d GetTcpOffsetInfo(const std::string& vision_type);
+            int GetSetNumber(const int& arm_mission_config_id);
+            std::vector<std::vector<int>> GetRefTcpPosIds(const int& arm_mission_config_id);
+
+            std::vector<std::vector<Eigen::Matrix4f>> GetRefTcpPosTFs(const std::vector<std::vector<int>>& pos_ids,
+                                                                      const yf::data::arm::Point3d& tcp_offset);
+
+            std::vector<std::vector<std::string>> GetRefPCFileNames(const int& arm_mission_config_id);
+            std::vector<int> GetFeatureTypeIds(const int& arm_mission_config_id);
+
 
         public: // for nw_sys: each mission // retrieve data from Arm(tm5)
 
@@ -935,31 +947,19 @@ std::deque<yf::data::arm::MissionConfig> yf::arm::tm::ConfigureArmMission(const 
             case data::arm::VisionType::D455:
             {
                 /// 1. Get info from DB
-                //   1.1. get offset_info
-                //   1.2. get set_num
-                //   1.3. get view_nums
-                //   1.4. get all ref_tcp_pos.
+                //   1.1. get tcp_offset_info
+                mission_config.tcp_offset_info = this->GetTcpOffsetInfo("d455");
+                //   1.2. get all ref_tcp_pos.
+                mission_config.ref_tcp_pos_ids = this->GetRefTcpPosIds(arm_mission_config_id);
 
-
+                // 2d vector for TF
+                mission_config.ref_tcp_pos_tfs = this->GetRefTcpPosTFs(mission_config.ref_tcp_pos_ids,mission_config.tcp_offset_info);
+                // 2d vector for ref_pc_file_name
+                mission_config.ref_pc_file_names = this->GetRefPCFileNames(arm_mission_config_id);
+                // 1d vector for feature type
+                mission_config.feature_type_ids = this->GetFeatureTypeIds(arm_mission_config_id);
             }
         }
-
-        #if 0
-        /// 8.2 landmark_flag
-        mission_config.landmark_flag = this->GetLandmarkFlag(arm_mission_config_id);
-
-        /// 9.(optional) vision_lm_init__position
-        if(mission_config.landmark_flag == true)
-        {
-            mission_config.ref_vision_lm_init_position = this->GetRefVisionLMInitPosition(arm_mission_config_id);
-        }
-
-        /// 10.(optional) ref_landmark_pos
-        if(mission_config.landmark_flag == true)
-        {
-            mission_config.ref_landmark_pos = this->GetRefLandmarkPos(arm_mission_config_id);
-        }
-        #endif
 
         /// 11. (*required) via_approach_point
 
@@ -1555,4 +1555,126 @@ yf::data::arm::VisionType yf::arm::tm::GetVisionType(const int &arm_mission_conf
             return data::arm::VisionType::D435;
         }
     }
+}
+
+yf::data::arm::Point3d yf::arm::tm::GetTcpOffsetInfo(const std::string& vision_type)
+{
+    auto offset_id  = sql_ptr_->GetTcpOffsetId(vision_type);
+
+    auto tcp_offset_info = sql_ptr_->GetTcpOffsetInfo(offset_id);
+
+    return tcp_offset_info;
+}
+
+int yf::arm::tm::GetSetNumber(const int &arm_mission_config_id)
+{
+    return sql_ptr_->GetSetNumber(arm_mission_config_id);
+}
+
+std::vector<std::vector<int>> yf::arm::tm::GetRefTcpPosIds(const int &arm_mission_config_id)
+{
+    std::vector<std::vector<int>> ref_tcp_pos_ids;
+
+    std::vector<int> each_set_ref_tcp_pos_ids;
+
+    auto set_no = sql_ptr_->GetSetNumber(arm_mission_config_id);
+
+    for(int n = 1 ; n <= set_no ; n++)
+    {
+        auto each_set_view_no = sql_ptr_->GetEachSetViewNumber(arm_mission_config_id,n);
+
+        each_set_ref_tcp_pos_ids.clear();
+
+        for(int m = 1; m <= each_set_view_no; m++)
+        {
+            auto ref_tcp_pos_id = sql_ptr_->GetEachViewRefTcpPosId(arm_mission_config_id,n,m);
+
+            each_set_ref_tcp_pos_ids.push_back(ref_tcp_pos_id);
+        }
+
+        ref_tcp_pos_ids.push_back(each_set_ref_tcp_pos_ids);
+    }
+
+    return ref_tcp_pos_ids;
+}
+
+std::vector<std::vector<std::string>> yf::arm::tm::GetRefPCFileNames(const int &arm_mission_config_id)
+{
+    std::vector<std::vector<std::string>> ref_tcp_pos_ids;
+
+    std::vector<std::string> each_set_ref_tcp_pos_ids;
+
+    auto set_no = sql_ptr_->GetSetNumber(arm_mission_config_id);
+
+    for(int n = 1 ; n <= set_no ; n++)
+    {
+        auto each_set_view_no = sql_ptr_->GetEachSetViewNumber(arm_mission_config_id,n);
+
+        each_set_ref_tcp_pos_ids.clear();
+
+        for(int m = 1; m <= each_set_view_no; m++)
+        {
+            auto ref_tcp_pos_id = sql_ptr_->GetEachViewRefPCFileName(arm_mission_config_id,n,m);
+
+            each_set_ref_tcp_pos_ids.push_back(ref_tcp_pos_id);
+        }
+
+        ref_tcp_pos_ids.push_back(each_set_ref_tcp_pos_ids);
+    }
+
+    return ref_tcp_pos_ids;
+}
+
+std::vector<int> yf::arm::tm::GetFeatureTypeIds(const int &arm_mission_config_id)
+{
+    std::vector<int> feature_type_ids;
+
+    auto set_no = sql_ptr_->GetSetNumber(arm_mission_config_id);
+
+    for(int n = 1 ; n <= set_no ; n++)
+    {
+        auto feature_type_id = sql_ptr_->GetEachSetFeatureTypeId(arm_mission_config_id,n);
+
+        feature_type_ids.push_back(feature_type_id);
+    }
+
+    return feature_type_ids;
+}
+
+std::vector<std::vector<Eigen::Matrix4f>> yf::arm::tm::GetRefTcpPosTFs(const std::vector<std::vector<int>>& pos_ids,
+                                                                       const yf::data::arm::Point3d& tcp_offset)
+{
+    std::vector<std::vector<Eigen::Matrix4f>> ref_pc_pos_tfs;
+
+    std::vector<Eigen::Matrix4f> each_set_ref_pc_pos_tfs;
+
+    for(int set = 0 ; set < pos_ids.size() ; set ++)
+    {
+        each_set_ref_pc_pos_tfs.clear();
+
+        for (int view = 0 ; view < pos_ids[set].size() ; view++)
+        {
+            // get the points. get the TMat_default
+            auto point = sql_ptr_->GetArmPoint(pos_ids[set][view]);
+            auto TMat_default = al_arm_path.points2TMat(point);
+
+            // apply the offset. get the TMat_offset
+            auto TMat_offset = al_arm_path.points2TMat(tcp_offset);
+
+            // get the TF
+            Eigen::Matrix4f TMat = TMat_default * TMat_offset;
+
+            ///\brief scale down for dr.chiu
+            TMat(0,3) = TMat(0,3) * 0.001;
+            TMat(1,3) = TMat(1,3) * 0.001;
+            TMat(2,3) = TMat(2,3) * 0.001;
+
+            // push back
+            each_set_ref_pc_pos_tfs.emplace_back(TMat);
+        }
+
+        ref_pc_pos_tfs.push_back(each_set_ref_pc_pos_tfs);
+    }
+
+    return ref_pc_pos_tfs;
 }

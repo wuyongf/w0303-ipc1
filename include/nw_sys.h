@@ -89,6 +89,11 @@ namespace yf
             //
             void JobsFilter(std::deque<int>& q_ids);
 
+        private:
+            /// Functions for the DoTasks()
+
+            std::vector<std::vector<std::string>> GetRealPCFileNames();
+
         protected:
             /// SQL Related
 
@@ -1121,7 +1126,54 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                     //  1.2 record the point clouds. (several sets....)
                                                     //  1.3 save the real_pc_files.
 
-                                                    // 2. compare!
+                                                    std::vector<std::vector<std::string>> real_pc_file_names;
+
+                                                    std::vector<std::string> each_set_real_pc_pos_names;
+
+                                                    for(int set = 0 ; set < arm_mission_configs[n].ref_tcp_pos_ids.size() ; set ++)
+                                                    {
+                                                        each_set_real_pc_pos_names.clear();
+
+                                                        for(int view = 0 ; view < arm_mission_configs[n].ref_tcp_pos_ids[set].size() ; view++)
+                                                        {
+                                                            // get the point
+                                                            auto point_str = this->ArmGetPointStr(sql_ptr_->GetArmPoint(arm_mission_configs[n].ref_tcp_pos_ids[set][view]));
+                                                            // set the point
+                                                            tm5.ArmTask("Set ref_tcp_pos = " + point_str);
+                                                            // move!
+                                                            tm5.ArmTask("Move_to ref_tcp_pos");
+
+                                                            //todo: record the real point cloud.
+                                                            LOG(INFO) << "Vision Job [Start]" << std::endl;
+                                                            // ....
+                                                            // ....
+                                                            // ....
+                                                            // wait for vision_job done
+                                                            LOG(INFO) << "Vision Job [Running]" << std::endl;
+                                                            LOG(INFO) << "Vision Job [Finish]" << std::endl;
+
+                                                            // save the real_pc_file.
+                                                            //  1. define the name
+                                                            std::string id_str = std::to_string(arm_mission_configs[n].id);
+                                                            std::string set_no_str = std::to_string(set);
+                                                            std::string view_no_str = std::to_string(view);
+                                                            std::string feature_type_name = sql_ptr_->GetFeatureTypeName(arm_mission_configs[n].feature_type_ids[set]);
+
+                                                            auto real_pc_file_name = id_str + "-" + set_no_str + "-" + view_no_str + "-" + feature_type_name + "-" + std::to_string(task_group_id);
+                                                            //todo:  2. save the real_point_cloud file
+                                                            // ...
+                                                            // ...
+                                                            // ...
+
+                                                            // push back
+                                                            each_set_real_pc_pos_names.push_back(real_pc_file_name);
+
+                                                        }
+
+                                                        real_pc_file_names.push_back(each_set_real_pc_pos_names);
+                                                    }
+
+                                                    //todo: 2. compare!
                                                     // @input:
 
                                                     // 3. get the TF!

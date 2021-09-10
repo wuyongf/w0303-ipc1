@@ -249,13 +249,18 @@ namespace  yf
 
                 int                     mission_order;
 
-                // yf: for phase2: point clouds
+                /// yf: for phase2: point clouds
 
-                Point3d                 tcp_offset;     // camera origin
-                int                     set_no;
-                std::vector<int>        view_nums;
+                Point3d                 tcp_offset_info;     // camera origin
+
                 std::vector<std::vector<int>> ref_tcp_pos_ids;
 
+                // 2d vector for TF
+                std::vector<std::vector<Eigen::Matrix4f>> ref_tcp_pos_tfs;
+                // 2d vector for ref_pc_file_name
+                std::vector<std::vector<std::string>> ref_pc_file_names;
+                // 1d vector for feature type
+                std::vector<int> feature_type_ids;
             };
         }
     }
