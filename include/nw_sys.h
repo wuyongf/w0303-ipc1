@@ -1,6 +1,7 @@
 #pragma once
 
 #include <thread>               // STL
+#include <filesystem>
 #include <glog/logging.h>       // GLOG
 #include "net.h"                // Net
 #include "net_w0303_server.h"
@@ -1121,6 +1122,19 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                 {
                                                     ///  b.2 find the TF!
 
+                                                    // 0. data management
+                                                    auto arm_mission_config_dir = "../data/point_clouds/real/arm_mission_config_" + std::to_string(arm_mission_configs[n].id);
+                                                    std::filesystem::create_directory(arm_mission_config_dir);
+
+                                                    auto task_group_dir = arm_mission_config_dir + "/task_group_" + std::to_string(task_group_id);
+                                                    std::filesystem::create_directory(task_group_dir);
+
+                                                    auto pc_dir = task_group_dir + "/point_cloud/";
+                                                    std::filesystem::create_directory(pc_dir);
+
+                                                    auto tf_dir = task_group_dir + "/tf/";
+                                                    std::filesystem::create_directory(tf_dir);
+
                                                     // 1. retrieve point cloud data in real time and then assign the value
                                                     //  1.1 move to several points.
                                                     //  1.2 record the point clouds. (several sets....)
@@ -1143,31 +1157,32 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                             // move!
                                                             tm5.ArmTask("Move_to ref_tcp_pos");
 
-                                                            //todo: record the real point cloud.
+                                                            //  1. define the name
+                                                            std::string id_str = std::to_string(arm_mission_configs[n].id);
+                                                            std::string set_no_str = std::to_string(set+1);
+                                                            std::string view_no_str = std::to_string(view+1);
+                                                            std::string feature_type_name = sql_ptr_->GetFeatureTypeName(arm_mission_configs[n].feature_type_ids[set]);
+
+                                                            auto real_pc_file_name = std::to_string(task_group_id) + "-" + id_str + "-" + set_no_str + "-" + view_no_str + "-" + feature_type_name;
+
+                                                            //todo: 1. record the real point cloud.
+                                                            //todo: 2. save the real_point_cloud file
                                                             LOG(INFO) << "Vision Job [Start]" << std::endl;
                                                             // ....
-                                                            // ....
-                                                            // ....
+                                                            auto result = tm5.RecordCurRealPointCloud(pc_dir, real_pc_file_name);
                                                             // wait for vision_job done
                                                             LOG(INFO) << "Vision Job [Running]" << std::endl;
                                                             LOG(INFO) << "Vision Job [Finish]" << std::endl;
 
-                                                            // save the real_pc_file.
-                                                            //  1. define the name
-                                                            std::string id_str = std::to_string(arm_mission_configs[n].id);
-                                                            std::string set_no_str = std::to_string(set);
-                                                            std::string view_no_str = std::to_string(view);
-                                                            std::string feature_type_name = sql_ptr_->GetFeatureTypeName(arm_mission_configs[n].feature_type_ids[set]);
-
-                                                            auto real_pc_file_name = id_str + "-" + set_no_str + "-" + view_no_str + "-" + feature_type_name + "-" + std::to_string(task_group_id);
-                                                            //todo:  2. save the real_point_cloud file
-                                                            // ...
-                                                            // ...
-                                                            // ...
+                                                            /// for debug
+                                                            auto tf_file_name = real_pc_file_name +"-tf.txt";
+                                                            auto tf_result = tm5.WriteTMatFile(arm_mission_configs[n].ref_tcp_pos_tfs[set][view],tf_dir, tf_file_name);
 
                                                             // push back
                                                             each_set_real_pc_pos_names.push_back(real_pc_file_name);
 
+                                                            // for safety concern.
+                                                            tm5.ArmTask("Move_to standby_p0");
                                                         }
 
                                                         real_pc_file_names.push_back(each_set_real_pc_pos_names);

@@ -2,6 +2,8 @@
 //
 
 #include <iostream>
+#include <fstream>
+
 #include <Windows.h>
 #include <stdio.h>
 
@@ -61,8 +63,68 @@ double curve_get_offset_distance(const int& layer_no, const std::deque<yf::data:
 }
 
 typedef int(*getoffsetpath)(robot_path_data*,double,robot_path_data*[]);
+
+typedef int (*get_point_cloud_from_depth_camera)(double [][3]);
+
 int main()
 {
+
+    // Get the Point Clouds
+
+    double input_pt[20000][3];
+
+    char filename2[] = "rs-pointcloud.dll"; // in debug file
+    wchar_t wtext2[100];
+    mbstowcs(wtext2, filename2, strlen(filename2) + 1);
+    LPWSTR ptr2 = wtext2;
+    HINSTANCE hinstLib2 = LoadLibraryW(ptr2);
+
+    //    HINSTANCE hinstLib2 = LoadLibrary(TEXT("../lib//rs-pointcloud.dll"));
+
+    if (hinstLib2 == NULL)
+    {
+        return 1;
+    }
+    get_point_cloud_from_depth_camera get_point_cloud;
+    get_point_cloud=(get_point_cloud_from_depth_camera)GetProcAddress(hinstLib2, "get_point_cloud_from_camera");
+    int m;
+    m=get_point_cloud(input_pt);
+
+
+    // write the point cloud file
+    ///\param file_name
+    ///\param directory
+
+    // format
+    ofstream myfile ("c:/example.txt");
+    if (myfile.is_open())
+    {
+        myfile << "# .PCD v.7 - Point Cloud Data file format\n";
+        myfile << "VERSION .7\n";
+        myfile << "FIELDS x y z\n";
+        myfile << "SIZE 4 4 4\n";
+        myfile << "TYPE F F F\n";
+        myfile << "COUNT 1 1 1\n";
+        myfile << "WIDTH " << m << "\n";
+        myfile << "HEIGHT 1\n";
+        myfile << "VIEWPOINT 0 0 0 1 0 0 0\n";
+        myfile << "POINTS " << m << "\n";
+        myfile << "DATA ascii\n";
+
+        for(int count = 0; count < m; count ++)
+        {
+            for (int index = 0 ; index < 3; index++)
+            {
+                myfile << input_pt[count][index] << " " ;
+            }
+            myfile << std::endl ;
+        }
+        myfile.close();
+    }
+    else cout << "Unable to open file";
+
+
+
 
 #if 0    /// rear
     //    pt[0][0] = -717.7292; // x0

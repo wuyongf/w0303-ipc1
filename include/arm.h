@@ -144,6 +144,11 @@ namespace yf
             std::vector<std::vector<std::string>> GetRefPCFileNames(const int& arm_mission_config_id);
             std::vector<int> GetFeatureTypeIds(const int& arm_mission_config_id);
 
+            bool RecordCurRealPointCloud(const std::string& abs_directory, const std::string& file_name);
+
+            bool WriteTMatFile(const Eigen::Matrix4f& TMat,
+                               const std::string &abs_directory,
+                               const std::string &file_name);
 
         public: // for nw_sys: each mission // retrieve data from Arm(tm5)
 
@@ -1677,4 +1682,46 @@ std::vector<std::vector<Eigen::Matrix4f>> yf::arm::tm::GetRefTcpPosTFs(const std
     }
 
     return ref_pc_pos_tfs;
+}
+
+bool yf::arm::tm::RecordCurRealPointCloud(const std::string &abs_directory, const std::string &file_name)
+{
+    if(al_arm_path.RecordCurRealPC(abs_directory,file_name))
+    {
+        return true;
+    }
+    else
+        return false;
+}
+
+bool
+yf::arm::tm::WriteTMatFile(const Eigen::Matrix4f &TMat, const std::string &abs_directory, const std::string &file_name)
+{
+    auto name = abs_directory + file_name;
+    std::ofstream myfile (name);
+
+    if (myfile.is_open())
+    {
+        for (int i = 0 ; i <= 3 ; i++)
+        {
+            for (int j = 0 ; j <= 3 ; j++)
+            {
+                myfile << TMat(i,j) ;
+
+                if(i!=3 || j!=3)
+                {
+                    myfile << ", ";
+                }
+            }
+            myfile << std::endl;
+        }
+        myfile.close();
+
+        return true;
+    }
+    else
+    {
+        std::cout << "Unable to open file";
+        return false;
+    }
 }

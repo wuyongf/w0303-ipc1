@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <fstream>
 #include <Windows.h>
 #include <stdio.h>
 
@@ -107,6 +108,11 @@ namespace yf
             yf::data::arm::Point3d ExportRealPointByLM(  const yf::data::arm::Point3d& original_via_points,
                                                          const yf::data::arm::Point3d& ref_landmark_pos,
                                                          const yf::data::arm::Point3d& real_landmark_pos);
+
+            bool RecordCurRealPC(const std::string &abs_directory, const std::string &file_name);
+
+            int RecordRealPCArray(double (&input_pt)[30000][3]);
+
 
 
         public:
@@ -491,6 +497,89 @@ yf::data::arm::Point3d yf::algorithm::arm_path::ExportRealPointByLM(const yf::da
 
     return real_point;
 }
+
+bool yf::algorithm::arm_path::RecordCurRealPC(const std::string &abs_directory, const std::string &file_name)
+{
+    Timer timer;
+    LOG(INFO) << "Record Point Cloud File [in progress]";
+    // Get the Point Clouds
+
+    double input_pt[30000][3];
+
+    auto point_no = this->RecordRealPCArray(input_pt);
+
+    if(point_no <= 0 )
+    {
+        return false;
+    }
+    else
+    {
+        // write the point cloud file
+        ///\param file_name
+        ///\param directory
+
+        // format
+        auto abs_name = abs_directory + file_name + ".pcd";
+
+        std::ofstream myfile (abs_name);
+        if (myfile.is_open())
+        {
+            myfile << "# .PCD v.7 - Point Cloud Data file format\n";
+            myfile << "VERSION .7\n";
+            myfile << "FIELDS x y z\n";
+            myfile << "SIZE 4 4 4\n";
+            myfile << "TYPE F F F\n";
+            myfile << "COUNT 1 1 1\n";
+            myfile << "WIDTH " << point_no << "\n";
+            myfile << "HEIGHT 1\n";
+            myfile << "VIEWPOINT 0 0 0 1 0 0 0\n";
+            myfile << "POINTS " << point_no << "\n";
+            myfile << "DATA ascii\n";
+
+            for(int count = 0; count < point_no; count ++)
+            {
+                for (int index = 0 ; index < 3; index++)
+                {
+                    myfile << input_pt[count][index] << " " ;
+                }
+                myfile << std::endl ;
+            }
+            myfile.close();
+
+            LOG(INFO) << "Record Point Cloud File [Done]";
+
+            return true;
+        }
+        else
+        {
+            std::cout << "Unable to open file";
+            return false;
+        }
+    }
+}
+
+int yf::algorithm::arm_path::RecordRealPCArray(double (&input_pt)[30000][3])
+{
+    char filename2[] = "rs-pointcloud.dll"; // in debug file
+    wchar_t wtext2[100];
+    mbstowcs(wtext2, filename2, strlen(filename2) + 1);
+    LPWSTR ptr2 = wtext2;
+    HINSTANCE hinstLib2 = LoadLibraryW(ptr2);
+
+    //    HINSTANCE hinstLib2 = LoadLibrary(TEXT("../lib//rs-pointcloud.dll"));
+
+    if (hinstLib2 == NULL)
+    {
+        return -1;
+    }
+
+    get_point_cloud_from_depth_camera get_point_cloud;
+    get_point_cloud=(get_point_cloud_from_depth_camera)GetProcAddress(hinstLib2, "get_point_cloud_from_camera");
+    return get_point_cloud(input_pt);
+}
+
+
+
 
 void yf::algorithm::cleaning_motion::Start(std::shared_ptr<yf::sql::sql_server> sql_ptr)
 {

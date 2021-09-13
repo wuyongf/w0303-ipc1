@@ -44,3 +44,6 @@ float unit32_to_float(const uint16_t& high_16, const uint16_t& low_16)
 
     return result;
 }
+
+/// Function from Point Cloud Dll
+typedef int (*get_point_cloud_from_depth_camera)(double [][3]);

@@ -4,9 +4,13 @@
 
 #include "../include/al.h"
 
+#include <filesystem>
+
 int main()
 {
     yf::algorithm::arm_path al;
+//
+//    al.RecordCurRealPC("c:", "123");
 
     // T_1: matrix input
     Eigen::Matrix4f T_1;
@@ -26,6 +30,34 @@ int main()
     0.02254707923126, 0.157577670571579, 0.987249161536931, 0.1422883,
     0.102470869788893, 0.981935099497134, -0.159069736971746, 0.9545875,
     0, 0, 0, 1;
+
+    std::filesystem::create_directory("c:/folder2/");
+
+    std::ofstream myfile ("c:/folder2/tf1.txt");
+    if (myfile.is_open())
+    {
+        for (int i = 0 ; i <= 3 ; i++)
+        {
+            for (int j = 0 ; j <= 3 ; j++)
+            {
+                myfile << T_1(i,j) ;
+
+                if(i!=3 || j!=3)
+                {
+                    myfile << ", ";
+                }
+            }
+            myfile << std::endl;
+        }
+        myfile.close();
+    }
+    else
+    {
+        std::cout << "Unable to open file";
+        return false;
+    }
+
+
 
     T_2 <<
     -0.862408753516547, -0.0436989246263717, -0.504322858736876, 0.02973238,
