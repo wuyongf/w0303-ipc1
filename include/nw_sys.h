@@ -1246,7 +1246,9 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
 
                                                     std::deque<yf::data::arm::Point3d> real_via_points;
 
-                                                    real_via_points = tm5.GetRealViaPoints(arm_mission_configs[n].via_points, arm_mission_configs[n].ref_landmark_pos, real_lm_pos_);
+                                                    real_via_points = tm5.GetRealViaPointsByLM(
+                                                            arm_mission_configs[n].via_points,
+                                                            arm_mission_configs[n].ref_landmark_pos, real_lm_pos_);
 
                                                     arm_mission_configs[n].via_points.clear();
 
@@ -3141,7 +3143,9 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
 
                                                         std::deque<yf::data::arm::Point3d> real_via_points;
 
-                                                        real_via_points = tm5.GetRealViaPoints(arm_mission_configs[n].via_points, arm_mission_configs[n].ref_landmark_pos, real_lm_pos_);
+                                                        real_via_points = tm5.GetRealViaPointsByLM(
+                                                                arm_mission_configs[n].via_points,
+                                                                arm_mission_configs[n].ref_landmark_pos, real_lm_pos_);
 
                                                         arm_mission_configs[n].via_points.clear();
 
@@ -3238,7 +3242,9 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
 
                                                     std::deque<yf::data::arm::Point3d> real_via_points;
 
-                                                    real_via_points = tm5.GetRealViaPoints(arm_mission_configs[n].via_points, arm_mission_configs[n].ref_landmark_pos, real_lm_pos_);
+                                                    real_via_points = tm5.GetRealViaPointsByLM(
+                                                            arm_mission_configs[n].via_points,
+                                                            arm_mission_configs[n].ref_landmark_pos, real_lm_pos_);
 
                                                     arm_mission_configs[n].via_points.clear();
 

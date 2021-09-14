@@ -66,9 +66,48 @@ typedef int(*getoffsetpath)(robot_path_data*,double,robot_path_data*[]);
 
 typedef int (*get_point_cloud_from_depth_camera)(double [][3]);
 
+typedef int (*door_handle_identification )(char [],char [],double [],double [][2]);
+
+typedef void (*calculate_exact_bounding_box)(double[][3], unsigned int, double[], double[], double[], double[], double[][3]);
+
+
 int main()
 {
+//    char filename[] = "ApproxMVBBExample-MVBB1.dll";
+//    wchar_t wtext[100];
+//    mbstowcs(wtext, filename, strlen(filename) + 1);
+//    LPWSTR ptr1 = wtext;
+//    HINSTANCE hinstLib = LoadLibraryW(ptr1);
+//    if (hinstLib == NULL)
+//    {
+//        return 1;
+//    }
+//    calculate_exact_bounding_box calculate_bounding_box;
+//    calculate_bounding_box = (calculate_exact_bounding_box)GetProcAddress(hinstLib, "calculate_bounding_box");
 
+
+#if 1
+    char filename1[] = "cloud_viewer.dll";
+    wchar_t wtext1[100];
+    mbstowcs(wtext1, filename1, strlen(filename1) + 1);
+    LPWSTR ptr1 = wtext1;
+    HINSTANCE hinstLib1 = LoadLibraryW(ptr1);
+    if (hinstLib1 == NULL)
+    {
+        return 1;
+    }
+    door_handle_identification door_plane_corner_line_processing;
+    door_plane_corner_line_processing = (door_handle_identification)GetProcAddress(hinstLib1, "door_plane_corner_line_processing");
+
+
+    double translation[3];
+    double rotation[2][2];
+    auto n = door_plane_corner_line_processing("C:\\Users\\yongf\\CLionProjects\\w0303-ipc1\\data\\point_clouds\\real\\arm_mission_config_11167\\task_group_6202\\point_cloud\\6202-11167-2-1-planar.pcd",
+                                      "C:\\Users\\yongf\\CLionProjects\\w0303-ipc1\\data\\point_clouds\\real\\arm_mission_config_11167\\task_group_6202\\tf\\6202-11167-2-1-planar-tf.txt",
+                                      translation,rotation);
+#endif
+
+#if 0
     // Get the Point Clouds
 
     double input_pt[20000][3];
@@ -272,6 +311,8 @@ int main()
         // insert to ref_paths
         ref_path.insert(ref_path.end(), ref_path_each_layer.begin(), ref_path_each_layer.end());
     }
+
+#endif
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu

@@ -9,7 +9,67 @@
 int main()
 {
     yf::algorithm::arm_path al;
-//
+
+    Eigen::Matrix4f TMat;
+    TMat <<
+    0.99944, 0.033362, 0, 35.119,
+    -0.033362, 0.99944, 0, -48.295,
+    0, 0, 1, 0,
+    0, 0, 0, 1;
+
+    yf::data::arm::Point3d pos_via;
+    pos_via.x = -744.789;
+    pos_via.y = -29.246;
+    pos_via.z = 667.744;
+    pos_via.rx = 128.466;
+    pos_via.ry = -1.191;
+    pos_via.rz = -65.125;
+
+    yf::data::arm::Point3d pos_1;
+    pos_1.x = -776.978;
+    pos_1.y = -37.067;
+    pos_1.z = 631.404;
+    pos_1.rx = 126.831;
+    pos_1.ry = -0.756;
+    pos_1.rz = -64.915;
+
+    yf::data::arm::Point3d pos_2;
+    pos_2.x = -826.655;
+    pos_2.y = 64.318;
+    pos_2.z = 620.239;
+    pos_2.rx = 125.916;
+    pos_2.ry = -4.15;
+    pos_2.rz = -62.464;
+
+    auto real_pos_via = al.GetRealPointByRS(TMat,pos_via);
+    auto real_pos_1 = al.GetRealPointByRS(TMat,pos_1);
+    auto real_pos_2 = al.GetRealPointByRS(TMat,pos_2);
+
+    std::cout << "real_pos_via: "<< std::endl;
+    std::cout << "x: " << real_pos_via.x << std::endl;
+    std::cout << "y: " << real_pos_via.y << std::endl;
+    std::cout << "z: " << real_pos_via.z << std::endl;
+    std::cout << "rx: " << real_pos_via.rx << std::endl;
+    std::cout << "ry: " << real_pos_via.ry << std::endl;
+    std::cout << "rz: " << real_pos_via.rz << std::endl;
+
+    std::cout << "real_pos_1: "<< std::endl;
+    std::cout << "x: " << real_pos_1.x << std::endl;
+    std::cout << "y: " << real_pos_1.y << std::endl;
+    std::cout << "z: " << real_pos_1.z << std::endl;
+    std::cout << "rx: " << real_pos_1.rx << std::endl;
+    std::cout << "ry: " << real_pos_1.ry << std::endl;
+    std::cout << "rz: " << real_pos_1.rz << std::endl;
+
+    std::cout << "real_pos_2: "<< std::endl;
+    std::cout << "x: " << real_pos_2.x << std::endl;
+    std::cout << "y: " << real_pos_2.y << std::endl;
+    std::cout << "z: " << real_pos_2.z << std::endl;
+    std::cout << "rx: " << real_pos_2.rx << std::endl;
+    std::cout << "ry: " << real_pos_2.ry << std::endl;
+    std::cout << "rz: " << real_pos_2.rz << std::endl;
+
+
 //    al.RecordCurRealPC("c:", "123");
 
     // T_1: matrix input

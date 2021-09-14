@@ -109,6 +109,9 @@ namespace yf
                                                          const yf::data::arm::Point3d& ref_landmark_pos,
                                                          const yf::data::arm::Point3d& real_landmark_pos);
 
+            yf::data::arm::Point3d GetRealPointByRS(const Eigen::Matrix4f & TMat,
+                                                    const yf::data::arm::Point3d& ref_tcp_pos);
+
             bool RecordCurRealPC(const std::string &abs_directory, const std::string &file_name);
 
             int RecordRealPCArray(double (&input_pt)[30000][3]);
@@ -578,7 +581,45 @@ int yf::algorithm::arm_path::RecordRealPCArray(double (&input_pt)[30000][3])
     return get_point_cloud(input_pt);
 }
 
+yf::data::arm::Point3d
+yf::algorithm::arm_path::GetRealPointByRS(const Eigen::Matrix4f &TMat, const yf::data::arm::Point3d &ref_tcp_pos)
+{
+    //todo: Find real_path T6 = T4*inv(T1)*T3
+    // T1: ref_landmark_pos
+    // T3: ref_path
+    // T4: real_landmark_pos
 
+    //@@ input:
+    // 1. via_points (original_path)
+    // 2. ref_landmark_pos(ref_TF)
+    // 3. real_landmark_pos(real_TF)
+    //@@ output:
+    // 1. new_via_points (real_path)
+
+    yf::data::arm::Point3d real_point;
+
+    std::vector<float> real_point_rpy;
+
+    auto T_n = points2TMat(ref_tcp_pos);
+
+    Eigen::Matrix4f T_real = TMat * T_n;
+    Eigen::MatrixXf Translation_real = T_real.block(0,3 ,3,1);
+
+    Eigen::Matrix3f R_real = T_real.block(0,0 ,3,3);
+
+    real_point_rpy = R2rpy(R_real);
+
+    // x,y,z
+    real_point.x = Translation_real(0);
+    real_point.y = Translation_real(1);
+    real_point.z = Translation_real(2);
+    // rx,ry,rz
+    real_point.rx = real_point_rpy[0];
+    real_point.ry = real_point_rpy[1];
+    real_point.rz = real_point_rpy[2];
+
+    return real_point;
+}
 
 
 void yf::algorithm::cleaning_motion::Start(std::shared_ptr<yf::sql::sql_server> sql_ptr)

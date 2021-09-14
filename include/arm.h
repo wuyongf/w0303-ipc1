@@ -162,13 +162,16 @@ namespace yf
 
         public: // algorithm
 
-            std::deque<yf::data::arm::Point3d> GetRealViaPoints(const std::deque<yf::data::arm::Point3d>& original_via_points,
-                                                                const yf::data::arm::Point3d& ref_landmark_pos,
-                                                                const yf::data::arm::Point3d& real_landmark_pos);
+            std::deque<yf::data::arm::Point3d> GetRealViaPointsByLM(const std::deque<yf::data::arm::Point3d>& original_via_points,
+                                                                    const yf::data::arm::Point3d& ref_landmark_pos,
+                                                                    const yf::data::arm::Point3d& real_landmark_pos);
 
             yf::data::arm::Point3d GetRealPointByLM(const yf::data::arm::Point3d& original_via_points,
                                                     const yf::data::arm::Point3d& ref_landmark_pos,
                                                     const yf::data::arm::Point3d& real_landmark_pos);
+
+            yf::data::arm::Point3d GetRealPointByRS(const Eigen::Matrix4f & TMat,
+                                                    const yf::data::arm::Point3d& ref_tcp_pos);
 
         public:
             /// Safety Methods
@@ -1298,9 +1301,9 @@ yf::data::arm::Point3d yf::arm::tm::GetRealLandmarkPos()
 }
 
 std::deque<yf::data::arm::Point3d>
-yf::arm::tm::GetRealViaPoints(const std::deque<yf::data::arm::Point3d> &original_via_points,
-                              const yf::data::arm::Point3d &ref_landmark_pos,
-                              const yf::data::arm::Point3d &real_landmark_pos)
+yf::arm::tm::GetRealViaPointsByLM(const std::deque<yf::data::arm::Point3d> &original_via_points,
+                                  const yf::data::arm::Point3d &ref_landmark_pos,
+                                  const yf::data::arm::Point3d &real_landmark_pos)
 {
     return al_arm_path.ExportRealPathByLM(original_via_points, ref_landmark_pos, real_landmark_pos);
 }
@@ -1724,4 +1727,10 @@ yf::arm::tm::WriteTMatFile(const Eigen::Matrix4f &TMat, const std::string &abs_d
         std::cout << "Unable to open file";
         return false;
     }
+}
+
+yf::data::arm::Point3d
+yf::arm::tm::GetRealPointByRS(const Eigen::Matrix4f &TMat, const yf::data::arm::Point3d &ref_tcp_pos)
+{
+    return yf::data::arm::Point3d();
 }

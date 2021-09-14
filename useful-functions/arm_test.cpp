@@ -118,7 +118,7 @@ int main()
 
     original_path.push_back(ori_point_1);
 
-    auto real_path = tm5.GetRealViaPoints(original_path, ref_landmark_pos, real_landmark_pos);
+    auto real_path = tm5.GetRealViaPointsByLM(original_path, ref_landmark_pos, real_landmark_pos);
 
 
 
