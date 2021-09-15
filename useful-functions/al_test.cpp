@@ -10,12 +10,17 @@ int main()
 {
     yf::algorithm::arm_path al;
 
-    Eigen::Matrix4f TMat;
-    TMat <<
-    0.99944, 0.033362, 0, 35.119,
-    -0.033362, 0.99944, 0, -48.295,
-    0, 0, 1, 0,
-    0, 0, 0, 1;
+    std::string real_pc_file = "..\\data\\point_clouds\\real\\arm_mission_config_11167\\task_group_6224\\point_cloud\\6224-11167-1-1-planar.pcd";
+    std::string ref_pos_tf_file = "..\\data\\point_clouds\\real\\arm_mission_config_11167\\task_group_6224\\tf\\6224-11167-1-1-planar-tf.txt";
+
+    auto TMat1 = al.Phase2GetTMat4Handle(real_pc_file,ref_pos_tf_file);
+
+//    Eigen::Matrix4f TMat;
+//    TMat <<
+//    0.99944, 0.033362, 0, 35.119,
+//    -0.033362, 0.99944, 0, -48.295,
+//    0, 0, 1, 0,
+//    0, 0, 0, 1;
 
     yf::data::arm::Point3d pos_via;
     pos_via.x = -744.789;
@@ -41,9 +46,9 @@ int main()
     pos_2.ry = -4.15;
     pos_2.rz = -62.464;
 
-    auto real_pos_via = al.GetRealPointByRS(TMat,pos_via);
-    auto real_pos_1 = al.GetRealPointByRS(TMat,pos_1);
-    auto real_pos_2 = al.GetRealPointByRS(TMat,pos_2);
+    auto real_pos_via = al.GetRealPointByRS(TMat1,pos_via);
+    auto real_pos_1 = al.GetRealPointByRS(TMat1,pos_1);
+    auto real_pos_2 = al.GetRealPointByRS(TMat1,pos_2);
 
     std::cout << "real_pos_via: "<< std::endl;
     std::cout << "x: " << real_pos_via.x << std::endl;

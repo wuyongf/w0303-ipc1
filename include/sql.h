@@ -312,6 +312,9 @@ namespace yf
             int GetEachSetFeatureTypeId(const int& arm_mission_config_id, const int& set_no);
 
             std::string GetFeatureTypeName(const int& feature_type_id);
+            int GetFeatureTypeId(const std::string& feature_type_name);
+
+            std::vector<std::string> GetRealFileNames();
 
         private:
             bool static IsOne(int x){return x == 1;}
@@ -319,7 +322,6 @@ namespace yf
 
             /// Onsite setup
             void OSGetScheduleReady(const int& schedule_id, const int& seconds_later_from_now);
-
 
         private: /// Onsite Setup: method 1: stl time ---> db time
 
@@ -4711,6 +4713,44 @@ std::string yf::sql::sql_server::GetFeatureTypeName(const int &feature_type_id)
         std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
 
         return feature_type_name;
+    };
+}
+
+int yf::sql::sql_server::GetFeatureTypeId(const std::string &feature_type_name)
+{
+    // query string
+    std::string query_update;
+
+    // input
+
+    // output
+    int feature_type_id;
+
+    //"SELECT position_name FROM data_ugv_mission_config where model_config_id = 1 ORDER BY mission_order"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT ID FROM data_arm_FeatureType where feature_type = '" + feature_type_name + "'";
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            feature_type_id = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return feature_type_id;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return feature_type_id;
     };
 }
 

@@ -239,7 +239,7 @@ namespace  yf
 
                 Point3d                 real_landmark_pos;
 
-                Eigen::Matrix4f         Mat_TF;
+                Eigen::Matrix4f         TMat;
 
                 Point3d                 via_approach_pos;
 
@@ -261,6 +261,9 @@ namespace  yf
                 std::vector<std::vector<std::string>> ref_pc_file_names;
                 // 1d vector for feature type
                 std::vector<int> feature_type_ids;
+
+                std::string real_pc_file;
+                std::string ref_pos_tf_file;
             };
         }
     }

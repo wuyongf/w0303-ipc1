@@ -170,8 +170,14 @@ namespace yf
                                                     const yf::data::arm::Point3d& ref_landmark_pos,
                                                     const yf::data::arm::Point3d& real_landmark_pos);
 
+            std::deque<yf::data::arm::Point3d> GetRealViaPointsByRS(const Eigen::Matrix4f & TMat,
+                                                                    const std::deque<yf::data::arm::Point3d> &original_via_points);
+
             yf::data::arm::Point3d GetRealPointByRS(const Eigen::Matrix4f & TMat,
                                                     const yf::data::arm::Point3d& ref_tcp_pos);
+
+            Eigen::Matrix4f Phase2GetTMat4Handle(std::string& real_pc_file, std::string& ref_pos_tf_file);
+
 
         public:
             /// Safety Methods
@@ -1732,5 +1738,16 @@ yf::arm::tm::WriteTMatFile(const Eigen::Matrix4f &TMat, const std::string &abs_d
 yf::data::arm::Point3d
 yf::arm::tm::GetRealPointByRS(const Eigen::Matrix4f &TMat, const yf::data::arm::Point3d &ref_tcp_pos)
 {
-    return yf::data::arm::Point3d();
+    return al_arm_path.GetRealPointByRS(TMat,ref_tcp_pos);
+}
+
+Eigen::Matrix4f yf::arm::tm::Phase2GetTMat4Handle(std::string &real_pc_file, std::string &ref_pos_tf_file)
+{
+    return al_arm_path.Phase2GetTMat4Handle(real_pc_file,ref_pos_tf_file);
+}
+
+std::deque<yf::data::arm::Point3d> yf::arm::tm::GetRealViaPointsByRS(const Eigen::Matrix4f &TMat,
+                                                                     const std::deque<yf::data::arm::Point3d> &original_via_points)
+{
+    return al_arm_path.ExportRealPathByRS(TMat,original_via_points );
 }

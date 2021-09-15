@@ -960,7 +960,11 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
 
                                             sleep.ms(200);
 
+#if 0 //disable for testing
+
                                             this->ArmAbsorbWater();
+
+#endif
                                         }
 
                                     }
@@ -1120,6 +1124,8 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                 }
                                                 case data::arm::VisionType::D455:
                                                 {
+                                                    amc_skip_flag = false;
+
                                                     ///  b.2 find the TF!
 
                                                     // 0. data management
@@ -1163,6 +1169,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                             std::string view_no_str = std::to_string(view+1);
                                                             std::string feature_type_name = sql_ptr_->GetFeatureTypeName(arm_mission_configs[n].feature_type_ids[set]);
 
+                                                            // note: without ".pcd"
                                                             auto real_pc_file_name = std::to_string(task_group_id) + "-" + id_str + "-" + set_no_str + "-" + view_no_str + "-" + feature_type_name;
 
                                                             //todo: 1. record the real point cloud.
@@ -1189,9 +1196,57 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                     }
 
                                                     //todo: 2. compare!
-                                                    // @input:
-
+                                                    // ...
+                                                    // ...
                                                     // 3. get the TF!
+                                                    switch (arm_mission_configs[n].model_type)
+                                                    {
+                                                        case data::arm::ModelType::Handle:
+                                                        {
+                                                            auto feature_type = "planar";
+                                                            auto feature_type_id = sql_ptr_->GetFeatureTypeId(feature_type);
+
+                                                            std::vector<int> planar_sets;
+
+                                                            // find the corresponding files
+                                                            for (int m =0; m < arm_mission_configs[n].feature_type_ids.size(); m++)
+                                                            {
+                                                                if(arm_mission_configs[n].feature_type_ids[m] == feature_type_id)
+                                                                {
+                                                                    planar_sets.push_back(m);
+                                                                }
+                                                            }
+
+                                                            /// for 1 set 1 view algorithm
+                                                            if(planar_sets.size() == 1)
+                                                            {
+                                                                auto set_no  = planar_sets[0];
+
+                                                                auto cur_set_view_no = arm_mission_configs[n].ref_pc_file_names[set_no].size();
+
+                                                                if (cur_set_view_no == 1)
+                                                                {
+                                                                    // get the file name;
+                                                                    auto ref_pc_file_name = arm_mission_configs[n].ref_pc_file_names[set_no][0];
+
+                                                                    auto real_pc_file_name = std::to_string(task_group_id) + "-" + ref_pc_file_name;
+
+                                                                    std::string real_pc_file =   "..\\data\\point_clouds\\real\\arm_mission_config_" + std::to_string(arm_mission_configs[n].id)
+                                                                            + "\\task_group_" + std::to_string(task_group_id) + "\\point_cloud\\" + real_pc_file_name + ".pcd";
+
+                                                                    std::string ref_pos_tf_file = "..\\data\\point_clouds\\real\\arm_mission_config_" + std::to_string(arm_mission_configs[n].id)
+                                                                            + "\\task_group_" + std::to_string(task_group_id) + "\\tf\\" + real_pc_file_name + "-tf.txt";
+
+                                                                    arm_mission_configs[n].real_pc_file = real_pc_file;
+                                                                    arm_mission_configs[n].ref_pos_tf_file = ref_pos_tf_file;
+
+                                                                    arm_mission_configs[n].TMat = tm5.Phase2GetTMat4Handle(real_pc_file,ref_pos_tf_file);
+                                                                }
+                                                            }
+
+                                                            break;
+                                                        }
+                                                    }
 
                                                     // 4. set the amc_skip_flag?
 
@@ -1231,7 +1286,6 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                             // 2.1.1 check&set tool_angle
                                             this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
 
-
                                             /// 2.2 Calculation
 
                                             switch (arm_mission_configs[n].vision_type)
@@ -1269,6 +1323,28 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                 }
                                                 case data::arm::VisionType::D455:
                                                 {
+                                                    // 2.1 calculate the new via_points
+
+                                                    std::deque<yf::data::arm::Point3d> real_via_points;
+
+                                                    real_via_points = tm5.GetRealViaPointsByRS(arm_mission_configs[n].TMat, arm_mission_configs[n].via_points);
+
+                                                    arm_mission_configs[n].via_points.clear();
+
+                                                    arm_mission_configs[n].via_points = real_via_points;
+
+                                                    // 2.2 calculate the real approach point
+
+                                                    auto real_via_approach_point = tm5.GetRealPointByRS(arm_mission_configs[n].TMat,arm_mission_configs[n].via_approach_pos);
+
+                                                    arm_mission_configs[n].via_approach_pos.x  = real_via_approach_point.x;
+                                                    arm_mission_configs[n].via_approach_pos.y  = real_via_approach_point.y;
+                                                    arm_mission_configs[n].via_approach_pos.z  = real_via_approach_point.z;
+                                                    arm_mission_configs[n].via_approach_pos.rx = real_via_approach_point.rx;
+                                                    arm_mission_configs[n].via_approach_pos.ry = real_via_approach_point.ry;
+                                                    arm_mission_configs[n].via_approach_pos.rz = real_via_approach_point.rz;
+
+
                                                     break;
                                                 }
                                                 case data::arm::VisionType::D435:

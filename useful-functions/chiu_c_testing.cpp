@@ -102,9 +102,9 @@ int main()
 
     double translation[3];
     double rotation[2][2];
-    auto n = door_plane_corner_line_processing("C:\\Users\\yongf\\CLionProjects\\w0303-ipc1\\data\\point_clouds\\real\\arm_mission_config_11167\\task_group_6202\\point_cloud\\6202-11167-2-1-planar.pcd",
-                                      "C:\\Users\\yongf\\CLionProjects\\w0303-ipc1\\data\\point_clouds\\real\\arm_mission_config_11167\\task_group_6202\\tf\\6202-11167-2-1-planar-tf.txt",
-                                      translation,rotation);
+    auto n = door_plane_corner_line_processing("..\\data\\point_clouds\\real\\arm_mission_config_11167\\task_group_6215\\point_cloud\\6215-11167-1-1-planar.pcd",
+                                               "..\\data\\point_clouds\\real\\arm_mission_config_11167\\task_group_6215\\tf\\6215-11167-1-1-planar-tf.txt",
+                                                translation,rotation);
 #endif
 
 #if 0

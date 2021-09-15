@@ -101,6 +101,7 @@ namespace yf
 
             void RecordRefPath();
 
+            /// Landmark
             std::deque<yf::data::arm::Point3d> ExportRealPathByLM(  const std::deque<yf::data::arm::Point3d>& original_via_points,
                                                                     const yf::data::arm::Point3d& ref_landmark_pos,
                                                                     const yf::data::arm::Point3d& real_landmark_pos);
@@ -109,6 +110,12 @@ namespace yf
                                                          const yf::data::arm::Point3d& ref_landmark_pos,
                                                          const yf::data::arm::Point3d& real_landmark_pos);
 
+            /// Camera
+
+            std::deque<yf::data::arm::Point3d> ExportRealPathByRS(  const Eigen::Matrix4f & TMat,
+                                                                    const std::deque<yf::data::arm::Point3d>& original_via_points);
+
+
             yf::data::arm::Point3d GetRealPointByRS(const Eigen::Matrix4f & TMat,
                                                     const yf::data::arm::Point3d& ref_tcp_pos);
 
@@ -116,7 +123,8 @@ namespace yf
 
             int RecordRealPCArray(double (&input_pt)[30000][3]);
 
-
+            /// for phase 2 office demo
+            Eigen::Matrix4f Phase2GetTMat4Handle(std::string& real_pc_file, std::string& ref_pos_tf_file);
 
         public:
 
@@ -619,6 +627,88 @@ yf::algorithm::arm_path::GetRealPointByRS(const Eigen::Matrix4f &TMat, const yf:
     real_point.rz = real_point_rpy[2];
 
     return real_point;
+}
+
+Eigen::Matrix4f yf::algorithm::arm_path::Phase2GetTMat4Handle(std::string& real_pc_file, std::string& ref_pos_tf_file)
+{
+    Eigen::Matrix4f TMat;
+    TMat.setZero();
+
+    typedef int (*door_handle_identification )(char [],char [],double [],double [][2]);
+
+    // get 2d TMat
+    char filename1[] = "cloud_viewer.dll";
+    wchar_t wtext1[100];
+    mbstowcs(wtext1, filename1, strlen(filename1) + 1);
+    LPWSTR ptr1 = wtext1;
+    HINSTANCE hinstLib1 = LoadLibraryW(ptr1);
+    if (hinstLib1 == NULL)
+    {
+        return TMat;
+    }
+    door_handle_identification door_plane_corner_line_processing;
+    door_plane_corner_line_processing = (door_handle_identification)GetProcAddress(hinstLib1, "door_plane_corner_line_processing");
+
+
+    double translation[3];
+    double rotation[2][2];
+    auto n = door_plane_corner_line_processing(&real_pc_file[0],&ref_pos_tf_file[0],translation,rotation);
+
+    /// fill the 4x4 TMat
+
+    // Translation
+    TMat(0, 3) = translation[0] * 1000;
+    TMat(1, 3) = translation[1] * 1000;
+    TMat(2, 3) = 0;
+    TMat(3, 3) = 1;
+
+    // Rotation
+    TMat(0, 0) = rotation[0][0];
+    TMat(0, 1) = rotation[0][1];
+    TMat(0, 2) = 0;
+    TMat(1, 0) = rotation[1][0];
+    TMat(1, 1) = rotation[1][1];
+    TMat(1, 2) = 0;
+    TMat(2, 0) = 0;
+    TMat(2, 1) = 0;
+    TMat(2, 2) = 1;
+
+    return TMat;
+}
+
+std::deque<yf::data::arm::Point3d> yf::algorithm::arm_path::ExportRealPathByRS(const Eigen::Matrix4f &TMat,
+                                                                               const std::deque<yf::data::arm::Point3d> &original_via_points)
+{
+    std::deque<yf::data::arm::Point3d> real_path;
+
+    for(int i = 0; i < original_via_points.size(); i++)
+    {
+        yf::data::arm::Point3d real_point;
+        std::vector<float> real_point_rpy;
+
+
+        auto T_n = points2TMat(original_via_points[i]);
+
+        Eigen::Matrix4f T_real = TMat * T_n;
+        Eigen::MatrixXf Translation_real = T_real.block(0,3 ,3,1);
+
+        Eigen::Matrix3f R_real = T_real.block(0,0 ,3,3);
+
+        real_point_rpy = R2rpy(R_real);
+
+        // x,y,z
+        real_point.x = Translation_real(0);
+        real_point.y = Translation_real(1);
+        real_point.z = Translation_real(2);
+        // rx,ry,rz
+        real_point.rx = real_point_rpy[0];
+        real_point.ry = real_point_rpy[1];
+        real_point.rz = real_point_rpy[2];
+
+        real_path.push_back(real_point);
+    }
+
+    return real_path;
 }
 
 
