@@ -86,7 +86,7 @@ int main()
 //    calculate_bounding_box = (calculate_exact_bounding_box)GetProcAddress(hinstLib, "calculate_bounding_box");
 
 
-#if 1
+#if 0
     char filename1[] = "cloud_viewer.dll";
     wchar_t wtext1[100];
     mbstowcs(wtext1, filename1, strlen(filename1) + 1);
@@ -107,10 +107,10 @@ int main()
                                                 translation,rotation);
 #endif
 
-#if 0
+#if 1
     // Get the Point Clouds
 
-    double input_pt[20000][3];
+    double input_pt[30000][3];
 
     char filename2[] = "rs-pointcloud.dll"; // in debug file
     wchar_t wtext2[100];
@@ -135,7 +135,7 @@ int main()
     ///\param directory
 
     // format
-    ofstream myfile ("c:/example.txt");
+    ofstream myfile ("c:/temp/point-cloud.pcd");
     if (myfile.is_open())
     {
         myfile << "# .PCD v.7 - Point Cloud Data file format\n";

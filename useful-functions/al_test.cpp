@@ -10,41 +10,81 @@ int main()
 {
     yf::algorithm::arm_path al;
 
+    yf::data::arm::Point3d ref_landmark_pos;
+    yf::data::arm::Point3d real_landmark_pos;
+
+    ref_landmark_pos.x = -555.3;
+    ref_landmark_pos.y = -214.55;
+    ref_landmark_pos.z = 2.74;
+    ref_landmark_pos.rx = 178.9;
+    ref_landmark_pos.ry = 7.16;
+    ref_landmark_pos.rz = 95.59;
+
+    real_landmark_pos.x = -624.77;
+    real_landmark_pos.y = -39.14;
+    real_landmark_pos.z = 0.21;
+    real_landmark_pos.rx = 179.97;
+    real_landmark_pos.ry = 0.98;
+    real_landmark_pos.rz = 94.44;
+
+    Eigen::Matrix4f T_ref_tag;      //T1
+    Eigen::Matrix4f T_real_tag;     //T4
+
+    T_ref_tag.setZero();
+    T_real_tag.setZero();
+
+    T_ref_tag = al.points2TMat(ref_landmark_pos);      // T1
+    T_real_tag = al.points2TMat(real_landmark_pos);    // T4
+
+    Eigen::Matrix4f T_deltaa = T_real_tag * T_ref_tag.inverse() ;
+
+    std::cout << "T_deltaa" << std::endl << T_deltaa << std::endl;
+
+/// demo handle testing
     std::string real_pc_file = "..\\data\\point_clouds\\real\\arm_mission_config_11167\\task_group_6224\\point_cloud\\6224-11167-1-1-planar.pcd";
     std::string ref_pos_tf_file = "..\\data\\point_clouds\\real\\arm_mission_config_11167\\task_group_6224\\tf\\6224-11167-1-1-planar-tf.txt";
 
-    auto TMat1 = al.Phase2GetTMat4Handle(real_pc_file,ref_pos_tf_file);
+//    auto TMat1 = al.Phase2GetTMat4Handle(real_pc_file,ref_pos_tf_file);
 
-//    Eigen::Matrix4f TMat;
-//    TMat <<
-//    0.99944, 0.033362, 0, 35.119,
-//    -0.033362, 0.99944, 0, -48.295,
-//    0, 0, 1, 0,
-//    0, 0, 0, 1;
+    Eigen::Matrix4f TMat1;
+    TMat1 <<
+    0.991383, 0.130997, 0, 11.0602,
+    -0.130997, 0.991383, 0, 173.274,
+    0, 0, 1, 0,
+    0, 0, 0, 1;
+
+    Eigen::Matrix4f TMat_delta;
+    TMat_delta <<
+    0, 0, 0, -47.5,
+    0, 0, 0, 125.23,
+    0, 0, 0, 0,
+    0, 0, 0, 0;
+
+//    TMat1 = TMat1 - TMat_delta;
 
     yf::data::arm::Point3d pos_via;
-    pos_via.x = -744.789;
-    pos_via.y = -29.246;
-    pos_via.z = 667.744;
-    pos_via.rx = 128.466;
-    pos_via.ry = -1.191;
-    pos_via.rz = -65.125;
+    pos_via.x = -607.0776;
+    pos_via.y = -83.38239;
+    pos_via.z = 686.2543;
+    pos_via.rx = 128.3404;
+    pos_via.ry = 2.061164;
+    pos_via.rz = -70.3384;
 
     yf::data::arm::Point3d pos_1;
-    pos_1.x = -776.978;
-    pos_1.y = -37.067;
-    pos_1.z = 631.404;
-    pos_1.rx = 126.831;
-    pos_1.ry = -0.756;
-    pos_1.rz = -64.915;
+    pos_1.x = -641.461;
+    pos_1.y = -86.476;
+    pos_1.z = 645.393;
+    pos_1.rx = 130.573;
+    pos_1.ry = 2.056;
+    pos_1.rz = -71.029;
 
     yf::data::arm::Point3d pos_2;
-    pos_2.x = -826.655;
-    pos_2.y = 64.318;
-    pos_2.z = 620.239;
-    pos_2.rx = 125.916;
-    pos_2.ry = -4.15;
-    pos_2.rz = -62.464;
+    pos_2.x = -670.471;
+    pos_2.y = 17.467;
+    pos_2.z = 632.146;
+    pos_2.rx = 126.768;
+    pos_2.ry = 2.234;
+    pos_2.rz = -75.474;
 
     auto real_pos_via = al.GetRealPointByRS(TMat1,pos_via);
     auto real_pos_1 = al.GetRealPointByRS(TMat1,pos_1);
@@ -95,6 +135,7 @@ int main()
     0.02254707923126, 0.157577670571579, 0.987249161536931, 0.1422883,
     0.102470869788893, 0.981935099497134, -0.159069736971746, 0.9545875,
     0, 0, 0, 1;
+
 
     std::filesystem::create_directory("c:/folder2/");
 
