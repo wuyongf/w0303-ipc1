@@ -47,6 +47,20 @@ namespace yf
             void WaitSchedulesInitialCheck();
 
         public:
+            /// Methods for two main functions
+
+            void DoJobs(const int& cur_schedule_id);
+            void DoTasks(const int& cur_job_id, const int& task_group_id);
+
+            void DoJobUgvBackToChargingStation();
+            void DoJobArmBackToHomePos();
+
+            void RedoJob(const int& cur_schedule_id,const yf::data::schedule::ScheduleCommand& redo_command);
+
+            //
+            void JobsFilter(std::deque<int>& q_ids);
+
+        public:
             /// Arm Methods: based on tm5.ArmTask();
 
             void ArmPickTool (const yf::data::arm::TaskMode& task_mode);
@@ -75,20 +89,6 @@ namespace yf
 
             bool WaitForUgvPLCRegisterInt(const int& plc_register, const int& value, const int& timeout_min);
             bool WaitForUgvPLCRegisterFloat(const int& plc_register, const float& value, const int& timeout_min);
-
-        public:
-            /// Methods for two main functions
-
-            void DoJobs(const int& cur_schedule_id);
-            void DoTasks(const int& cur_job_id, const int& task_group_id);
-
-            void DoJobUgvBackToChargingStation();
-            void DoJobArmBackToHomePos();
-
-            void RedoJob(const int& cur_schedule_id,const yf::data::schedule::ScheduleCommand& redo_command);
-
-            //
-            void JobsFilter(std::deque<int>& q_ids);
 
         private:
             /// Functions for the DoTasks()
@@ -504,6 +504,9 @@ void yf::sys::nw_sys::thread_DoSchedules()
                     }
                     case data::schedule::ScheduleCommand::CustomPlan:
                     {
+                        /// Testing
+
+                        #if 0
                         /// custom_plan: 1-6
                         auto plan_no = sql_ptr_->GetAvailableCustomPlan();
 
@@ -542,6 +545,7 @@ void yf::sys::nw_sys::thread_DoSchedules()
                                 break;
                             }
                         }
+                        #endif
 
                         break;
                     }
