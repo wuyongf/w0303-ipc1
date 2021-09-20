@@ -1018,7 +1018,6 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                             ///   b. Find the TF & Set the amc_skip_flag
                                             ///   c. Return standby_position
 
-
                                             // a.1
                                             //
                                             //  a.1.1 get standby_point_str
@@ -2282,12 +2281,12 @@ void yf::sys::nw_sys::ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode,
                             }
                             default:
                             {
-                                tm5.SetMotorHigh();
+//                                tm5.SetMotorHigh();
 
                                 std::string command = "Post arm_via0_line";
                                 tm5.ArmTask(command);
 
-                                tm5.SetMotorLow();
+//                                tm5.SetMotorLow();
                                 break;
                             }
                         }
@@ -2299,12 +2298,12 @@ void yf::sys::nw_sys::ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode,
                     }
                     default:
                     {
-                        tm5.SetMotorHigh();
+//                        tm5.SetMotorHigh();
 
                         std::string command = "Post arm_via0_line";
                         tm5.ArmTask(command);
 
-                        tm5.SetMotorLow();
+//                        tm5.SetMotorLow();
 
                         break;
                     }
@@ -2319,45 +2318,45 @@ void yf::sys::nw_sys::ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode,
                 {
                     case data::arm::ModelType::Windows:
                     {
-                        tm5.SetMotorHigh();
+//                        tm5.SetMotorHigh();
 
                         std::string command = "Post arm_via45_line_z";
                         tm5.ArmTask(command);
 
-                        tm5.SetMotorLow();
+//                        tm5.SetMotorLow();
 
                         break;
                     }
                     case data::arm::ModelType::DeskRectangle:
                     {
-                        tm5.SetMotorHigh();
+//                        tm5.SetMotorHigh();
 
                         std::string command = "Post arm_via45_line_d";
                         tm5.ArmTask(command);
 
-                        tm5.SetMotorLow();
+//                        tm5.SetMotorLow();
 
                         break;
                     }
                     case data::arm::ModelType::DeskCircle:
                     {
-                        tm5.SetMotorHigh();
+//                        tm5.SetMotorHigh();
 
                         std::string command = "Post arm_via45_p2p";
                         tm5.ArmTask(command);
 
-                        tm5.SetMotorLow();
+//                        tm5.SetMotorLow();
 
                         break;
                     }
                     case data::arm::ModelType::DeskPolygon:
                     {
-                        tm5.SetMotorHigh();
+//                        tm5.SetMotorHigh();
 
                         std::string command = "Post arm_via45_line_z";
                         tm5.ArmTask(command);
 
-                        tm5.SetMotorLow();
+//                        tm5.SetMotorLow();
 
                         break;
                     }
@@ -2370,12 +2369,12 @@ void yf::sys::nw_sys::ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode,
                         {
                             case data::arm::ForceType::via45_z:
                             {
-                                tm5.SetMotorHigh();
+//                                tm5.SetMotorHigh();
 
                                 std::string command = "Post arm_via45_line_z";
                                 tm5.ArmTask(command);
 
-                                tm5.SetMotorLow();
+//                                tm5.SetMotorLow();
 
                                 break;
                             }
@@ -2395,12 +2394,12 @@ void yf::sys::nw_sys::ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode,
                     }
                     case data::arm::ModelType::NurseStation:
                     {
-                        tm5.SetMotorHigh();
+//                        tm5.SetMotorHigh();
 
                         std::string command = "Post arm_via45_line_z";
                         tm5.ArmTask(command);
 
-                        tm5.SetMotorLow();
+//                        tm5.SetMotorLow();
 
                         break;
                     }
@@ -2420,12 +2419,12 @@ void yf::sys::nw_sys::ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode,
                         {
                             case data::arm::ForceType::via45_z:
                             {
-                                tm5.SetMotorHigh();
+//                                tm5.SetMotorHigh();
 
                                 std::string command = "Post arm_via45_line_z";
                                 tm5.ArmTask(command);
 
-                                tm5.SetMotorLow();
+//                                tm5.SetMotorLow();
 
                                 break;
                             }
@@ -2438,12 +2437,12 @@ void yf::sys::nw_sys::ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode,
                     }
                     default:
                     {
-                        tm5.SetMotorHigh();
+//                        tm5.SetMotorHigh();
 
                         std::string command = "Post arm_via45_line_z";
                         tm5.ArmTask(command);
 
-                        tm5.SetMotorLow();
+//                        tm5.SetMotorLow();
 
                         break;
                     }
