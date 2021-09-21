@@ -209,6 +209,9 @@ namespace yf
             yf::data::arm::Point3d GetArmPoint(const int& point_id);
             float GetArmPointElement(const int &point_id, const std::string &point_element);
 
+            // retrieve point(x,y,z,rx,ry,rz) from table "data_arm_points"
+            int GetSubStandbyPositionId(const int& arm_mission_config_id);
+
             // retrieve data from table "data_arm_mc_ref_landmark_pos"
             int GetArmRefLMPosId(const int& arm_mission_config_id);
             yf::data::arm::Point3d GetArmRefLMPos(const int& pos_id);
@@ -4752,6 +4755,38 @@ int yf::sql::sql_server::GetFeatureTypeId(const std::string &feature_type_name)
 
         return feature_type_id;
     };
+}
+
+int yf::sql::sql_server::GetSubStandbyPositionId(const int &arm_mission_config_id)
+{
+    std::string query_update;
+
+    //"SELECT ID FROM schedule_table where status=1 AND planned_start > '2021-02-06 11:10:08.000'"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT sub_standby_position_id FROM data_arm_mission_config where ID = "+ std::to_string(arm_mission_config_id);
+
+        int sub_standby_position_id;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        while(result.next())
+        {
+            sub_standby_position_id = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return sub_standby_position_id;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+        return 0;
+    }
 }
 
 

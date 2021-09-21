@@ -1286,7 +1286,13 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                         {
                                             /// 2.1 Initialization
 
-                                            // 2.1.1 check&set tool_angle
+                                            // 2.1.1 sub_standby_position
+                                            auto sub_standby_point = arm_mission_configs[n].sub_standby_position;
+                                            std::string sub_standby_point_str = this->ArmGetPointStr(sub_standby_point);
+                                            tm5.ArmTask("Set standby_p1 = "+ sub_standby_point_str);
+                                            tm5.ArmTask("Move_to standby_p1");
+
+                                            // 2.1.2 check&set tool_angle
                                             this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
 
                                             /// 2.2 Calculation
@@ -1356,7 +1362,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                 }
                                             }
 
-                                            /// 2.3 Fire the task and then return standby_p0
+                                            /// 2.3 Fire the task and then return to standby_p1 ---> standby_p0
 
                                             // 2.3.1 assign n_via_points.
                                             std::string n_via_points_str = std::to_string(arm_mission_configs[n].n_via_points);
@@ -1372,6 +1378,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                             this->ArmPostViaPoints(cur_task_mode_, arm_mission_configs[n].tool_angle, arm_mission_configs[n].model_type, arm_mission_configs[n].id);
 
                                             // 2.3.5 post return standby_position
+                                            tm5.ArmTask("Move_to standby_p1");
                                             tm5.ArmTask("Move_to standby_p0");
                                         }
                                     }

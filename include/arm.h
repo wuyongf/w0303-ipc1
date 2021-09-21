@@ -121,6 +121,8 @@ namespace yf
 
             yf::data::arm::Point3d GetStandbyPosition(const int& arm_config_id);
 
+            yf::data::arm::Point3d GetSubStandbyPosition(const int& arm_mission_config_id);
+
             bool GetLandmarkFlag(const int& arm_mission_config_id);
 
             yf::data::arm::VisionType GetVisionType(const int& arm_mission_config_id);
@@ -938,8 +940,11 @@ std::deque<yf::data::arm::MissionConfig> yf::arm::tm::ConfigureArmMission(const 
         /// 6. motion_type
         mission_config.motion_type = this->GetMotionType(arm_mission_config_id);
 
-        /// 7. standby_position
+        /// 7.1 standby_position
         mission_config.standby_position = this->GetStandbyPosition(arm_config_id);
+
+        /// 7.2 sub_standby_position
+        mission_config.sub_standby_position = this->GetSubStandbyPosition(arm_mission_config_id);
 
         /// 8. vision_type
         mission_config.vision_type = this->GetVisionType(arm_mission_config_id);
@@ -1750,4 +1755,11 @@ std::deque<yf::data::arm::Point3d> yf::arm::tm::GetRealViaPointsByRS(const Eigen
                                                                      const std::deque<yf::data::arm::Point3d> &original_via_points)
 {
     return al_arm_path.ExportRealPathByRS(TMat,original_via_points );
+}
+
+yf::data::arm::Point3d yf::arm::tm::GetSubStandbyPosition(const int &arm_mission_config_id)
+{
+    int sub_standby_position_id = sql_ptr_->GetSubStandbyPositionId(arm_mission_config_id);
+
+    return sql_ptr_->GetArmPoint(sub_standby_position_id);
 }

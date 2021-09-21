@@ -229,6 +229,8 @@ namespace  yf
 
                 Point3d                 standby_position;
 
+                Point3d                 sub_standby_position;
+
                 bool                    landmark_flag;
 
                 VisionType              vision_type;
