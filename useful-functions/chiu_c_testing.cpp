@@ -64,7 +64,7 @@ double curve_get_offset_distance(const int& layer_no, const std::deque<yf::data:
 
 typedef int(*getoffsetpath)(robot_path_data*,double,robot_path_data*[]);
 
-typedef int (*get_point_cloud_from_depth_camera)(double [][3]);
+typedef int (*get_point_cloud_from_depth_camera)(unsigned int, double [][3]);
 
 typedef int (*door_handle_identification )(char [],char [],double [],double [][2]);
 
@@ -127,8 +127,8 @@ int main()
     get_point_cloud_from_depth_camera get_point_cloud;
     get_point_cloud=(get_point_cloud_from_depth_camera)GetProcAddress(hinstLib2, "get_point_cloud_from_camera");
     int m;
-    m=get_point_cloud(input_pt);
-
+    int resolution = 6;
+    m=get_point_cloud(resolution, input_pt);
 
     // write the point cloud file
     ///\param file_name

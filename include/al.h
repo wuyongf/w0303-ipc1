@@ -121,7 +121,7 @@ namespace yf
 
             bool RecordCurRealPC(const std::string &abs_directory, const std::string &file_name);
 
-            int RecordRealPCArray(double (&input_pt)[30000][3]);
+            int RecordRealPCArray(int &resolution, double (&input_pt)[30000][3]);
 
             /// for phase 2 office demo
             Eigen::Matrix4f Phase2GetTMat4Handle(std::string& real_pc_file, std::string& ref_pos_tf_file);
@@ -515,9 +515,10 @@ bool yf::algorithm::arm_path::RecordCurRealPC(const std::string &abs_directory, 
     LOG(INFO) << "Record Point Cloud File [in progress]";
     // Get the Point Clouds
 
+    int resolution = 1;
     double input_pt[30000][3];
 
-    auto point_no = this->RecordRealPCArray(input_pt);
+    auto point_no = this->RecordRealPCArray(resolution, input_pt);
 
     if(point_no <= 0 )
     {
@@ -569,8 +570,10 @@ bool yf::algorithm::arm_path::RecordCurRealPC(const std::string &abs_directory, 
     }
 }
 
-int yf::algorithm::arm_path::RecordRealPCArray(double (&input_pt)[30000][3])
+int yf::algorithm::arm_path::RecordRealPCArray(int & resolution, double (&input_pt)[30000][3])
 {
+    typedef int (*get_point_cloud_from_depth_camera)(unsigned int, double [][3]);
+
     char filename2[] = "rs-pointcloud.dll"; // in debug file
     wchar_t wtext2[100];
     mbstowcs(wtext2, filename2, strlen(filename2) + 1);
@@ -586,7 +589,7 @@ int yf::algorithm::arm_path::RecordRealPCArray(double (&input_pt)[30000][3])
 
     get_point_cloud_from_depth_camera get_point_cloud;
     get_point_cloud=(get_point_cloud_from_depth_camera)GetProcAddress(hinstLib2, "get_point_cloud_from_camera");
-    return get_point_cloud(input_pt);
+    return get_point_cloud(resolution, input_pt);
 }
 
 yf::data::arm::Point3d
