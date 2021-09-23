@@ -122,6 +122,8 @@ namespace yf
 
             void UpdateEachTaskStatus(const int& task_group_id, const int& task_order, const int& task_status);
 
+            void UpdateEachTaskStatus(const int& cur_task_id, const int& task_status);
+
             /// Consuming Task Table
 
             std::string GetTaskTableElement(const int& failed_task_id, const std::string& element);
@@ -4786,6 +4788,27 @@ int yf::sql::sql_server::GetSubStandbyPositionId(const int &arm_mission_config_i
         std::cerr << e.what() << std::endl;
         std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
         return 0;
+    }
+}
+
+void yf::sql::sql_server::UpdateEachTaskStatus(const int &cur_task_id, const int &task_status)
+{
+    std::string query_update;
+
+    try
+    {
+        Connect();
+
+        query_update = query_update = "UPDATE sys_schedule_job_task SET status = " + std::to_string(task_status) + " WHERE ID = " + std::to_string(cur_task_id) ;
+
+        nanodbc::execute(conn_,query_update);
+
+        Disconnect();
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
     }
 }
 

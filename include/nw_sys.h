@@ -963,14 +963,10 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                             this->ArmUpdatePadNo();
 
                                             sleep.ms(200);
-
 #if 0 //disable for testing
-
                                             this->ArmAbsorbWater();
-
 #endif
                                         }
-
                                     }
 
                                     ///\ (2) For each order, move to safety position first.
@@ -2900,7 +2896,6 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
         }
     }
 
-
     // get job_id from job_log
     int origin_job_id = sql_ptr_->GetJobIdFromJobLog(task_group_id);
 
@@ -2909,8 +2904,6 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
     nw_status_ptr_->cur_job_success_flag = false;
     bool ugv_mission_success_flag = false;
     bool arm_mission_success_flag = false;
-
-    bool arm_sub_mission_success_flag = true;
 
     /// 1. Initialization
     //
@@ -2964,12 +2957,14 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
 
         while (mission_continue_flag)
         {
-            // while mir's mission has not finished
+            /// while mir's mission has not finished
             // if plc4 ==2 || plc4 == 3 --> break
             // if plc4 !=2 && plc4 != 3 ===> continue
             while(  mir100_ptr_->GetPLCRegisterIntValue(4) != 2 &&
                     mir100_ptr_->GetPLCRegisterIntValue(4) != 3)
             {
+                bool arm_sub_mission_success_flag = true;
+
                 ///TIME
                 sleep.ms(200);
 
@@ -2986,7 +2981,7 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
                 // if plc004 == 3 and then we know mir mission is error;
                 ugv_mission_continue_flag = mir100_ptr_->MissionStatusCheck(2);
 
-                if(ugv_mission_continue_flag == true)
+                if(ugv_mission_continue_flag)
                 {
                     /// stage 0: check arm config is valid or not
                     /// stage 1: if it is valid, configuring arm mission
@@ -3000,11 +2995,11 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
                     ///TIME
                     sleep.ms(200);
 
-                    if(arm_wait_plc003_success_flag == true)
+                    if(arm_wait_plc003_success_flag)
                     {
                         /// get current order
 
-                        while(cur_order == pre_order)
+                        while(cur_order == pre_order || cur_order == 0)
                         {
                             cur_order = mir100_ptr_->GetPLCRegisterIntValue(2);
 
@@ -3016,6 +3011,8 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
 
                         /// check arm config is valid or not
 
+                        sleep.ms(1000);
+
                         int  cur_arm_config_id = sql_ptr_->GetRedoArmConfigId(task_group_id, cur_order);
                         int  is_valid = sql_ptr_->GetArmConfigIsValid(cur_arm_config_id);
                         LOG(INFO) << "current arm config is_valid:" << is_valid;
@@ -3024,29 +3021,53 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
                         {
                             case 0: // invalid
                             {
-                                // arm configure stage has finished
-                                // notify mir100 and ipc
+                                /// 1. Do arm configuration here: assign all arm_mission_configs
+                                // ...
+                                /// 2. Notify mir100 that arm configuration stage has finished
                                 mir100_ptr_->SetPLCRegisterIntValue(3,0);
 
-                                // wait for executing flag/signal.
+                                /// 3. Wait for flag for executing all arm_mission_configs
                                 arm_wait_plc001_success_flag = this->WaitForUgvPLCRegisterInt(1,1,5);
 
-                                if(arm_wait_plc001_success_flag == true)
+                                /// 4. Check the flag result
+                                if(arm_wait_plc001_success_flag)
                                 {
-                                    /// TIME
+                                    /// 4.1 True
+
+                                    /// 4.1.1 Loop all arm_mission_configs here
+                                    // ...
                                     sleep.ms(200);
+
+                                    /// 4.1.2 Check the execution result of all arm_mission_configs
+                                    ///    a. if anything wrong, record and then break the loop
+                                    ///    b. if everything okay, record and then break the loop
+
+                                    // situation b.
+                                    // b.1 Notify mir100 that all arm_mission_configs has finished, you're ready to go :)
                                     mir100_ptr_->SetPLCRegisterIntValue(1,0);
+
+                                    ///\@ redo part
+                                    // b.2 Update current arm_config status as Finished.
+                                    sql_ptr_->UpdateEachTaskStatus(redo_ids[cur_order-1], 3);
                                 }
                                 else
                                 {
-                                    LOG(INFO) << "mission failed at step 2: wait for plc001 == 1";
+                                    /// 4.2 False
+
+                                    LOG(INFO) << "Mission failed: ugv failed to set plc001=1 ? Arm needs plc001==1 to execute all arm_mission_configs";
 
                                     arm_mission_success_flag = false;
                                     mission_continue_flag = false;
+
+                                    /// 4.2.1 Update current arm_config status as Error.
+                                    // ...
+                                    ///\@ redo part
+                                    sql_ptr_->UpdateEachTaskStatus(redo_ids[cur_order-1], 5);
+
                                     break;
                                 }
 
-                                /// Last order
+                                /// 5. Check if this is the Last order, if true, break the loop.
                                 if(cur_order == cur_mission_num_)
                                 {
                                     sleep.ms(1000);
@@ -3063,24 +3084,22 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
                                     }
                                 }
 
-//                                /// Update Each order's Status as Finished.
-//                                sql_ptr_->UpdateEachTaskStatus(task_group_id, cur_order, 3);
-
                                 break;
                             }
                             case 1: // valid
                             {
-                                ///
+                                /// 1. Do arm configuration here: assign all arm_mission_configs
+
                                 LOG(INFO) << "configure redo arm mission   [Start!]";
                                 auto arm_mission_configs = tm5.ConfigureRedoArmMission(task_group_id, cur_order, cur_model_config_id_);
                                 LOG(INFO) << "configure redo arm mission   [Finished!]";
 
                                 cur_operation_area_ =  arm_mission_configs[0].operation_area;
 
-                                /// find last valid order
+                                // 1. find last valid order
                                 // input: cur_order, which is the cur_valid_order!
-                                /// get_cur_valid_order
-                                /// get_last_valid_order
+                                // 2. get cur_valid_order & last_valid_order
+
                                 if(cur_order == cur_first_valid_order_)
                                 {
                                     last_valid_order = cur_order;
@@ -3094,32 +3113,32 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
                                     last_valid_order = cur_valid_indexes_[last_valid_order_index] + 1;
                                 }
 
-                                /// get last operation area
+                                // get last operation area
                                 int  last_arm_config_id = sql_ptr_->GetRedoArmConfigId(task_group_id, last_valid_order);
                                 auto last_operation_area = tm5.GetOperationArea(last_arm_config_id);
 
-                                // arm configure stage has finished
-                                // notify mir100 and ipc
-                                mir100_ptr_->SetPLCRegisterIntValue(3,0);
-                                arm_config_stage_success_flag = true;
+                                /// 2. Notify mir100 that arm configuration stage has finished
 
-                                // wait for executing flag/signal.
+                                mir100_ptr_->SetPLCRegisterIntValue(3,0);
+
+                                arm_config_stage_success_flag = true; // no use now?
+
+                                /// 3. Wait for flag for executing all arm_mission_configs
                                 arm_wait_plc001_success_flag = this->WaitForUgvPLCRegisterInt(1,1,5);
 
-                                if(arm_wait_plc001_success_flag == true)
+                                /// 4. Check the flag result
+                                if(arm_wait_plc001_success_flag)
                                 {
-                                    //todo:
-                                    // Start Monitoring Arm Status!!!
-                                    // 1. Wait for jumping out of the loop, done
-                                    // 2. Wait for pausing MiR mission
+                                    /// 4.1 True
+                                    /// 4.1.1 Loop all arm_mission_configs here
 
-                                    /// b.3.2 start executing arm mission
+                                    ///\workflow Start executing arm mission
 
-                                    /// First order, pick the pad
+                                    ///\ (1) First order, pick the pad
                                     if(cur_order == cur_first_valid_order_)
                                     {
                                         cur_tool_angle_ = data::arm::ToolAngle::Zero;
-#if 1 /// Disable For Testing
+
                                         this->ArmPickTool(cur_task_mode_);
 
                                         sleep.ms(200);
@@ -3133,13 +3152,13 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
                                             this->ArmUpdatePadNo();
 
                                             sleep.ms(200);
-
+#if 1 /// Disable For Testing
                                             this->ArmAbsorbWater();
-                                        }
 #endif
+                                        }
                                     }
 
-                                    /// For each order, move to safety position first.
+                                    ///\ (2) For each order, move to safety position first.
                                     //
                                     if(cur_order == cur_first_valid_order_ )
                                     {
@@ -3158,43 +3177,69 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
                                         }
                                     }
 
+                                    ///\brief
+                                    /// amc_skip_conditions:
+                                    /// 1. For Landmark
+                                    ///     1.1. cannot find the landmark
+                                    ///     1.2. landmark deviation too large
+                                    /// 2. For D455
+                                    ///     2.1 cannot match the origin 2d image.
+                                    ///     2.2 TF deviation too large
                                     bool amc_skip_flag = true;
 
-                                    /// Loop all the arm_mission_configs
+                                    //TODO: testing
+                                    ///\ (3) Loop all the arm_mission_configs
                                     for (int n = 0; n < arm_mission_configs.size(); n++)
                                     {
-                                        switch (n)
+                                        /// I: Find the TF and amc_skip_flag
+                                        //  for first order
+                                        //    I.1. Get the TF first(landmark_tf, camera_tf)
+                                        //    I.2. Assign the amc_skip_flag
+                                        if(n == 0)
                                         {
-                                            // for the first arm mission config, checking the landmark first.
-                                            case 0:
+                                            /// I.1
+                                            ///   a. Initialization
+                                            ///     a.1 move to standby_position
+                                            ///     a.2 check&set tool_angle
+                                            ///   b. Find the TF & Set the amc_skip_flag
+                                            ///   c. Return standby_position
+
+                                            // a.1
+                                            //
+                                            //  a.1.1 get standby_point_str
+                                            auto standby_point = arm_mission_configs[n].standby_position;
+                                            std::string standby_point_str = this->ArmGetPointStr(standby_point);
+                                            //  a.1.2 set standby_point
+                                            tm5.ArmTask("Set standby_p0 = "+standby_point_str);
+                                            //  a.1.3 move to standby_point
+                                            tm5.ArmTask("Move_to standby_p0");
+
+                                            // a.2.
+                                            this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
+
+                                            /// b. vision job initialization
+                                            ///   b.1: for None: do nothing
+                                            ///   b.2: for Landmark: scan landmark, mark down the record
+                                            ///   b.3: for D455: record the point clouds, mark down the record.
+
+                                            switch (arm_mission_configs[n].vision_type)
                                             {
-                                                // 1. move to standby_position
-                                                //  1.1 get standby_point_str
-                                                auto standby_point = arm_mission_configs[n].standby_position;
-                                                std::string standby_point_str = this->ArmGetPointStr(standby_point);
-                                                //  1.2 set standby_point
-                                                tm5.ArmTask("Set standby_p0 = "+standby_point_str);
-                                                //  1.3 move to standby_point
-                                                tm5.ArmTask("Move_to standby_p0");
-
-                                                // 3. check&set tool_angle
-                                                this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
-
-                                                //todo: which vision job?? default vision job is landmark
-                                                /// scan landmark, mark down the record
-                                                ///
-                                                if(arm_mission_configs[n].landmark_flag == true)
+                                                case data::arm::VisionType::None:
                                                 {
-                                                    // 2.1 init_lm_vision_position.
-                                                    //  2.1.1 retrieve init_lm_vision_position_str
+                                                    // do nothing
+                                                    break;
+                                                }
+                                                case data::arm::VisionType::Landmark:
+                                                {
+                                                    // 1. move to init_lm_vision_position.
+                                                    //  1.1 retrieve init_lm_vision_position_str
                                                     std::string ref_vision_lm_init_position_str = this->ArmGetPointStr(arm_mission_configs[n].ref_vision_lm_init_position);
-                                                    //  2.1.2 set init_lm_vision_position
+                                                    //  1.2 set init_lm_vision_position
                                                     tm5.ArmTask("Set vision_lm_init_p0 = " + ref_vision_lm_init_position_str);
-                                                    //  2.1.3 move_to init_lm_vision_position
+                                                    //  1.3 move_to init_lm_vision_position
                                                     tm5.ArmTask("Move_to vision_lm_init_p0");
 
-
-                                                    // 2.2 execute vision_find_landmark
+                                                    // 2. execute task 'vision_find_landmark'
                                                     switch (arm_mission_configs[n].model_type)
                                                     {
                                                         case data::arm::ModelType::Windows:
@@ -3209,46 +3254,46 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
                                                         }
                                                     }
 
-                                                    // 2.3 check find_landmark_flag
+                                                    // 3. check the result: find_landmark_flag
                                                     tm5.ArmTask("Post get_find_landmark_flag");
 
-                                                    if(tm5.GetFindLandmarkFlag() == true)
+                                                    // 4. set the amc_skip_flag and record the TF(landmark_tf)
+                                                    //  4.1 find the landmark
+                                                    //     a. found, get the real_landmark_pos but is it deviation?
+                                                    //       a.1 yes ---> amc_skip_flag = True
+                                                    //       a.2 no  ---> amc_skip_flag = False
+                                                    //     b. cannot find ---> amc_skip_flag = True
+
+                                                    if(tm5.GetFindLandmarkFlag())
                                                     {
                                                         LOG(INFO) << "Find Landmark!";
-                                                        amc_skip_flag = false;
 
-                                                        // 2.4 get real_landmark_pos
+                                                        // get real_landmark_pos
                                                         tm5.ArmTask("Post get_landmark_pos_str");
                                                         real_lm_pos_ = tm5.GetRealLandmarkPos();
 
-                                                        // 2.5 post back_to_standby_position.
-                                                        tm5.ArmTask("Move_to standby_p0");
+                                                        /// Comparison real_lm_pos & ref_lm_pos. Check whether error is too significant
+                                                        if(tm5.IsLMPosDeviation(arm_mission_configs[n].ref_landmark_pos, real_lm_pos_))
+                                                        {
+                                                            // error too significant, skip current arm mission config!
 
-                                                        // 2.6 get TF
-                                                        // 2.7 calculate the new via_points
+                                                            LOG(INFO) << "Error too significant! Skip cur_arm_mission_config!!";
 
-                                                        std::deque<yf::data::arm::Point3d> real_via_points;
+                                                            arm_sub_mission_success_flag = false;
 
-                                                        real_via_points = tm5.GetRealViaPointsByLM(
-                                                                arm_mission_configs[n].via_points,
-                                                                arm_mission_configs[n].ref_landmark_pos, real_lm_pos_);
+                                                            LOG(INFO) << "Skip the whole arm mission configs!";
 
-                                                        arm_mission_configs[n].via_points.clear();
+                                                            ///TIME
+                                                            sleep.ms(200);
 
-                                                        arm_mission_configs[n].via_points = real_via_points;
+                                                            continue;
 
-                                                        // 2.8 calculate the real approach point
-
-                                                        yf::data::arm::Point3d real_via_approach_point;
-
-                                                        real_via_approach_point = tm5.GetRealPointByLM(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].ref_landmark_pos, real_lm_pos_);
-
-                                                        arm_mission_configs[n].via_approach_pos.x  = real_via_approach_point.x;
-                                                        arm_mission_configs[n].via_approach_pos.y  = real_via_approach_point.y;
-                                                        arm_mission_configs[n].via_approach_pos.z  = real_via_approach_point.z;
-                                                        arm_mission_configs[n].via_approach_pos.rx = real_via_approach_point.rx;
-                                                        arm_mission_configs[n].via_approach_pos.ry = real_via_approach_point.ry;
-                                                        arm_mission_configs[n].via_approach_pos.rz = real_via_approach_point.rz;
+                                                        }
+                                                        else
+                                                        {
+                                                            LOG(INFO) << "No Deviation!";
+                                                            amc_skip_flag = false;
+                                                        }
                                                     }
                                                     else
                                                     {
@@ -3257,12 +3302,6 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
                                                         arm_sub_mission_success_flag = false;
 
                                                         LOG(INFO) << "Skip the whole arm mission configs!";
-                                                        amc_skip_flag = true;
-
-                                                        // back to standby_point
-                                                        tm5.ArmTask("Move_to standby_p0");
-                                                        // back to safety position
-                                                        tm5.ArmTask("Post arm_back_to_safety");
 
                                                         ///TIME
                                                         sleep.ms(200);
@@ -3270,61 +3309,189 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
                                                         continue;
                                                     }
 
-                                                    /// Comparison real_lm_pos & ref_lm_pos. Check whether error is too significant
-                                                    if(tm5.IsLMPosDeviation(arm_mission_configs[n].ref_landmark_pos, real_lm_pos_))
+                                                    break;
+                                                }
+                                                case data::arm::VisionType::D455:
+                                                {
+                                                    amc_skip_flag = false;
+
+                                                    ///  b.2 find the TF!
+
+                                                    // 0. data management
+                                                    auto arm_mission_config_dir = "../data/point_clouds/real/arm_mission_config_" + std::to_string(arm_mission_configs[n].id);
+                                                    std::filesystem::create_directory(arm_mission_config_dir);
+
+                                                    auto task_group_dir = arm_mission_config_dir + "/task_group_" + std::to_string(task_group_id);
+                                                    std::filesystem::create_directory(task_group_dir);
+
+                                                    auto pc_dir = task_group_dir + "/point_cloud/";
+                                                    std::filesystem::create_directory(pc_dir);
+
+                                                    auto tf_dir = task_group_dir + "/tf/";
+                                                    std::filesystem::create_directory(tf_dir);
+
+                                                    // 1. retrieve point cloud data in real time and then assign the value
+                                                    //  1.1 move to several points.
+                                                    //  1.2 record the point clouds. (several sets....)
+                                                    //  1.3 save the real_pc_files.
+
+                                                    std::vector<std::vector<std::string>> real_pc_file_names;
+
+                                                    std::vector<std::string> each_set_real_pc_pos_names;
+
+                                                    for(int set = 0 ; set < arm_mission_configs[n].ref_tcp_pos_ids.size() ; set ++)
                                                     {
-                                                        // error too significant, skip current arm mission config!
+                                                        each_set_real_pc_pos_names.clear();
 
-                                                        LOG(INFO) << "Error too significant! Skip cur_arm_mission_config!!";
+                                                        for(int view = 0 ; view < arm_mission_configs[n].ref_tcp_pos_ids[set].size() ; view++)
+                                                        {
+                                                            // get the point
+                                                            auto point_str = this->ArmGetPointStr(sql_ptr_->GetArmPoint(arm_mission_configs[n].ref_tcp_pos_ids[set][view]));
+                                                            // set the point
+                                                            tm5.ArmTask("Set ref_tcp_pos = " + point_str);
+                                                            // move!
+                                                            tm5.ArmTask("Move_to ref_tcp_pos");
 
-                                                        arm_sub_mission_success_flag = false;
+                                                            //  1. define the name
+                                                            std::string id_str = std::to_string(arm_mission_configs[n].id);
+                                                            std::string set_no_str = std::to_string(set+1);
+                                                            std::string view_no_str = std::to_string(view+1);
+                                                            std::string feature_type_name = sql_ptr_->GetFeatureTypeName(arm_mission_configs[n].feature_type_ids[set]);
 
-                                                        LOG(INFO) << "Skip the whole arm mission configs!";
-                                                        amc_skip_flag = true;
+                                                            // note: without ".pcd"
+                                                            auto real_pc_file_name = std::to_string(task_group_id) + "-" + id_str + "-" + set_no_str + "-" + view_no_str + "-" + feature_type_name;
 
-                                                        // back to standby_point
-                                                        tm5.ArmTask("Move_to standby_p0");
-                                                        // back to safety position
-                                                        tm5.ArmTask("Post arm_back_to_safety");
+                                                            //todo: 1. record the real point cloud.
+                                                            //todo: 2. save the real_point_cloud file
+                                                            LOG(INFO) << "Vision Job [Start]" << std::endl;
+                                                            // ....
+                                                            auto result = tm5.RecordCurRealPointCloud(pc_dir, real_pc_file_name);
+                                                            // wait for vision_job done
+                                                            LOG(INFO) << "Vision Job [Running]" << std::endl;
+                                                            LOG(INFO) << "Vision Job [Finish]" << std::endl;
 
-                                                        ///TIME
-                                                        sleep.ms(200);
+                                                            /// for debug
+                                                            auto tf_file_name = real_pc_file_name +"-tf.txt";
+                                                            auto tf_result = tm5.WriteTMatFile(arm_mission_configs[n].ref_tcp_pos_tfs[set][view],tf_dir, tf_file_name);
 
+                                                            // push back
+                                                            each_set_real_pc_pos_names.push_back(real_pc_file_name);
 
-                                                        continue;
+                                                            // for safety concern.
+                                                            tm5.ArmTask("Move_to standby_p0");
+                                                        }
 
+                                                        real_pc_file_names.push_back(each_set_real_pc_pos_names);
                                                     }
-                                                }
-                                                break;
-                                            }
-                                            default:
-                                            {
-                                                // if not detect the landmark, just skip the arm mission config.
-                                                if(amc_skip_flag)
-                                                {
-                                                    continue;
-                                                }
-                                                else
-                                                {
-#if 0
-                                                    // 1. move to standby_position
-                                                    //  1.1 get standby_point_str
-                                                    auto standby_point = arm_mission_configs[n].standby_position;
-                                                    std::string standby_point_str = this->ArmGetPointStr(standby_point);
-                                                    //  1.2 set standby_point
-                                                    tm5.ArmTask("Set standby_p0 = "+standby_point_str);
-                                                    //  1.3 move to standby_point
-                                                    tm5.ArmTask("Move_to standby_p0");
-#endif
 
-                                                    // 3. check&set tool_angle
-                                                    this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
-#if 0
-                                                    // 2.5 post back_to_standby_position.
-                                                    tm5.ArmTask("Move_to standby_p0");
-#endif
-                                                    // 2.6 get TF
-                                                    // 2.7 calculate the new via_points
+                                                    //todo: 2. compare!
+                                                    // ...
+                                                    // ...
+                                                    // 3. get the TF!
+                                                    switch (arm_mission_configs[n].model_type)
+                                                    {
+                                                        case data::arm::ModelType::Handle:
+                                                        {
+                                                            auto feature_type = "planar";
+                                                            auto feature_type_id = sql_ptr_->GetFeatureTypeId(feature_type);
+
+                                                            std::vector<int> planar_sets;
+
+                                                            // find the corresponding files
+                                                            for (int m =0; m < arm_mission_configs[n].feature_type_ids.size(); m++)
+                                                            {
+                                                                if(arm_mission_configs[n].feature_type_ids[m] == feature_type_id)
+                                                                {
+                                                                    planar_sets.push_back(m);
+                                                                }
+                                                            }
+
+                                                            /// for 1 set 1 view algorithm
+                                                            if(planar_sets.size() == 1)
+                                                            {
+                                                                auto set_no  = planar_sets[0];
+
+                                                                auto cur_set_view_no = arm_mission_configs[n].ref_pc_file_names[set_no].size();
+
+                                                                if (cur_set_view_no == 1)
+                                                                {
+                                                                    // get the file name;
+                                                                    auto ref_pc_file_name = arm_mission_configs[n].ref_pc_file_names[set_no][0];
+
+                                                                    auto real_pc_file_name = std::to_string(task_group_id) + "-" + ref_pc_file_name;
+
+                                                                    std::string real_pc_file =   "..\\data\\point_clouds\\real\\arm_mission_config_" + std::to_string(arm_mission_configs[n].id)
+                                                                                                 + "\\task_group_" + std::to_string(task_group_id) + "\\point_cloud\\" + real_pc_file_name + ".pcd";
+
+                                                                    std::string ref_pos_tf_file = "..\\data\\point_clouds\\real\\arm_mission_config_" + std::to_string(arm_mission_configs[n].id)
+                                                                                                  + "\\task_group_" + std::to_string(task_group_id) + "\\tf\\" + real_pc_file_name + "-tf.txt";
+
+                                                                    arm_mission_configs[n].real_pc_file = real_pc_file;
+                                                                    arm_mission_configs[n].ref_pos_tf_file = ref_pos_tf_file;
+
+                                                                    arm_mission_configs[n].TMat = tm5.Phase2GetTMat4Handle(real_pc_file,ref_pos_tf_file);
+                                                                }
+                                                            }
+
+                                                            break;
+                                                        }
+                                                    }
+
+                                                    // 4. set the amc_skip_flag?
+
+                                                    break;
+                                                }
+                                                case data::arm::VisionType::D435:
+                                                {
+                                                    break;
+                                                }
+                                            }
+
+                                            /// c. return standby_position
+
+                                            // back to standby_point
+                                            tm5.ArmTask("Move_to standby_p0");
+                                        }
+
+                                        /// II:
+                                        //  check the amc_skip_flag
+                                        //  1. if ture, skip current arm_mission_config
+                                        //  2. if false, just execute the arm_mission_config
+                                        //    2.1. Initialization
+                                        //    2.2. Calculation (base on vision_type: calculate the real_points)
+                                        //      2.2.1 new via_points (real_points)
+                                        //      2.2.2 new approach_point
+                                        //      2.2.3 new n_points
+                                        //    2.3. post the arm_mission_config
+
+                                        if(amc_skip_flag)
+                                        {
+                                            continue;
+                                        }
+                                        else
+                                        {
+                                            /// 2.1 Initialization
+
+                                            // 2.1.1 sub_standby_position
+                                            auto sub_standby_point = arm_mission_configs[n].sub_standby_position;
+                                            std::string sub_standby_point_str = this->ArmGetPointStr(sub_standby_point);
+                                            tm5.ArmTask("Set standby_p1 = "+ sub_standby_point_str);
+                                            tm5.ArmTask("Move_to standby_p1");
+
+                                            // 2.1.2 check&set tool_angle
+                                            this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
+
+                                            /// 2.2 Calculation
+
+                                            switch (arm_mission_configs[n].vision_type)
+                                            {
+                                                case data::arm::VisionType::None:
+                                                {
+                                                    break;
+                                                }
+                                                case data::arm::VisionType::Landmark:
+                                                {
+                                                    // 2.1 calculate the new via_points
 
                                                     std::deque<yf::data::arm::Point3d> real_via_points;
 
@@ -3336,11 +3503,9 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
 
                                                     arm_mission_configs[n].via_points = real_via_points;
 
-                                                    // 2.8 calculate the real approach point
+                                                    // 2.2 calculate the real approach point
 
-                                                    yf::data::arm::Point3d real_via_approach_point;
-
-                                                    real_via_approach_point = tm5.GetRealPointByLM(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].ref_landmark_pos, real_lm_pos_);
+                                                    auto real_via_approach_point = tm5.GetRealPointByLM(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].ref_landmark_pos, real_lm_pos_);
 
                                                     arm_mission_configs[n].via_approach_pos.x  = real_via_approach_point.x;
                                                     arm_mission_configs[n].via_approach_pos.y  = real_via_approach_point.y;
@@ -3349,53 +3514,77 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
                                                     arm_mission_configs[n].via_approach_pos.ry = real_via_approach_point.ry;
                                                     arm_mission_configs[n].via_approach_pos.rz = real_via_approach_point.rz;
 
+                                                    break;
+                                                }
+                                                case data::arm::VisionType::D455:
+                                                {
+                                                    // 2.1 calculate the new via_points
+
+                                                    std::deque<yf::data::arm::Point3d> real_via_points;
+
+                                                    real_via_points = tm5.GetRealViaPointsByRS(arm_mission_configs[n].TMat, arm_mission_configs[n].via_points);
+
+                                                    arm_mission_configs[n].via_points.clear();
+
+                                                    arm_mission_configs[n].via_points = real_via_points;
+
+                                                    // 2.2 calculate the real approach point
+
+                                                    auto real_via_approach_point = tm5.GetRealPointByRS(arm_mission_configs[n].TMat,arm_mission_configs[n].via_approach_pos);
+
+                                                    arm_mission_configs[n].via_approach_pos.x  = real_via_approach_point.x;
+                                                    arm_mission_configs[n].via_approach_pos.y  = real_via_approach_point.y;
+                                                    arm_mission_configs[n].via_approach_pos.z  = real_via_approach_point.z;
+                                                    arm_mission_configs[n].via_approach_pos.rx = real_via_approach_point.rx;
+                                                    arm_mission_configs[n].via_approach_pos.ry = real_via_approach_point.ry;
+                                                    arm_mission_configs[n].via_approach_pos.rz = real_via_approach_point.rz;
+
+
+                                                    break;
+                                                }
+                                                case data::arm::VisionType::D435:
+                                                {
+                                                    break;
                                                 }
                                             }
-                                        }
 
-                                        if(amc_skip_flag)
-                                        {
-                                            continue;
-                                        }
-                                        else
-                                        {
-                                            // 4. check motion_type, decide which motion.
-                                            // 5. assign n_via_points.
+                                            /// 2.3 Fire the task and then return to standby_p1 ---> standby_p0
+
+                                            // 2.3.1 assign n_via_points.
                                             std::string n_via_points_str = std::to_string(arm_mission_configs[n].n_via_points);
                                             tm5.ArmTask("Set n_points = " + n_via_points_str);
 
-                                            // 6. set approach_point
+                                            // 2.3.2 set approach_point
                                             this->ArmSetApproachPoint(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].tool_angle);
 
-                                            // 7. set via_points
+                                            // 2.3.3 set via_points
                                             this->ArmSetViaPoints(arm_mission_configs[n].via_points, arm_mission_configs[n].tool_angle);
 
-                                            // 8. post via_points
+                                            // 2.3.4 post via_points
                                             this->ArmPostViaPoints(cur_task_mode_, arm_mission_configs[n].tool_angle, arm_mission_configs[n].model_type, arm_mission_configs[n].id);
 
-                                            // 9. post return standby_position
+                                            // 2.3.5 post return standby_position
+                                            tm5.ArmTask("Move_to standby_p1");
                                             tm5.ArmTask("Move_to standby_p0");
                                         }
                                     }
 
-                                    ///TIME
                                     sleep.ms(200);
 
-                                    // 10. post return safety.
-                                    tm5.ArmTask("Post arm_back_to_safety");
-                                    ///
+                                    ///\ (4) Finish Current Arm Mission
+                                    ///\    a. For Normal orders: Return 'Safety Position'.
+                                    ///\    b. For Last order: Place the tool and then return 'Home Position'
 
-                                    ///TIME
+                                    // a.
+                                    tm5.ArmTask("Post arm_back_to_safety");
                                     sleep.ms(500);
 
-                                    /// Last valid order
+                                    // b.
                                     if(cur_order == cur_last_valid_order_)
                                     {
-                                        /// arm motion
-
                                         // back to home first
                                         tm5.ArmTask("Post arm_safety_to_home");
-#if 1 /// Disable For Testing
+
                                         // remove pad if its necessary
                                         if (cur_task_mode_ == data::arm::TaskMode::Mopping)
                                         {
@@ -3409,13 +3598,14 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
 
                                         // place the tool
                                         this->ArmPlaceTool(cur_task_mode_);
-#endif
+
                                         cur_tool_angle_ = data::arm::ToolAngle::Zero;
                                     }
 
-                                    /// For the end of each arm config. Check arm is alright or not
-                                    // todo:
-                                    //  check if arm is still connected
+                                    /// 4.1.2 Check the execution result of all arm_mission_configs
+                                    ///    a. if anything wrong, record and then break the loop
+                                    ///    b. if everything okay, record and then break the loop
+
                                     bool arm_mission_failed_status =
                                             nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::Error ||
                                             nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::EStop;
@@ -3423,50 +3613,68 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
                                     if( nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Disconnected ||
                                         arm_mission_failed_status )
                                     {
+                                        // a.1 Notify mir100 that arm has error, mir100's mission should be aborted by IPC1.
 
                                         arm_mission_success_flag    = false;
                                         mission_continue_flag       = false;
                                         mir100_ptr_->SetPLCRegisterIntValue(4,3); // error message
 
-//                                        /// Update Each order's Status as Error.
-//                                        sql_ptr_->UpdateEachTaskStatus(task_group_id, cur_order, 5);
+                                        // a.2 Update current arm_config status as as Error.
+                                        ///\@ redo part
+                                        sql_ptr_->UpdateEachTaskStatus(redo_ids[cur_order-1], 5);
 
                                         continue;
                                     }
                                     else
                                     {
-                                        sleep.ms(500);
-
-                                        /// info mir100 the arm has finished
+                                        // situation b.
+                                        // b.1 Notify mir100 that all arm_mission_configs has finished, you're ready to go :)
                                         mir100_ptr_->SetPLCRegisterIntValue(1,0);
 
-//                                        /// Update Each order's Status as Finished.
-//                                        sql_ptr_->UpdateEachTaskStatus(task_group_id, cur_order, 3);
+                                        // b.2 Update current arm_config status as Finished.
+                                        ///\@ redo part
+                                        sql_ptr_->UpdateEachTaskStatus(redo_ids[cur_order-1], 3);
                                     }
 
-                                    /// For Last order -- Need to decide how to break the loop
-                                    if(cur_order == cur_mission_num_)
+                                    if(!arm_sub_mission_success_flag)
                                     {
-                                        sleep.ms(1000);
-                                        /// ipc1 loop
-                                        // set arm_mission_success_flag
-                                        arm_mission_success_flag = true;
+                                        // no need to break the loop, finish the rest of arm_configs first!
 
-                                        // set ugv_mission_success_flag
-                                        if(mir100_ptr_->GetPLCRegisterIntValue(4) == 2)
-                                        {
-                                            ugv_mission_success_flag    = true;
-                                            mission_continue_flag       = false;
-                                        }
+                                        // a.2 Update current arm_config status as as Error.
+                                        ///\@ redo part
+                                        sql_ptr_->UpdateEachTaskStatus(redo_ids[cur_order-1], 5);
                                     }
                                 }
                                 else
                                 {
-                                    LOG(INFO) << "mission failed at step 2: wait for plc001 == 1";
+                                    /// 4.2 False
+
+                                    LOG(INFO) << "Mission failed: ugv failed to set plc001=1 ? Arm needs plc001==1 to execute all arm_mission_configs";
 
                                     arm_mission_success_flag = false;
                                     mission_continue_flag = false;
+
+                                    ///\@ redo part
+                                    sql_ptr_->UpdateEachTaskStatus(redo_ids[cur_order-1], 5);
+
                                     break;
+                                }
+
+                                /// 5. Check if this is the Last order, if true, break the loop.
+                                if(cur_order == cur_mission_num_)
+                                {
+                                    sleep.ms(1000);
+                                    /// ipc1 loop
+                                    // set arm_mission_success_flag
+
+                                    arm_mission_success_flag = true;
+
+                                    // set ugv_mission_success_flag
+                                    if(mir100_ptr_->GetPLCRegisterIntValue(4) == 2)
+                                    {
+                                        ugv_mission_success_flag    = true;
+                                        mission_continue_flag       = false;
+                                    }
                                 }
 
                                 break;
@@ -3498,40 +3706,28 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
         LOG(INFO) << "mission failed at initial status check.";
     }
 
-    int job_log_id = sql_ptr_->GetJobLogId(task_group_id);
-
+    //todo: what about table: job_log ???
     if(arm_mission_success_flag == true && ugv_mission_success_flag == true)
     {
-        if(arm_sub_mission_success_flag == true)
+        // check all statuses of the task_group_id == 3
+        if(sql_ptr_->CheckFailedTaskNo(task_group_id) == 0)
         {
             nw_status_ptr_->cur_job_success_flag = true;
 
             mir100_ptr_->SetPLCRegisterIntValue(4,0);
-
-            // Mark job_log_id status as error
-            sql_ptr_->UpdateJobLog(job_log_id, 3);
         }
         else
         {
+            // something is wrong.
             nw_status_ptr_->cur_job_success_flag = false;
 
             mir100_ptr_->SetPLCRegisterIntValue(4,3);
-
-            // Mark job_log_id status as error
-            sql_ptr_->UpdateJobLog(job_log_id, 5);
         }
-
     }
     else
     {
         // something is wrong.
         nw_status_ptr_->cur_job_success_flag = false;
-
-        mir100_ptr_->SetPLCRegisterIntValue(4,3);
-
-        // Mark job_log_id status as finished
-        sql_ptr_->UpdateJobLog(job_log_id, 5);
-
     }
 
     mir100_ptr_->Pause();
