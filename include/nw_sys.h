@@ -3152,7 +3152,7 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
                                             this->ArmUpdatePadNo();
 
                                             sleep.ms(200);
-#if 1 /// Disable For Testing
+#if 0 /// Disable For Testing
                                             this->ArmAbsorbWater();
 #endif
                                         }

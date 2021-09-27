@@ -1455,22 +1455,44 @@ yf::arm::tm::ConfigureRedoArmMission(const int &task_group_id, const int &order,
         /// 6. motion_type
         mission_config.motion_type = this->GetMotionType(arm_mission_config_id);
 
-        /// 7. standby_position
+        /// 7.1 standby_position
         mission_config.standby_position = this->GetStandbyPosition(arm_config_id);
 
-        /// 8. landmark_flag
-        mission_config.landmark_flag = this->GetLandmarkFlag(arm_mission_config_id);
+        /// 7.2 sub_standby_position
+        mission_config.sub_standby_position = this->GetSubStandbyPosition(arm_mission_config_id);
 
-        /// 9.(optional) vision_lm_init__position
-        if(mission_config.landmark_flag == true)
-        {
-            mission_config.ref_vision_lm_init_position = this->GetRefVisionLMInitPosition(arm_mission_config_id);
-        }
+        /// 8. vision_type
+        mission_config.vision_type = this->GetVisionType(arm_mission_config_id);
 
-        /// 10.(optional) ref_landmark_pos
-        if(mission_config.landmark_flag == true)
+        switch (mission_config.vision_type)
         {
-            mission_config.ref_landmark_pos = this->GetRefLandmarkPos(arm_mission_config_id);
+            case data::arm::VisionType::None:
+            {
+                // do nothing
+                break;
+            }
+            case data::arm::VisionType::Landmark:
+            {
+                // a. vision_lm_init__position
+                mission_config.ref_vision_lm_init_position = this->GetRefVisionLMInitPosition(arm_mission_config_id);
+                // b. ref_landmark_pos
+                mission_config.ref_landmark_pos = this->GetRefLandmarkPos(arm_mission_config_id);
+            }
+            case data::arm::VisionType::D455:
+            {
+                /// 1. Get info from DB
+                //   1.1. get tcp_offset_info
+                mission_config.tcp_offset_info = this->GetTcpOffsetInfo("d455");
+                //   1.2. get all ref_tcp_pos.
+                mission_config.ref_tcp_pos_ids = this->GetRefTcpPosIds(arm_mission_config_id);
+
+                // 2d vector for TF
+                mission_config.ref_tcp_pos_tfs = this->GetRefTcpPosTFs(mission_config.ref_tcp_pos_ids,mission_config.tcp_offset_info);
+                // 2d vector for ref_pc_file_name
+                mission_config.ref_pc_file_names = this->GetRefPCFileNames(arm_mission_config_id);
+                // 1d vector for feature type
+                mission_config.feature_type_ids = this->GetFeatureTypeIds(arm_mission_config_id);
+            }
         }
 
         /// 11. (*required) via_approach_point
