@@ -66,8 +66,8 @@ namespace yf
             void ArmPickTool (const yf::data::arm::TaskMode& task_mode);
             void ArmPlaceTool(const yf::data::arm::TaskMode& task_mode);
 
-            void ArmPickPad();
-            void ArmRemovePad();
+            void ArmPickPad(const int& job_id);
+            void ArmRemovePad(const int& job_id);
             void ArmAbsorbWater();
             int  ArmGetAbsorbType();
 
@@ -198,8 +198,8 @@ namespace yf
             std::deque<int> q_job_ids;
             int job_number = 0;
 
-            std::deque<int> q_job_mopping_ids;
             std::deque<int> q_job_uvc_scanning_ids;
+            std::deque<int> q_job_mopping_ids;
 
             std::deque<int> q_task_ids;
             int task_number = 0;
@@ -613,7 +613,7 @@ void yf::sys::nw_sys::DoJobs(const int &cur_schedule_id)
 
     q_job_ids = sql_ptr_->GetJobsId(cur_schedule_id);
 
-    /// Job Filter, do mopping first!
+    /// Job Filter, do small_pad_mopping first!
     this->JobsFilter(q_job_ids);
 
     /// Ugv needs to change the map first!
@@ -945,7 +945,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
 
                                     ///\workflow Start executing arm mission
 
-                                    ///\ (1) First order, pick the pad
+                                    ///\ (1) First order, pick the pad?
                                     if(cur_order == cur_first_valid_order_)
                                     {
                                         switch (cur_task_mode_)
@@ -959,29 +959,46 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                             {
                                                 cur_tool_angle_ = data::arm::ToolAngle::Zero;
 
-//                                                q_job_mopping_ids
-                                                /// check pick_tool_flag
-
-                                                this->ArmPickTool(cur_task_mode_);
-
-                                                sleep.ms(200);
-
-                                                /// Check the change_pad_flag
-                                                if(cur_task_mode_ == data::arm::TaskMode::Mopping)
+                                                /// check if it's the first mopping job
+                                                if(cur_job_id == q_job_mopping_ids.front())
                                                 {
-                                                    this->ArmRemovePad();
+                                                    this->ArmPickTool(cur_task_mode_);
+                                                    sleep.ms(200);
 
-                                                    this->ArmPickPad();
-
+                                                    this->ArmPickPad(cur_job_id);
                                                     sleep.ms(200);
 
                                                     this->ArmUpdatePadNo();
-
                                                     sleep.ms(200);
-#if 0 //disable for testing
-                                                    this->ArmAbsorbWater();
-#endif
+
+                                                    // for remove_tool
+                                                    tm5.set_remove_tool_flag(false);
+
+                                                    // for change_pad: start the timer
+
+                                                } else
+                                                {
+                                                    // tm5.CheckChangePadFlag(cur_job_id);
+
+                                                    // if True, change the pad
+                                                        // this->ArmRemovePad(cur_job_id);
+                                                    //    False, unchange the pad
                                                 }
+
+                                                // Check if it's the last mopping job, set the remove_tool_flag
+                                                if(cur_job_id == q_job_mopping_ids.back())
+                                                {
+                                                    tm5.set_remove_tool_flag(true);
+                                                }
+
+                                                /// check pick_tool_flag
+
+                                                /// Check the change_pad_flag
+
+
+                                                #if 0 //disable for testing
+                                                this->ArmAbsorbWater();
+                                                #endif
 
                                                 break;
                                             }
@@ -1467,13 +1484,16 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                 tm5.ArmTask("Post tool_angle_0");
                                             }
 
-                                            this->ArmRemovePad();
+                                            if(tm5.get_remove_tool_flag())
+                                            {
+                                                this->ArmRemovePad(cur_job_id);
+
+                                                // place the tool
+                                                this->ArmPlaceTool(cur_task_mode_);
+                                            }
+
+                                            cur_tool_angle_ = data::arm::ToolAngle::Zero;
                                         }
-
-                                        // place the tool
-                                        this->ArmPlaceTool(cur_task_mode_);
-
-                                        cur_tool_angle_ = data::arm::ToolAngle::Zero;
                                     }
 
                                     /// 4.1.2 Check the execution result of all arm_mission_configs
@@ -2529,85 +2549,45 @@ void yf::sys::nw_sys::ArmPostViaPoints(const yf::data::arm::TaskMode& task_mode,
     return;
 }
 
-void yf::sys::nw_sys::ArmPickPad()
+void yf::sys::nw_sys::ArmPickPad(const int& job_id)
 {
-    switch (cur_model_type_)
+    // check each pad_size
+    auto pad_type_id = sql_ptr_->GetModelConfigElement(sql_ptr_->GetModelConfigId(job_id),"pad_type");
+
+    // push back respectively.
+    switch (pad_type_id)
     {
-        case data::arm::ModelType::Handrail:
+        case 1: // small_pad
         {
             tm5.ArmTask("Post pick_small_pad");
+            tm5.set_cur_pad_type(data::arm::PadType::Small);
             break;
         }
-        case data::arm::ModelType::Windows:
+        case 2: // large_pad
         {
             tm5.ArmTask("Post pick_large_pad");
-            break;
-        }
-        case data::arm::ModelType::NurseStation:
-        {
-            tm5.ArmTask("Post pick_large_pad");
-            break;
-        }
-        case data::arm::ModelType::DeskPolygon:
-        {
-            tm5.ArmTask("Post pick_large_pad");
-            break;
-        }
-        case data::arm::ModelType::Skirting:
-        {
-            tm5.ArmTask("Post pick_large_pad");
-            break;
-        }
-        case data::arm::ModelType::Wall:
-        {
-            tm5.ArmTask("Post pick_large_pad");
-            break;
-        }
-        default:
-        {
-            tm5.ArmTask("Post pick_small_pad");
+            tm5.set_cur_pad_type(data::arm::PadType::Large);
             break;
         }
     }
 }
 
-void yf::sys::nw_sys::ArmRemovePad()
+void yf::sys::nw_sys::ArmRemovePad(const int& job_id)
 {
-    switch (cur_model_type_)
+    // check each pad_size
+    auto pad_type_id = sql_ptr_->GetModelConfigElement(sql_ptr_->GetModelConfigId(job_id),"pad_type");
+
+    // push back respectively.
+    switch (pad_type_id)
     {
-        case data::arm::ModelType::Handrail:
+        case 1: // small_pad
         {
             tm5.ArmTask("Post remove_small_pad");
             break;
         }
-        case data::arm::ModelType::Windows:
+        case 2: // large_pad
         {
             tm5.ArmTask("Post remove_large_pad");
-            break;
-        }
-        case data::arm::ModelType::NurseStation:
-        {
-            tm5.ArmTask("Post remove_large_pad");
-            break;
-        }
-        case data::arm::ModelType::DeskPolygon:
-        {
-            tm5.ArmTask("Post remove_large_pad");
-            break;
-        }
-        case data::arm::ModelType::Skirting:
-        {
-            tm5.ArmTask("Post remove_large_pad");
-            break;
-        }
-        case data::arm::ModelType::Wall:
-        {
-            tm5.ArmTask("Post remove_large_pad");
-            break;
-        }
-        default:
-        {
-            tm5.ArmTask("Post remove_small_pad");
             break;
         }
     }
@@ -2726,16 +2706,54 @@ void yf::sys::nw_sys::JobsFilter(std::deque<int>& q_ids)
         // for each job id, check its task_mode
         switch (sql_ptr_->GetTaskMode(q_ids[n]))
         {
-            case 1:
+            case 1: // mopping
             {
                 q_job_mopping_ids.push_back(q_ids[n]);
                 break;
             }
-            case 2:
+            case 2: // uvc scanning
             {
                 q_job_uvc_scanning_ids.push_back(q_ids[n]);
                 break;
             }
+        }
+    }
+
+    // ids filter for small/large pad
+    if(!q_job_mopping_ids.empty())
+    {
+        std::deque<int> small_pad_mopping_ids;
+        std::deque<int> large_pad_mopping_ids;
+
+        small_pad_mopping_ids.clear();
+        large_pad_mopping_ids.clear();
+
+        for(int n = 0; n < q_job_mopping_ids.size(); n++)
+        {
+            // check each pad_size
+            auto pad_type_id = sql_ptr_->GetModelConfigElement(sql_ptr_->GetModelConfigId(q_job_mopping_ids[n]),"pad_type");
+
+            // push back respectively.
+            switch (pad_type_id)
+            {
+                case 1: // small_pad
+                {
+                    small_pad_mopping_ids.push_back(q_job_mopping_ids[n]);
+                    break;
+                }
+                case 2: // large_pad
+                {
+                    large_pad_mopping_ids.push_back(q_job_mopping_ids[n]);
+                    break;
+                }
+            }
+
+            // redesign q_job_mopping_ids
+            q_job_mopping_ids.clear();
+
+            q_job_mopping_ids.insert(q_ids.end(), small_pad_mopping_ids.begin(), small_pad_mopping_ids.end());
+            q_job_mopping_ids.insert(q_ids.end(), large_pad_mopping_ids.begin(), large_pad_mopping_ids.end());
+
         }
     }
 
@@ -3209,7 +3227,7 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
 
                                         if(cur_task_mode_ == data::arm::TaskMode::Mopping)
                                         {
-                                            this->ArmPickPad();
+                                            this->ArmPickPad(origin_job_id);
 
                                             sleep.ms(200);
 
@@ -3657,7 +3675,7 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
                                                 tm5.ArmTask("Post tool_angle_0");
                                             }
 
-                                            this->ArmRemovePad();
+                                            this->ArmRemovePad(origin_job_id);
                                         }
 
                                         // place the tool

@@ -177,6 +177,12 @@ namespace  yf
                 FortyFive   =   45
             };
 
+            enum class PadType
+            {
+                Small       =   1,
+                Large       =   2
+            };
+
             enum class ModelType
             {
                 Handrail        = 1,

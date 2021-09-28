@@ -8,17 +8,37 @@ using std::endl;
 
 int main()
 {
+#if 1
+    std::deque<int> q_ids;
+
+    q_ids.push_back(1);
+
+    if(1 == q_ids.front())
+    {
+        cout << "is_front()!"  << endl;
+    }
+
+    if(1 == q_ids.back())
+    {
+        cout << "is_back()!"  << endl;
+    }
+
+    cout << "Done!"  << endl;
+#endif
 
 /// For localhost: ROG
 //    yf::sql::sql_server sql("SQL Server","192.168.7.84","NW_mobile_robot_sys","sa","wuyongfeng1334");
-//    std::shared_ptr<yf::sql::sql_server> sql = std::make_shared<yf::sql::sql_server>("ODBC Driver 17 for SQL Server","localhost","NW_mobile_robot_sys","sa","wuyongfeng1334");
+    std::shared_ptr<yf::sql::sql_server> sql = std::make_shared<yf::sql::sql_server>("ODBC Driver 17 for SQL Server","localhost","NW_mobile_robot_sys","sa","wuyongfeng1334");
+//
+///// For localhost: NW 238 OFFICE
+////    yf::sql::sql_server sql("ODBC Driver 17 for SQL Server","192.168.0.8","NW_mobile_robot_sys","sa","Willsonic2010");
+//
+//
+///// For IPC1
+////    std::shared_ptr<yf::sql::sql_server> sql = std::make_shared<yf::sql::sql_server>("SQL Server","192.168.7.127","NW_mobile_robot_sys","sa","NWcadcam2021");
 
-/// For localhost: NW 238 OFFICE
-//    yf::sql::sql_server sql("ODBC Driver 17 for SQL Server","192.168.0.8","NW_mobile_robot_sys","sa","Willsonic2010");
+    auto pad_type_id = sql->GetModelConfigElement(1,"pad_type");
 
-
-/// For IPC1
-    std::shared_ptr<yf::sql::sql_server> sql = std::make_shared<yf::sql::sql_server>("SQL Server","192.168.7.127","NW_mobile_robot_sys","sa","NWcadcam2021");
 
     auto set_number = sql->GetEachSetViewNumber(11167,3);
 

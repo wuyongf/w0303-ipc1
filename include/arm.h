@@ -231,9 +231,8 @@ namespace yf
             bool        ipc_server_flag_ = true;                                // tm_net_server_living_flag
             std::thread th_ipc_server_;                                         // th_tm_net_server
 
-            // Arm Listen Node
-            //
-            //
+            /// Arm Listen Node
+
             IPCClient   ipc_client_ln_;
             bool        ipc_client_ln_flag_ = true;
             std::thread th_ipc_client_ln_;
@@ -244,9 +243,8 @@ namespace yf
             std::mutex mux_Blocking_ln;
             std::condition_variable cv_Blocking_ln;
 
-            // Job
-            //
-            //
+            /// Job
+
             yf::data::common::MissionStatus schedule_status_;
 
             // overall control
@@ -273,9 +271,20 @@ namespace yf
             std::deque<yf::data::schedule::Job> schedule{};
             std::deque<int>  all_avaiable_schedule_ids;
 
-        private:
+        public: // pad related
 
-            // for arm task
+            yf::data::arm::PadType      cur_pad_type_;
+
+            bool change_pad_flag;
+            bool remove_tool_flag = true;
+
+            void set_remove_tool_flag(const bool& boolean);
+            bool get_remove_tool_flag();
+
+            void set_cur_pad_type(const yf::data::arm::PadType& pad_type);
+            yf::data::arm::PadType get_cur_pad_type();
+
+            bool CheckChangePadFlag(const int& cur_job_id);
 
         };
     }
@@ -1785,3 +1794,74 @@ yf::data::arm::Point3d yf::arm::tm::GetSubStandbyPosition(const int &arm_mission
 
     return sql_ptr_->GetArmPoint(sub_standby_position_id);
 }
+
+void yf::arm::tm::set_remove_tool_flag(const bool &boolean)
+{
+    remove_tool_flag = boolean;
+}
+
+bool yf::arm::tm::get_remove_tool_flag()
+{
+    return remove_tool_flag;
+}
+
+void yf::arm::tm::set_cur_pad_type(const yf::data::arm::PadType &pad_type)
+{
+    cur_pad_type_ = pad_type;
+}
+
+yf::data::arm::PadType yf::arm::tm::get_cur_pad_type()
+{
+    return cur_pad_type_;
+}
+
+bool yf::arm::tm::CheckChangePadFlag(const int &cur_job_id)
+{
+    //1. different_pad_flag
+    //2. timer_flag
+    //3. event_trigger_flag
+    bool different_pad_flag, timer_flag, event_trigger_flag;
+
+    /// 1. different_pad_flag
+    auto next_pad_type_id = sql_ptr_->GetModelConfigElement(cur_job_id,"pad_type");
+    yf::data::arm::PadType next_pad_type;
+
+    switch (next_pad_type_id)
+    {
+        case 1:
+        {
+            next_pad_type = data::arm::PadType::Small;
+            break;
+        }
+        case 2:
+        {
+            next_pad_type = data::arm::PadType::Large;
+            break;
+        }
+    }
+
+    if(cur_pad_type_ == next_pad_type)
+    {
+        different_pad_flag = false;
+    } else
+    {
+        different_pad_flag = true;
+    }
+
+    /// 2. timer_flag
+
+    /// 3. event_trigger_flag (frontend : User Input???)
+    // check new_pad_flag;(1?)
+    event_trigger_flag = false;
+
+    if( different_pad_flag == true || timer_flag == true || event_trigger_flag == true)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
