@@ -959,6 +959,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                             {
                                                 cur_tool_angle_ = data::arm::ToolAngle::Zero;
 
+//                                                q_job_mopping_ids
                                                 /// check pick_tool_flag
 
                                                 this->ArmPickTool(cur_task_mode_);
