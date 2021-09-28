@@ -614,7 +614,7 @@ void yf::sys::nw_sys::DoJobs(const int &cur_schedule_id)
     q_job_ids = sql_ptr_->GetJobsId(cur_schedule_id);
 
     /// Job Filter, do mopping first!
-//    this->JobsFilter(q_job_ids);
+    this->JobsFilter(q_job_ids);
 
     /// Ugv needs to change the map first!
     mir100_ptr_->ClearErrorState();
@@ -948,24 +948,42 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                     ///\ (1) First order, pick the pad
                                     if(cur_order == cur_first_valid_order_)
                                     {
-                                        cur_tool_angle_ = data::arm::ToolAngle::Zero;
-
-                                        this->ArmPickTool(cur_task_mode_);
-
-                                        sleep.ms(200);
-
-                                        if(cur_task_mode_ == data::arm::TaskMode::Mopping)
+                                        switch (cur_task_mode_)
                                         {
-                                            this->ArmPickPad();
+                                            case data::arm::TaskMode::UVCScanning:
+                                            {
+                                                this->ArmPickTool(cur_task_mode_);
+                                                break;
+                                            }
+                                            case data::arm::TaskMode::Mopping:
+                                            {
+                                                cur_tool_angle_ = data::arm::ToolAngle::Zero;
 
-                                            sleep.ms(200);
+                                                /// check pick_tool_flag
 
-                                            this->ArmUpdatePadNo();
+                                                this->ArmPickTool(cur_task_mode_);
 
-                                            sleep.ms(200);
+                                                sleep.ms(200);
+
+                                                /// Check the change_pad_flag
+                                                if(cur_task_mode_ == data::arm::TaskMode::Mopping)
+                                                {
+                                                    this->ArmRemovePad();
+
+                                                    this->ArmPickPad();
+
+                                                    sleep.ms(200);
+
+                                                    this->ArmUpdatePadNo();
+
+                                                    sleep.ms(200);
 #if 0 //disable for testing
-                                            this->ArmAbsorbWater();
+                                                    this->ArmAbsorbWater();
 #endif
+                                                }
+
+                                                break;
+                                            }
                                         }
                                     }
 
@@ -1235,6 +1253,51 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
 
                                                                     std::string ref_pos_tf_file = "..\\data\\point_clouds\\real\\arm_mission_config_" + std::to_string(arm_mission_configs[n].id)
                                                                             + "\\task_group_" + std::to_string(task_group_id) + "\\tf\\" + real_pc_file_name + "-tf.txt";
+
+                                                                    arm_mission_configs[n].real_pc_file = real_pc_file;
+                                                                    arm_mission_configs[n].ref_pos_tf_file = ref_pos_tf_file;
+
+                                                                    arm_mission_configs[n].TMat = tm5.Phase2GetTMat4Handle(real_pc_file,ref_pos_tf_file);
+                                                                }
+                                                            }
+
+                                                            break;
+                                                        }
+                                                        case data::arm::ModelType::Handrail:
+                                                        {
+                                                            auto feature_type = "handrail_higher";
+                                                            auto feature_type_id = sql_ptr_->GetFeatureTypeId(feature_type);
+
+                                                            std::vector<int> handrail_higher_sets;
+
+                                                            // find the corresponding files
+                                                            for (int m =0; m < arm_mission_configs[n].feature_type_ids.size(); m++)
+                                                            {
+                                                                if(arm_mission_configs[n].feature_type_ids[m] == feature_type_id)
+                                                                {
+                                                                    handrail_higher_sets.push_back(m);
+                                                                }
+                                                            }
+
+                                                            /// for 1 set 1 view algorithm
+                                                            if(handrail_higher_sets.size() == 1)
+                                                            {
+                                                                auto set_no  = handrail_higher_sets[0];
+
+                                                                auto cur_set_view_no = arm_mission_configs[n].ref_pc_file_names[set_no].size();
+
+                                                                if (cur_set_view_no == 1)
+                                                                {
+                                                                    // get the file name;
+                                                                    auto ref_pc_file_name = arm_mission_configs[n].ref_pc_file_names[set_no][0];
+
+                                                                    auto real_pc_file_name = std::to_string(task_group_id) + "-" + ref_pc_file_name;
+
+                                                                    std::string real_pc_file =   "..\\data\\point_clouds\\real\\arm_mission_config_" + std::to_string(arm_mission_configs[n].id)
+                                                                                                 + "\\task_group_" + std::to_string(task_group_id) + "\\point_cloud\\" + real_pc_file_name + ".pcd";
+
+                                                                    std::string ref_pos_tf_file = "..\\data\\point_clouds\\real\\arm_mission_config_" + std::to_string(arm_mission_configs[n].id)
+                                                                                                  + "\\task_group_" + std::to_string(task_group_id) + "\\tf\\" + real_pc_file_name + "-tf.txt";
 
                                                                     arm_mission_configs[n].real_pc_file = real_pc_file;
                                                                     arm_mission_configs[n].ref_pos_tf_file = ref_pos_tf_file;

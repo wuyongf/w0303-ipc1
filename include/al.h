@@ -515,7 +515,7 @@ bool yf::algorithm::arm_path::RecordCurRealPC(const std::string &abs_directory, 
     LOG(INFO) << "Record Point Cloud File [in progress]";
     // Get the Point Clouds
 
-    int resolution = 1;
+    int resolution = 30;
     double input_pt[30000][3];
 
     auto point_no = this->RecordRealPCArray(resolution, input_pt);
@@ -637,7 +637,10 @@ Eigen::Matrix4f yf::algorithm::arm_path::Phase2GetTMat4Handle(std::string& real_
     Eigen::Matrix4f TMat;
     TMat.setZero();
 
-    typedef int (*door_handle_identification )(char [],char [],double [],double [][2]);
+    typedef int (*door_handle_identification )(char pcd_name[],char pcd_transform[],
+                                               double delta_dist[],double transformation[][2],
+                                               double plane_box[],int no_of_location_box,double location_box[][6],
+                                               double ref_position[],double ref_angle,double para[]);
 
     // get 2d TMat
     char filename1[] = "cloud_viewer.dll";
@@ -647,15 +650,59 @@ Eigen::Matrix4f yf::algorithm::arm_path::Phase2GetTMat4Handle(std::string& real_
     HINSTANCE hinstLib1 = LoadLibraryW(ptr1);
     if (hinstLib1 == NULL)
     {
+        std::cerr << "cannot open the dll!";
         return TMat;
     }
+
     door_handle_identification door_plane_corner_line_processing;
     door_plane_corner_line_processing = (door_handle_identification)GetProcAddress(hinstLib1, "door_plane_corner_line_processing");
 
 
     double translation[3];
     double rotation[2][2];
-    auto n = door_plane_corner_line_processing(&real_pc_file[0],&ref_pos_tf_file[0],translation,rotation);
+
+    // param
+    double plane_box[6];
+    int no_of_location_box;
+    double location_box[2][6];
+    double ref_position[2];
+    double ref_angle;
+    double para[5];
+
+    // hard code for now
+
+    // for 11221
+    plane_box[0] = 0;
+    plane_box[1] = -1.1;
+    plane_box[2] = 0.63;
+    plane_box[3] = 0.1;
+    plane_box[4] = -0.9;
+    plane_box[5] = 0.67;
+
+    no_of_location_box = 2;
+
+    location_box[0][0] = 0.2;
+    location_box[0][1] = -1.3;
+    location_box[0][2] = 0.1;
+    location_box[0][3] = 0.4;
+    location_box[0][4] = -0.9;
+    location_box[0][5] = 0.2;
+
+    location_box[1][0] = 0.2;
+    location_box[1][1] = -1.3;
+    location_box[1][2] = 0.58;
+    location_box[1][3] = 0.4;
+    location_box[1][4] = -0.9;
+    location_box[1][5] = 0.62;
+
+    ref_position[0] = 0.290253;
+    ref_position[1] = -0.889795;
+
+    ref_angle = -0.0724364;
+
+    para[0] = 0.135;
+
+    auto n = door_plane_corner_line_processing(&real_pc_file[0],&ref_pos_tf_file[0],translation,rotation,plane_box,no_of_location_box,location_box,ref_position,ref_angle,para);
 
     /// fill the 4x4 TMat
 
@@ -675,6 +722,9 @@ Eigen::Matrix4f yf::algorithm::arm_path::Phase2GetTMat4Handle(std::string& real_
     TMat(2, 0) = 0;
     TMat(2, 1) = 0;
     TMat(2, 2) = 1;
+
+    LOG(INFO) << "TMat: " << TMat ;
+    std::cout << "TMat: " << TMat ;
 
     return TMat;
 }

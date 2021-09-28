@@ -9,110 +9,110 @@
 int main()
 {
     yf::algorithm::arm_path al;
-
-    yf::data::arm::Point3d ref_landmark_pos;
-    yf::data::arm::Point3d real_landmark_pos;
-
-    ref_landmark_pos.x = -555.3;
-    ref_landmark_pos.y = -214.55;
-    ref_landmark_pos.z = 2.74;
-    ref_landmark_pos.rx = 178.9;
-    ref_landmark_pos.ry = 7.16;
-    ref_landmark_pos.rz = 95.59;
-
-    real_landmark_pos.x = -624.77;
-    real_landmark_pos.y = -39.14;
-    real_landmark_pos.z = 0.21;
-    real_landmark_pos.rx = 179.97;
-    real_landmark_pos.ry = 0.98;
-    real_landmark_pos.rz = 94.44;
-
-    Eigen::Matrix4f T_ref_tag;      //T1
-    Eigen::Matrix4f T_real_tag;     //T4
-
-    T_ref_tag.setZero();
-    T_real_tag.setZero();
-
-    T_ref_tag = al.points2TMat(ref_landmark_pos);      // T1
-    T_real_tag = al.points2TMat(real_landmark_pos);    // T4
-
-    Eigen::Matrix4f T_deltaa = T_real_tag * T_ref_tag.inverse() ;
-
-    std::cout << "T_deltaa" << std::endl << T_deltaa << std::endl;
+//
+//    yf::data::arm::Point3d ref_landmark_pos;
+//    yf::data::arm::Point3d real_landmark_pos;
+//
+//    ref_landmark_pos.x = -555.3;
+//    ref_landmark_pos.y = -214.55;
+//    ref_landmark_pos.z = 2.74;
+//    ref_landmark_pos.rx = 178.9;
+//    ref_landmark_pos.ry = 7.16;
+//    ref_landmark_pos.rz = 95.59;
+//
+//    real_landmark_pos.x = -624.77;
+//    real_landmark_pos.y = -39.14;
+//    real_landmark_pos.z = 0.21;
+//    real_landmark_pos.rx = 179.97;
+//    real_landmark_pos.ry = 0.98;
+//    real_landmark_pos.rz = 94.44;
+//
+//    Eigen::Matrix4f T_ref_tag;      //T1
+//    Eigen::Matrix4f T_real_tag;     //T4
+//
+//    T_ref_tag.setZero();
+//    T_real_tag.setZero();
+//
+//    T_ref_tag = al.points2TMat(ref_landmark_pos);      // T1
+//    T_real_tag = al.points2TMat(real_landmark_pos);    // T4
+//
+//    Eigen::Matrix4f T_deltaa = T_real_tag * T_ref_tag.inverse() ;
+//
+//    std::cout << "T_deltaa" << std::endl << T_deltaa << std::endl;
 
 /// demo handle testing
-    std::string real_pc_file = "..\\data\\point_clouds\\real\\arm_mission_config_11167\\task_group_6224\\point_cloud\\6224-11167-1-1-planar.pcd";
-    std::string ref_pos_tf_file = "..\\data\\point_clouds\\real\\arm_mission_config_11167\\task_group_6224\\tf\\6224-11167-1-1-planar-tf.txt";
+    std::string real_pc_file = "..\\data\\point_clouds\\real\\arm_mission_config_11178\\task_group_7288\\point_cloud\\7288-11178-1-1-handrail_higher.pcd";
+    std::string ref_pos_tf_file = "..\\data\\point_clouds\\real\\arm_mission_config_11178\\task_group_7288\\tf\\7288-11178-1-1-handrail_higher-tf.txt";
 
-//    auto TMat1 = al.Phase2GetTMat4Handle(real_pc_file,ref_pos_tf_file);
+    auto TMat1 = al.Phase2GetTMat4Handle(real_pc_file,ref_pos_tf_file);
 
-    Eigen::Matrix4f TMat1;
-    TMat1 <<
-    0.991383, 0.130997, 0, 11.0602,
-    -0.130997, 0.991383, 0, 173.274,
-    0, 0, 1, 0,
-    0, 0, 0, 1;
-
-    Eigen::Matrix4f TMat_delta;
-    TMat_delta <<
-    0, 0, 0, -47.5,
-    0, 0, 0, 125.23,
-    0, 0, 0, 0,
-    0, 0, 0, 0;
-
-//    TMat1 = TMat1 - TMat_delta;
-
-    yf::data::arm::Point3d pos_via;
-    pos_via.x = -607.0776;
-    pos_via.y = -83.38239;
-    pos_via.z = 686.2543;
-    pos_via.rx = 128.3404;
-    pos_via.ry = 2.061164;
-    pos_via.rz = -70.3384;
-
-    yf::data::arm::Point3d pos_1;
-    pos_1.x = -641.461;
-    pos_1.y = -86.476;
-    pos_1.z = 645.393;
-    pos_1.rx = 130.573;
-    pos_1.ry = 2.056;
-    pos_1.rz = -71.029;
-
-    yf::data::arm::Point3d pos_2;
-    pos_2.x = -670.471;
-    pos_2.y = 17.467;
-    pos_2.z = 632.146;
-    pos_2.rx = 126.768;
-    pos_2.ry = 2.234;
-    pos_2.rz = -75.474;
-
-    auto real_pos_via = al.GetRealPointByRS(TMat1,pos_via);
-    auto real_pos_1 = al.GetRealPointByRS(TMat1,pos_1);
-    auto real_pos_2 = al.GetRealPointByRS(TMat1,pos_2);
-
-    std::cout << "real_pos_via: "<< std::endl;
-    std::cout << "x: " << real_pos_via.x << std::endl;
-    std::cout << "y: " << real_pos_via.y << std::endl;
-    std::cout << "z: " << real_pos_via.z << std::endl;
-    std::cout << "rx: " << real_pos_via.rx << std::endl;
-    std::cout << "ry: " << real_pos_via.ry << std::endl;
-    std::cout << "rz: " << real_pos_via.rz << std::endl;
-
-    std::cout << "real_pos_1: "<< std::endl;
-    std::cout << "x: " << real_pos_1.x << std::endl;
-    std::cout << "y: " << real_pos_1.y << std::endl;
-    std::cout << "z: " << real_pos_1.z << std::endl;
-    std::cout << "rx: " << real_pos_1.rx << std::endl;
-    std::cout << "ry: " << real_pos_1.ry << std::endl;
-    std::cout << "rz: " << real_pos_1.rz << std::endl;
-
-    std::cout << "real_pos_2: "<< std::endl;
-    std::cout << "x: " << real_pos_2.x << std::endl;
-    std::cout << "y: " << real_pos_2.y << std::endl;
-    std::cout << "z: " << real_pos_2.z << std::endl;
-    std::cout << "rx: " << real_pos_2.rx << std::endl;
-    std::cout << "ry: " << real_pos_2.ry << std::endl;
-    std::cout << "rz: " << real_pos_2.rz << std::endl;
+//    Eigen::Matrix4f TMat1;
+//    TMat1 <<
+//    0.991383, 0.130997, 0, 11.0602,
+//    -0.130997, 0.991383, 0, 173.274,
+//    0, 0, 1, 0,
+//    0, 0, 0, 1;
+//
+//    Eigen::Matrix4f TMat_delta;
+//    TMat_delta <<
+//    0, 0, 0, -47.5,
+//    0, 0, 0, 125.23,
+//    0, 0, 0, 0,
+//    0, 0, 0, 0;
+//
+////    TMat1 = TMat1 - TMat_delta;
+//
+//    yf::data::arm::Point3d pos_via;
+//    pos_via.x = -607.0776;
+//    pos_via.y = -83.38239;
+//    pos_via.z = 686.2543;
+//    pos_via.rx = 128.3404;
+//    pos_via.ry = 2.061164;
+//    pos_via.rz = -70.3384;
+//
+//    yf::data::arm::Point3d pos_1;
+//    pos_1.x = -641.461;
+//    pos_1.y = -86.476;
+//    pos_1.z = 645.393;
+//    pos_1.rx = 130.573;
+//    pos_1.ry = 2.056;
+//    pos_1.rz = -71.029;
+//
+//    yf::data::arm::Point3d pos_2;
+//    pos_2.x = -670.471;
+//    pos_2.y = 17.467;
+//    pos_2.z = 632.146;
+//    pos_2.rx = 126.768;
+//    pos_2.ry = 2.234;
+//    pos_2.rz = -75.474;
+//
+//    auto real_pos_via = al.GetRealPointByRS(TMat1,pos_via);
+//    auto real_pos_1 = al.GetRealPointByRS(TMat1,pos_1);
+//    auto real_pos_2 = al.GetRealPointByRS(TMat1,pos_2);
+//
+//    std::cout << "real_pos_via: "<< std::endl;
+//    std::cout << "x: " << real_pos_via.x << std::endl;
+//    std::cout << "y: " << real_pos_via.y << std::endl;
+//    std::cout << "z: " << real_pos_via.z << std::endl;
+//    std::cout << "rx: " << real_pos_via.rx << std::endl;
+//    std::cout << "ry: " << real_pos_via.ry << std::endl;
+//    std::cout << "rz: " << real_pos_via.rz << std::endl;
+//
+//    std::cout << "real_pos_1: "<< std::endl;
+//    std::cout << "x: " << real_pos_1.x << std::endl;
+//    std::cout << "y: " << real_pos_1.y << std::endl;
+//    std::cout << "z: " << real_pos_1.z << std::endl;
+//    std::cout << "rx: " << real_pos_1.rx << std::endl;
+//    std::cout << "ry: " << real_pos_1.ry << std::endl;
+//    std::cout << "rz: " << real_pos_1.rz << std::endl;
+//
+//    std::cout << "real_pos_2: "<< std::endl;
+//    std::cout << "x: " << real_pos_2.x << std::endl;
+//    std::cout << "y: " << real_pos_2.y << std::endl;
+//    std::cout << "z: " << real_pos_2.z << std::endl;
+//    std::cout << "rx: " << real_pos_2.rx << std::endl;
+//    std::cout << "ry: " << real_pos_2.ry << std::endl;
+//    std::cout << "rz: " << real_pos_2.rz << std::endl;
 
 
 //    al.RecordCurRealPC("c:", "123");
