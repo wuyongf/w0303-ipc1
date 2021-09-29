@@ -93,6 +93,12 @@ namespace yf
             bool PostMethod(const std::string& sub_path, const Poco::JSON::Object& obj);
             bool DeleteMethod(const std::string& sub_path);
 
+        private:
+            // Private Methods
+
+            bool doRequest(Poco::Net::HTTPClientSession& session, Poco::Net::HTTPRequest& request, Poco::Net::HTTPResponse& response);
+
+
         public:
 
             void Start(const std::string& ip_addr, std::shared_ptr<yf::status::nw_status> status_ptr, std::shared_ptr<yf::sql::sql_server> sql_ptr);
@@ -204,10 +210,6 @@ namespace yf
 
             bool ChangeInitPositionByDBMapStatus();
 
-        private:
-            // Private Methods
-
-            bool doRequest(Poco::Net::HTTPClientSession& session, Poco::Net::HTTPRequest& request, Poco::Net::HTTPResponse& response);
 
         private:
 

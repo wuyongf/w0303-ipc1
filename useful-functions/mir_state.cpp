@@ -28,9 +28,14 @@ int main()
 
     mir100.Start("192.168.7.34", nw_status_ptr, sql_ptr);
 
+    auto status = mir100.GetUgvStatus();
+
+
+#if 0
+
 //    std::cout << "docking guid:" << mir100.GetDockingGUID("21bd0de2-b2f7-11eb-bb31-00012978eb45") << std::endl;
 
-    auto status = mir100.GetUgvStatus();
+//    auto status = mir100.GetUgvStatus();
 
 
     mir100.PostMissionForDebugTest(6046);
@@ -125,7 +130,7 @@ int main()
 
     auto pos = mir100.GetCurPosition();
 
-
+#endif
 
 #if 0
     auto pos_name_list = mir100.GetPositionNameList("HA","HA_MainBlock_3/F");
