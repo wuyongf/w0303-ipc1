@@ -1,17 +1,13 @@
 #pragma once
 
-#include "nw_status.h"
-#include "sql.h"
-
-#include <stdio.h>
-#include <time.h>
+// Std
+#include <cstdio>
+#include <ctime>
 #include <iostream>
 #include <string>
 #include <map>
 #include <thread>
 #include <mutex>
-
-// time control
 #include <chrono>
 #include <thread>
 
@@ -40,6 +36,9 @@
 
 #include "Poco/Mutex.h"
 
+// Sys
+#include "nw_status.h"
+#include "sql.h"
 #include "al.h"
 
 using Poco::Net::HTTPClientSession;
@@ -86,9 +85,11 @@ namespace yf
 
         private: /// Rest API: CRUD
 
-            /// Most Basic Function
-            // todo: comment the cout
+            /// Most Basic Function *
             std::string GetRequestResult();
+
+            /// Most Basic Function **
+            bool doRequest(Poco::Net::HTTPClientSession& session, Poco::Net::HTTPRequest& request, Poco::Net::HTTPResponse& response);
 
             /// Basic Methods
             bool GetMethod(const std::string& sub_path);
@@ -97,11 +98,6 @@ namespace yf
             bool DeleteMethod(const std::string& sub_path);
 
             Poco::Mutex _mutex;
-
-        private:
-            // Private Methods
-
-            bool doRequest(Poco::Net::HTTPClientSession& session, Poco::Net::HTTPRequest& request, Poco::Net::HTTPResponse& response);
 
         public:
 
@@ -120,7 +116,6 @@ namespace yf
 
             bool  SetPLCRegisterIntValue(const int& plc_register, const int& value);
             bool  SetPLCRegisterFloatValue(const int& plc_register, const float& value);
-
 
         public: ///  Layer2: Interact with nw_status, database
 
@@ -255,23 +250,6 @@ namespace yf
             std::deque<std::string> cur_position_names_;
 
             yf::algorithm::TimeSleep sleep;
-
-            // for RestApi GET STATE and POST Actions interference
-        public:
-
-
-
-            bool configuration_flag_ = false;
-            bool get_configuration_flag();
-            void set_configuration_flag(const bool& boolean);
-
-            bool IsConfiguringMission();
-
-            bool update_flag_ = false;
-            bool get_update_flag();
-            void set_update_flag(const bool& boolean);
-
-            bool IsUpdatingStatus();
         };
     }
 }
@@ -311,10 +289,6 @@ void yf::ugv::mir::SetAuthentication(const std::string &auth_info)
 
 std::string yf::ugv::mir::GetRequestResult()
 {
-//    auto result = request_result_;
-//    request_result_.clear();
-//    return result;
-
     return  request_result_;
 }
 
@@ -2571,36 +2545,6 @@ void yf::ugv::mir::UpdateUgvMissionStatus(const yf::data::ugv::Status &status)
             break;
         }
     }
-}
-
-void yf::ugv::mir::set_configuration_flag(const bool &boolean)
-{
-    configuration_flag_ = boolean;
-}
-
-bool yf::ugv::mir::get_configuration_flag()
-{
-    return configuration_flag_;
-}
-
-bool yf::ugv::mir::IsConfiguringMission()
-{
-    return this->get_configuration_flag();
-}
-
-bool yf::ugv::mir::get_update_flag()
-{
-    return update_flag_;
-}
-
-void yf::ugv::mir::set_update_flag(const bool &boolean)
-{
-    update_flag_=boolean;
-}
-
-bool yf::ugv::mir::IsUpdatingStatus()
-{
-    return this->get_update_flag();
 }
 
 

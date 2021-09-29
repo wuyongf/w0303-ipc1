@@ -123,27 +123,9 @@ namespace yf
             // methods
             void thread_WebStatusManager();
 
-            void thread_Web_UgvBatteryPercentage(bool& web_status_flag,
-                                                 const int& sleep_duration);
-
-            void thread_Web_UgvCurPosition(const bool& web_status_flag,
-                                           const int& sleep_duration);
-
-            void thread_Web_UgvStatus(const bool& web_status_flag,
-                                           const int& sleep_duration);
-
-            void thread_Web_DeviceConnectionMissionStatus(const bool& web_status_flag,
-                                                          const int& sleep_duration);
-
-
-
-        private:
-            /// threads handle for Web Status Manager
+            void thread_Web_UgvStatus(const bool& web_status_flag, const int& sleep_duration);
 
             std::thread th_web_status_manager_;
-            std::thread th_web_ugv_battery_;
-            std::thread th_web_ugv_position_;
-            std::thread th_web_ugv_connection_mission_status_;
             std::thread th_web_ugv_status_;
 
         private:
@@ -286,7 +268,7 @@ void yf::sys::nw_sys::Start()
     mir100_ptr_->Start("192.168.7.34", nw_status_ptr_, sql_ptr_);
 
     /// TIME
-    sleep.ms(1000);
+    sleep.ms(500);
 
     /// 3. Web Status Manager
     th_web_status_manager_ = std::thread(&nw_sys::thread_WebStatusManager, this);
@@ -741,17 +723,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
     int pre_order = 0;
 
     /// 2. Assign Ugv Mission
-    //
-    // todo: TIME OUT!!!
-    while (mir100_ptr_->IsUpdatingStatus())
-    {
-        std::cout << "wait for the thread_update_mir_status to finish..."<<std::endl;
-        sleep.sec(1);
-    }
 
-    // 2.0 postpone ugv state updater thead first
-    mir100_ptr_->set_configuration_flag(true);
-    sleep.sec(1);
     //  2.1. Ugv: post a new mission via REST
     mir100_ptr_->PostMission(cur_model_config_id_);
     //  2.2. Ugv: post actions via REST
@@ -773,8 +745,6 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
         ///TIME
         sleep.ms(200);
         mir100_ptr_->Play();
-
-        mir100_ptr_->set_configuration_flag(false);
 
         /// \brief
         ///
@@ -1643,7 +1613,6 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
     }
     else
     {
-        mir100_ptr_->set_configuration_flag(false);
         LOG(INFO) << "mission failed at initial status check.";
     }
 
@@ -2659,28 +2628,13 @@ void yf::sys::nw_sys::thread_WebStatusManager()
     /// Configuration
     ///
     /// duration for each thread
-    int duration_min_ugv_battery = 10;
-    int duration_sec_ugv_pos = 10;
-    int duration_sec_ugv_connection_mission_status = 5;
-
-    int duration_sec_ugv_status = 5;
+    int duration_sec_ugv_status = 2;
 
     /// each thread's control flag
     web_status_flag_ = true;
 
-    /// kick off each thread
-    // th_web_ugv_battery_ = std::thread(&nw_sys::thread_Web_UgvBatteryPercentage, this,
-    //                                  std::ref(web_status_flag_),std::move(duration_min_ugv_battery));
-
-    // th_web_ugv_position_ = std::thread(&nw_sys::thread_Web_UgvCurPosition, this,
-    //                                   std::ref(web_status_flag_),std::move(duration_sec_ugv_pos));
-
-    // th_web_ugv_connection_mission_status_ = std::thread(&nw_sys::thread_Web_DeviceConnectionMissionStatus, this,
-    //                                                    std::ref(web_status_flag_),
-    //                                                    std::move(duration_sec_ugv_connection_mission_status));
-
-    th_web_ugv_position_ = std::thread(&nw_sys::thread_Web_UgvStatus, this,
-                                       std::ref(web_status_flag_),std::move(duration_sec_ugv_status));
+    th_web_ugv_status_ = std::thread(&nw_sys::thread_Web_UgvStatus, this,
+                                       std::ref(web_status_flag_),duration_sec_ugv_status);
 
     /// Check Duration: 1 minute
     while (schedule_flag_)
@@ -2690,56 +2644,6 @@ void yf::sys::nw_sys::thread_WebStatusManager()
 
     /// Stop all web status threads
     web_status_flag_ = false;
-}
-
-void yf::sys::nw_sys::thread_Web_UgvBatteryPercentage(bool &web_status_flag,
-                                                      const int& sleep_duration)
-{
-    while(web_status_flag)
-    {
-        if(mir100_ptr_->IsConnected())
-        {
-            try
-            {
-                // retrieve data from ugv
-                auto result = mir100_ptr_->GetBatteryPercentage();
-                // update to sql
-                sql_ptr_->UpdateDeviceBatteryCapacity("ugv", result);
-            }
-            catch (std::error_code ec)
-            {
-                std::cerr << "Cannot Get MiR100 Battery Percentage. Will Try Again Later";
-            }
-        }
-
-        sleep.minute(sleep_duration);
-    }
-}
-
-void yf::sys::nw_sys::thread_Web_UgvCurPosition(const bool &web_status_flag,
-                                                const int &sleep_duration)
-{
-    sleep.sec(sleep_duration);
-
-    while(web_status_flag)
-    {
-        if(mir100_ptr_->IsConnected())
-        {
-            try
-            {
-                // retrieve data from ugv
-                auto result = mir100_ptr_->GetCurPosition();
-                // update to sql
-                sql_ptr_->UpdateDeviceUgvCurPosition(result[0],result[1],result[2]);
-            }
-            catch (std::error_code ec)
-            {
-                std::cerr << "Cannot Get MiR100 Cur Position. Will Try Again Later";
-            }
-        }
-
-        sleep.sec(sleep_duration);
-    }
 }
 
 /// \brief Sorting all incoming job ids, do mopping jobs first, and then ucv scanning jobs
@@ -3865,43 +3769,6 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
 
 }
 
-void yf::sys::nw_sys::thread_Web_DeviceConnectionMissionStatus(const bool &web_status_flag, const int &sleep_duration)
-{
-    sleep.sec(sleep_duration);
-
-    while(web_status_flag)
-    {
-        /// 1. mir100
-
-        /// 1.1. ping mir 192.168.7.34
-
-        if(mir100_ptr_->IsConnected())
-        {
-            /// if success
-            /// 1.1.1 update mir connection status
-            nw_status_ptr_->ugv_connection_status_ = data::common::ConnectionStatus::Connected;
-            sql_ptr_->UpdateDeviceConnectionStatus("ugv", 1);
-
-            /// 1.3. get mir mission status from REST API
-            /// 1.4. update mir mission status
-            mir100_ptr_->RetrieveUgvCurrentMissionState();
-        }
-        else
-        {
-            nw_status_ptr_->ugv_connection_status_ = data::common::ConnectionStatus::Disconnected;
-            sql_ptr_->UpdateDeviceConnectionStatus("ugv", 0);
-            sql_ptr_->UpdateDeviceMissionStatus("ugv",6);
-        }
-
-        /// 2. arm
-        /// 2.1 connection status
-        /// 2.2 mission status
-        tm5.UpdateSQLArmStatus();
-
-        sleep.sec(sleep_duration);
-    }
-}
-
 void yf::sys::nw_sys::ArmCheckPadIsEmpty()
 {
     // check if there is any small/large pad
@@ -4249,35 +4116,26 @@ void yf::sys::nw_sys::thread_Web_UgvStatus(const bool &web_status_flag, const in
     {
         if(mir100_ptr_->IsConnected())
         {
-            if(!mir100_ptr_->IsConfiguringMission())
+            try
             {
-                try
-                {
-                    //postpone ugv configuration task
-                    mir100_ptr_->set_update_flag(true);
+                /// Retrieve ugv status
+                auto status = mir100_ptr_->GetUgvStatus();
 
-                    /// Retrieve ugv status
-                    auto status = mir100_ptr_->GetUgvStatus();
+                /// Update database
+                // 1. battery_percentage
+                sql_ptr_->UpdateDeviceBatteryCapacity("ugv", status.battery_percentage);
+                // 2. position
+                sql_ptr_->UpdateDeviceUgvCurPosition(status.position.x,status.position.y,status.position.orientation);
+                // 3. ugv_connection_status
+                nw_status_ptr_->ugv_connection_status_ = data::common::ConnectionStatus::Connected;
+                sql_ptr_->UpdateDeviceConnectionStatus("ugv", 1);
+                // 4. ugv_mission_status
+                mir100_ptr_->UpdateUgvMissionStatus(status);
 
-                    /// Update database
-                    // 1. battery_percentage
-                    sql_ptr_->UpdateDeviceBatteryCapacity("ugv", status.battery_percentage);
-                    // 2. position
-                    sql_ptr_->UpdateDeviceUgvCurPosition(status.position.x,status.position.y,status.position.orientation);
-                    // 3. ugv_connection_status
-                    nw_status_ptr_->ugv_connection_status_ = data::common::ConnectionStatus::Connected;
-                    sql_ptr_->UpdateDeviceConnectionStatus("ugv", 1);
-                    // 4. ugv_mission_status
-                    mir100_ptr_->UpdateUgvMissionStatus(status);
-
-                    mir100_ptr_->set_update_flag(false);
-
-                }
-                catch (std::error_code ec)
-                {
-                    mir100_ptr_->set_update_flag(false);
-                    std::cerr << "Cannot Get Ugv Status. Will Try Again Later";
-                }
+            }
+            catch (std::error_code& ec)
+            {
+                std::cerr << "Cannot Get Ugv Status. Will Try Again Later";
             }
         }
         else

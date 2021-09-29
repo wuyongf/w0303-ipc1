@@ -8,7 +8,6 @@
 #include "../include/sql.h"
 #include "../include/nw_status.h"
 
-
 #include<iostream>
 #include<vector>
 #include<algorithm>
@@ -36,6 +35,8 @@ void thread_Web_UgvStatus(const int& sleep_duration,yf::ugv::mir& mir)
 
 int main()
 {
+
+
     std::shared_ptr<yf::status::nw_status> nw_status_ptr = std::make_shared<yf::status::nw_status>();
 //    std::shared_ptr<yf::sql::sql_server> sql_ptr = std::make_shared<yf::sql::sql_server>("SQL Server","192.168.7.84","NW_mobile_robot_sys","sa","wuyongfeng1334");
     std::shared_ptr<yf::sql::sql_server> sql_ptr = std::make_shared<yf::sql::sql_server>("SQL Server","192.168.7.127","NW_mobile_robot_sys","sa","NWcadcam2021");
@@ -428,6 +429,30 @@ std::cout << "state_id: " << state_id << std::endl;
 
 //    mir100.UpdatePositionOnMap(19.048f, 31.291f, 27.605f);
 
+#endif
+
+/// vector iterator tutorial
+#if 0
+    std::vector<int> v;
+    v.push_back(10);
+    v.push_back(-100);
+    v.push_back(20);
+    v.push_back(40);
+    v[2] = 30;
+    v.erase(v.begin() + 1);  // erase the second element (value = -100)
+    for (size_t i = 0; i < v.size(); i++) {
+        std::cout << v[i] << std::endl;
+    }  // prints: 10, 20, 30 (on separate lines)
+    v.clear();
+
+    std::vector<int> v1{0,10,20,30,40,50,60,70,80,90};
+    std::vector<int> v2(v1.begin(), v1.end());
+    // v2 = {0,10,20,30,40,50,60,70,80,90}
+    std::vector<int> v3(v2.begin() + 2, v2.begin() + 6);
+    // v3 == {20,30,40,50}
+    v3.erase(v3.begin() + 1, v3.begin() + 2);
+    // v3 == {20,50}
+    std::reverse(v1.begin(), v1.end() - 2);
 #endif
     return 1;
 }

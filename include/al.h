@@ -3,13 +3,11 @@
 #include <iostream>
 #include <fstream>
 #include <Windows.h>
-#include <stdio.h>
+#include <cstdio>
 
 #include "al_common.h"
 #include "data.h"
-
 #include "sql.h"
-
 
 namespace yf
 {
