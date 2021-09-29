@@ -291,7 +291,7 @@ namespace yf
             void set_pad_cur_timer();
             std::chrono::time_point<std::chrono::steady_clock> get_pad_cur_timer();
 
-            bool CheckChangePadFlag(const int& cur_job_id);
+            bool CheckChangePadFlag(const int& cur_model_config_id);
 
         };
     }
@@ -1822,7 +1822,7 @@ yf::data::arm::PadType yf::arm::tm::get_cur_pad_type()
     return cur_pad_type_;
 }
 
-bool yf::arm::tm::CheckChangePadFlag(const int &cur_job_id)
+bool yf::arm::tm::CheckChangePadFlag(const int &cur_model_config_id)
 {
     //1. different_pad_flag
     //2. timer_flag
@@ -1830,7 +1830,7 @@ bool yf::arm::tm::CheckChangePadFlag(const int &cur_job_id)
     bool different_pad_flag, timer_flag, event_trigger_flag;
 
     /// 1. different_pad_flag
-    auto next_pad_type_id = sql_ptr_->GetModelConfigElement(cur_job_id,"pad_type");
+    auto next_pad_type_id = sql_ptr_->GetModelConfigElement(cur_model_config_id, "pad_type");
     yf::data::arm::PadType next_pad_type;
 
     switch (next_pad_type_id)
@@ -1871,7 +1871,7 @@ bool yf::arm::tm::CheckChangePadFlag(const int &cur_job_id)
     }
 
     /// 3. event_trigger_flag (frontend : User Input)
-    auto new_pad_flag = sql_ptr_->GetModelConfigElement(cur_job_id,"new_pad_flag");
+    auto new_pad_flag = sql_ptr_->GetModelConfigElement(cur_model_config_id, "pad_renew_flag");
 
     if(new_pad_flag)
     {

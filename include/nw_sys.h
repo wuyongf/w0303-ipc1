@@ -998,7 +998,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                     tm5.set_pad_start_timer();
                                                 } else
                                                 {
-                                                    auto change_pad_flag = tm5.CheckChangePadFlag(cur_job_id);
+                                                    auto change_pad_flag = tm5.CheckChangePadFlag(sql_ptr_->GetModelConfigId(cur_job_id));
 
                                                     if(change_pad_flag)
                                                     {
@@ -2739,7 +2739,7 @@ void yf::sys::nw_sys::JobsFilter(std::deque<int>& q_ids)
     for(int n = 0; n < q_ids.size(); n++)
     {
         // for each job id, check its task_mode
-        switch (sql_ptr_->GetTaskMode(q_ids[n]))
+        switch (sql_ptr_->GetTaskMode(sql_ptr_->GetModelConfigId(q_ids[n])))
         {
             case 1: // mopping
             {
@@ -2766,7 +2766,8 @@ void yf::sys::nw_sys::JobsFilter(std::deque<int>& q_ids)
         for(int n = 0; n < q_job_mopping_ids.size(); n++)
         {
             // check each pad_size
-            auto pad_type_id = sql_ptr_->GetModelConfigElement(sql_ptr_->GetModelConfigId(q_job_mopping_ids[n]),"pad_type");
+            auto pad_type_id = sql_ptr_->GetModelConfigElement(sql_ptr_->GetModelConfigId(q_job_mopping_ids[n]),
+                                                               "pad_type");
 
             // push back respectively.
             switch (pad_type_id)
@@ -2782,14 +2783,13 @@ void yf::sys::nw_sys::JobsFilter(std::deque<int>& q_ids)
                     break;
                 }
             }
+        }
 
             // redesign q_job_mopping_ids
             q_job_mopping_ids.clear();
 
-            q_job_mopping_ids.insert(q_ids.end(), small_pad_mopping_ids.begin(), small_pad_mopping_ids.end());
-            q_job_mopping_ids.insert(q_ids.end(), large_pad_mopping_ids.begin(), large_pad_mopping_ids.end());
-
-        }
+            q_job_mopping_ids.insert(q_job_mopping_ids.end(), small_pad_mopping_ids.begin(), small_pad_mopping_ids.end());
+            q_job_mopping_ids.insert(q_job_mopping_ids.end(), large_pad_mopping_ids.begin(), large_pad_mopping_ids.end());
     }
 
     q_ids.clear();
