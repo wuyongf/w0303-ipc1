@@ -1545,16 +1545,15 @@ int yf::sql::sql_server::GetModelConfigElement(const int &model_config_id, const
         };
 
         Disconnect();
-
-        return element_value;
     }
     catch (std::exception& e)
     {
         std::cerr << e.what() << std::endl;
         std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+    }
 
-        return 0;
-    };
+    return element_value;
+
 }
 
 std::deque<int> yf::sql::sql_server::GetArmMissionConfigIds(const int &arm_config_id)

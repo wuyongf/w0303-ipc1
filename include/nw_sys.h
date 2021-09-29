@@ -65,6 +65,7 @@ namespace yf
 
             void ArmPickTool (const yf::data::arm::TaskMode& task_mode);
             void ArmPlaceTool(const yf::data::arm::TaskMode& task_mode);
+            void ArmPlaceToolSafety();
 
             void ArmPickPad(const int& job_id);
             void ArmRemovePad(const int& job_id);
@@ -945,14 +946,29 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
 
                                     ///\workflow Start executing arm mission
 
-                                    ///\ (1) First order, pick the pad?
+                                    ///\ (1) First order, pick the tool?
                                     if(cur_order == cur_first_valid_order_)
                                     {
                                         switch (cur_task_mode_)
                                         {
                                             case data::arm::TaskMode::UVCScanning:
                                             {
-                                                this->ArmPickTool(cur_task_mode_);
+                                                if(cur_job_id == q_job_uvc_scanning_ids.front())
+                                                {
+                                                    // if there is any tool attaching on the arm, place it first
+                                                    this->ArmPlaceToolSafety();
+                                                    sleep.ms(200);
+
+                                                    this->ArmPickTool(cur_task_mode_);
+
+                                                    tm5.set_remove_tool_flag(false);
+                                                }
+
+                                                if(cur_job_id == q_job_uvc_scanning_ids.back())
+                                                {
+                                                    tm5.set_remove_tool_flag(true);
+                                                }
+
                                                 break;
                                             }
                                             case data::arm::TaskMode::Mopping:
@@ -962,6 +978,10 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                 /// check if it's the first mopping job
                                                 if(cur_job_id == q_job_mopping_ids.front())
                                                 {
+                                                    // if there is any tool attaching on the arm, place it first
+                                                    this->ArmPlaceToolSafety();
+                                                    sleep.ms(200);
+
                                                     this->ArmPickTool(cur_task_mode_);
                                                     sleep.ms(200);
 
@@ -975,14 +995,26 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                     tm5.set_remove_tool_flag(false);
 
                                                     // for change_pad: start the timer
-
+                                                    tm5.set_pad_start_timer();
                                                 } else
                                                 {
-                                                    // tm5.CheckChangePadFlag(cur_job_id);
+                                                    auto change_pad_flag = tm5.CheckChangePadFlag(cur_job_id);
 
-                                                    // if True, change the pad
-                                                        // this->ArmRemovePad(cur_job_id);
-                                                    //    False, unchange the pad
+                                                    if(change_pad_flag)
+                                                    {
+                                                        this->ArmRemovePad(cur_job_id);
+                                                        sleep.ms(200);
+                                                        this->ArmPickPad(cur_job_id);
+                                                        sleep.ms(200);
+                                                        this->ArmUpdatePadNo();
+                                                        sleep.ms(200);
+
+                                                        // for remove_tool
+                                                        tm5.set_remove_tool_flag(false);
+
+                                                        // for change_pad: restart the timer
+                                                        tm5.set_pad_start_timer();
+                                                    }
                                                 }
 
                                                 // Check if it's the last mopping job, set the remove_tool_flag
@@ -991,12 +1023,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                     tm5.set_remove_tool_flag(true);
                                                 }
 
-                                                /// check pick_tool_flag
-
-                                                /// Check the change_pad_flag
-
-
-                                                #if 0 //disable for testing
+                                                #if 1 //disable for testing
                                                 this->ArmAbsorbWater();
                                                 #endif
 
@@ -1493,6 +1520,16 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                             }
 
                                             cur_tool_angle_ = data::arm::ToolAngle::Zero;
+                                        }
+
+                                        // remove uvc tool if it's the last job
+                                        if (cur_task_mode_ == data::arm::TaskMode::UVCScanning)
+                                        {
+                                            if(tm5.get_remove_tool_flag())
+                                            {
+                                                // place the tool
+                                                this->ArmPlaceTool(cur_task_mode_);
+                                            }
                                         }
                                     }
 
@@ -2160,8 +2197,6 @@ void yf::sys::nw_sys::ArmPlaceTool(const yf::data::arm::TaskMode &task_mode)
             break;
         }
     }
-
-    return;
 }
 
 void yf::sys::nw_sys::ArmSetOperationArea(const yf::data::arm::OperationArea &operation_area)
@@ -2915,6 +2950,7 @@ void yf::sys::nw_sys::DoJobArmBackToHomePos()
     // Do job
     tm5.ArmTask("Post arm_back_home");
 
+    // if there is any tool attaching on the arm, place it first
     auto arm_current_tool = tm5.GetCurrentTool();
 
     switch (arm_current_tool)
@@ -4234,6 +4270,29 @@ void yf::sys::nw_sys::thread_Web_UgvStatus(const bool &web_status_flag, const in
         }
 
         sleep.sec(sleep_duration);
+    }
+}
+
+void yf::sys::nw_sys::ArmPlaceToolSafety()
+{
+    auto arm_current_tool = tm5.GetCurrentTool();
+
+    switch (arm_current_tool)
+    {
+        case data::arm::Tool::None:
+        {
+            break;
+        }
+        case data::arm::Tool::UvcLed:
+        {
+            tm5.ArmTask("Post place_uvc");
+            break;
+        }
+        case data::arm::Tool::Brush:
+        {
+            tm5.ArmTask("Post place_mop");
+            break;
+        }
     }
 }
 

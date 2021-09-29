@@ -273,16 +273,23 @@ namespace yf
 
         public: // pad related
 
-            yf::data::arm::PadType      cur_pad_type_;
+            yf::data::arm::PadType  cur_pad_type_;
+            void set_cur_pad_type(const yf::data::arm::PadType& pad_type);
+            yf::data::arm::PadType get_cur_pad_type();
 
-            bool change_pad_flag;
             bool remove_tool_flag = true;
-
             void set_remove_tool_flag(const bool& boolean);
             bool get_remove_tool_flag();
 
-            void set_cur_pad_type(const yf::data::arm::PadType& pad_type);
-            yf::data::arm::PadType get_cur_pad_type();
+            bool change_pad_flag;
+
+            std::chrono::time_point<std::chrono::steady_clock> pad_start_timer,pad_cur_timer,pad_end_timer;
+
+            void set_pad_start_timer();
+            std::chrono::time_point<std::chrono::steady_clock> get_pad_start_timer();
+
+            void set_pad_cur_timer();
+            std::chrono::time_point<std::chrono::steady_clock> get_pad_cur_timer();
 
             bool CheckChangePadFlag(const int& cur_job_id);
 
@@ -1849,12 +1856,33 @@ bool yf::arm::tm::CheckChangePadFlag(const int &cur_job_id)
     }
 
     /// 2. timer_flag
+    this->set_pad_cur_timer();
+    // calculate the duration
+    std::chrono::duration<float> duration;
+    duration = pad_cur_timer - pad_start_timer;
 
-    /// 3. event_trigger_flag (frontend : User Input???)
-    // check new_pad_flag;(1?)
-    event_trigger_flag = false;
+    float min_duration = duration.count()/60 ;
+    if(min_duration > 20)
+    {
+        timer_flag = true;
+    } else
+    {
+        timer_flag = false;
+    }
 
-    if( different_pad_flag == true || timer_flag == true || event_trigger_flag == true)
+    /// 3. event_trigger_flag (frontend : User Input)
+    auto new_pad_flag = sql_ptr_->GetModelConfigElement(cur_job_id,"new_pad_flag");
+
+    if(new_pad_flag)
+    {
+        event_trigger_flag = true;
+    }
+    else
+    {
+        event_trigger_flag = false;
+    }
+
+    if( different_pad_flag || timer_flag || event_trigger_flag)
     {
         return true;
     }
@@ -1862,6 +1890,16 @@ bool yf::arm::tm::CheckChangePadFlag(const int &cur_job_id)
     {
         return false;
     }
+}
+
+void yf::arm::tm::set_pad_start_timer()
+{
+    pad_start_timer = std::chrono::high_resolution_clock::now();
+}
+
+void yf::arm::tm::set_pad_cur_timer()
+{
+    pad_cur_timer = std::chrono::high_resolution_clock::now();
 }
 
 
