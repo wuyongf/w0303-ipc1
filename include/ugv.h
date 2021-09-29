@@ -37,6 +37,9 @@
 #include "Poco/Dynamic/Var.h"
 #include "Poco/JSON/Parser.h"
 #include "Poco/JSON/PrintHandler.h"
+
+#include "Poco/Mutex.h"
+
 #include "al.h"
 
 using Poco::Net::HTTPClientSession;
@@ -93,11 +96,12 @@ namespace yf
             bool PostMethod(const std::string& sub_path, const Poco::JSON::Object& obj);
             bool DeleteMethod(const std::string& sub_path);
 
+            Poco::Mutex _mutex;
+
         private:
             // Private Methods
 
             bool doRequest(Poco::Net::HTTPClientSession& session, Poco::Net::HTTPRequest& request, Poco::Net::HTTPResponse& response);
-
 
         public:
 
@@ -255,8 +259,7 @@ namespace yf
             // for RestApi GET STATE and POST Actions interference
         public:
 
-            std::mutex mux_Blocking;
-            std::condition_variable cv_Blocking;
+
 
             bool configuration_flag_ = false;
             bool get_configuration_flag();
@@ -319,7 +322,7 @@ bool yf::ugv::mir::doRequest(HTTPClientSession &session,
                              HTTPRequest &request,
                              HTTPResponse &response)
 {
-    std::scoped_lock lock();
+//    std::scoped_lock lock();
 //    request_result_.clear();
 
     session.sendRequest(request);
@@ -348,6 +351,8 @@ bool yf::ugv::mir::doRequest(HTTPClientSession &session,
 
 bool yf::ugv::mir::GetMethod(const std::string &sub_path)
 {
+    Poco::Mutex::ScopedLock lock(_mutex);
+
     try
     {
         uri_.setPath(sub_path);
@@ -393,6 +398,8 @@ void yf::ugv::mir::Start(const std::string& ip_addr, std::shared_ptr<yf::status:
 
 bool yf::ugv::mir::PutMethod(const std::string &sub_path,const Poco::JSON::Object& obj)
 {
+    Poco::Mutex::ScopedLock lock(_mutex);
+
     try
     {
         // TODO: prepare session.
@@ -457,6 +464,8 @@ bool yf::ugv::mir::PutMethod(const std::string &sub_path,const Poco::JSON::Objec
 
 bool yf::ugv::mir::PostMethod(const std::string &sub_path, const Poco::JSON::Object &obj)
 {
+    Poco::Mutex::ScopedLock lock(_mutex);
+
     try
     {
         //1. prepare session.
@@ -1458,6 +1467,8 @@ bool yf::ugv::mir::DeleteMissionQueue()
 
 bool yf::ugv::mir::DeleteMethod(const std::string& sub_path)
 {
+    Poco::Mutex::ScopedLock lock(_mutex);
+
     try
     {
         uri_.setPath(sub_path);
