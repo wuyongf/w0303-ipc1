@@ -8,6 +8,8 @@
 #include <iostream>
 #include <string>
 #include <map>
+#include <thread>
+#include <mutex>
 
 // time control
 #include <chrono>
@@ -251,6 +253,9 @@ namespace yf
             // for RestApi GET STATE and POST Actions interference
         public:
 
+            std::mutex mux_Blocking;
+            std::condition_variable cv_Blocking;
+
             bool configuration_flag_ = false;
             bool get_configuration_flag();
             void set_configuration_flag(const bool& boolean);
@@ -312,6 +317,7 @@ bool yf::ugv::mir::doRequest(HTTPClientSession &session,
                              HTTPRequest &request,
                              HTTPResponse &response)
 {
+    std::scoped_lock lock();
 //    request_result_.clear();
 
     session.sendRequest(request);
