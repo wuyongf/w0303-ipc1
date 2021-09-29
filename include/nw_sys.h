@@ -742,6 +742,16 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
 
     /// 2. Assign Ugv Mission
     //
+    // todo: TIME OUT!!!
+    while (mir100_ptr_->IsUpdatingStatus())
+    {
+        std::cout << "wait for the thread_update_mir_status to finish..."<<std::endl;
+        sleep.sec(1);
+    }
+
+    // 2.0 postpone ugv state updater thead first
+    mir100_ptr_->set_configuration_flag(true);
+    sleep.sec(1);
     //  2.1. Ugv: post a new mission via REST
     mir100_ptr_->PostMission(cur_model_config_id_);
     //  2.2. Ugv: post actions via REST
@@ -763,6 +773,8 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
         ///TIME
         sleep.ms(200);
         mir100_ptr_->Play();
+
+        mir100_ptr_->set_configuration_flag(false);
 
         /// \brief
         ///
@@ -1631,6 +1643,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
     }
     else
     {
+        mir100_ptr_->set_configuration_flag(false);
         LOG(INFO) << "mission failed at initial status check.";
     }
 
@@ -4236,26 +4249,35 @@ void yf::sys::nw_sys::thread_Web_UgvStatus(const bool &web_status_flag, const in
     {
         if(mir100_ptr_->IsConnected())
         {
-            try
+            if(!mir100_ptr_->IsConfiguringMission())
             {
-                /// Retrieve ugv status
-                auto status = mir100_ptr_->GetUgvStatus();
+                try
+                {
+                    //postpone ugv configuration task
+                    mir100_ptr_->set_update_flag(true);
 
-                /// Update database
-                // 1. battery_percentage
-                sql_ptr_->UpdateDeviceBatteryCapacity("ugv", status.battery_percentage);
-                // 2. position
-                sql_ptr_->UpdateDeviceUgvCurPosition(status.position.x,status.position.y,status.position.orientation);
-                // 3. ugv_connection_status
-                nw_status_ptr_->ugv_connection_status_ = data::common::ConnectionStatus::Connected;
-                sql_ptr_->UpdateDeviceConnectionStatus("ugv", 1);
-                // 4. ugv_mission_status
-                mir100_ptr_->UpdateUgvMissionStatus(status);
+                    /// Retrieve ugv status
+                    auto status = mir100_ptr_->GetUgvStatus();
 
-            }
-            catch (std::error_code ec)
-            {
-                std::cerr << "Cannot Get Ugv Status. Will Try Again Later";
+                    /// Update database
+                    // 1. battery_percentage
+                    sql_ptr_->UpdateDeviceBatteryCapacity("ugv", status.battery_percentage);
+                    // 2. position
+                    sql_ptr_->UpdateDeviceUgvCurPosition(status.position.x,status.position.y,status.position.orientation);
+                    // 3. ugv_connection_status
+                    nw_status_ptr_->ugv_connection_status_ = data::common::ConnectionStatus::Connected;
+                    sql_ptr_->UpdateDeviceConnectionStatus("ugv", 1);
+                    // 4. ugv_mission_status
+                    mir100_ptr_->UpdateUgvMissionStatus(status);
+
+                    mir100_ptr_->set_update_flag(false);
+
+                }
+                catch (std::error_code ec)
+                {
+                    mir100_ptr_->set_update_flag(false);
+                    std::cerr << "Cannot Get Ugv Status. Will Try Again Later";
+                }
             }
         }
         else

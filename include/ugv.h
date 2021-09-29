@@ -247,6 +247,21 @@ namespace yf
             std::deque<std::string> cur_position_names_;
 
             yf::algorithm::TimeSleep sleep;
+
+            // for RestApi GET STATE and POST Actions interference
+        public:
+
+            bool configuration_flag_ = false;
+            bool get_configuration_flag();
+            void set_configuration_flag(const bool& boolean);
+
+            bool IsConfiguringMission();
+
+            bool update_flag_ = false;
+            bool get_update_flag();
+            void set_update_flag(const bool& boolean);
+
+            bool IsUpdatingStatus();
         };
     }
 }
@@ -720,6 +735,8 @@ void yf::ugv::mir::PostActions(const int& model_config_id)
 
 bool yf::ugv::mir::PostActionSetPLC(const int &plc_register, const float &value, const std::string& mission_guid, const int& priority)
 {
+    sleep.ms(50);
+
     int value_i = static_cast<int>(value);
 
     if (plc_register <= 100)
@@ -2461,7 +2478,7 @@ yf::data::ugv::Status yf::ugv::mir::GetUgvStatus()
     status.battery_percentage = battery_percentage;
     // 2. position
     status.position.x = x;
-    status.position.y = x;
+    status.position.y = y;
     status.position.orientation = orientation;
     // 3. state_id
     status.state_id = state_id;
@@ -2535,6 +2552,36 @@ void yf::ugv::mir::UpdateUgvMissionStatus(const yf::data::ugv::Status &status)
             break;
         }
     }
+}
+
+void yf::ugv::mir::set_configuration_flag(const bool &boolean)
+{
+    configuration_flag_ = boolean;
+}
+
+bool yf::ugv::mir::get_configuration_flag()
+{
+    return configuration_flag_;
+}
+
+bool yf::ugv::mir::IsConfiguringMission()
+{
+    return this->get_configuration_flag();
+}
+
+bool yf::ugv::mir::get_update_flag()
+{
+    return update_flag_;
+}
+
+void yf::ugv::mir::set_update_flag(const bool &boolean)
+{
+    update_flag_=boolean;
+}
+
+bool yf::ugv::mir::IsUpdatingStatus()
+{
+    return this->get_update_flag();
 }
 
 
