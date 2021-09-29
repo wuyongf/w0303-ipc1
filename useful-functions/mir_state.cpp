@@ -26,9 +26,12 @@ void thread_Web_UgvStatus(const int& sleep_duration,yf::ugv::mir& mir)
         ///TIME
         std::this_thread::sleep_for(std::chrono::milliseconds(sleep_duration));
 
-        std::cout << "Hi, thread[" << std::this_thread::get_id << "]" << std::endl;
-    }
+        std::cout << "thread[" << std::this_thread::get_id << "]" << std::endl;
 
+        auto status = mir.GetUgvStatus();
+
+        std::cout << "thread[" << std::this_thread::get_id << "]: mir_battery_percentage: " << status.battery_percentage << std::endl;
+    }
 }
 
 int main()
@@ -43,11 +46,15 @@ int main()
 
     auto status = mir100.GetUgvStatus();
 
-    std::thread t1;
+    std::thread t1, t2;
 
-    int duration_1 = 200;
+    int duration_1 = 100;
+
+    int duration_2 = 200;
 
     t1 = std::thread(&thread_Web_UgvStatus,std::ref(duration_1),std::ref(mir100));
+
+//    t2 = std::thread(&thread_Web_UgvStatus,std::ref(duration_2),std::ref(mir100));
 
 
     while(1)
