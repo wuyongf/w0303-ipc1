@@ -13,9 +13,22 @@
 #include<vector>
 #include<algorithm>
 #include<deque>
+#include <thread>
 
 bool isOne(int x){
     return x == 1;
+}
+
+void thread_Web_UgvStatus(const int& sleep_duration,yf::ugv::mir& mir)
+{
+    while(1)
+    {
+        ///TIME
+        std::this_thread::sleep_for(std::chrono::milliseconds(sleep_duration));
+
+        std::cout << "Hi, thread[" << std::this_thread::get_id << "]" << std::endl;
+    }
+
 }
 
 int main()
@@ -29,6 +42,20 @@ int main()
     mir100.Start("192.168.7.34", nw_status_ptr, sql_ptr);
 
     auto status = mir100.GetUgvStatus();
+
+    std::thread t1;
+
+    int duration_1 = 200;
+
+    t1 = std::thread(&thread_Web_UgvStatus,std::ref(duration_1),std::ref(mir100));
+
+
+    while(1)
+    {
+        ///TIME
+        std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+    }
+//    std::thread t2(&thread_Web_UgvStatus);
 
 
 #if 0
