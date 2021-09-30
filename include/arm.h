@@ -185,6 +185,8 @@ namespace yf
             /// Safety Methods
             bool IsLMPosDeviation(const yf::data::arm::Point3d& ref_landmark_pos,
                                   const yf::data::arm::Point3d& real_landmark_pos);
+
+            bool IsArmOutOfRange(const std::deque<yf::data::arm::Point3d>& real_points, const data::arm::TaskMode& task_modee);
             /// Arm Connection Mission Status
             void UpdateSQLArmStatus();
 
@@ -1900,6 +1902,78 @@ void yf::arm::tm::set_pad_start_timer()
 void yf::arm::tm::set_pad_cur_timer()
 {
     pad_cur_timer = std::chrono::high_resolution_clock::now();
+}
+
+bool yf::arm::tm::IsArmOutOfRange(const std::deque<yf::data::arm::Point3d> &real_points, const data::arm::TaskMode& task_mode)
+{
+//    float range_x = 880;
+
+    float range_y = 950;
+
+    int fail_no = 0;
+
+    for (auto point : real_points)
+    {
+        LOG(INFO) << "check point: { x= " << point.x << ", y= " << point.y << ", z= " << point.z
+                  << ", rx= " << point.rx <<  ", ry= " << point.ry << ", rz= " << point.rz;
+
+        switch (task_mode)
+        {
+            case data::arm::TaskMode::Mopping:
+            {
+                if(point.z > 580)
+                {
+                    range_y = 900;
+                }
+
+                if(point.z < 550)
+                {
+                    range_y = 950;
+                }
+
+                if(std::abs(point.y) > range_y)
+                {
+                    LOG(INFO) << "failed point: { x= " << point.x << ", y= " << point.y << ", z= " << point.z
+                              << ", rx= " << point.rx <<  ", ry= " << point.ry << ", rz= " << point.rz;
+                    fail_no++;
+                }
+
+                break;
+            }
+
+            case data::arm::TaskMode::UVCScanning:
+            {
+                if(point.z > 570)
+                {
+                    range_y = 800;
+                }
+
+                if(point.z < 550)
+                {
+                    range_y = 950;
+                }
+
+                if(std::abs(point.y) > range_y)
+                {
+                    LOG(INFO) << "failed point: { x= " << point.x << ", y= " << point.y << ", z= " << point.z
+                              << ", rx= " << point.rx <<  ", ry= " << point.ry << ", rz= " << point.rz;
+                    fail_no++;
+                }
+
+                break;
+            }
+
+        }
+    }
+
+    if(fail_no != 0)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 

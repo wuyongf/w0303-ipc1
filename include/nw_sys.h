@@ -1043,6 +1043,9 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                     ///     2.2 TF deviation too large
                                     bool amc_skip_flag = true;
 
+                                    bool amc_deviation_skip_flag = true;
+                                    bool amc_range_skip_flag = true;
+
                                     ///\ (3) Loop all the arm_mission_configs
                                     for (int n = 0; n < arm_mission_configs.size(); n++)
                                     {
@@ -1056,8 +1059,10 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                             ///   a. Initialization
                                             ///     a.1 move to standby_position
                                             ///     a.2 check&set tool_angle
-                                            ///   b. Find the TF & Set the amc_skip_flag
-                                            ///   c. Return standby_position
+                                            ///   b. Find the TF & Set the amc_skip_flag / amc_deviation_skip_flag
+                                            ///   c. Calculation
+                                            ///   d. Check if arm is out of range. / amc_range_skip_flag . Set amc_skip_flag
+                                            ///   e. Return standby_position
 
                                             // a.1
                                             //
@@ -1147,7 +1152,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                         else
                                                         {
                                                             LOG(INFO) << "No Deviation!";
-                                                            amc_skip_flag = false;
+                                                            amc_deviation_skip_flag = false;
                                                         }
                                                     }
                                                     else
@@ -1168,7 +1173,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                 }
                                                 case data::arm::VisionType::D455:
                                                 {
-                                                    amc_skip_flag = false;
+                                                    amc_deviation_skip_flag = false;
 
                                                     ///  b.2 find the TF!
 
@@ -1347,7 +1352,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                 }
                                             }
 
-                                            /// c. return standby_position
+                                            /// e. return standby_position
 
                                             // back to standby_point
                                             tm5.ArmTask("Move_to standby_p0");
@@ -1358,30 +1363,19 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                         //  1. if ture, skip current arm_mission_config
                                         //  2. if false, just execute the arm_mission_config
                                         //    2.1. Initialization
-                                        //    2.2. Calculation (base on vision_type: calculate the real_points)
-                                        //      2.2.1 new via_points (real_points)
-                                        //      2.2.2 new approach_point
-                                        //      2.2.3 new n_points
+                                        ///    2.2. Calculation (base on vision_type: calculate the real_points)
+                                        ///      2.2.1 new via_points (real_points)
+                                        ///      2.2.2 new approach_point
+                                        ///      2.2.3 new n_points
                                         //    2.3. post the arm_mission_config
 
-                                        if(amc_skip_flag)
+                                        if(amc_deviation_skip_flag)
                                         {
                                             continue;
                                         }
                                         else
                                         {
-                                            /// 2.1 Initialization
-
-                                            // 2.1.1 sub_standby_position
-                                            auto sub_standby_point = arm_mission_configs[n].sub_standby_position;
-                                            std::string sub_standby_point_str = this->ArmGetPointStr(sub_standby_point);
-                                            tm5.ArmTask("Set standby_p1 = "+ sub_standby_point_str);
-                                            tm5.ArmTask("Move_to standby_p1");
-
-                                            // 2.1.2 check&set tool_angle
-                                            this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
-
-                                            /// 2.2 Calculation
+                                            /// c. Calculation
 
                                             switch (arm_mission_configs[n].vision_type)
                                             {
@@ -1448,24 +1442,54 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                 }
                                             }
 
-                                            /// 2.3 Fire the task and then return to standby_p1 ---> standby_p0
+                                            /// d. amc_range_skip_flag. amc_skip_flag
 
-                                            // 2.3.1 assign n_via_points.
-                                            std::string n_via_points_str = std::to_string(arm_mission_configs[n].n_via_points);
-                                            tm5.ArmTask("Set n_points = " + n_via_points_str);
+                                            if(!tm5.IsArmOutOfRange(arm_mission_configs[n].via_points, arm_mission_configs[n].task_mode))
+                                            {
+                                                amc_range_skip_flag = false;
+                                            }
 
-                                            // 2.3.2 set approach_point
-                                            this->ArmSetApproachPoint(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].tool_angle);
+                                            if(amc_deviation_skip_flag == false && amc_range_skip_flag == false)
+                                            {
+                                                amc_skip_flag = false;
+                                            }
 
-                                            // 2.3.3 set via_points
-                                            this->ArmSetViaPoints(arm_mission_configs[n].via_points, arm_mission_configs[n].tool_angle);
+                                            if(amc_skip_flag)
+                                            {
+                                                continue;
+                                            }
+                                            else
+                                            {
+                                                /// 2.1 Initialization
 
-                                            // 2.3.4 post via_points
-                                            this->ArmPostViaPoints(cur_task_mode_, arm_mission_configs[n].tool_angle, arm_mission_configs[n].model_type, arm_mission_configs[n].id);
+                                                // 2.1.1 sub_standby_position
+                                                auto sub_standby_point = arm_mission_configs[n].sub_standby_position;
+                                                std::string sub_standby_point_str = this->ArmGetPointStr(sub_standby_point);
+                                                tm5.ArmTask("Set standby_p1 = "+ sub_standby_point_str);
+                                                tm5.ArmTask("Move_to standby_p1");
 
-                                            // 2.3.5 post return standby_position
-                                            tm5.ArmTask("Move_to standby_p1");
-                                            tm5.ArmTask("Move_to standby_p0");
+                                                // 2.1.2 check&set tool_angle
+                                                this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
+
+                                                /// 2.3 Fire the task and then return to standby_p1 ---> standby_p0
+
+                                                // 2.3.1 assign n_via_points.
+                                                std::string n_via_points_str = std::to_string(arm_mission_configs[n].n_via_points);
+                                                tm5.ArmTask("Set n_points = " + n_via_points_str);
+
+                                                // 2.3.2 set approach_point
+                                                this->ArmSetApproachPoint(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].tool_angle);
+
+                                                // 2.3.3 set via_points
+                                                this->ArmSetViaPoints(arm_mission_configs[n].via_points, arm_mission_configs[n].tool_angle);
+
+                                                // 2.3.4 post via_points
+                                                this->ArmPostViaPoints(cur_task_mode_, arm_mission_configs[n].tool_angle, arm_mission_configs[n].model_type, arm_mission_configs[n].id);
+
+                                                // 2.3.5 post return standby_position
+                                                tm5.ArmTask("Move_to standby_p1");
+                                                tm5.ArmTask("Move_to standby_p0");
+                                            }
                                         }
                                     }
 
