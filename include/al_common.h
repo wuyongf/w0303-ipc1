@@ -17,11 +17,6 @@
 #include <cstdint>
 #include <cmath>
 
-//
-//#include "../include/boost_1_75_0/boost/asio.hpp"
-//#include "../include/boost_1_75_0/boost/asio/ts/buffer.hpp"
-//#include "../include/boost_1_75_0/boost/asio/ts/internet.hpp"
-
 const float PI = std::atan(1.0)*4;
 
 /// uint32_t to float

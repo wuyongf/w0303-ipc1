@@ -14,6 +14,7 @@ find_package(glog CONFIG REQUIRED)
 find_package(libmodbus CONFIG REQUIRED)
 find_package(Poco CONFIG REQUIRED Foundation Net XML Zip Data JSON)
 find_package(Eigen3 CONFIG REQUIRED)
+find_package(PCL CONFIG REQUIRED)
 #find_package(Boost 1.75.0 )
 
 include_directories( ${OpenCV_INCLUDE_DIRS} )
@@ -58,6 +59,9 @@ add_executable(w0303_main "src/w0303_main.cpp" "include/net_w0303_server.h")
 target_link_libraries(w0303_main PUBLIC glog::glog nanodbc modbus Poco::Foundation Poco::Net Poco::XML Poco::Zip Poco::Data Poco::JSON)
 
 ## for testing
+
+add_executable(pcl_tutorial "useful-functions/pcl_tutorial.cpp")
+#target_link_libraries(pcl_tutorial ${PCL_LIBRARIES})
 
 add_executable(header_demo "useful-functions/header_demo.cpp" "useful-functions/header_tutorial.cpp")
 
