@@ -14,7 +14,7 @@ find_package(glog CONFIG REQUIRED)
 find_package(libmodbus CONFIG REQUIRED)
 find_package(Poco CONFIG REQUIRED Foundation Net XML Zip Data JSON)
 find_package(Eigen3 CONFIG REQUIRED)
-find_package(PCL 1.11.1)
+find_package(PCL 1.11.1 )
 find_package(Boost REQUIRED)
 
 include_directories( ${OpenCV_INCLUDE_DIRS} )
