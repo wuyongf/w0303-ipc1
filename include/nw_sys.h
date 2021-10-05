@@ -1173,8 +1173,6 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                 }
                                                 case data::arm::VisionType::D455:
                                                 {
-                                                    amc_deviation_skip_flag = false;
-
                                                     ///  b.2 find the TF!
 
                                                     // 0. data management
@@ -1289,7 +1287,8 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                                     arm_mission_configs[n].real_pc_file = real_pc_file;
                                                                     arm_mission_configs[n].ref_pos_tf_file = ref_pos_tf_file;
 
-                                                                    arm_mission_configs[n].TMat = tm5.Phase2GetTMat4Handle(real_pc_file,ref_pos_tf_file);
+                                                                    arm_mission_configs[n].vision_success_flag = tm5.Phase2GetTMat4Handle(real_pc_file,ref_pos_tf_file);
+                                                                    arm_mission_configs[n].TMat = tm5.get_TMat();
                                                                 }
                                                             }
 
@@ -1334,7 +1333,8 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                                     arm_mission_configs[n].real_pc_file = real_pc_file;
                                                                     arm_mission_configs[n].ref_pos_tf_file = ref_pos_tf_file;
 
-                                                                    arm_mission_configs[n].TMat = tm5.Phase2GetTMat4Handle(real_pc_file,ref_pos_tf_file);
+                                                                    arm_mission_configs[n].vision_success_flag = tm5.Phase2GetTMat4Handle(real_pc_file,ref_pos_tf_file);
+                                                                    arm_mission_configs[n].TMat = tm5.get_TMat();
                                                                 }
                                                             }
 
@@ -1343,6 +1343,17 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                     }
 
                                                     // 4. set the amc_skip_flag?
+
+                                                    LOG(INFO) << "vision_success_flag: " << arm_mission_configs[n].vision_success_flag;
+
+                                                    if(arm_mission_configs[n].vision_success_flag  == 1)
+                                                    {
+                                                        amc_deviation_skip_flag = false;
+                                                    }
+                                                    else
+                                                    {
+                                                        amc_deviation_skip_flag = true;
+                                                    }
 
                                                     break;
                                                 }
@@ -1376,8 +1387,8 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                         else
                                         {
                                             /// c. Calculation
-
-                                            switch (arm_mission_configs[n].vision_type)
+                                            //TODO: For Testing: arm_mission_configs[n] --> arm_mission_configs[0]
+                                            switch (arm_mission_configs[0].vision_type)
                                             {
                                                 case data::arm::VisionType::None:
                                                 {
@@ -1416,7 +1427,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
 
                                                     std::deque<yf::data::arm::Point3d> real_via_points;
 
-                                                    real_via_points = tm5.GetRealViaPointsByRS(arm_mission_configs[n].TMat, arm_mission_configs[n].via_points);
+                                                    real_via_points = tm5.GetRealViaPointsByRS(arm_mission_configs[0].TMat, arm_mission_configs[n].via_points);
 
                                                     arm_mission_configs[n].via_points.clear();
 
@@ -1424,7 +1435,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
 
                                                     // 2.2 calculate the real approach point
 
-                                                    auto real_via_approach_point = tm5.GetRealPointByRS(arm_mission_configs[n].TMat,arm_mission_configs[n].via_approach_pos);
+                                                    auto real_via_approach_point = tm5.GetRealPointByRS(arm_mission_configs[0].TMat,arm_mission_configs[n].via_approach_pos);
 
                                                     arm_mission_configs[n].via_approach_pos.x  = real_via_approach_point.x;
                                                     arm_mission_configs[n].via_approach_pos.y  = real_via_approach_point.y;
@@ -3488,7 +3499,8 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
                                                                     arm_mission_configs[n].real_pc_file = real_pc_file;
                                                                     arm_mission_configs[n].ref_pos_tf_file = ref_pos_tf_file;
 
-                                                                    arm_mission_configs[n].TMat = tm5.Phase2GetTMat4Handle(real_pc_file,ref_pos_tf_file);
+                                                                    arm_mission_configs[n].vision_success_flag = tm5.Phase2GetTMat4Handle(real_pc_file,ref_pos_tf_file);
+                                                                    arm_mission_configs[n].TMat = tm5.get_TMat();
                                                                 }
                                                             }
 
@@ -4250,7 +4262,7 @@ void yf::sys::nw_sys::ArmPlaceToolSafety()
 
 /// Ugv Workflow
 ///  1. Initialization
-//     1.1 Set PLC 001 = 0, PLC 002 = 0, PLC 003 = 0, PLC 004 = 1 (phase 1 static point)
+//     1.1 Set PLC 001 = 0, PLC 002 = 0, -PLC 003 = 0,   -PLC 004 = 1 (phase 1 static point)
 //     1.2 Set PLC 005 = 0, PLC 006 = 0, PLC 007 = 0  (for mir relative move)
 //     1.3 Set PLC 101 = 0, (for mir relative move parameters)
 
@@ -4275,7 +4287,9 @@ void yf::sys::nw_sys::ArmPlaceToolSafety()
 ///         c.7. Break the loop. set PLC 005 = 2.
 ///         c.8. Reset PLC 006 == 0.
 
-///  5. Moves to P1_ref
+///  5. Reset PLC 005 = 0; PLC 006 = 0;
+
+///  6。 Moves to P1_ref
 ///  ...
 ///  X. Set PLC 004 = 2
 
@@ -4290,7 +4304,7 @@ void yf::sys::nw_sys::ArmPlaceToolSafety()
 /// 2. While(Continue_Flag)   --- !( PLC 005 == 2 || PLC 005 == 3)
 ///   2.1. While(PLC 005 != 2 && PLC 005 != 3)
 ///     a. if(PLC 001 == 1)
-///       a.1 if (PLC 006 == 0 || 1).
+///       a.1 if (PLC 006 == 1).
 ///          1. Move to vision_pos_ref
 ///          2. Read LM_real
 ///          3. Compare with LM_ref, get the difference. (delta x, y, z, rx, ry, rz)

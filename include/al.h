@@ -122,7 +122,7 @@ namespace yf
             int RecordRealPCArray(int &resolution, double (&input_pt)[30000][3]);
 
             /// for phase 2 office demo
-            Eigen::Matrix4f Phase2GetTMat4Handle(std::string& real_pc_file, std::string& ref_pos_tf_file);
+            int Phase2GetTMat4Handle(std::string& real_pc_file, std::string& ref_pos_tf_file);
 
         public:
 
@@ -139,6 +139,14 @@ namespace yf
             std::vector<std::vector<float>> Convert2RealPathByLM(std::vector<std::vector<float>>& original_path,
                                                                  std::vector<float>& ref_tag_position,
                                                                  std::vector<float>& real_tag_positon);
+
+        private:
+
+            Eigen::Matrix4f TMat_;
+
+        public:
+
+            Eigen::Matrix4f get_TMat();
         };
 
         class TimeSleep
@@ -630,10 +638,9 @@ yf::algorithm::arm_path::GetRealPointByRS(const Eigen::Matrix4f &TMat, const yf:
     return real_point;
 }
 
-Eigen::Matrix4f yf::algorithm::arm_path::Phase2GetTMat4Handle(std::string& real_pc_file, std::string& ref_pos_tf_file)
+int yf::algorithm::arm_path::Phase2GetTMat4Handle(std::string& real_pc_file, std::string& ref_pos_tf_file)
 {
-    Eigen::Matrix4f TMat;
-    TMat.setZero();
+    TMat_.setZero();
 
     typedef int (*door_handle_identification )(char pcd_name[],char pcd_transform[],
                                                double delta_dist[],double transformation[][2],
@@ -649,7 +656,7 @@ Eigen::Matrix4f yf::algorithm::arm_path::Phase2GetTMat4Handle(std::string& real_
     if (hinstLib1 == NULL)
     {
         std::cerr << "cannot open the dll!";
-        return TMat;
+        return -2;
     }
 
     door_handle_identification door_plane_corner_line_processing;
@@ -699,32 +706,40 @@ Eigen::Matrix4f yf::algorithm::arm_path::Phase2GetTMat4Handle(std::string& real_
     ref_angle = -0.0724364;
 
     para[0] = 0.135;
+    para[4] = 1;
 
     auto n = door_plane_corner_line_processing(&real_pc_file[0],&ref_pos_tf_file[0],translation,rotation,plane_box,no_of_location_box,location_box,ref_position,ref_angle,para);
 
-    /// fill the 4x4 TMat
+    if(n == 1)
+    {
+        /// fill the 4x4 TMat
 
-    // Translation
-    TMat(0, 3) = translation[0] * 1000;
-    TMat(1, 3) = translation[1] * 1000;
-    TMat(2, 3) = 0;
-    TMat(3, 3) = 1;
+        // Translation
+        TMat_(0, 3) = translation[0] * 1000;
+        TMat_(1, 3) = translation[1] * 1000;
+        TMat_(2, 3) = 0;
+        TMat_(3, 3) = 1;
 
-    // Rotation
-    TMat(0, 0) = rotation[0][0];
-    TMat(0, 1) = rotation[0][1];
-    TMat(0, 2) = 0;
-    TMat(1, 0) = rotation[1][0];
-    TMat(1, 1) = rotation[1][1];
-    TMat(1, 2) = 0;
-    TMat(2, 0) = 0;
-    TMat(2, 1) = 0;
-    TMat(2, 2) = 1;
+        // Rotation
+        TMat_(0, 0) = rotation[0][0];
+        TMat_(0, 1) = rotation[0][1];
+        TMat_(0, 2) = 0;
+        TMat_(1, 0) = rotation[1][0];
+        TMat_(1, 1) = rotation[1][1];
+        TMat_(1, 2) = 0;
+        TMat_(2, 0) = 0;
+        TMat_(2, 1) = 0;
+        TMat_(2, 2) = 1;
 
-    LOG(INFO) << "TMat: " << TMat ;
-    std::cout << "TMat: " << TMat ;
+        LOG(INFO) << "TMat: " << std::endl << TMat_ ;
+        std::cout <<    "TMat: " << std::endl << TMat_ << std::endl;
+    }
+    else
+    {
+        LOG(INFO) << "No TMat! Can Find the BBox?" ;
+    }
 
-    return TMat;
+    return n;
 }
 
 std::deque<yf::data::arm::Point3d> yf::algorithm::arm_path::ExportRealPathByRS(const Eigen::Matrix4f &TMat,
@@ -760,6 +775,11 @@ std::deque<yf::data::arm::Point3d> yf::algorithm::arm_path::ExportRealPathByRS(c
     }
 
     return real_path;
+}
+
+Eigen::Matrix4f yf::algorithm::arm_path::get_TMat()
+{
+    return TMat_;
 }
 
 

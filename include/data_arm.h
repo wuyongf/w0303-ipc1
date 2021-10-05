@@ -272,6 +272,8 @@ namespace  yf
 
                 std::string real_pc_file;
                 std::string ref_pos_tf_file;
+
+                bool vision_success_flag = 0;
             };
         }
     }
