@@ -4246,3 +4246,64 @@ void yf::sys::nw_sys::ArmPlaceToolSafety()
 // 2. assign arm task.
 // 3. update arm task.
 
+/// For Relative Move
+
+/// Ugv Workflow
+///  1. Initialization
+//     1.1 Set PLC 001 = 0, PLC 002 = 0, PLC 003 = 0, PLC 004 = 1 (phase 1 static point)
+//     1.2 Set PLC 005 = 0, PLC 006 = 0, PLC 007 = 0  (for mir relative move)
+//     1.3 Set PLC 101 = 0, (for mir relative move parameters)
+
+    // PLC 002 ++(arm mission order ++).
+///  2. Moves to P0_ref.
+    // Set PLC 003  = 1.
+///  3. Start Relative Move Flag: Set PLC 005 = 1.
+///  4. While(PLC 005 != 2 && PLC 005 != 3)
+///     a. Wait for PLC 001 = 0; (default PLC 001 == 0)
+///     b. While (PLC 006 != 2); (default PLC 006 == 0)
+///         b.1. fire the arm. Set PLC 001 = 1.
+///         b.2. wait for PLC 001 == 0.
+///         b.3  get the relative_move_parameters from PLC 001/002/003, which were calculated from ipc1.
+///         b.4  relative move!!!
+///         b.5. Counting++ (PLC 007++)
+///     c. if (PLC 006 == 2)
+///         c.1. get the relative_move_parameters from PLC 001/002/003, which were from DB.
+///         c.2. relative move!!!
+///         c.3. done.
+///         c.4. Set PLC 001 = 1. Notice the arm to return to safety_pos.
+///         c.5. Wait for PLC 001 = 0.
+///         c.7. Break the loop. set PLC 005 = 2.
+///         c.8. Reset PLC 006 == 0.
+
+///  5. Moves to P1_ref
+///  ...
+///  X. Set PLC 004 = 2
+
+
+/// Arm Workflow
+
+/// For Each Arm Mission Config.
+/// 1. Set Continue_Flag.
+///   a. Check if PLC 004 = 2
+///   c. Check Ugv Status
+///   d. Check Arm Status
+/// 2. While(Continue_Flag)   --- !( PLC 005 == 2 || PLC 005 == 3)
+///   2.1. While(PLC 005 != 2 && PLC 005 != 3)
+///     a. if(PLC 001 == 1)
+///       a.1 if (PLC 006 == 0 || 1).
+///          1. Move to vision_pos_ref
+///          2. Read LM_real
+///          3. Compare with LM_ref, get the difference. (delta x, y, z, rx, ry, rz)
+///          4. Set mir relative move params: Set PLC 101/102/103 = xxx...
+///          5. Set ugv_rotate_flag. (start or finish?) (PLC 006 == 1 or 2?)
+///          6. Move back to Safety_Pos
+///       a.2 if (PLC 006 == 2)
+///          1. check the arm_mission_config_no.
+///          2. move to rmove_approach_point.
+///          3. start rmove_force_node. (Arm Running)
+///       a.3 check rmove result.
+///          1. if everything okay. Mission Handover: Set PLC 001 = 0;
+///          2. if Arm error. Set PLC 005 == 3. Ugv Mission Abortion.
+///     c. wait 500ms
+
+/// 2. Check PLC 005.
