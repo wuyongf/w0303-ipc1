@@ -1603,25 +1603,50 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                                             real_lm_pos_ = tm5.GetRealLandmarkPos();
 
                                                                             /// Comparison real_lm_pos & ref_lm_pos. Check whether error is too significant
-                                                                            if(tm5.IsLMPosDeviation(arm_mission_configs[n].ref_landmark_pos, real_lm_pos_))
+                                                                            if(tm5.IsLMPosDeviationRMove(arm_mission_configs[n].ref_landmark_pos, real_lm_pos_))
                                                                             {
-                                                                                // error too significant, skip current arm mission config!
+                                                                                // error too significant.
+                                                                                LOG(INFO) << "Keep fine tuning the MiR Pos...";
 
-                                                                                LOG(INFO) << "Error too significant! Skip cur_arm_mission_config!!";
+                                                                                // 0. get the params firsr
+                                                                                int iteration_no_rz = tm5.get_PLC_int_value(8);
+                                                                                int iteration_no_x = tm5.get_PLC_int_value(9);
+                                                                                int iteration_no_y = tm5.get_PLC_int_value(10);
 
-                                                                                arm_sub_mission_success_flag = false;
+                                                                                // 1. adjust rz
+                                                                                if (iteration_no_rz != 0)
+                                                                                {
+                                                                                    int orientation_flag = tm5.get_PLC_int_value(11);
 
-                                                                                LOG(INFO) << "Skip the whole arm mission configs!";
+                                                                                    mir100_ptr_->SetPLCRegisterIntValue(8,iteration_no_rz);
+                                                                                    mir100_ptr_->SetPLCRegisterIntValue(11,orientation_flag);
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    mir100_ptr_->SetPLCRegisterIntValue(8,0);
+                                                                                    mir100_ptr_->SetPLCRegisterIntValue(11,0);
+                                                                                }
 
-                                                                                ///TIME
-                                                                                sleep.ms(200);
+                                                                                // 2. adjust x
+                                                                                if (iteration_no_x != 0)
+                                                                                {
+                                                                                    int orientation_flag = tm5.get_PLC_int_value(12);
 
-                                                                                continue;
-
+                                                                                    mir100_ptr_->SetPLCRegisterIntValue(9,iteration_no_rz);
+                                                                                    mir100_ptr_->SetPLCRegisterIntValue(12,orientation_flag);
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    mir100_ptr_->SetPLCRegisterIntValue(9,0);
+                                                                                    mir100_ptr_->SetPLCRegisterIntValue(12,0);
+                                                                                }
                                                                             }
                                                                             else
                                                                             {
                                                                                 LOG(INFO) << "RMove: No Deviation!";
+
+                                                                                mir100_ptr_->SetPLCRegisterIntValue(6,2);
+
                                                                                 amc_deviation_skip_flag = false;
                                                                             }
                                                                         }
@@ -1659,9 +1684,16 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
 
                                                                 tm5.ArmTask("Move_to standby_p0");
 
+                                                                /// d. set PLC 001 = 0. Handover the Mission.
+                                                                mir100_ptr_->SetPLCRegisterIntValue(1,0);
+
                                                                 break;
                                                             }
 
+                                                            case 2:
+                                                            {
+                                                                break;
+                                                            }
                                                         }
                                                     }
                                                     else
