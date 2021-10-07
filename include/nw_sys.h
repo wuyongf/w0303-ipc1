@@ -85,6 +85,17 @@ namespace yf
 
             std::string ArmGetPointStr(const yf::data::arm::Point3d& point);
 
+        private:
+            /// Arm: RMove
+
+            // properties
+            bool rmove_start_flag_ = false;
+
+            // methods
+            void thread_RMoveForceNode();
+
+            std::thread th_rmove_ForceNode_;
+
         public:
             /// Ugv Method: based on REST API
 
@@ -1696,6 +1707,17 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
 
                                                             case 2:
                                                             {
+                                                                // 2.1 sub_standby_position
+                                                                auto sub_standby_point = arm_mission_configs[n].sub_standby_position;
+                                                                std::string sub_standby_point_str = this->ArmGetPointStr(sub_standby_point);
+                                                                tm5.ArmTask("Set standby_p1 = "+ sub_standby_point_str);
+                                                                tm5.ArmTask("Move_to standby_p1");
+
+                                                                // 2.2 check&set tool_angle
+                                                                this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
+
+                                                                /// 2.3 awake the thread_rmove_ForceNode
+
                                                                 break;
                                                             }
                                                         }
@@ -4429,6 +4451,18 @@ void yf::sys::nw_sys::ArmPlaceToolSafety()
             break;
         }
     }
+}
+
+void yf::sys::nw_sys::thread_RMoveForceNode()
+{
+    while(!rmove_start_flag_)
+    {
+        // sleep 1s
+    }
+
+    tm5.ArmTask("Post via0_RMove");
+
+    // tm5.ArmTask("Post via45_RMove");
 }
 
 
