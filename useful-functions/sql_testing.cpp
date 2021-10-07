@@ -8,6 +8,10 @@ using std::endl;
 
 int main()
 {
+    int a = round(1.2 / 4);
+
+    std::cout << a << std::endl;
+
     for (int n = 0 ; n < 10 ; n ++)
     {
         switch (n)

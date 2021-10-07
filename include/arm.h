@@ -2023,25 +2023,42 @@ bool yf::arm::tm::IsLMPosDeviationRMove(const yf::data::arm::Point3d &ref_landma
     deviation_y = ref_landmark_pos.y - real_landmark_pos.y;
     deviation_z = ref_landmark_pos.z - real_landmark_pos.z;
 
+    // iteration_no plc 009
+    int iteration_no_x = std::round(deviation_x/ std_error_x);
+    int iteration_no_y = std::round(deviation_y/ std_error_y);
+    int iteration_no_z = std::round(deviation_rz/ std_error_rz);
 
-    if(std::abs(deviation_x) > std_error_x)
+    if(std::abs(deviation_rz) > std_error_rz || std::abs(deviation_x) > std_error_x)
     {
         // for debug
         sql_ptr_->InsertNewArmLMError(deviation_x,deviation_y,deviation_z,deviation_rx,deviation_ry,deviation_rz,1,2);
 
+        /// rz
+        if(deviation_rz < 0)
+        {
+            // counterclockwise? // clockwise?
+            // PLC 011 = 0 or 1?
+
+        } else
+        {
+
+        }
+
+        /// x
         // if error is still too significant
         if(deviation_x < 0)
         {
             // vehicle move forward
+            // PLC 012 = 1
+
+
 
         } else
         {
             // vehicle move backward
+            // PLC 012 = 0
 
         }
-
-
-        return true;
     }
     else
     {
