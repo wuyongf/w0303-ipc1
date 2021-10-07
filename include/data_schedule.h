@@ -52,7 +52,7 @@ namespace yf
                 std::vector<yf::data::arm::MotionConfig>      arm_motion_configs;
 
                 int ugv_motion_config_no;
-                yf::data::ugv::MotionConfig                   ugv_motion_config;
+                yf::data::ugv::MissionConfig                   ugv_mission_config;
 
                 //process --- record...
                 std::vector<SubTaskForRefModel> subtasks;

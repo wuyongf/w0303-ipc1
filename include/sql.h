@@ -187,7 +187,7 @@ namespace yf
             // Arm Debug
             void InsertNewArmLMError(const float& delta_x,const float& delta_y, const float& delta_z,
                                      const float &delta_rx, const float &delta_ry, const float &delta_rz,
-                                     const int& is_error);
+                                     const int& is_error, const int& mission_type);
 
             /// Arm_mission_config
             //
@@ -252,6 +252,8 @@ namespace yf
             int GetJobLogId(const int& task_group_id);
 
             /// Ugv_mission_config
+            int GetMissionTypeId(const int& model_config_id, const int& cur_order);
+
             int GetUgvMissionConfigNum(const int& model_config_id);
 
             std::vector<int> GetArmConfigValidResultQueue(const int& model_config_id);
@@ -4014,7 +4016,7 @@ int yf::sql::sql_server::GetJobLogId(const int &task_group_id)
 
 void yf::sql::sql_server::InsertNewArmLMError(const float &delta_x, const float &delta_y, const float &delta_z,
                                               const float &delta_rx, const float &delta_ry, const float &delta_rz,
-                                              const int &is_error)
+                                              const int &is_error, const int& mission_type)
 {
     std::string query_update;
 
@@ -4023,10 +4025,10 @@ void yf::sql::sql_server::InsertNewArmLMError(const float &delta_x, const float 
         Connect();
 
 
-        query_update = "INSERT INTO data_arm_debug_lm_error(delta_x, delta_y, delta_z,delta_rx, delta_ry, delta_rz, is_error) "
+        query_update = "INSERT INTO data_arm_debug_lm_error(delta_x, delta_y, delta_z,delta_rx, delta_ry, delta_rz, is_error, mission_type) "
                        "VALUES (" + std::to_string(delta_x) + ","+ std::to_string(delta_y) +","+ std::to_string(delta_z)+","+
                                     std::to_string(delta_rx) + ","+ std::to_string(delta_ry) +","+ std::to_string(delta_rz)+","+
-                                    std::to_string(is_error) +")";
+                                    std::to_string(is_error) + ","+ std::to_string(mission_type) +")";
 
         nanodbc::execute(conn_,query_update);
 
@@ -4808,6 +4810,46 @@ void yf::sql::sql_server::UpdateEachTaskStatus(const int &cur_task_id, const int
     {
         std::cerr << e.what() << std::endl;
         std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+    }
+}
+
+int yf::sql::sql_server::GetMissionTypeId(const int &model_config_id, const int &cur_order)
+{
+    // query string
+    std::string query_update;
+
+    // input
+    std::string model_config_id_str = std::to_string(model_config_id);
+    std::string cur_order_str = std::to_string(cur_order);
+
+    // output
+    int arm_config_id;
+
+    //"SELECT arm_config_id FROM data_ugv_mission_config where model_config_id = 1"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT mission_type FROM data_ugv_mission_config where model_config_id = " + model_config_id_str + "AND mission_order = " + cur_order_str ;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            arm_config_id = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return arm_config_id;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return 0;
     }
 }
 

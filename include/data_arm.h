@@ -212,6 +212,12 @@ namespace  yf
                 D435        =   3
             };
 
+            enum class MissionType
+            {
+                FixedPosition       =   1,
+                RelativeMove        =   2,
+            };
+
             /// yf: using
             struct MissionConfig
             {
@@ -274,6 +280,7 @@ namespace  yf
                 std::string ref_pos_tf_file;
 
                 bool vision_success_flag = 0;
+
             };
         }
     }

@@ -66,13 +66,18 @@ namespace  yf
                 int acc;                        //  mm/s^2
             };
 
-            // Mission Config
-            struct MotionConfig
+            enum class MissionType
             {
-                std::string                  map_id;
-                BasicMotionInfo              basic_motion_info;
-                std::vector<MapPosition2d>   mir_positions;
-                float                        mir_step_distance;
+                FixedPosition       =   1,
+                RelativeMove        =   2,
+            };
+
+            /// yf: using
+            struct MissionConfig
+            {
+                int id;
+                /// yf: for relative move
+                MissionType mission_type;
             };
         }
     }

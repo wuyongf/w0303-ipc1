@@ -152,6 +152,9 @@ namespace yf
                                const std::string &abs_directory,
                                const std::string &file_name);
 
+            /// Relative Move Related
+            yf::data::arm::MissionType GetMissionType(const int& mission_type_id);
+
         public: // for nw_sys: each mission // retrieve data from Arm(tm5)
 
             bool GetFindLandmarkFlag();
@@ -190,6 +193,10 @@ namespace yf
             bool IsArmOutOfRange(const std::deque<yf::data::arm::Point3d>& real_points, const data::arm::TaskMode& task_modee);
             /// Arm Connection Mission Status
             void UpdateSQLArmStatus();
+
+            /// Relative Move Methods
+            bool IsLMPosDeviationRMove(const yf::data::arm::Point3d& ref_landmark_pos,
+                                  const yf::data::arm::Point3d& real_landmark_pos);
 
         protected:
 
@@ -931,8 +938,7 @@ std::deque<yf::data::arm::MissionConfig> yf::arm::tm::ConfigureArmMission(const 
     {
         int arm_mission_config_id = arm_mission_config_ids[n];
 
-        // start config each arm_mission
-
+        // start configuring each arm_mission
         data::arm::MissionConfig mission_config;
 
         /// -1. id
@@ -1403,20 +1409,20 @@ bool yf::arm::tm::IsLMPosDeviation(const yf::data::arm::Point3d &ref_landmark_po
     float deviation_z = 0;
 
 
-    deviation_rx = std::abs(std::abs(ref_landmark_pos.rx) - std::abs(real_landmark_pos.rx));
-    deviation_ry = std::abs(std::abs(ref_landmark_pos.ry) - std::abs(real_landmark_pos.ry));
-    deviation_rz = std::abs(std::abs(ref_landmark_pos.rz) - std::abs(real_landmark_pos.rz));
+    deviation_rx = std::abs(ref_landmark_pos.rx) - std::abs(real_landmark_pos.rx);
+    deviation_ry = std::abs(ref_landmark_pos.ry) - std::abs(real_landmark_pos.ry);
+    deviation_rz = std::abs(ref_landmark_pos.rz) - std::abs(real_landmark_pos.rz);
 
-    deviation_x = std::abs(std::abs(ref_landmark_pos.x) - std::abs(real_landmark_pos.x));
-    deviation_y = std::abs(std::abs(ref_landmark_pos.y) - std::abs(real_landmark_pos.y));
-    deviation_z = std::abs(std::abs(ref_landmark_pos.z) - std::abs(real_landmark_pos.z));
+    deviation_x = std::abs(ref_landmark_pos.x) - std::abs(real_landmark_pos.x);
+    deviation_y = std::abs(ref_landmark_pos.y) - std::abs(real_landmark_pos.y);
+    deviation_z = std::abs(ref_landmark_pos.z) - std::abs(real_landmark_pos.z);
 
 
-    if(deviation_rx >= std_error_rx || deviation_ry >= std_error_ry || deviation_rz >= std_error_rz ||
-        deviation_x >= std_error_x)
+    if(std::abs(deviation_rx) >= std_error_rx || std::abs(deviation_ry) >= std_error_ry ||
+       std::abs(deviation_rz) >= std_error_rz || std::abs(deviation_x) >= std_error_x)
     {
         // for debug
-        sql_ptr_->InsertNewArmLMError(deviation_x,deviation_y,deviation_z,deviation_rx,deviation_ry,deviation_rz,1);
+        sql_ptr_->InsertNewArmLMError(deviation_x,deviation_y,deviation_z,deviation_rx,deviation_ry,deviation_rz,1,1);
 
         // if error too significant
         return true;
@@ -1424,7 +1430,7 @@ bool yf::arm::tm::IsLMPosDeviation(const yf::data::arm::Point3d &ref_landmark_po
     else
     {
         // for debug
-        sql_ptr_->InsertNewArmLMError(deviation_x,deviation_y,deviation_z,deviation_rx,deviation_ry,deviation_rz,0);
+        sql_ptr_->InsertNewArmLMError(deviation_x,deviation_y,deviation_z,deviation_rx,deviation_ry,deviation_rz,0,1);
 
         return false;
     }
@@ -1980,6 +1986,59 @@ bool yf::arm::tm::IsArmOutOfRange(const std::deque<yf::data::arm::Point3d> &real
 Eigen::Matrix4f yf::arm::tm::get_TMat()
 {
     return al_arm_path.get_TMat();
+}
+
+yf::data::arm::MissionType yf::arm::tm::GetMissionType(const int &mission_type_id)
+{
+    switch (mission_type_id)
+    {
+        case 1:
+        {
+            return data::arm::MissionType::FixedPosition;
+        }
+        case 2:
+        {
+            return data::arm::MissionType::RelativeMove;
+        }
+    }
+}
+
+bool yf::arm::tm::IsLMPosDeviationRMove(const yf::data::arm::Point3d &ref_landmark_pos,
+                                        const yf::data::arm::Point3d &real_landmark_pos)
+{
+    float std_error_x = 20;
+    float std_error_y = 150;
+
+    float std_error_rz = 1.0;
+
+    // consider x, y, rz ...
+    float deviation_x, deviation_y, deviation_z;
+    float deviation_rx, deviation_ry, deviation_rz;
+
+    deviation_rx = std::abs(ref_landmark_pos.rx) - std::abs(real_landmark_pos.rx);
+    deviation_ry = std::abs(ref_landmark_pos.ry) - std::abs(real_landmark_pos.ry);
+    deviation_rz = std::abs(ref_landmark_pos.rz) - std::abs(real_landmark_pos.rz);
+
+    deviation_x = std::abs(ref_landmark_pos.x) - std::abs(real_landmark_pos.x);
+    deviation_y = std::abs(ref_landmark_pos.y) - std::abs(real_landmark_pos.y);
+    deviation_z = std::abs(ref_landmark_pos.z) - std::abs(real_landmark_pos.z);
+
+
+    if(std::abs(deviation_rz) >= std_error_rz || std::abs(deviation_x) >= std_error_x)
+    {
+        // for debug
+        sql_ptr_->InsertNewArmLMError(deviation_x,deviation_y,deviation_z,deviation_rx,deviation_ry,deviation_rz,1,2);
+
+        // if error too significant
+        return true;
+    }
+    else
+    {
+        // for debug
+        sql_ptr_->InsertNewArmLMError(deviation_x,deviation_y,deviation_z,deviation_rx,deviation_ry,deviation_rz,0,2);
+
+        return false;
+    }
 }
 
 

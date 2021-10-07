@@ -1033,476 +1033,659 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                         }
                                     }
 
-                                    ///\brief
-                                    /// amc_skip_conditions:
-                                    /// 1. For Landmark
-                                    ///     1.1. cannot find the landmark
-                                    ///     1.2. landmark deviation too large
-                                    /// 2. For D455
-                                    ///     2.1 cannot match the origin 2d image.
-                                    ///     2.2 TF deviation too large
-                                    bool amc_skip_flag = true;
+                                    /// check current arm_config mission type
+                                    auto mission_type = tm5.GetMissionType(sql_ptr_->GetMissionTypeId(cur_model_config_id_, cur_order));
 
-                                    bool amc_deviation_skip_flag = true;
-                                    bool amc_range_skip_flag = true;
-
-                                    ///\ (3) Loop all the arm_mission_configs
-                                    for (int n = 0; n < arm_mission_configs.size(); n++)
+                                    switch (mission_type)
                                     {
-                                        /// I: Find the TF and amc_skip_flag
-                                        //  for first order
-                                        //    I.1. Get the TF first(landmark_tf, camera_tf)
-                                        //    I.2. Assign the amc_skip_flag
-                                        if(n == 0)
+                                        case data::arm::MissionType::FixedPosition:
                                         {
-                                            /// I.1
-                                            ///   a. Initialization
-                                            ///     a.1 move to standby_position
-                                            ///     a.2 check&set tool_angle
-                                            ///   b. Find the TF & Set the amc_skip_flag / amc_deviation_skip_flag
-                                            ///   c. Calculation
-                                            ///   d. Check if arm is out of range. / amc_range_skip_flag . Set amc_skip_flag
-                                            ///   e. Return standby_position
+                                            ///\ (3) Loop all the arm_mission_configs here
 
-                                            // a.1
-                                            //
-                                            //  a.1.1 get standby_point_str
-                                            auto standby_point = arm_mission_configs[n].standby_position;
-                                            std::string standby_point_str = this->ArmGetPointStr(standby_point);
-                                            //  a.1.2 set standby_point
-                                            tm5.ArmTask("Set standby_p0 = "+standby_point_str);
-                                            //  a.1.3 move to standby_point
-                                            tm5.ArmTask("Move_to standby_p0");
+                                            ///\brief for MotionType::FixedPosition
+                                            /// amc_skip_conditions:
+                                            /// 1. For Landmark
+                                            ///     1.1. cannot find the landmark
+                                            ///     1.2. landmark deviation too large
+                                            /// 2. For D455
+                                            ///     2.1 cannot match the origin 2d image.
+                                            ///     2.2 TF deviation too large
+                                            bool amc_skip_flag = true;
 
-                                            // a.2.
-                                            this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
+                                            bool amc_deviation_skip_flag = true;
+                                            bool amc_range_skip_flag = true;
 
-                                            /// b. vision job initialization
-                                            ///   b.1: for None: do nothing
-                                            ///   b.2: for Landmark: scan landmark, mark down the record
-                                            ///   b.3: for D455: record the point clouds, mark down the record.
-
-                                            switch (arm_mission_configs[n].vision_type)
+                                            for (int n = 0; n < arm_mission_configs.size(); n++)
                                             {
-                                                case data::arm::VisionType::None:
+                                                /// I: Find the TF and amc_skip_flag
+                                                //  for first order
+                                                //    I.1. Get the TF first(landmark_tf, camera_tf)
+                                                //    I.2. Assign the amc_skip_flag
+                                                if(n == 0)
                                                 {
-                                                    // do nothing
-                                                    break;
+                                                    /// I.1
+                                                    ///   a. Initialization
+                                                    ///     a.1 move to standby_position
+                                                    ///     a.2 check&set tool_angle
+                                                    ///   b. Find the TF & Set the amc_skip_flag / amc_deviation_skip_flag
+                                                    ///   c. Calculation
+                                                    ///   d. Check if arm is out of range. / amc_range_skip_flag . Set amc_skip_flag
+                                                    ///   e. Return standby_position
+
+                                                    // a.1
+                                                    //
+                                                    //  a.1.1 get standby_point_str
+                                                    auto standby_point = arm_mission_configs[n].standby_position;
+                                                    std::string standby_point_str = this->ArmGetPointStr(standby_point);
+                                                    //  a.1.2 set standby_point
+                                                    tm5.ArmTask("Set standby_p0 = "+standby_point_str);
+                                                    //  a.1.3 move to standby_point
+                                                    tm5.ArmTask("Move_to standby_p0");
+
+                                                    // a.2.
+                                                    this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
+
+                                                    /// b. vision job initialization
+                                                    ///   b.1: for None: do nothing
+                                                    ///   b.2: for Landmark: scan landmark, mark down the record
+                                                    ///   b.3: for D455: record the point clouds, mark down the record.
+
+                                                    switch (arm_mission_configs[n].vision_type)
+                                                    {
+                                                        case data::arm::VisionType::None:
+                                                        {
+                                                            // do nothing
+                                                            break;
+                                                        }
+                                                        case data::arm::VisionType::Landmark:
+                                                        {
+                                                            // 1. move to init_lm_vision_position.
+                                                            //  1.1 retrieve init_lm_vision_position_str
+                                                            std::string ref_vision_lm_init_position_str = this->ArmGetPointStr(arm_mission_configs[n].ref_vision_lm_init_position);
+                                                            //  1.2 set init_lm_vision_position
+                                                            tm5.ArmTask("Set vision_lm_init_p0 = " + ref_vision_lm_init_position_str);
+                                                            //  1.3 move_to init_lm_vision_position
+                                                            tm5.ArmTask("Move_to vision_lm_init_p0");
+
+                                                            // 2. execute task 'vision_find_landmark'
+                                                            switch (arm_mission_configs[n].model_type)
+                                                            {
+                                                                case data::arm::ModelType::Windows:
+                                                                {
+                                                                    tm5.ArmTask("Post vision_find_light_landmark");
+                                                                    break;
+                                                                }
+                                                                default:
+                                                                {
+                                                                    tm5.ArmTask("Post vision_find_landmark");
+                                                                    break;
+                                                                }
+                                                            }
+
+                                                            // 3. check the result: find_landmark_flag
+                                                            tm5.ArmTask("Post get_find_landmark_flag");
+
+                                                            // 4. set the amc_skip_flag and record the TF(landmark_tf)
+                                                            //  4.1 find the landmark
+                                                            //     a. found, get the real_landmark_pos but is it deviation?
+                                                            //       a.1 yes ---> amc_skip_flag = True
+                                                            //       a.2 no  ---> amc_skip_flag = False
+                                                            //     b. cannot find ---> amc_skip_flag = True
+
+                                                            if(tm5.GetFindLandmarkFlag())
+                                                            {
+                                                                LOG(INFO) << "Find Landmark!";
+
+                                                                // get real_landmark_pos
+                                                                tm5.ArmTask("Post get_landmark_pos_str");
+                                                                real_lm_pos_ = tm5.GetRealLandmarkPos();
+
+                                                                /// Comparison real_lm_pos & ref_lm_pos. Check whether error is too significant
+                                                                if(tm5.IsLMPosDeviation(arm_mission_configs[n].ref_landmark_pos, real_lm_pos_))
+                                                                {
+                                                                    // error too significant, skip current arm mission config!
+
+                                                                    LOG(INFO) << "Error too significant! Skip cur_arm_mission_config!!";
+
+                                                                    arm_sub_mission_success_flag = false;
+
+                                                                    LOG(INFO) << "Skip the whole arm mission configs!";
+
+                                                                    ///TIME
+                                                                    sleep.ms(200);
+                                                                }
+                                                                else
+                                                                {
+                                                                    LOG(INFO) << "No Deviation!";
+                                                                    amc_deviation_skip_flag = false;
+                                                                }
+                                                            }
+                                                            else
+                                                            {
+                                                                LOG(INFO) << "Cannot find Landmark! Skip cur_arm_mission_config!!";
+
+                                                                arm_sub_mission_success_flag = false;
+
+                                                                LOG(INFO) << "Skip the whole arm mission configs!";
+
+                                                                ///TIME
+                                                                sleep.ms(200);
+                                                            }
+
+                                                            break;
+                                                        }
+                                                        case data::arm::VisionType::D455:
+                                                        {
+                                                            ///  b.2 find the TF!
+
+                                                            // 0. data management
+                                                            auto arm_mission_config_dir = "../data/point_clouds/real/arm_mission_config_" + std::to_string(arm_mission_configs[n].id);
+                                                            std::filesystem::create_directory(arm_mission_config_dir);
+
+                                                            auto task_group_dir = arm_mission_config_dir + "/task_group_" + std::to_string(task_group_id);
+                                                            std::filesystem::create_directory(task_group_dir);
+
+                                                            auto pc_dir = task_group_dir + "/point_cloud/";
+                                                            std::filesystem::create_directory(pc_dir);
+
+                                                            auto tf_dir = task_group_dir + "/tf/";
+                                                            std::filesystem::create_directory(tf_dir);
+
+                                                            // 1. retrieve point cloud data in real time and then assign the value
+                                                            //  1.1 move to several points.
+                                                            //  1.2 record the point clouds. (several sets....)
+                                                            //  1.3 save the real_pc_files.
+
+                                                            std::vector<std::vector<std::string>> real_pc_file_names;
+
+                                                            std::vector<std::string> each_set_real_pc_pos_names;
+
+                                                            for(int set = 0 ; set < arm_mission_configs[n].ref_tcp_pos_ids.size() ; set ++)
+                                                            {
+                                                                each_set_real_pc_pos_names.clear();
+
+                                                                for(int view = 0 ; view < arm_mission_configs[n].ref_tcp_pos_ids[set].size() ; view++)
+                                                                {
+                                                                    // get the point
+                                                                    auto point_str = this->ArmGetPointStr(sql_ptr_->GetArmPoint(arm_mission_configs[n].ref_tcp_pos_ids[set][view]));
+                                                                    // set the point
+                                                                    tm5.ArmTask("Set ref_tcp_pos = " + point_str);
+                                                                    // move!
+                                                                    tm5.ArmTask("Move_to ref_tcp_pos");
+
+                                                                    //  1. define the name
+                                                                    std::string id_str = std::to_string(arm_mission_configs[n].id);
+                                                                    std::string set_no_str = std::to_string(set+1);
+                                                                    std::string view_no_str = std::to_string(view+1);
+                                                                    std::string feature_type_name = sql_ptr_->GetFeatureTypeName(arm_mission_configs[n].feature_type_ids[set]);
+
+                                                                    // note: without ".pcd"
+                                                                    auto real_pc_file_name = std::to_string(task_group_id) + "-" + id_str + "-" + set_no_str + "-" + view_no_str + "-" + feature_type_name;
+
+                                                                    //todo: 1. record the real point cloud.
+                                                                    //todo: 2. save the real_point_cloud file
+                                                                    LOG(INFO) << "Vision Job [Start]" << std::endl;
+                                                                    // ....
+                                                                    auto result = tm5.RecordCurRealPointCloud(pc_dir, real_pc_file_name);
+                                                                    // wait for vision_job done
+                                                                    LOG(INFO) << "Vision Job [Running]" << std::endl;
+                                                                    LOG(INFO) << "Vision Job [Finish]" << std::endl;
+
+                                                                    /// for debug
+                                                                    auto tf_file_name = real_pc_file_name +"-tf.txt";
+                                                                    auto tf_result = tm5.WriteTMatFile(arm_mission_configs[n].ref_tcp_pos_tfs[set][view],tf_dir, tf_file_name);
+
+                                                                    // push back
+                                                                    each_set_real_pc_pos_names.push_back(real_pc_file_name);
+
+                                                                    // for safety concern.
+                                                                    tm5.ArmTask("Move_to standby_p0");
+                                                                }
+
+                                                                real_pc_file_names.push_back(each_set_real_pc_pos_names);
+                                                            }
+
+                                                            //todo: 2. compare!
+                                                            // ...
+                                                            // ...
+                                                            // 3. get the TF!
+                                                            switch (arm_mission_configs[n].model_type)
+                                                            {
+                                                                case data::arm::ModelType::Handle:
+                                                                {
+                                                                    auto feature_type = "planar";
+                                                                    auto feature_type_id = sql_ptr_->GetFeatureTypeId(feature_type);
+
+                                                                    std::vector<int> planar_sets;
+
+                                                                    // find the corresponding files
+                                                                    for (int m =0; m < arm_mission_configs[n].feature_type_ids.size(); m++)
+                                                                    {
+                                                                        if(arm_mission_configs[n].feature_type_ids[m] == feature_type_id)
+                                                                        {
+                                                                            planar_sets.push_back(m);
+                                                                        }
+                                                                    }
+
+                                                                    /// for 1 set 1 view algorithm
+                                                                    if(planar_sets.size() == 1)
+                                                                    {
+                                                                        auto set_no  = planar_sets[0];
+
+                                                                        auto cur_set_view_no = arm_mission_configs[n].ref_pc_file_names[set_no].size();
+
+                                                                        if (cur_set_view_no == 1)
+                                                                        {
+                                                                            // get the file name;
+                                                                            auto ref_pc_file_name = arm_mission_configs[n].ref_pc_file_names[set_no][0];
+
+                                                                            auto real_pc_file_name = std::to_string(task_group_id) + "-" + ref_pc_file_name;
+
+                                                                            std::string real_pc_file =   "..\\data\\point_clouds\\real\\arm_mission_config_" + std::to_string(arm_mission_configs[n].id)
+                                                                                                         + "\\task_group_" + std::to_string(task_group_id) + "\\point_cloud\\" + real_pc_file_name + ".pcd";
+
+                                                                            std::string ref_pos_tf_file = "..\\data\\point_clouds\\real\\arm_mission_config_" + std::to_string(arm_mission_configs[n].id)
+                                                                                                          + "\\task_group_" + std::to_string(task_group_id) + "\\tf\\" + real_pc_file_name + "-tf.txt";
+
+                                                                            arm_mission_configs[n].real_pc_file = real_pc_file;
+                                                                            arm_mission_configs[n].ref_pos_tf_file = ref_pos_tf_file;
+
+                                                                            arm_mission_configs[n].vision_success_flag = tm5.Phase2GetTMat4Handle(real_pc_file,ref_pos_tf_file);
+                                                                            arm_mission_configs[n].TMat = tm5.get_TMat();
+                                                                        }
+                                                                    }
+
+                                                                    break;
+                                                                }
+                                                                case data::arm::ModelType::Handrail:
+                                                                {
+                                                                    auto feature_type = "handrail_higher";
+                                                                    auto feature_type_id = sql_ptr_->GetFeatureTypeId(feature_type);
+
+                                                                    std::vector<int> handrail_higher_sets;
+
+                                                                    // find the corresponding files
+                                                                    for (int m =0; m < arm_mission_configs[n].feature_type_ids.size(); m++)
+                                                                    {
+                                                                        if(arm_mission_configs[n].feature_type_ids[m] == feature_type_id)
+                                                                        {
+                                                                            handrail_higher_sets.push_back(m);
+                                                                        }
+                                                                    }
+
+                                                                    /// for 1 set 1 view algorithm
+                                                                    if(handrail_higher_sets.size() == 1)
+                                                                    {
+                                                                        auto set_no  = handrail_higher_sets[0];
+
+                                                                        auto cur_set_view_no = arm_mission_configs[n].ref_pc_file_names[set_no].size();
+
+                                                                        if (cur_set_view_no == 1)
+                                                                        {
+                                                                            // get the file name;
+                                                                            auto ref_pc_file_name = arm_mission_configs[n].ref_pc_file_names[set_no][0];
+
+                                                                            auto real_pc_file_name = std::to_string(task_group_id) + "-" + ref_pc_file_name;
+
+                                                                            std::string real_pc_file =   "..\\data\\point_clouds\\real\\arm_mission_config_" + std::to_string(arm_mission_configs[n].id)
+                                                                                                         + "\\task_group_" + std::to_string(task_group_id) + "\\point_cloud\\" + real_pc_file_name + ".pcd";
+
+                                                                            std::string ref_pos_tf_file = "..\\data\\point_clouds\\real\\arm_mission_config_" + std::to_string(arm_mission_configs[n].id)
+                                                                                                          + "\\task_group_" + std::to_string(task_group_id) + "\\tf\\" + real_pc_file_name + "-tf.txt";
+
+                                                                            arm_mission_configs[n].real_pc_file = real_pc_file;
+                                                                            arm_mission_configs[n].ref_pos_tf_file = ref_pos_tf_file;
+
+                                                                            arm_mission_configs[n].vision_success_flag = tm5.Phase2GetTMat4Handle(real_pc_file,ref_pos_tf_file);
+                                                                            arm_mission_configs[n].TMat = tm5.get_TMat();
+                                                                        }
+                                                                    }
+
+                                                                    break;
+                                                                }
+                                                            }
+
+                                                            // 4. set the amc_skip_flag?
+
+                                                            LOG(INFO) << "vision_success_flag: " << arm_mission_configs[n].vision_success_flag;
+
+                                                            if(arm_mission_configs[n].vision_success_flag  == 1)
+                                                            {
+                                                                amc_deviation_skip_flag = false;
+                                                            }
+                                                            else
+                                                            {
+                                                                amc_deviation_skip_flag = true;
+                                                            }
+
+                                                            break;
+                                                        }
+                                                        case data::arm::VisionType::D435:
+                                                        {
+                                                            break;
+                                                        }
+                                                    }
+
+                                                    /// e. return standby_position
+
+                                                    // back to standby_point
+                                                    tm5.ArmTask("Move_to standby_p0");
                                                 }
-                                                case data::arm::VisionType::Landmark:
+
+                                                /// II:
+                                                //  check the amc_skip_flag
+                                                //  1. if ture, skip current arm_mission_config
+                                                //  2. if false, just execute the arm_mission_config
+                                                //    2.1. Initialization
+                                                ///    2.2. Calculation (base on vision_type: calculate the real_points)
+                                                ///      2.2.1 new via_points (real_points)
+                                                ///      2.2.2 new approach_point
+                                                ///      2.2.3 new n_points
+                                                //    2.3. post the arm_mission_config
+
+                                                if(amc_deviation_skip_flag)
                                                 {
-                                                    // 1. move to init_lm_vision_position.
-                                                    //  1.1 retrieve init_lm_vision_position_str
-                                                    std::string ref_vision_lm_init_position_str = this->ArmGetPointStr(arm_mission_configs[n].ref_vision_lm_init_position);
-                                                    //  1.2 set init_lm_vision_position
-                                                    tm5.ArmTask("Set vision_lm_init_p0 = " + ref_vision_lm_init_position_str);
-                                                    //  1.3 move_to init_lm_vision_position
-                                                    tm5.ArmTask("Move_to vision_lm_init_p0");
-
-                                                    // 2. execute task 'vision_find_landmark'
-                                                    switch (arm_mission_configs[n].model_type)
+                                                    continue;
+                                                }
+                                                else
+                                                {
+                                                    /// c. Calculation
+                                                    //TODO: For Testing: arm_mission_configs[n] --> arm_mission_configs[0]
+                                                    switch (arm_mission_configs[0].vision_type)
                                                     {
-                                                        case data::arm::ModelType::Windows:
+                                                        case data::arm::VisionType::None:
                                                         {
-                                                            tm5.ArmTask("Post vision_find_light_landmark");
                                                             break;
                                                         }
-                                                        default:
+                                                        case data::arm::VisionType::Landmark:
                                                         {
-                                                            tm5.ArmTask("Post vision_find_landmark");
+                                                            // 2.1 calculate the new via_points
+
+                                                            std::deque<yf::data::arm::Point3d> real_via_points;
+
+                                                            real_via_points = tm5.GetRealViaPointsByLM(
+                                                                    arm_mission_configs[n].via_points,
+                                                                    arm_mission_configs[n].ref_landmark_pos, real_lm_pos_);
+
+                                                            arm_mission_configs[n].via_points.clear();
+
+                                                            arm_mission_configs[n].via_points = real_via_points;
+
+                                                            // 2.2 calculate the real approach point
+
+                                                            auto real_via_approach_point = tm5.GetRealPointByLM(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].ref_landmark_pos, real_lm_pos_);
+
+                                                            arm_mission_configs[n].via_approach_pos.x  = real_via_approach_point.x;
+                                                            arm_mission_configs[n].via_approach_pos.y  = real_via_approach_point.y;
+                                                            arm_mission_configs[n].via_approach_pos.z  = real_via_approach_point.z;
+                                                            arm_mission_configs[n].via_approach_pos.rx = real_via_approach_point.rx;
+                                                            arm_mission_configs[n].via_approach_pos.ry = real_via_approach_point.ry;
+                                                            arm_mission_configs[n].via_approach_pos.rz = real_via_approach_point.rz;
+
+                                                            break;
+                                                        }
+                                                        case data::arm::VisionType::D455:
+                                                        {
+                                                            // 2.1 calculate the new via_points
+
+                                                            std::deque<yf::data::arm::Point3d> real_via_points;
+
+                                                            real_via_points = tm5.GetRealViaPointsByRS(arm_mission_configs[0].TMat, arm_mission_configs[n].via_points);
+
+                                                            arm_mission_configs[n].via_points.clear();
+
+                                                            arm_mission_configs[n].via_points = real_via_points;
+
+                                                            // 2.2 calculate the real approach point
+
+                                                            auto real_via_approach_point = tm5.GetRealPointByRS(arm_mission_configs[0].TMat,arm_mission_configs[n].via_approach_pos);
+
+                                                            arm_mission_configs[n].via_approach_pos.x  = real_via_approach_point.x;
+                                                            arm_mission_configs[n].via_approach_pos.y  = real_via_approach_point.y;
+                                                            arm_mission_configs[n].via_approach_pos.z  = real_via_approach_point.z;
+                                                            arm_mission_configs[n].via_approach_pos.rx = real_via_approach_point.rx;
+                                                            arm_mission_configs[n].via_approach_pos.ry = real_via_approach_point.ry;
+                                                            arm_mission_configs[n].via_approach_pos.rz = real_via_approach_point.rz;
+
+
+                                                            break;
+                                                        }
+                                                        case data::arm::VisionType::D435:
+                                                        {
                                                             break;
                                                         }
                                                     }
 
-                                                    // 3. check the result: find_landmark_flag
-                                                    tm5.ArmTask("Post get_find_landmark_flag");
+                                                    /// d. amc_range_skip_flag. amc_skip_flag
 
-                                                    // 4. set the amc_skip_flag and record the TF(landmark_tf)
-                                                    //  4.1 find the landmark
-                                                    //     a. found, get the real_landmark_pos but is it deviation?
-                                                    //       a.1 yes ---> amc_skip_flag = True
-                                                    //       a.2 no  ---> amc_skip_flag = False
-                                                    //     b. cannot find ---> amc_skip_flag = True
-
-                                                    if(tm5.GetFindLandmarkFlag())
+                                                    if(!tm5.IsArmOutOfRange(arm_mission_configs[n].via_points, arm_mission_configs[n].task_mode))
                                                     {
-                                                        LOG(INFO) << "Find Landmark!";
-
-                                                        // get real_landmark_pos
-                                                        tm5.ArmTask("Post get_landmark_pos_str");
-                                                        real_lm_pos_ = tm5.GetRealLandmarkPos();
-
-                                                        /// Comparison real_lm_pos & ref_lm_pos. Check whether error is too significant
-                                                        if(tm5.IsLMPosDeviation(arm_mission_configs[n].ref_landmark_pos, real_lm_pos_))
-                                                        {
-                                                            // error too significant, skip current arm mission config!
-
-                                                            LOG(INFO) << "Error too significant! Skip cur_arm_mission_config!!";
-
-                                                            arm_sub_mission_success_flag = false;
-
-                                                            LOG(INFO) << "Skip the whole arm mission configs!";
-
-                                                            ///TIME
-                                                            sleep.ms(200);
-
-                                                            continue;
-
-                                                        }
-                                                        else
-                                                        {
-                                                            LOG(INFO) << "No Deviation!";
-                                                            amc_deviation_skip_flag = false;
-                                                        }
+                                                        amc_range_skip_flag = false;
                                                     }
-                                                    else
+
+                                                    if(amc_deviation_skip_flag == false && amc_range_skip_flag == false)
                                                     {
-                                                        LOG(INFO) << "Cannot find Landmark! Skip cur_arm_mission_config!!";
+                                                        amc_skip_flag = false;
+                                                    }
 
-                                                        arm_sub_mission_success_flag = false;
-
-                                                        LOG(INFO) << "Skip the whole arm mission configs!";
-
-                                                        ///TIME
-                                                        sleep.ms(200);
-
+                                                    if(amc_skip_flag)
+                                                    {
                                                         continue;
                                                     }
+                                                    else
+                                                    {
+                                                        /// 2.1 Initialization
 
-                                                    break;
+                                                        // 2.1.1 sub_standby_position
+                                                        auto sub_standby_point = arm_mission_configs[n].sub_standby_position;
+                                                        std::string sub_standby_point_str = this->ArmGetPointStr(sub_standby_point);
+                                                        tm5.ArmTask("Set standby_p1 = "+ sub_standby_point_str);
+                                                        tm5.ArmTask("Move_to standby_p1");
+
+                                                        // 2.1.2 check&set tool_angle
+                                                        this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
+
+                                                        /// 2.3 Fire the task and then return to standby_p1 ---> standby_p0
+
+                                                        // 2.3.1 assign n_via_points.
+                                                        std::string n_via_points_str = std::to_string(arm_mission_configs[n].n_via_points);
+                                                        tm5.ArmTask("Set n_points = " + n_via_points_str);
+
+                                                        // 2.3.2 set approach_point
+                                                        this->ArmSetApproachPoint(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].tool_angle);
+
+                                                        // 2.3.3 set via_points
+                                                        this->ArmSetViaPoints(arm_mission_configs[n].via_points, arm_mission_configs[n].tool_angle);
+
+                                                        // 2.3.4 post via_points
+                                                        this->ArmPostViaPoints(cur_task_mode_, arm_mission_configs[n].tool_angle, arm_mission_configs[n].model_type, arm_mission_configs[n].id);
+
+                                                        // 2.3.5 post return standby_position
+                                                        tm5.ArmTask("Move_to standby_p1");
+                                                        tm5.ArmTask("Move_to standby_p0");
+                                                    }
                                                 }
-                                                case data::arm::VisionType::D455:
+                                            }
+
+                                            break;
+                                        }
+
+                                        case data::arm::MissionType::RelativeMove:
+                                        {
+                                            bool amc_skip_flag = true;
+
+                                            bool amc_deviation_skip_flag = true;
+                                            bool amc_range_skip_flag = true;
+
+                                            ///\ (3) Loop all the arm_mission_configs here
+                                            for (int n = 0; n < arm_mission_configs.size(); n++)
+                                            {
+                                                /// I:  RMove Details
+                                                /// II: Check the Robot Status & RMove result
+
+                                                /// I:  RMove Details
+                                                while(mir100_ptr_->GetPLCRegisterIntValue(6) != 0)
                                                 {
-                                                    ///  b.2 find the TF!
+                                                    /// 1. Wait for flag to execute rmove_missions.
+                                                    auto arm_execute_flag = this->WaitForUgvPLCRegisterInt(1,1,5);
 
-                                                    // 0. data management
-                                                    auto arm_mission_config_dir = "../data/point_clouds/real/arm_mission_config_" + std::to_string(arm_mission_configs[n].id);
-                                                    std::filesystem::create_directory(arm_mission_config_dir);
-
-                                                    auto task_group_dir = arm_mission_config_dir + "/task_group_" + std::to_string(task_group_id);
-                                                    std::filesystem::create_directory(task_group_dir);
-
-                                                    auto pc_dir = task_group_dir + "/point_cloud/";
-                                                    std::filesystem::create_directory(pc_dir);
-
-                                                    auto tf_dir = task_group_dir + "/tf/";
-                                                    std::filesystem::create_directory(tf_dir);
-
-                                                    // 1. retrieve point cloud data in real time and then assign the value
-                                                    //  1.1 move to several points.
-                                                    //  1.2 record the point clouds. (several sets....)
-                                                    //  1.3 save the real_pc_files.
-
-                                                    std::vector<std::vector<std::string>> real_pc_file_names;
-
-                                                    std::vector<std::string> each_set_real_pc_pos_names;
-
-                                                    for(int set = 0 ; set < arm_mission_configs[n].ref_tcp_pos_ids.size() ; set ++)
+                                                    if(arm_execute_flag)
                                                     {
-                                                        each_set_real_pc_pos_names.clear();
+                                                        // a. get the PLC 006 value. PLC_006/ rmove_mission_flag
+                                                        auto PLC_006 = mir100_ptr_->GetPLCRegisterIntValue(6);
 
-                                                        for(int view = 0 ; view < arm_mission_configs[n].ref_tcp_pos_ids[set].size() ; view++)
+                                                        switch (PLC_006)
                                                         {
-                                                            // get the point
-                                                            auto point_str = this->ArmGetPointStr(sql_ptr_->GetArmPoint(arm_mission_configs[n].ref_tcp_pos_ids[set][view]));
-                                                            // set the point
-                                                            tm5.ArmTask("Set ref_tcp_pos = " + point_str);
-                                                            // move!
-                                                            tm5.ArmTask("Move_to ref_tcp_pos");
+                                                            case 1:
+                                                            {
+                                                                /// a. move to standby_position
+                                                                if(n == 0)
+                                                                {
+                                                                    // a.1 move to standby_position
+                                                                    auto standby_point = arm_mission_configs[n].standby_position;
+                                                                    std::string standby_point_str = this->ArmGetPointStr(standby_point);
+                                                                    tm5.ArmTask("Set standby_p0 = "+standby_point_str);
+                                                                    tm5.ArmTask("Move_to standby_p0");
 
-                                                            //  1. define the name
-                                                            std::string id_str = std::to_string(arm_mission_configs[n].id);
-                                                            std::string set_no_str = std::to_string(set+1);
-                                                            std::string view_no_str = std::to_string(view+1);
-                                                            std::string feature_type_name = sql_ptr_->GetFeatureTypeName(arm_mission_configs[n].feature_type_ids[set]);
+                                                                    // a.2. check&set tool_angle
+                                                                    this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
+                                                                }
 
-                                                            // note: without ".pcd"
-                                                            auto real_pc_file_name = std::to_string(task_group_id) + "-" + id_str + "-" + set_no_str + "-" + view_no_str + "-" + feature_type_name;
+                                                                /// b. vision job initialization
+                                                                ///   b.1: for None: do nothing
+                                                                ///   b.2: for Landmark: scan landmark, mark down the record
+                                                                ///   b.3: for D455: do nothing
+                                                                switch (arm_mission_configs[n].vision_type)
+                                                                {
+                                                                    case data::arm::VisionType::None:
+                                                                    {
+                                                                        // do nothing
+                                                                        break;
+                                                                    }
+                                                                    case data::arm::VisionType::Landmark:
+                                                                    {
+                                                                        // 1. move to init_lm_vision_position.
+                                                                        std::string ref_vision_lm_init_position_str = this->ArmGetPointStr(arm_mission_configs[n].ref_vision_lm_init_position);
+                                                                        tm5.ArmTask("Set vision_lm_init_p0 = " + ref_vision_lm_init_position_str);
+                                                                        tm5.ArmTask("Move_to vision_lm_init_p0");
 
-                                                            //todo: 1. record the real point cloud.
-                                                            //todo: 2. save the real_point_cloud file
-                                                            LOG(INFO) << "Vision Job [Start]" << std::endl;
-                                                            // ....
-                                                            auto result = tm5.RecordCurRealPointCloud(pc_dir, real_pc_file_name);
-                                                            // wait for vision_job done
-                                                            LOG(INFO) << "Vision Job [Running]" << std::endl;
-                                                            LOG(INFO) << "Vision Job [Finish]" << std::endl;
+                                                                        // 2. execute vision_task 'vision_find_landmark'
+                                                                        switch (arm_mission_configs[n].model_type)
+                                                                        {
+                                                                            case data::arm::ModelType::Windows:
+                                                                            {
+                                                                                tm5.ArmTask("Post vision_find_light_landmark");
+                                                                                break;
+                                                                            }
+                                                                            default:
+                                                                            {
+                                                                                tm5.ArmTask("Post vision_find_landmark");
+                                                                                break;
+                                                                            }
+                                                                        }
 
-                                                            /// for debug
-                                                            auto tf_file_name = real_pc_file_name +"-tf.txt";
-                                                            auto tf_result = tm5.WriteTMatFile(arm_mission_configs[n].ref_tcp_pos_tfs[set][view],tf_dir, tf_file_name);
+                                                                        // 3. check the result: find_landmark_flag
+                                                                        tm5.ArmTask("Post get_find_landmark_flag");
 
-                                                            // push back
-                                                            each_set_real_pc_pos_names.push_back(real_pc_file_name);
+                                                                        // 4. set the amc_skip_flag and record the TF(landmark_tf)
+                                                                        //  4.1 find the landmark
+                                                                        //     a. found, get the real_landmark_pos but is it deviation?
+                                                                        //       a.1 yes ---> amc_skip_flag = True
+                                                                        //       a.2 no  ---> amc_skip_flag = False
+                                                                        //     b. cannot find ---> amc_skip_flag = True
 
-                                                            // for safety concern.
-                                                            tm5.ArmTask("Move_to standby_p0");
+                                                                        if(tm5.GetFindLandmarkFlag())
+                                                                        {
+                                                                            LOG(INFO) << "Find Landmark!";
+
+                                                                            // get real_landmark_pos
+                                                                            tm5.ArmTask("Post get_landmark_pos_str");
+                                                                            real_lm_pos_ = tm5.GetRealLandmarkPos();
+
+                                                                            /// Comparison real_lm_pos & ref_lm_pos. Check whether error is too significant
+                                                                            if(tm5.IsLMPosDeviation(arm_mission_configs[n].ref_landmark_pos, real_lm_pos_))
+                                                                            {
+                                                                                // error too significant, skip current arm mission config!
+
+                                                                                LOG(INFO) << "Error too significant! Skip cur_arm_mission_config!!";
+
+                                                                                arm_sub_mission_success_flag = false;
+
+                                                                                LOG(INFO) << "Skip the whole arm mission configs!";
+
+                                                                                ///TIME
+                                                                                sleep.ms(200);
+
+                                                                                continue;
+
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                LOG(INFO) << "RMove: No Deviation!";
+                                                                                amc_deviation_skip_flag = false;
+                                                                            }
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            LOG(INFO) << "Cannot find Landmark! Skip cur_arm_mission_config!!";
+
+                                                                            arm_sub_mission_success_flag = false;
+
+                                                                            LOG(INFO) << "Skip the whole arm mission configs!";
+
+                                                                            ///TIME
+                                                                            sleep.ms(200);
+
+                                                                            /// STOP The RMove Mission
+                                                                            LOG(INFO) << "Stop RMove Mission!";
+
+                                                                            mir100_ptr_->SetPLCRegisterIntValue(6,0);
+                                                                            mir100_ptr_->SetPLCRegisterIntValue(5,3);
+                                                                        }
+
+                                                                        break;
+                                                                    }
+                                                                    case data::arm::VisionType::D455:
+                                                                    {
+                                                                        break;
+                                                                    }
+                                                                    case data::arm::VisionType::D435:
+                                                                    {
+                                                                        break;
+                                                                    }
+                                                                }
+
+                                                                /// c. return standby_position
+
+                                                                tm5.ArmTask("Move_to standby_p0");
+
+                                                                break;
+                                                            }
+
                                                         }
-
-                                                        real_pc_file_names.push_back(each_set_real_pc_pos_names);
-                                                    }
-
-                                                    //todo: 2. compare!
-                                                    // ...
-                                                    // ...
-                                                    // 3. get the TF!
-                                                    switch (arm_mission_configs[n].model_type)
-                                                    {
-                                                        case data::arm::ModelType::Handle:
-                                                        {
-                                                            auto feature_type = "planar";
-                                                            auto feature_type_id = sql_ptr_->GetFeatureTypeId(feature_type);
-
-                                                            std::vector<int> planar_sets;
-
-                                                            // find the corresponding files
-                                                            for (int m =0; m < arm_mission_configs[n].feature_type_ids.size(); m++)
-                                                            {
-                                                                if(arm_mission_configs[n].feature_type_ids[m] == feature_type_id)
-                                                                {
-                                                                    planar_sets.push_back(m);
-                                                                }
-                                                            }
-
-                                                            /// for 1 set 1 view algorithm
-                                                            if(planar_sets.size() == 1)
-                                                            {
-                                                                auto set_no  = planar_sets[0];
-
-                                                                auto cur_set_view_no = arm_mission_configs[n].ref_pc_file_names[set_no].size();
-
-                                                                if (cur_set_view_no == 1)
-                                                                {
-                                                                    // get the file name;
-                                                                    auto ref_pc_file_name = arm_mission_configs[n].ref_pc_file_names[set_no][0];
-
-                                                                    auto real_pc_file_name = std::to_string(task_group_id) + "-" + ref_pc_file_name;
-
-                                                                    std::string real_pc_file =   "..\\data\\point_clouds\\real\\arm_mission_config_" + std::to_string(arm_mission_configs[n].id)
-                                                                            + "\\task_group_" + std::to_string(task_group_id) + "\\point_cloud\\" + real_pc_file_name + ".pcd";
-
-                                                                    std::string ref_pos_tf_file = "..\\data\\point_clouds\\real\\arm_mission_config_" + std::to_string(arm_mission_configs[n].id)
-                                                                            + "\\task_group_" + std::to_string(task_group_id) + "\\tf\\" + real_pc_file_name + "-tf.txt";
-
-                                                                    arm_mission_configs[n].real_pc_file = real_pc_file;
-                                                                    arm_mission_configs[n].ref_pos_tf_file = ref_pos_tf_file;
-
-                                                                    arm_mission_configs[n].vision_success_flag = tm5.Phase2GetTMat4Handle(real_pc_file,ref_pos_tf_file);
-                                                                    arm_mission_configs[n].TMat = tm5.get_TMat();
-                                                                }
-                                                            }
-
-                                                            break;
-                                                        }
-                                                        case data::arm::ModelType::Handrail:
-                                                        {
-                                                            auto feature_type = "handrail_higher";
-                                                            auto feature_type_id = sql_ptr_->GetFeatureTypeId(feature_type);
-
-                                                            std::vector<int> handrail_higher_sets;
-
-                                                            // find the corresponding files
-                                                            for (int m =0; m < arm_mission_configs[n].feature_type_ids.size(); m++)
-                                                            {
-                                                                if(arm_mission_configs[n].feature_type_ids[m] == feature_type_id)
-                                                                {
-                                                                    handrail_higher_sets.push_back(m);
-                                                                }
-                                                            }
-
-                                                            /// for 1 set 1 view algorithm
-                                                            if(handrail_higher_sets.size() == 1)
-                                                            {
-                                                                auto set_no  = handrail_higher_sets[0];
-
-                                                                auto cur_set_view_no = arm_mission_configs[n].ref_pc_file_names[set_no].size();
-
-                                                                if (cur_set_view_no == 1)
-                                                                {
-                                                                    // get the file name;
-                                                                    auto ref_pc_file_name = arm_mission_configs[n].ref_pc_file_names[set_no][0];
-
-                                                                    auto real_pc_file_name = std::to_string(task_group_id) + "-" + ref_pc_file_name;
-
-                                                                    std::string real_pc_file =   "..\\data\\point_clouds\\real\\arm_mission_config_" + std::to_string(arm_mission_configs[n].id)
-                                                                                                 + "\\task_group_" + std::to_string(task_group_id) + "\\point_cloud\\" + real_pc_file_name + ".pcd";
-
-                                                                    std::string ref_pos_tf_file = "..\\data\\point_clouds\\real\\arm_mission_config_" + std::to_string(arm_mission_configs[n].id)
-                                                                                                  + "\\task_group_" + std::to_string(task_group_id) + "\\tf\\" + real_pc_file_name + "-tf.txt";
-
-                                                                    arm_mission_configs[n].real_pc_file = real_pc_file;
-                                                                    arm_mission_configs[n].ref_pos_tf_file = ref_pos_tf_file;
-
-                                                                    arm_mission_configs[n].vision_success_flag = tm5.Phase2GetTMat4Handle(real_pc_file,ref_pos_tf_file);
-                                                                    arm_mission_configs[n].TMat = tm5.get_TMat();
-                                                                }
-                                                            }
-
-                                                            break;
-                                                        }
-                                                    }
-
-                                                    // 4. set the amc_skip_flag?
-
-                                                    LOG(INFO) << "vision_success_flag: " << arm_mission_configs[n].vision_success_flag;
-
-                                                    if(arm_mission_configs[n].vision_success_flag  == 1)
-                                                    {
-                                                        amc_deviation_skip_flag = false;
                                                     }
                                                     else
                                                     {
-                                                        amc_deviation_skip_flag = true;
+                                                        LOG(INFO) << "Failed at RMove Start. Cannot set PLC 001 = 1? Please Check.";
+
+                                                        /// STOP The RMove Mission
+                                                        mir100_ptr_->SetPLCRegisterIntValue(6,0);
+                                                        mir100_ptr_->SetPLCRegisterIntValue(5,3);
                                                     }
-
-                                                    break;
                                                 }
-                                                case data::arm::VisionType::D435:
+
+                                                /// II: Check the Robot Status & RMove result
+                                                if(mir100_ptr_->GetPLCRegisterIntValue(5) == 3)
                                                 {
+                                                    LOG(INFO) << "RMove Mission Failed! Please Check!";
                                                     break;
                                                 }
                                             }
 
-                                            /// e. return standby_position
-
-                                            // back to standby_point
-                                            tm5.ArmTask("Move_to standby_p0");
-                                        }
-
-                                        /// II:
-                                        //  check the amc_skip_flag
-                                        //  1. if ture, skip current arm_mission_config
-                                        //  2. if false, just execute the arm_mission_config
-                                        //    2.1. Initialization
-                                        ///    2.2. Calculation (base on vision_type: calculate the real_points)
-                                        ///      2.2.1 new via_points (real_points)
-                                        ///      2.2.2 new approach_point
-                                        ///      2.2.3 new n_points
-                                        //    2.3. post the arm_mission_config
-
-                                        if(amc_deviation_skip_flag)
-                                        {
-                                            continue;
-                                        }
-                                        else
-                                        {
-                                            /// c. Calculation
-                                            //TODO: For Testing: arm_mission_configs[n] --> arm_mission_configs[0]
-                                            switch (arm_mission_configs[0].vision_type)
-                                            {
-                                                case data::arm::VisionType::None:
-                                                {
-                                                    break;
-                                                }
-                                                case data::arm::VisionType::Landmark:
-                                                {
-                                                    // 2.1 calculate the new via_points
-
-                                                    std::deque<yf::data::arm::Point3d> real_via_points;
-
-                                                    real_via_points = tm5.GetRealViaPointsByLM(
-                                                            arm_mission_configs[n].via_points,
-                                                            arm_mission_configs[n].ref_landmark_pos, real_lm_pos_);
-
-                                                    arm_mission_configs[n].via_points.clear();
-
-                                                    arm_mission_configs[n].via_points = real_via_points;
-
-                                                    // 2.2 calculate the real approach point
-
-                                                    auto real_via_approach_point = tm5.GetRealPointByLM(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].ref_landmark_pos, real_lm_pos_);
-
-                                                    arm_mission_configs[n].via_approach_pos.x  = real_via_approach_point.x;
-                                                    arm_mission_configs[n].via_approach_pos.y  = real_via_approach_point.y;
-                                                    arm_mission_configs[n].via_approach_pos.z  = real_via_approach_point.z;
-                                                    arm_mission_configs[n].via_approach_pos.rx = real_via_approach_point.rx;
-                                                    arm_mission_configs[n].via_approach_pos.ry = real_via_approach_point.ry;
-                                                    arm_mission_configs[n].via_approach_pos.rz = real_via_approach_point.rz;
-
-                                                    break;
-                                                }
-                                                case data::arm::VisionType::D455:
-                                                {
-                                                    // 2.1 calculate the new via_points
-
-                                                    std::deque<yf::data::arm::Point3d> real_via_points;
-
-                                                    real_via_points = tm5.GetRealViaPointsByRS(arm_mission_configs[0].TMat, arm_mission_configs[n].via_points);
-
-                                                    arm_mission_configs[n].via_points.clear();
-
-                                                    arm_mission_configs[n].via_points = real_via_points;
-
-                                                    // 2.2 calculate the real approach point
-
-                                                    auto real_via_approach_point = tm5.GetRealPointByRS(arm_mission_configs[0].TMat,arm_mission_configs[n].via_approach_pos);
-
-                                                    arm_mission_configs[n].via_approach_pos.x  = real_via_approach_point.x;
-                                                    arm_mission_configs[n].via_approach_pos.y  = real_via_approach_point.y;
-                                                    arm_mission_configs[n].via_approach_pos.z  = real_via_approach_point.z;
-                                                    arm_mission_configs[n].via_approach_pos.rx = real_via_approach_point.rx;
-                                                    arm_mission_configs[n].via_approach_pos.ry = real_via_approach_point.ry;
-                                                    arm_mission_configs[n].via_approach_pos.rz = real_via_approach_point.rz;
-
-
-                                                    break;
-                                                }
-                                                case data::arm::VisionType::D435:
-                                                {
-                                                    break;
-                                                }
-                                            }
-
-                                            /// d. amc_range_skip_flag. amc_skip_flag
-
-                                            if(!tm5.IsArmOutOfRange(arm_mission_configs[n].via_points, arm_mission_configs[n].task_mode))
-                                            {
-                                                amc_range_skip_flag = false;
-                                            }
-
-                                            if(amc_deviation_skip_flag == false && amc_range_skip_flag == false)
-                                            {
-                                                amc_skip_flag = false;
-                                            }
-
-                                            if(amc_skip_flag)
-                                            {
-                                                continue;
-                                            }
-                                            else
-                                            {
-                                                /// 2.1 Initialization
-
-                                                // 2.1.1 sub_standby_position
-                                                auto sub_standby_point = arm_mission_configs[n].sub_standby_position;
-                                                std::string sub_standby_point_str = this->ArmGetPointStr(sub_standby_point);
-                                                tm5.ArmTask("Set standby_p1 = "+ sub_standby_point_str);
-                                                tm5.ArmTask("Move_to standby_p1");
-
-                                                // 2.1.2 check&set tool_angle
-                                                this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
-
-                                                /// 2.3 Fire the task and then return to standby_p1 ---> standby_p0
-
-                                                // 2.3.1 assign n_via_points.
-                                                std::string n_via_points_str = std::to_string(arm_mission_configs[n].n_via_points);
-                                                tm5.ArmTask("Set n_points = " + n_via_points_str);
-
-                                                // 2.3.2 set approach_point
-                                                this->ArmSetApproachPoint(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].tool_angle);
-
-                                                // 2.3.3 set via_points
-                                                this->ArmSetViaPoints(arm_mission_configs[n].via_points, arm_mission_configs[n].tool_angle);
-
-                                                // 2.3.4 post via_points
-                                                this->ArmPostViaPoints(cur_task_mode_, arm_mission_configs[n].tool_angle, arm_mission_configs[n].model_type, arm_mission_configs[n].id);
-
-                                                // 2.3.5 post return standby_position
-                                                tm5.ArmTask("Move_to standby_p1");
-                                                tm5.ArmTask("Move_to standby_p0");
-                                            }
+                                            break;
                                         }
                                     }
+
 
                                     sleep.ms(200);
 

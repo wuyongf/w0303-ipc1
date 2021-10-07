@@ -8,6 +8,19 @@ using std::endl;
 
 int main()
 {
+    for (int n = 0 ; n < 10 ; n ++)
+    {
+        switch (n)
+        {
+            case 5:
+            {
+                continue;
+            }
+        }
+        std::cout << n << std::endl;
+    }
+
+
 #if 1
     std::deque<int> q_ids;
 
