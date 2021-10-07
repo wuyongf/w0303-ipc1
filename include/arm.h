@@ -2046,28 +2046,33 @@ bool yf::arm::tm::IsLMPosDeviationRMove(const yf::data::arm::Point3d &ref_landma
             this->set_PLC_int_value(11,2);
 
             // iteration_no PLC 008
-            int iteration_no_z = std::round(std::abs(std::abs(deviation_rz)- 360)/ std_error_rz);
+            deviation_rz = std::abs(std::abs(deviation_rz)- 360);
+
+            int iteration_no_z = std::round(deviation_rz/ std_error_rz);
             LOG(INFO) << "iteration_no_z: " << iteration_no_z;
 
             this->set_PLC_int_value(8,iteration_no_z);
 
-        } else if ( -180 < deviation_rz <= 0)
+        } else if ( -180 < deviation_rz && deviation_rz <= 0)
         {
             // counterclockwise (PLC 011 = 1)
             this->set_PLC_int_value(11,1);
 
             // iteration_no PLC 008
-            int iteration_no_z = std::round(std::abs(deviation_rz)/ std_error_rz);
+            deviation_rz = std::abs(deviation_rz);
+
+            int iteration_no_z = std::round(deviation_rz/ std_error_rz);
             LOG(INFO) << "iteration_no_z: " << iteration_no_z;
 
             this->set_PLC_int_value(8,iteration_no_z);
 
-        } else if ( deviation_rz <= 180 )
+        } else if (  0 < deviation_rz && deviation_rz <= 180 )
         {
             // clockwise (PLC 011 = 2)
             this->set_PLC_int_value(11,2);
 
             // iteration_no PLC 008
+
             int iteration_no_z = std::round(deviation_rz/ std_error_rz);
             LOG(INFO) << "iteration_no_z: " << iteration_no_z;
 
@@ -2079,7 +2084,9 @@ bool yf::arm::tm::IsLMPosDeviationRMove(const yf::data::arm::Point3d &ref_landma
             this->set_PLC_int_value(11,1);
 
             // iteration_no PLC 008
-            int iteration_no_z = std::round(std::abs(deviation_rz- 360)/ std_error_rz);
+            deviation_rz = std::abs(deviation_rz- 360);
+
+            int iteration_no_z = std::round(deviation_rz/ std_error_rz);
             LOG(INFO) << "iteration_no_z: " << iteration_no_z;
 
             this->set_PLC_int_value(8,iteration_no_z);

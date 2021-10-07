@@ -1605,10 +1605,12 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                                             /// Comparison real_lm_pos & ref_lm_pos. Check whether error is too significant
                                                                             if(tm5.IsLMPosDeviationRMove(arm_mission_configs[n].ref_landmark_pos, real_lm_pos_))
                                                                             {
+
+
                                                                                 // error too significant.
                                                                                 LOG(INFO) << "Keep fine tuning the MiR Pos...";
 
-                                                                                // 0. get the params firsr
+                                                                                // 0. get the params first
                                                                                 int iteration_no_rz = tm5.get_PLC_int_value(8);
                                                                                 int iteration_no_x = tm5.get_PLC_int_value(9);
                                                                                 int iteration_no_y = tm5.get_PLC_int_value(10);
@@ -1627,6 +1629,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                                                     mir100_ptr_->SetPLCRegisterIntValue(11,0);
                                                                                 }
 
+                                                                                #if 0
                                                                                 // 2. adjust x
                                                                                 if (iteration_no_x != 0)
                                                                                 {
@@ -1640,6 +1643,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                                                     mir100_ptr_->SetPLCRegisterIntValue(9,0);
                                                                                     mir100_ptr_->SetPLCRegisterIntValue(12,0);
                                                                                 }
+                                                                                #endif
                                                                             }
                                                                             else
                                                                             {
