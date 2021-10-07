@@ -2009,27 +2009,38 @@ bool yf::arm::tm::IsLMPosDeviationRMove(const yf::data::arm::Point3d &ref_landma
     float std_error_x = 20;
     float std_error_y = 150;
 
-    float std_error_rz = 1.0;
+    float std_error_rz = 0.5;
 
     // consider x, y, rz ...
     float deviation_x, deviation_y, deviation_z;
     float deviation_rx, deviation_ry, deviation_rz;
 
-    deviation_rx = std::abs(ref_landmark_pos.rx) - std::abs(real_landmark_pos.rx);
-    deviation_ry = std::abs(ref_landmark_pos.ry) - std::abs(real_landmark_pos.ry);
-    deviation_rz = std::abs(ref_landmark_pos.rz) - std::abs(real_landmark_pos.rz);
+    deviation_rx = ref_landmark_pos.rx - real_landmark_pos.rx;
+    deviation_ry = ref_landmark_pos.ry - real_landmark_pos.ry;
+    deviation_rz = ref_landmark_pos.rz - real_landmark_pos.rz;
 
-    deviation_x = std::abs(ref_landmark_pos.x) - std::abs(real_landmark_pos.x);
-    deviation_y = std::abs(ref_landmark_pos.y) - std::abs(real_landmark_pos.y);
-    deviation_z = std::abs(ref_landmark_pos.z) - std::abs(real_landmark_pos.z);
+    deviation_x = ref_landmark_pos.x - real_landmark_pos.x;
+    deviation_y = ref_landmark_pos.y - real_landmark_pos.y;
+    deviation_z = ref_landmark_pos.z - real_landmark_pos.z;
 
 
-    if(std::abs(deviation_rz) >= std_error_rz || std::abs(deviation_x) >= std_error_x)
+    if(std::abs(deviation_x) > std_error_x)
     {
         // for debug
         sql_ptr_->InsertNewArmLMError(deviation_x,deviation_y,deviation_z,deviation_rx,deviation_ry,deviation_rz,1,2);
 
-        // if error too significant
+        // if error is still too significant
+        if(deviation_x < 0)
+        {
+            // vehicle move forward
+
+        } else
+        {
+            // vehicle move backward
+
+        }
+
+
         return true;
     }
     else
