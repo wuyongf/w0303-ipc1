@@ -1716,17 +1716,18 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                                 // 2.2 check&set tool_angle
                                                                 this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
 
-                                                                // 2.3 get rmove_marker. 1, 2, 3,...
-                                                                // post rmove_via0_approach
-                                                                // post rmove_via45_approach
+                                                                // 2.3 via_approach_point
+                                                                this->ArmSetApproachPoint(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].tool_angle);
                                                                 switch (arm_mission_configs[n].tool_angle)
                                                                 {
                                                                     case data::arm::ToolAngle::Zero:
                                                                     {
+                                                                        tm5.ArmTask("Move_to via0_approach_point");
                                                                         break;
                                                                     }
                                                                     case data::arm::ToolAngle::FortyFive:
                                                                     {
+                                                                        tm5.ArmTask("Move_to via45_approach_point");
                                                                         break;
                                                                     }
                                                                 }

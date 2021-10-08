@@ -30,6 +30,10 @@ namespace yf
             bool read_isPause();
             bool read_isEStop();
 
+            // for RMove
+            int  get_RMove_ForceFlag();
+            bool set_RMove_ForceFlag(const int& value);
+
             // Arm DI/O
             int get_control_box_DO(const int& DO);
             int get_control_box_DI(const int& DI);
@@ -61,6 +65,8 @@ namespace yf
             uint8_t     reg_end_module_DI[3];
 
             uint16_t       reg_robot_coordinate[60];
+
+            uint8_t     reg_rmove_force_flag[1];
 
         };
     }
@@ -195,7 +201,7 @@ bool yf::modbus::tm_modbus::set_control_box_DO(const int &DO, const int &value)
 
         return true;
     }
-    catch (std::error_code ec)
+    catch (std::error_code& ec)
     {
         std::cerr << ec << std::endl;
         return false;
@@ -261,6 +267,39 @@ float yf::modbus::tm_modbus::get_current_base_param(const int &high_16, const in
 
     return x_f;
 }
+
+int yf::modbus::tm_modbus::get_RMove_ForceFlag()
+{
+    modbus_connect(mb);
+
+    modbus_read_bits(mb, 9000, 1, reg_rmove_force_flag);
+
+    int value = reg_rmove_force_flag[0];
+
+    modbus_close(mb);
+
+    return value;
+}
+
+bool yf::modbus::tm_modbus::set_RMove_ForceFlag(const int &value)
+{
+    try
+    {
+        modbus_connect(mb);
+
+        modbus_write_bit(mb,9000,value);
+
+        modbus_close(mb);
+
+        return true;
+    }
+    catch (std::error_code& ec)
+    {
+        std::cerr << ec << std::endl;
+        return false;
+    }
+}
+
 
 
 

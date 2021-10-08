@@ -60,6 +60,13 @@ int main(void) {
 
     tm_modbus.Start("192.168.7.29",502);
 
+    auto force_flag = tm_modbus.get_RMove_ForceFlag();
+
+
+    auto result = tm_modbus.set_RMove_ForceFlag(1);
+
+    auto force_flag1 = tm_modbus.get_RMove_ForceFlag();
+
     auto DI_0 = tm_modbus.get_end_module_DI(1);
 
 //    std::cout << "DI_0: " << DI_0 << std::endl;
