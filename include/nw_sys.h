@@ -92,7 +92,7 @@ namespace yf
             bool rmove_start_flag_ = false;
 
             // methods
-            void thread_RMoveForceNode();
+            void thread_RMoveForceNode(const yf::data::arm::ToolAngle &tool_angle);
 
             std::thread th_rmove_ForceNode_;
 
@@ -1716,8 +1716,91 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                                 // 2.2 check&set tool_angle
                                                                 this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
 
-                                                                /// 2.3 awake the thread_rmove_ForceNode
+                                                                // 2.3 get rmove_marker. 1, 2, 3,...
+                                                                // post rmove_via0_approach
+                                                                // post rmove_via45_approach
+                                                                switch (arm_mission_configs[n].tool_angle)
+                                                                {
+                                                                    case data::arm::ToolAngle::Zero:
+                                                                    {
+                                                                        break;
+                                                                    }
+                                                                    case data::arm::ToolAngle::FortyFive:
+                                                                    {
+                                                                        break;
+                                                                    }
+                                                                }
 
+                                                                /// 2.4 awake the thread_RMoveForceNode
+                                                                th_rmove_ForceNode_ = std::thread(&nw_sys::thread_RMoveForceNode, this, std::ref(arm_mission_configs[n].tool_angle));
+                                                                sleep.ms(200);
+                                                                rmove_start_flag_ = true;
+                                                                sleep.sec(2);
+
+                                                                /// 2.5 rmove_param_init
+                                                                std::chrono::time_point<std::chrono::steady_clock> start,end;
+                                                                std::chrono::duration<float> duration;
+
+                                                                if(nw_status_ptr_->arm_mission_status == data::common::MissionStatus::Running)
+                                                                {
+                                                                    // set PLC 006 = 3. notice ugv
+                                                                    // set PLC 001 = 0. notice ugv
+
+                                                                    // get current time1.
+                                                                    start = std::chrono::high_resolution_clock::now();
+                                                                }
+
+                                                                bool rmove_continue_flag = true;
+                                                                while (rmove_continue_flag)
+                                                                {
+                                                                    // timeout?
+                                                                    end = std::chrono::high_resolution_clock::now();
+                                                                    duration = end - start;
+                                                                    float min = duration.count() / 60.0f;
+                                                                    if( min > 5 )
+                                                                    {
+                                                                        LOG(INFO) << "rmove: already last 5 min. Timeout!";
+
+                                                                        rmove_continue_flag = false;
+                                                                        /// STOP The RMove Mission
+                                                                        mir100_ptr_->Pause();
+                                                                        mir100_ptr_->SetPLCRegisterIntValue(6,0);
+                                                                        mir100_ptr_->SetPLCRegisterIntValue(5,3);
+                                                                    }
+
+                                                                    // check if it's error.
+                                                                    if(nw_status_ptr_->arm_mission_status == data::common::MissionStatus::Error ||
+                                                                       nw_status_ptr_->arm_mission_status == data::common::MissionStatus::EStop)
+                                                                    {
+                                                                        LOG(INFO) << "rmove: Arm is Error! Please Check";
+
+                                                                        rmove_continue_flag = false;
+                                                                        /// STOP The RMove Mission
+                                                                        mir100_ptr_->Pause();
+                                                                        mir100_ptr_->SetPLCRegisterIntValue(6,0);
+                                                                        mir100_ptr_->SetPLCRegisterIntValue(5,3);
+                                                                    }
+
+                                                                    // update PLC_006
+                                                                    PLC_006 = mir100_ptr_->GetPLCRegisterIntValue(6);
+
+                                                                    if(PLC_006 == 4)
+                                                                    {
+                                                                        rmove_continue_flag = false;
+
+                                                                        /// notice arm to stop force node
+                                                                        /// ...
+
+                                                                        // thread join
+                                                                        th_rmove_ForceNode_.join();
+
+                                                                        /// return safety position
+                                                                        /// ...
+
+                                                                        /// STOP The RMove Mission
+                                                                        mir100_ptr_->SetPLCRegisterIntValue(6,0);
+                                                                    }
+                                                                }
                                                                 break;
                                                             }
                                                         }
@@ -1727,8 +1810,10 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                         LOG(INFO) << "Failed at RMove Start. Cannot set PLC 001 = 1? Please Check.";
 
                                                         /// STOP The RMove Mission
+                                                        mir100_ptr_->Pause();
                                                         mir100_ptr_->SetPLCRegisterIntValue(6,0);
                                                         mir100_ptr_->SetPLCRegisterIntValue(5,3);
+
                                                     }
                                                 }
 
@@ -4453,16 +4538,32 @@ void yf::sys::nw_sys::ArmPlaceToolSafety()
     }
 }
 
-void yf::sys::nw_sys::thread_RMoveForceNode()
+void yf::sys::nw_sys::thread_RMoveForceNode(const yf::data::arm::ToolAngle &tool_angle)
 {
     while(!rmove_start_flag_)
     {
-        // sleep 1s
+        // sleep 200ms
+        sleep.ms(200);
     }
 
-    tm5.ArmTask("Post via0_RMove");
+    switch (tool_angle)
+    {
+        case data::arm::ToolAngle::Zero:
+        {
+            break;
+        }
+        case data::arm::ToolAngle::FortyFive:
+        {
+            break;
+        }
+    }
 
+    // tm5.ArmTask("Post via0_RMove");
     // tm5.ArmTask("Post via45_RMove");
+
+    // post rmove_0_force
+    // post rmove_45_force
+
 }
 
 
