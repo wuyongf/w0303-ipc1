@@ -48,6 +48,9 @@ namespace yf
             void SetMotorHigh();
             void SetMotorLow();
 
+            void SetRMoveForceFlag(const int& value);
+            int GetRMoveForceFlag();
+
             /// Net Method
             // (1) ipc1(net_server) ---> arm: ipc1(net sever) requests "Get Status"
             // (2) ipc1(net_server) <--- arm: arm return current status to ipc1(net_server)
@@ -2150,6 +2153,16 @@ int yf::arm::tm::get_PLC_int_value(const int &register_no)
 void yf::arm::tm::set_PLC_int_value(const int &register_no, const int &value)
 {
     PLCRegisterInt[register_no-1] = value;
+}
+
+void yf::arm::tm::SetRMoveForceFlag(const int &value)
+{
+    tm_modbus.set_RMove_ForceFlag(value);
+}
+
+int yf::arm::tm::GetRMoveForceFlag()
+{
+    return tm_modbus.get_RMove_ForceFlag();
 }
 
 

@@ -96,6 +96,8 @@ namespace yf
 
             std::thread th_rmove_ForceNode_;
 
+            bool WaitForArmRMoveForceFlag(const int& value, const int& timeout_min);
+
         public:
             /// Ugv Method: based on REST API
 
@@ -1535,8 +1537,22 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                 /// II: Check the Robot Status & RMove result
 
                                                 /// I:  RMove Details
-                                                while(mir100_ptr_->GetPLCRegisterIntValue(6) != 0)
+
+
+
+                                                while(mir100_ptr_->GetPLCRegisterIntValue(6) != 0 )
                                                 {
+                                                    /// 0. Check Arm Status First.
+                                                    if( nw_status_ptr_->arm_mission_status == data::common::MissionStatus::Error ||
+                                                    nw_status_ptr_->arm_mission_status == data::common::MissionStatus::EStop)
+                                                    {
+                                                        // STOP The RMove Mission
+                                                        mir100_ptr_->Pause();
+                                                        mir100_ptr_->SetPLCRegisterIntValue(6,0);
+                                                        mir100_ptr_->SetPLCRegisterIntValue(5,3);
+                                                        break;
+                                                    }
+
                                                     /// 1. Wait for flag to execute rmove_missions.
                                                     auto arm_execute_flag = this->WaitForUgvPLCRegisterInt(1,1,5);
 
@@ -1732,48 +1748,52 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                                     }
                                                                 }
 
-                                                                /// 2.4 awake the thread_RMoveForceNode
+                                                                /// 2.4 rmove_param_init
+                                                                std::chrono::time_point<std::chrono::steady_clock> start,end;
+                                                                std::chrono::duration<float> duration;
+                                                                tm5.SetRMoveForceFlag(0);
+
+                                                                /// 2.5 awake the thread_RMoveForceNode
                                                                 th_rmove_ForceNode_ = std::thread(&nw_sys::thread_RMoveForceNode, this, std::ref(arm_mission_configs[n].tool_angle));
                                                                 sleep.ms(200);
                                                                 rmove_start_flag_ = true;
-                                                                sleep.sec(2);
 
-                                                                /// 2.5 rmove_param_init
-                                                                std::chrono::time_point<std::chrono::steady_clock> start,end;
-                                                                std::chrono::duration<float> duration;
-
-                                                                if(nw_status_ptr_->arm_mission_status == data::common::MissionStatus::Running)
+                                                                if(this->WaitForArmRMoveForceFlag(1,1))
                                                                 {
                                                                     // set PLC 006 = 3. notice ugv
                                                                     // set PLC 001 = 0. notice ugv
+                                                                    mir100_ptr_->SetPLCRegisterIntValue(6,3);
+                                                                    mir100_ptr_->SetPLCRegisterIntValue(1,0);
 
-                                                                    // get current time1.
+                                                                    // get current time.
                                                                     start = std::chrono::high_resolution_clock::now();
                                                                 }
 
                                                                 bool rmove_continue_flag = true;
                                                                 while (rmove_continue_flag)
                                                                 {
-                                                                    // timeout?
-                                                                    end = std::chrono::high_resolution_clock::now();
-                                                                    duration = end - start;
-                                                                    float min = duration.count() / 60.0f;
-                                                                    if( min > 5 )
+                                                                    // 1. check arm status first.
+                                                                    if(nw_status_ptr_->arm_mission_status == data::common::MissionStatus::Error ||
+                                                                       nw_status_ptr_->arm_mission_status == data::common::MissionStatus::EStop)
                                                                     {
-                                                                        LOG(INFO) << "rmove: already last 5 min. Timeout!";
+                                                                        LOG(INFO) << "RMove: Arm is Error! Please Check";
 
                                                                         rmove_continue_flag = false;
                                                                         /// STOP The RMove Mission
                                                                         mir100_ptr_->Pause();
                                                                         mir100_ptr_->SetPLCRegisterIntValue(6,0);
                                                                         mir100_ptr_->SetPLCRegisterIntValue(5,3);
+
+                                                                        break;
                                                                     }
 
-                                                                    // check if it's error.
-                                                                    if(nw_status_ptr_->arm_mission_status == data::common::MissionStatus::Error ||
-                                                                       nw_status_ptr_->arm_mission_status == data::common::MissionStatus::EStop)
+                                                                    // 2. timeout?
+                                                                    end = std::chrono::high_resolution_clock::now();
+                                                                    duration = end - start;
+                                                                    float min = duration.count() / 60.0f;
+                                                                    if( min > 5 )
                                                                     {
-                                                                        LOG(INFO) << "rmove: Arm is Error! Please Check";
+                                                                        LOG(INFO) << "RMove: already last 5 min. Timeout!";
 
                                                                         rmove_continue_flag = false;
                                                                         /// STOP The RMove Mission
@@ -1790,16 +1810,22 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                                         rmove_continue_flag = false;
 
                                                                         /// notice arm to stop force node
-                                                                        /// ...
+                                                                        tm5.SetRMoveForceFlag(0);
 
-                                                                        // thread join
+                                                                        // wait for thread to join
+                                                                        LOG(INFO) << "wait for th_rmove_ForceNode_ to join...";
                                                                         th_rmove_ForceNode_.join();
+                                                                        LOG(INFO) << "th_rmove_ForceNode_ joined.";
 
-                                                                        /// return safety position
-                                                                        /// ...
+                                                                        /// return standby position
+                                                                        tm5.ArmTask("Move_to standby_p1");
+                                                                        tm5.ArmTask("Move_to standby_p0");
 
                                                                         /// STOP The RMove Mission
                                                                         mir100_ptr_->SetPLCRegisterIntValue(6,0);
+
+                                                                        /// Reset PLC registers
+//                                                                        mir100_ptr_->SetPLCRegisterIntValue(7,0);
                                                                     }
                                                                 }
                                                                 break;
@@ -4551,20 +4577,45 @@ void yf::sys::nw_sys::thread_RMoveForceNode(const yf::data::arm::ToolAngle &tool
     {
         case data::arm::ToolAngle::Zero:
         {
+            tm5.ArmTask("Post via0_RMove");
             break;
         }
         case data::arm::ToolAngle::FortyFive:
         {
+            tm5.ArmTask("Post via45_RMove");
             break;
         }
     }
+}
 
-    // tm5.ArmTask("Post via0_RMove");
-    // tm5.ArmTask("Post via45_RMove");
+bool yf::sys::nw_sys::WaitForArmRMoveForceFlag(const int &value, const int &timeout_min)
+{
+    std::string time_future = sql_ptr_->CountdownTime(sql_ptr_->TimeNow(),timeout_min);
 
-    // post rmove_0_force
-    // post rmove_45_force
+    while (true)
+    {
+        auto result = tm5.GetRMoveForceFlag();
 
+        if (result != value)
+        {
+            ///TIME
+            sleep.ms(500);
+        }
+        else
+        {
+            break;
+        }
+
+        /// IPC1 waits too long.
+        if(!sql_ptr_->isFutureTime(time_future, sql_ptr_->TimeNow()))
+        {
+            LOG(INFO) << "The RMove_ForceFlag has not changed, current value: " << result;
+
+            return false;
+        }
+    }
+
+    return true;
 }
 
 
