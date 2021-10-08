@@ -2025,7 +2025,7 @@ bool yf::arm::tm::IsLMPosDeviationRMove(const yf::data::arm::Point3d &ref_landma
     float std_error_x = 20;
     float std_error_y = 150;
 
-    float std_error_rz = 0.5;
+    float std_error_rz = 1;
 
     // consider x, y, rz ...
     float deviation_x, deviation_y, deviation_z;
@@ -2101,6 +2101,7 @@ bool yf::arm::tm::IsLMPosDeviationRMove(const yf::data::arm::Point3d &ref_landma
         this->set_PLC_int_value(8,0);
     }
 
+#if 0 /// disable for now
     if(std::abs(deviation_x) > std_error_x)
     {
         /// x
@@ -2128,8 +2129,9 @@ bool yf::arm::tm::IsLMPosDeviationRMove(const yf::data::arm::Point3d &ref_landma
         this->set_PLC_int_value(12,0);
         this->set_PLC_int_value(9,0);
     }
+#endif
 
-    if( std::abs(deviation_rz) > std_error_rz || std::abs(deviation_x) > std_error_x)
+    if( std::abs(deviation_rz) > std_error_rz )
     {
         // for debug
         sql_ptr_->InsertNewArmLMError(deviation_x,deviation_y,deviation_z,deviation_rx,deviation_ry,deviation_rz,1,2);

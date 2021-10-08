@@ -1018,7 +1018,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                     tm5.set_remove_tool_flag(true);
                                                 }
 
-                                                #if 1 //disable for testing
+                                                #if 0 //disable for testing
                                                 this->ArmAbsorbWater();
                                                 #endif
 
@@ -1538,126 +1538,125 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
 
                                                 /// I:  RMove Details
 
+                                                /// I.1. Wait for flag to execute rmove_missions.
+                                                LOG(INFO) << "RMove: cur_arm_mission_config_no: " << n  << ". Wait for PLC 001 == 1...";
+                                                auto arm_execute_flag = this->WaitForUgvPLCRegisterInt(1,1,5);
 
-
-                                                while(mir100_ptr_->GetPLCRegisterIntValue(6) != 0 )
+                                                if(arm_execute_flag)
                                                 {
-                                                    /// 0. Check Arm Status First.
-                                                    if( nw_status_ptr_->arm_mission_status == data::common::MissionStatus::Error ||
-                                                    nw_status_ptr_->arm_mission_status == data::common::MissionStatus::EStop)
+                                                    while(mir100_ptr_->GetPLCRegisterIntValue(6) != 0 )
                                                     {
-                                                        // STOP The RMove Mission
-                                                        mir100_ptr_->Pause();
-                                                        mir100_ptr_->SetPLCRegisterIntValue(6,0);
-                                                        mir100_ptr_->SetPLCRegisterIntValue(5,3);
-                                                        break;
-                                                    }
-
-                                                    /// 1. Wait for flag to execute rmove_missions.
-                                                    auto arm_execute_flag = this->WaitForUgvPLCRegisterInt(1,1,5);
-
-                                                    if(arm_execute_flag)
-                                                    {
-                                                        // a. get the PLC 006 value. PLC_006/ rmove_mission_flag
-                                                        auto PLC_006 = mir100_ptr_->GetPLCRegisterIntValue(6);
-
-                                                        switch (PLC_006)
+                                                        /// 0. Check Arm Status First.
+                                                        if( nw_status_ptr_->arm_mission_status == data::common::MissionStatus::Error ||
+                                                            nw_status_ptr_->arm_mission_status == data::common::MissionStatus::EStop)
                                                         {
-                                                            case 1:
+                                                            // STOP The RMove Mission
+                                                            mir100_ptr_->Pause();
+                                                            mir100_ptr_->SetPLCRegisterIntValue(6,0);
+                                                            mir100_ptr_->SetPLCRegisterIntValue(5,3);
+                                                            break;
+                                                        }
+                                                        else
+                                                        {
+                                                            // a. get the PLC 006 value. PLC_006/ rmove_mission_flag
+                                                            auto PLC_006 = mir100_ptr_->GetPLCRegisterIntValue(6);
+
+                                                            switch (PLC_006)
                                                             {
-                                                                /// a. move to standby_position
-                                                                if(n == 0)
+                                                                case 1:
                                                                 {
-                                                                    // a.1 move to standby_position
-                                                                    auto standby_point = arm_mission_configs[n].standby_position;
-                                                                    std::string standby_point_str = this->ArmGetPointStr(standby_point);
-                                                                    tm5.ArmTask("Set standby_p0 = "+standby_point_str);
-                                                                    tm5.ArmTask("Move_to standby_p0");
-
-                                                                    // a.2. check&set tool_angle
-                                                                    this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
-                                                                }
-
-                                                                /// b. vision job initialization
-                                                                ///   b.1: for None: do nothing
-                                                                ///   b.2: for Landmark: scan landmark, mark down the record
-                                                                ///   b.3: for D455: do nothing
-                                                                switch (arm_mission_configs[n].vision_type)
-                                                                {
-                                                                    case data::arm::VisionType::None:
+                                                                    /// a. move to standby_position
+                                                                    if(n == 0)
                                                                     {
-                                                                        // do nothing
-                                                                        break;
+                                                                        // a.1 move to standby_position
+                                                                        auto standby_point = arm_mission_configs[n].standby_position;
+                                                                        std::string standby_point_str = this->ArmGetPointStr(standby_point);
+                                                                        tm5.ArmTask("Set standby_p0 = "+standby_point_str);
+                                                                        tm5.ArmTask("Move_to standby_p0");
+
+                                                                        // a.2. check&set tool_angle
+                                                                        this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
                                                                     }
-                                                                    case data::arm::VisionType::Landmark:
+
+                                                                    /// b. vision job initialization
+                                                                    ///   b.1: for None: do nothing
+                                                                    ///   b.2: for Landmark: scan landmark, mark down the record
+                                                                    ///   b.3: for D455: do nothing
+                                                                    switch (arm_mission_configs[n].vision_type)
                                                                     {
-                                                                        // 1. move to init_lm_vision_position.
-                                                                        std::string ref_vision_lm_init_position_str = this->ArmGetPointStr(arm_mission_configs[n].ref_vision_lm_init_position);
-                                                                        tm5.ArmTask("Set vision_lm_init_p0 = " + ref_vision_lm_init_position_str);
-                                                                        tm5.ArmTask("Move_to vision_lm_init_p0");
-
-                                                                        // 2. execute vision_task 'vision_find_landmark'
-                                                                        switch (arm_mission_configs[n].model_type)
+                                                                        case data::arm::VisionType::None:
                                                                         {
-                                                                            case data::arm::ModelType::Windows:
-                                                                            {
-                                                                                tm5.ArmTask("Post vision_find_light_landmark");
-                                                                                break;
-                                                                            }
-                                                                            default:
-                                                                            {
-                                                                                tm5.ArmTask("Post vision_find_landmark");
-                                                                                break;
-                                                                            }
+                                                                            // do nothing
+                                                                            break;
                                                                         }
-
-                                                                        // 3. check the result: find_landmark_flag
-                                                                        tm5.ArmTask("Post get_find_landmark_flag");
-
-                                                                        // 4. set the amc_skip_flag and record the TF(landmark_tf)
-                                                                        //  4.1 find the landmark
-                                                                        //     a. found, get the real_landmark_pos but is it deviation?
-                                                                        //       a.1 yes ---> amc_skip_flag = True
-                                                                        //       a.2 no  ---> amc_skip_flag = False
-                                                                        //     b. cannot find ---> amc_skip_flag = True
-
-                                                                        if(tm5.GetFindLandmarkFlag())
+                                                                        case data::arm::VisionType::Landmark:
                                                                         {
-                                                                            LOG(INFO) << "Find Landmark!";
+                                                                            // 1. move to init_lm_vision_position.
+                                                                            std::string ref_vision_lm_init_position_str = this->ArmGetPointStr(arm_mission_configs[n].ref_vision_lm_init_position);
+                                                                            tm5.ArmTask("Set vision_lm_init_p0 = " + ref_vision_lm_init_position_str);
+                                                                            tm5.ArmTask("Move_to vision_lm_init_p0");
 
-                                                                            // get real_landmark_pos
-                                                                            tm5.ArmTask("Post get_landmark_pos_str");
-                                                                            real_lm_pos_ = tm5.GetRealLandmarkPos();
-
-                                                                            /// Comparison real_lm_pos & ref_lm_pos. Check whether error is too significant
-                                                                            if(tm5.IsLMPosDeviationRMove(arm_mission_configs[n].ref_landmark_pos, real_lm_pos_))
+                                                                            // 2. execute vision_task 'vision_find_landmark'
+                                                                            switch (arm_mission_configs[n].model_type)
                                                                             {
-
-
-                                                                                // error too significant.
-                                                                                LOG(INFO) << "Keep fine tuning the MiR Pos...";
-
-                                                                                // 0. get the params first
-                                                                                int iteration_no_rz = tm5.get_PLC_int_value(8);
-                                                                                int iteration_no_x = tm5.get_PLC_int_value(9);
-                                                                                int iteration_no_y = tm5.get_PLC_int_value(10);
-
-                                                                                // 1. adjust rz
-                                                                                if (iteration_no_rz != 0)
+                                                                                case data::arm::ModelType::Windows:
                                                                                 {
-                                                                                    int orientation_flag = tm5.get_PLC_int_value(11);
-
-                                                                                    mir100_ptr_->SetPLCRegisterIntValue(8,iteration_no_rz);
-                                                                                    mir100_ptr_->SetPLCRegisterIntValue(11,orientation_flag);
+                                                                                    tm5.ArmTask("Post vision_find_light_landmark");
+                                                                                    break;
                                                                                 }
-                                                                                else
+                                                                                default:
                                                                                 {
-                                                                                    mir100_ptr_->SetPLCRegisterIntValue(8,0);
-                                                                                    mir100_ptr_->SetPLCRegisterIntValue(11,0);
+                                                                                    tm5.ArmTask("Post vision_find_landmark");
+                                                                                    break;
                                                                                 }
+                                                                            }
 
-                                                                                #if 0
-                                                                                // 2. adjust x
+                                                                            // 3. check the result: find_landmark_flag
+                                                                            tm5.ArmTask("Post get_find_landmark_flag");
+
+                                                                            // 4. set the amc_skip_flag and record the TF(landmark_tf)
+                                                                            //  4.1 find the landmark
+                                                                            //     a. found, get the real_landmark_pos but is it deviation?
+                                                                            //       a.1 yes ---> amc_skip_flag = True
+                                                                            //       a.2 no  ---> amc_skip_flag = False
+                                                                            //     b. cannot find ---> amc_skip_flag = True
+
+                                                                            if(tm5.GetFindLandmarkFlag())
+                                                                            {
+                                                                                LOG(INFO) << "Find Landmark!";
+
+                                                                                // get real_landmark_pos
+                                                                                tm5.ArmTask("Post get_landmark_pos_str");
+                                                                                real_lm_pos_ = tm5.GetRealLandmarkPos();
+
+                                                                                /// Comparison real_lm_pos & ref_lm_pos. Check whether error is too significant
+                                                                                if(tm5.IsLMPosDeviationRMove(arm_mission_configs[n].ref_landmark_pos, real_lm_pos_))
+                                                                                {
+
+                                                                                    // error too significant.
+                                                                                    LOG(INFO) << "Keep fine tuning the MiR Pos...";
+
+                                                                                    // 0. get the params first
+                                                                                    int iteration_no_rz = tm5.get_PLC_int_value(8);
+                                                                                    int iteration_no_x = tm5.get_PLC_int_value(9);
+                                                                                    int iteration_no_y = tm5.get_PLC_int_value(10);
+
+                                                                                    // 1. adjust rz
+                                                                                    if (iteration_no_rz != 0)
+                                                                                    {
+                                                                                        int orientation_flag = tm5.get_PLC_int_value(11);
+
+                                                                                        mir100_ptr_->SetPLCRegisterIntValue(8,iteration_no_rz);
+                                                                                        mir100_ptr_->SetPLCRegisterIntValue(11,orientation_flag);
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        mir100_ptr_->SetPLCRegisterIntValue(8,0);
+                                                                                        mir100_ptr_->SetPLCRegisterIntValue(11,0);
+                                                                                    }
+
+#if 0
+                                                                                    // 2. adjust x
                                                                                 if (iteration_no_x != 0)
                                                                                 {
                                                                                     int orientation_flag = tm5.get_PLC_int_value(12);
@@ -1670,178 +1669,188 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                                                     mir100_ptr_->SetPLCRegisterIntValue(9,0);
                                                                                     mir100_ptr_->SetPLCRegisterIntValue(12,0);
                                                                                 }
-                                                                                #endif
+#endif
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    LOG(INFO) << "RMove: No Deviation!";
+
+                                                                                    mir100_ptr_->SetPLCRegisterIntValue(6,2);
+
+                                                                                    amc_deviation_skip_flag = false;
+                                                                                }
                                                                             }
                                                                             else
                                                                             {
-                                                                                LOG(INFO) << "RMove: No Deviation!";
+                                                                                LOG(INFO) << "Cannot find Landmark! Skip cur_arm_mission_config!!";
 
-                                                                                mir100_ptr_->SetPLCRegisterIntValue(6,2);
+                                                                                arm_sub_mission_success_flag = false;
 
-                                                                                amc_deviation_skip_flag = false;
+                                                                                LOG(INFO) << "Skip the whole arm mission configs!";
+
+                                                                                ///TIME
+                                                                                sleep.ms(200);
+
+                                                                                /// STOP The RMove Mission
+                                                                                LOG(INFO) << "Stop RMove Mission!";
+
+                                                                                mir100_ptr_->SetPLCRegisterIntValue(6,0);
+                                                                                mir100_ptr_->SetPLCRegisterIntValue(5,3);
                                                                             }
+
+                                                                            break;
                                                                         }
-                                                                        else
+                                                                        case data::arm::VisionType::D455:
                                                                         {
-                                                                            LOG(INFO) << "Cannot find Landmark! Skip cur_arm_mission_config!!";
+                                                                            break;
+                                                                        }
+                                                                        case data::arm::VisionType::D435:
+                                                                        {
+                                                                            break;
+                                                                        }
+                                                                    }
 
-                                                                            arm_sub_mission_success_flag = false;
+                                                                    /// c. return standby_position
 
-                                                                            LOG(INFO) << "Skip the whole arm mission configs!";
+                                                                    tm5.ArmTask("Move_to standby_p0");
 
-                                                                            ///TIME
-                                                                            sleep.ms(200);
+                                                                    /// d. set PLC 001 = 0. Handover the Mission.
+                                                                    mir100_ptr_->SetPLCRegisterIntValue(1,0);
 
+                                                                    break;
+                                                                }
+
+                                                                case 2:
+                                                                {
+                                                                    // 2.1 sub_standby_position
+                                                                    auto sub_standby_point = arm_mission_configs[n].sub_standby_position;
+                                                                    std::string sub_standby_point_str = this->ArmGetPointStr(sub_standby_point);
+                                                                    tm5.ArmTask("Set standby_p1 = "+ sub_standby_point_str);
+                                                                    tm5.ArmTask("Move_to standby_p1");
+
+                                                                    // 2.2 check&set tool_angle
+                                                                    this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
+
+                                                                    // 2.3 via_approach_point
+                                                                    auto real_via_approach_point = tm5.GetRealPointByLM(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].ref_landmark_pos, real_lm_pos_);
+
+                                                                    arm_mission_configs[n].via_approach_pos.x  = real_via_approach_point.x;
+                                                                    arm_mission_configs[n].via_approach_pos.y  = real_via_approach_point.y;
+                                                                    arm_mission_configs[n].via_approach_pos.z  = real_via_approach_point.z;
+                                                                    arm_mission_configs[n].via_approach_pos.rx = real_via_approach_point.rx;
+                                                                    arm_mission_configs[n].via_approach_pos.ry = real_via_approach_point.ry;
+                                                                    arm_mission_configs[n].via_approach_pos.rz = real_via_approach_point.rz;
+
+                                                                    this->ArmSetApproachPoint(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].tool_angle);
+                                                                    switch (arm_mission_configs[n].tool_angle)
+                                                                    {
+                                                                        case data::arm::ToolAngle::Zero:
+                                                                        {
+                                                                            tm5.ArmTask("Move_to via0_approach_point");
+                                                                            break;
+                                                                        }
+                                                                        case data::arm::ToolAngle::FortyFive:
+                                                                        {
+                                                                            tm5.ArmTask("Move_to via45_approach_point");
+                                                                            break;
+                                                                        }
+                                                                    }
+
+                                                                    /// 2.4 rmove_param_init
+                                                                    std::chrono::time_point<std::chrono::steady_clock> start,end;
+                                                                    std::chrono::duration<float> duration;
+                                                                    tm5.SetRMoveForceFlag(0);
+
+                                                                    /// 2.5 awake the thread_RMoveForceNode
+                                                                    th_rmove_ForceNode_ = std::thread(&nw_sys::thread_RMoveForceNode, this, std::ref(arm_mission_configs[n].tool_angle));
+                                                                    sleep.ms(200);
+                                                                    rmove_start_flag_ = true;
+
+                                                                    if(this->WaitForArmRMoveForceFlag(1,1))
+                                                                    {
+                                                                        // set PLC 006 = 3. notice ugv
+                                                                        // set PLC 001 = 0. notice ugv
+                                                                        mir100_ptr_->SetPLCRegisterIntValue(6,3);
+                                                                        mir100_ptr_->SetPLCRegisterIntValue(1,0);
+
+                                                                        // get current time.
+                                                                        start = std::chrono::high_resolution_clock::now();
+                                                                    }
+
+                                                                    bool rmove_continue_flag = true;
+                                                                    while (rmove_continue_flag)
+                                                                    {
+                                                                        // 1. check arm status first.
+                                                                        if(nw_status_ptr_->arm_mission_status == data::common::MissionStatus::Error ||
+                                                                           nw_status_ptr_->arm_mission_status == data::common::MissionStatus::EStop)
+                                                                        {
+                                                                            LOG(INFO) << "RMove: Arm is Error! Please Check";
+
+                                                                            rmove_continue_flag = false;
                                                                             /// STOP The RMove Mission
-                                                                            LOG(INFO) << "Stop RMove Mission!";
+                                                                            mir100_ptr_->Pause();
+                                                                            mir100_ptr_->SetPLCRegisterIntValue(6,0);
+                                                                            mir100_ptr_->SetPLCRegisterIntValue(5,3);
 
+                                                                            break;
+                                                                        }
+
+                                                                        // 2. timeout?
+                                                                        end = std::chrono::high_resolution_clock::now();
+                                                                        duration = end - start;
+                                                                        float min = duration.count() / 60.0f;
+                                                                        if( min > 5 )
+                                                                        {
+                                                                            LOG(INFO) << "RMove: already last 5 min. Timeout!";
+
+                                                                            rmove_continue_flag = false;
+                                                                            /// STOP The RMove Mission
+                                                                            mir100_ptr_->Pause();
                                                                             mir100_ptr_->SetPLCRegisterIntValue(6,0);
                                                                             mir100_ptr_->SetPLCRegisterIntValue(5,3);
                                                                         }
 
-                                                                        break;
-                                                                    }
-                                                                    case data::arm::VisionType::D455:
-                                                                    {
-                                                                        break;
-                                                                    }
-                                                                    case data::arm::VisionType::D435:
-                                                                    {
-                                                                        break;
-                                                                    }
-                                                                }
+                                                                        // update PLC_006
+                                                                        PLC_006 = mir100_ptr_->GetPLCRegisterIntValue(6);
 
-                                                                /// c. return standby_position
+                                                                        if(PLC_006 == 4)
+                                                                        {
+                                                                            rmove_continue_flag = false;
 
-                                                                tm5.ArmTask("Move_to standby_p0");
+                                                                            /// notice arm to stop force node
+                                                                            tm5.SetRMoveForceFlag(0);
 
-                                                                /// d. set PLC 001 = 0. Handover the Mission.
-                                                                mir100_ptr_->SetPLCRegisterIntValue(1,0);
+                                                                            // wait for thread to join
+                                                                            LOG(INFO) << "wait for th_rmove_ForceNode_ to join...";
+                                                                            th_rmove_ForceNode_.join();
+                                                                            LOG(INFO) << "th_rmove_ForceNode_ joined.";
 
-                                                                break;
-                                                            }
+                                                                            /// return standby position
+                                                                            tm5.ArmTask("Move_to standby_p1");
+                                                                            tm5.ArmTask("Move_to standby_p0");
 
-                                                            case 2:
-                                                            {
-                                                                // 2.1 sub_standby_position
-                                                                auto sub_standby_point = arm_mission_configs[n].sub_standby_position;
-                                                                std::string sub_standby_point_str = this->ArmGetPointStr(sub_standby_point);
-                                                                tm5.ArmTask("Set standby_p1 = "+ sub_standby_point_str);
-                                                                tm5.ArmTask("Move_to standby_p1");
+                                                                            /// STOP The RMove Mission
+                                                                            mir100_ptr_->SetPLCRegisterIntValue(6,0);
 
-                                                                // 2.2 check&set tool_angle
-                                                                this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
-
-                                                                // 2.3 via_approach_point
-                                                                this->ArmSetApproachPoint(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].tool_angle);
-                                                                switch (arm_mission_configs[n].tool_angle)
-                                                                {
-                                                                    case data::arm::ToolAngle::Zero:
-                                                                    {
-                                                                        tm5.ArmTask("Move_to via0_approach_point");
-                                                                        break;
-                                                                    }
-                                                                    case data::arm::ToolAngle::FortyFive:
-                                                                    {
-                                                                        tm5.ArmTask("Move_to via45_approach_point");
-                                                                        break;
-                                                                    }
-                                                                }
-
-                                                                /// 2.4 rmove_param_init
-                                                                std::chrono::time_point<std::chrono::steady_clock> start,end;
-                                                                std::chrono::duration<float> duration;
-                                                                tm5.SetRMoveForceFlag(0);
-
-                                                                /// 2.5 awake the thread_RMoveForceNode
-                                                                th_rmove_ForceNode_ = std::thread(&nw_sys::thread_RMoveForceNode, this, std::ref(arm_mission_configs[n].tool_angle));
-                                                                sleep.ms(200);
-                                                                rmove_start_flag_ = true;
-
-                                                                if(this->WaitForArmRMoveForceFlag(1,1))
-                                                                {
-                                                                    // set PLC 006 = 3. notice ugv
-                                                                    // set PLC 001 = 0. notice ugv
-                                                                    mir100_ptr_->SetPLCRegisterIntValue(6,3);
-                                                                    mir100_ptr_->SetPLCRegisterIntValue(1,0);
-
-                                                                    // get current time.
-                                                                    start = std::chrono::high_resolution_clock::now();
-                                                                }
-
-                                                                bool rmove_continue_flag = true;
-                                                                while (rmove_continue_flag)
-                                                                {
-                                                                    // 1. check arm status first.
-                                                                    if(nw_status_ptr_->arm_mission_status == data::common::MissionStatus::Error ||
-                                                                       nw_status_ptr_->arm_mission_status == data::common::MissionStatus::EStop)
-                                                                    {
-                                                                        LOG(INFO) << "RMove: Arm is Error! Please Check";
-
-                                                                        rmove_continue_flag = false;
-                                                                        /// STOP The RMove Mission
-                                                                        mir100_ptr_->Pause();
-                                                                        mir100_ptr_->SetPLCRegisterIntValue(6,0);
-                                                                        mir100_ptr_->SetPLCRegisterIntValue(5,3);
-
-                                                                        break;
-                                                                    }
-
-                                                                    // 2. timeout?
-                                                                    end = std::chrono::high_resolution_clock::now();
-                                                                    duration = end - start;
-                                                                    float min = duration.count() / 60.0f;
-                                                                    if( min > 5 )
-                                                                    {
-                                                                        LOG(INFO) << "RMove: already last 5 min. Timeout!";
-
-                                                                        rmove_continue_flag = false;
-                                                                        /// STOP The RMove Mission
-                                                                        mir100_ptr_->Pause();
-                                                                        mir100_ptr_->SetPLCRegisterIntValue(6,0);
-                                                                        mir100_ptr_->SetPLCRegisterIntValue(5,3);
-                                                                    }
-
-                                                                    // update PLC_006
-                                                                    PLC_006 = mir100_ptr_->GetPLCRegisterIntValue(6);
-
-                                                                    if(PLC_006 == 4)
-                                                                    {
-                                                                        rmove_continue_flag = false;
-
-                                                                        /// notice arm to stop force node
-                                                                        tm5.SetRMoveForceFlag(0);
-
-                                                                        // wait for thread to join
-                                                                        LOG(INFO) << "wait for th_rmove_ForceNode_ to join...";
-                                                                        th_rmove_ForceNode_.join();
-                                                                        LOG(INFO) << "th_rmove_ForceNode_ joined.";
-
-                                                                        /// return standby position
-                                                                        tm5.ArmTask("Move_to standby_p1");
-                                                                        tm5.ArmTask("Move_to standby_p0");
-
-                                                                        /// STOP The RMove Mission
-                                                                        mir100_ptr_->SetPLCRegisterIntValue(6,0);
-
-                                                                        /// Reset PLC registers
+                                                                            /// Reset PLC registers
 //                                                                        mir100_ptr_->SetPLCRegisterIntValue(7,0);
+                                                                        }
                                                                     }
+                                                                    break;
                                                                 }
-                                                                break;
                                                             }
                                                         }
                                                     }
-                                                    else
-                                                    {
-                                                        LOG(INFO) << "Failed at RMove Start. Cannot set PLC 001 = 1? Please Check.";
+                                                }
+                                                else
+                                                {
+                                                    LOG(INFO) << "Failed at RMove Start. Cannot set PLC 001 = 1? Please Check.";
 
-                                                        /// STOP The RMove Mission
-                                                        mir100_ptr_->Pause();
-                                                        mir100_ptr_->SetPLCRegisterIntValue(6,0);
-                                                        mir100_ptr_->SetPLCRegisterIntValue(5,3);
+                                                    /// STOP The RMove Mission
+                                                    mir100_ptr_->Pause();
+                                                    mir100_ptr_->SetPLCRegisterIntValue(6,0);
+                                                    mir100_ptr_->SetPLCRegisterIntValue(5,3);
 
-                                                    }
                                                 }
 
                                                 /// II: Check the Robot Status & RMove result
