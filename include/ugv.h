@@ -1932,6 +1932,9 @@ void yf::ugv::mir::PostActionsForDebugTest(const int &model_config_id)
     int priority = 1;
 
     this->PostActionWhile(mission_guid,priority);
+    priority++;
+    this->PostActionSetPLC(4,1,mission_guid,priority);
+    priority++;
 
 #if 0
     /// (1) Set Ugv Mission Start Flag
