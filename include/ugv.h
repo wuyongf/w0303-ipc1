@@ -2615,7 +2615,7 @@ bool yf::ugv::mir::PostActionWhile(const std::string &mission_guid, const int &p
     content_array.set(0, action_plc_json);
 
     std::ostringstream oss;
-    Poco::JSON::Stringifier::stringify( action_plc_json, oss);
+    Poco::JSON::Stringifier::stringify( content_array, oss);
 
     std::string str = oss.str();
     // mission_guid (done)
