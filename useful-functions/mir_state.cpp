@@ -49,6 +49,8 @@ int main()
 
     mir100.Start("192.168.7.34", nw_status_ptr, sql_ptr);
 
+#if 0
+
     auto status = mir100.GetUgvStatus();
 
     std::thread t1, t2;
@@ -69,7 +71,10 @@ int main()
     }
 //    std::thread t2(&thread_Web_UgvStatus);
 
+#endif
 
+    mir100.PostMissionForDebugTest(8063);
+    mir100.PostActionsForDebugTest(8063);
 
 
 #if 0
