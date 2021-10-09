@@ -190,7 +190,7 @@ namespace yf
                                      const int& is_error, const int& mission_type);
 
             /// Arm_mission_config
-            //
+
             int GetArmConfigId(const int& model_config_id, const int& cur_order);
             int GetArmConfigIsValid(const int& arm_config_id);
 
@@ -289,6 +289,11 @@ namespace yf
 
             /// Ugv Initialization for Each Schedule
             std::string GetActivatedMapName();
+
+            /// Relative Move
+            std::deque<int> GetArmMissionConfigIdsCount(const int& model_config_id);
+            std::deque<int> GetUgvMissionConfigMissionType(const int& model_config_id);
+
 
             ///
             /// Phase2 Related
@@ -4850,6 +4855,112 @@ int yf::sql::sql_server::GetMissionTypeId(const int &model_config_id, const int 
         std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
 
         return 0;
+    }
+}
+
+std::deque<int> yf::sql::sql_server::GetArmMissionConfigIdsCount(const int &model_config_id)
+{
+    // query string
+    std::string query_update;
+
+    // input
+    std::string model_config_id_str = std::to_string(model_config_id);
+
+    // output
+    std::deque<int> arm_config_ids;
+    std::deque<int> amc_ids_num;
+
+    //"SELECT ID FROM schedule_table where status=1 AND planned_start > '2021-02-06 11:10:08.000'"
+    try
+    {
+        /// 1. arm_config_ids
+        Connect();
+
+        query_update = "SELECT arm_config_id FROM data_ugv_mission_config where model_config_id = " + model_config_id_str + " ORDER BY mission_order";
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            auto arm_config_id = result.get<int>(0);
+
+            arm_config_ids.push_back(arm_config_id);
+        };
+
+        Disconnect();
+
+
+        /// amc_ids_num
+
+        for(int n = 0; n < arm_config_ids.size(); n ++)
+        {
+            Connect();
+
+            query_update = "SELECT count(ID) FROM data_arm_mission_config Where arm_config_id = " + std::to_string(arm_config_ids[n]);
+
+            auto result = nanodbc::execute(conn_,query_update);
+
+            // if there are new schedules available, sql module will mark down all the available schedule ids
+            while(result.next())
+            {
+                auto ids_num = result.get<int>(0);
+
+                amc_ids_num.push_back(ids_num);
+            };
+
+            Disconnect();
+        }
+
+        return amc_ids_num;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return amc_ids_num;
+    }
+}
+
+std::deque<int> yf::sql::sql_server::GetUgvMissionConfigMissionType(const int &model_config_id)
+{
+    // query string
+    std::string query_update;
+
+    // input
+    std::string model_config_id_str = std::to_string(model_config_id);
+
+    // output
+    std::deque<int> mission_types;
+
+    //"SELECT ID FROM schedule_table where status=1 AND planned_start > '2021-02-06 11:10:08.000'"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT mission_type FROM data_ugv_mission_config WHERE model_config_id = " + model_config_id_str + " ORDER BY mission_order";
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            auto arm_config_id = result.get<int>(0);
+
+            mission_types.push_back(arm_config_id);
+        };
+
+        Disconnect();
+
+        return mission_types;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return mission_types;
     }
 }
 

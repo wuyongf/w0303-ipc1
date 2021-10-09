@@ -644,24 +644,27 @@ bool yf::ugv::mir::PostMission(const int& model_config_id)
 //@@ output: a list of actions
 void yf::ugv::mir::PostActions(const int& model_config_id)
 {
-    // 1. get mission_guid from REST
-    std::string mission_guid = this->GetCurMissionGUID();
-
-    // 2. get position_names from DB, based on model_config_id
-    std::deque<std::string> position_names = sql_ptr_->GetUgvMissionConfigPositionNames(model_config_id);
-
-    // 3.
-    // 3.a. get map name from db.
-    auto model_id = sql_ptr_->GetModelId(model_config_id);
-    auto map_id = sql_ptr_->GetMapIdFromModelId(model_id);
+    // 1. map
+    //  1.a. map name
+    auto map_id = sql_ptr_->GetMapIdFromModelId(sql_ptr_->GetModelId(model_config_id));
     auto map_name = sql_ptr_->GetMapElement(map_id,"map_name");
-    // 3.b. based on map_name, retrieve map_guid from REST.
+    //  1.b. map_guid
     std::string map_guid = this->GetMapGUID(map_name);
 
-    /// Actions detail
-    ///
+    // 2. get mission_guid from REST
+    std::string mission_guid = this->GetCurMissionGUID();
+
+    // 3. get position_names from DB, based on model_config_id
+    std::deque<std::string> position_names  = sql_ptr_->GetUgvMissionConfigPositionNames(model_config_id);
+
+    // 4. for relative move
+    std::deque<int>         mission_types   = sql_ptr_->GetUgvMissionConfigMissionType(model_config_id);
+    std::deque<int>         amc_ids_count   = sql_ptr_->GetArmMissionConfigIdsCount(model_config_id);
+
     int total_position_num = sql_ptr_->GetUgvMissionConfigNum(model_config_id);
     int priority = 1;
+
+    /// Actions detail
 
     /// (1) Set Ugv Mission Start Flag
     this->PostActionSetPLC(4,1,mission_guid,priority);
@@ -690,8 +693,6 @@ void yf::ugv::mir::PostActions(const int& model_config_id)
     {
         /// a. get position name.
         std::string position_name = position_names[mission_count-1];
-
-        //todo: get position_guid
 
         /// b. position_guid
         std::string position_guid = this->GetPositionGUID(map_guid,position_name);

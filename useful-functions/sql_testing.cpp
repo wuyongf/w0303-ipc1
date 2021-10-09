@@ -8,6 +8,8 @@ using std::endl;
 
 int main()
 {
+
+#if 0
     int a = round(1.2 / 4);
 
     std::cout << a << std::endl;
@@ -23,9 +25,9 @@ int main()
         }
         std::cout << n << std::endl;
     }
+#endif
 
-
-#if 1
+#if 0
     std::deque<int> q_ids;
 
     q_ids.push_back(1);
@@ -53,6 +55,8 @@ int main()
 //
 ///// For IPC1
 ////    std::shared_ptr<yf::sql::sql_server> sql = std::make_shared<yf::sql::sql_server>("SQL Server","192.168.7.127","NW_mobile_robot_sys","sa","NWcadcam2021");
+
+    auto amc_ids_num = sql->GetArmMissionConfigIdsCount(8067);
 
     auto pad_type_id = sql->GetModelConfigElement(1,"pad_type");
 
