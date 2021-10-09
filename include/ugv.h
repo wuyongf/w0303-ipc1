@@ -165,6 +165,9 @@ namespace yf
             bool PostActionDocking(const std::string& docking_position_guid, const std::string &mission_guid, const int &priority);
             bool PostActionCharging(const std::string &mission_guid, const int &priority);
 
+            // for relative move
+            bool PostActionWhile(const std::string& mission_guid, const int& priority);
+
             bool PostMissionForCharging();
             void PostActionsForCharging();
 
@@ -1928,7 +1931,7 @@ void yf::ugv::mir::PostActionsForDebugTest(const int &model_config_id)
     int total_position_num = sql_ptr_->GetUgvMissionConfigNum(model_config_id);
     int priority = 1;
 
-    this->PostActionSetPLC(4,111,mission_guid,priority);
+    this->PostActionWhile(mission_guid,priority);
 
 #if 0
     /// (1) Set Ugv Mission Start Flag
@@ -2576,6 +2579,72 @@ void yf::ugv::mir::UpdateUgvMissionStatus(const yf::data::ugv::Status &status)
             break;
         }
     }
+}
+
+bool yf::ugv::mir::PostActionWhile(const std::string &mission_guid, const int &priority)
+{
+    // mission_guid (done)
+    // action_type (done)  "while"
+    // parameters (?)   {compare    }
+    //                  {module     }
+    //                  {io_port    }
+    //                  {register   }
+    //                  {operator   }
+    //                  {value      }
+    //                  {content    }
+    // priority (done)
+
+    Poco::JSON::Object action_while_json;
+
+    Poco::JSON::Object compare_json;
+    Poco::JSON::Object module_json;
+    Poco::JSON::Object io_port_json;
+    Poco::JSON::Object register_json;
+    Poco::JSON::Object operator_json;
+    Poco::JSON::Object value_json;
+    Poco::JSON::Object content_json;
+
+
+    compare_json.set("value", "plc_register");
+    compare_json.set("id", "compare");
+
+    module_json.set("value", {});
+    module_json.set("id", "module");
+
+    io_port_json.set("value", 0);
+    io_port_json.set("id", "io_port");
+
+    register_json.set("value", 6);
+    register_json.set("id", "register");
+
+    operator_json.set("value", "!=");
+    operator_json.set("id", "operator");
+
+    value_json.set("value", 0);
+    value_json.set("id", "value");
+
+    content_json.set("value", {});
+    content_json.set("id", "content");
+
+    Poco::JSON::Array parameters_array;
+    parameters_array.set(0, compare_json);
+    parameters_array.set(1, module_json);
+    parameters_array.set(2, io_port_json);
+    parameters_array.set(3, register_json);
+    parameters_array.set(4, operator_json);
+    parameters_array.set(5, value_json);
+    parameters_array.set(6, content_json);
+
+    action_while_json.set("parameters", parameters_array);
+    action_while_json.set("priority", priority);
+    action_while_json.set("mission_id", mission_guid);
+    action_while_json.set("action_type", "while");
+
+    /// (4) fine tune the sub_path
+
+    std::string sub_path = "/api/v2.0.0/missions/" + mission_guid + "/actions";
+
+    return PostMethod(sub_path, action_while_json);
 }
 
 
