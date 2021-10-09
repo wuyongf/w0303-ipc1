@@ -2583,6 +2583,31 @@ void yf::ugv::mir::UpdateUgvMissionStatus(const yf::data::ugv::Status &status)
 
 bool yf::ugv::mir::PostActionWhile(const std::string &mission_guid, const int &priority)
 {
+    Poco::JSON::Object action_plc_json;
+
+    Poco::JSON::Object registry_json;
+    Poco::JSON::Object action_json;
+    Poco::JSON::Object value_json;
+
+    registry_json.set("value",101);
+    registry_json.set("id","register");
+
+    action_json.set("value","set");
+    action_json.set("id","action");
+
+    value_json.set("value",0);
+    value_json.set("id","value");
+
+    Poco::JSON::Array parameters_array_1;
+    parameters_array_1.set(0,registry_json);
+    parameters_array_1.set(1,action_json);
+    parameters_array_1.set(2,value_json);
+
+    action_plc_json.set("parameters", parameters_array_1);
+    action_plc_json.set("priority", priority);
+    action_plc_json.set("mission_id", mission_guid);
+    action_plc_json.set("action_type", "set_plc_register");
+
     // mission_guid (done)
     // action_type (done)  "while"
     // parameters (?)   {compare    }
@@ -2623,7 +2648,7 @@ bool yf::ugv::mir::PostActionWhile(const std::string &mission_guid, const int &p
     value_json.set("value", 0);
     value_json.set("id", "value");
 
-    content_json.set("value", {});
+    content_json.set("value", action_plc_json);
     content_json.set("id", "content");
 
     Poco::JSON::Array parameters_array;
