@@ -2589,7 +2589,7 @@ bool yf::ugv::mir::PostActionWhile(const std::string &mission_guid, const int &p
     Poco::JSON::Object action_json;
     Poco::JSON::Object value_json_1;
 
-    registry_json.set("value",101);
+    registry_json.set("value",001);
     registry_json.set("id","register");
 
     action_json.set("value","set");
@@ -2651,7 +2651,7 @@ bool yf::ugv::mir::PostActionWhile(const std::string &mission_guid, const int &p
     value_json.set("value", 0);
     value_json.set("id", "value");
 
-    content_json.set("value", content_array);
+    content_json.set("value", action_plc_json);
     content_json.set("id", "content");
 
     Poco::JSON::Array parameters_array;
