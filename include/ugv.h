@@ -661,10 +661,9 @@ void yf::ugv::mir::PostActions(const int& model_config_id)
     std::deque<int>         mission_types   = sql_ptr_->GetUgvMissionConfigMissionType(model_config_id);
     std::deque<int>         amc_ids_count   = sql_ptr_->GetArmMissionConfigIdsCount(model_config_id);
 
+    /// Actions details
     int total_position_num = sql_ptr_->GetUgvMissionConfigNum(model_config_id);
     int priority = 1;
-
-    /// Actions detail
 
     /// (1) Set Ugv Mission Start Flag
     this->PostActionSetPLC(4,1,mission_guid,priority);
@@ -1908,30 +1907,49 @@ bool yf::ugv::mir::PostMissionForDebugTest(const int &model_config_id)
 
 void yf::ugv::mir::PostActionsForDebugTest(const int &model_config_id)
 {
-    // 1. get mission_guid from REST
-    std::string mission_guid = this->GetCurMissionGUID();
-
-    // 2. get position_names from DB, based on model_config_id
-    std::deque<std::string> position_names = sql_ptr_->GetUgvMissionConfigPositionNames(model_config_id);
-
-    // 3.
-    // 3.a. get map name from db.
-    auto model_id = sql_ptr_->GetModelId(model_config_id);
-    auto map_id   = sql_ptr_->GetMapIdFromModelId(model_id);
+    // 1. map
+    //  1.a. map name
+    auto map_id = sql_ptr_->GetMapIdFromModelId(sql_ptr_->GetModelId(model_config_id));
     auto map_name = sql_ptr_->GetMapElement(map_id,"map_name");
-    // 3.b. based on map_name, retrieve map_guid from REST.
+    //  1.b. map_guid
     std::string map_guid = this->GetMapGUID(map_name);
 
-    /// Actions detail
-    ///
+    // 2. get mission_guid from REST
+    std::string mission_guid = this->GetCurMissionGUID();
+
+    // 3. get position_names from DB, based on model_config_id
+    std::deque<std::string> position_names = sql_ptr_->GetUgvMissionConfigPositionNames(model_config_id);
+
+    // 4. for relative move
+    std::deque<int>         mission_types   = sql_ptr_->GetUgvMissionConfigMissionType(model_config_id);
+    std::deque<int>         amc_ids_count   = sql_ptr_->GetArmMissionConfigIdsCount(model_config_id);
+
+    /// Actions details
     int total_position_num = sql_ptr_->GetUgvMissionConfigNum(model_config_id);
     int priority = 1;
 
-    /// (1) Initialization Stage
-    this->PostActionAdjustLocalization(mission_guid,priority);
+    this->PostActionSetPLC(4,111,mission_guid,priority);
+
+#if 0
+    /// (1) Set Ugv Mission Start Flag
+    this->PostActionSetPLC(4,1,mission_guid,priority);
     priority++;
 
-    // todo: speed, footprint initialization
+    /// (2) Initialization Stage
+    this->PostActionSetPLC(1,0,mission_guid,priority);
+    priority++;
+    this->PostActionSetPLC(2,0,mission_guid,priority);
+    priority++;
+    this->PostActionSetPLC(3,0,mission_guid,priority);
+    priority++;
+
+    /// Initialization Ugv Properties
+    // speed
+    this->PostActionSpeed(0.6,mission_guid,priority);
+    priority++;
+    // adjust localization
+    this->PostActionAdjustLocalization(mission_guid,priority);
+    priority++;
 
     /// (3) For loop, mission details
     //
@@ -1949,17 +1967,29 @@ void yf::ugv::mir::PostActionsForDebugTest(const int &model_config_id)
         //
         //@@ input: position_guid, mission_guid(done)
         //
-        this->PostActionSetPLC(101,0,mission_guid,priority);
+        this->PostActionSetPLC(2,mission_count,mission_guid,priority);
+        priority++;
+
+        this->PostActionSetPLC(3,1,mission_guid,priority);
         priority++;
 
         this->PostActionMove(position_guid, mission_guid, priority);
         priority++;
 
-        this->PostActionWaitPLC(101,1,mission_guid,priority);
+        this->PostActionSetPLC(1,1,mission_guid,priority);
         priority++;
+
+        this->PostActionWaitPLC(1,0,mission_guid,priority);
+        priority++;
+
     }
 
+    /// (4) Set Ugv Mission Finish Flag
+    //
+    this->PostActionSetPLC(4,2,mission_guid,priority);
+    priority++;
 
+#endif
 }
 
 bool yf::ugv::mir::PostActionAdjustLocalization(const std::string &mission_guid, const int &priority)
