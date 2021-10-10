@@ -2709,6 +2709,8 @@ bool yf::ugv::mir::PostActionsRelativeMove(const std::string &mission_guid, int 
 
     std::string content_guid = this->GetContentGuid();
 
+    return false;
+
 }
 
 
