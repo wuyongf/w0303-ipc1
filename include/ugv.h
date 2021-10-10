@@ -2704,7 +2704,7 @@ std::string yf::ugv::mir::GetContentGuid()
 bool yf::ugv::mir::PostActionsRelativeMove(const std::string &mission_guid, int &priority)
 {
     /// 1. create a while loop action first!!!
-    PostActionWhile(mission_guid,priority);
+    PostActionWhile(6, "!=", 0, mission_guid,priority);
     priority++;
 
     std::string content_guid = this->GetContentGuid();
