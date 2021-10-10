@@ -77,6 +77,7 @@ int main()
     mir100.PostActionsForDebugTest(8063);
 
 
+    std::cout << "done" << std::endl;
 #if 0
 
 //    std::cout << "docking guid:" << mir100.GetDockingGUID("21bd0de2-b2f7-11eb-bb31-00012978eb45") << std::endl;

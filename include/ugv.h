@@ -2592,13 +2592,13 @@ bool yf::ugv::mir::PostActionWhile(const std::string &mission_guid, const int &p
     Poco::JSON::Object action_json;
     Poco::JSON::Object value_json_1;
 
-    registry_json.set("value",001);
+    registry_json.set("value",1);
     registry_json.set("id","register");
 
     action_json.set("value","set");
     action_json.set("id","action");
 
-    value_json_1.set("value",1);
+    value_json_1.set("value",0);
     value_json_1.set("id","value");
 
     Poco::JSON::Array parameters_array_1;
@@ -2607,7 +2607,7 @@ bool yf::ugv::mir::PostActionWhile(const std::string &mission_guid, const int &p
     parameters_array_1.set(2,value_json_1);
 
     action_plc_json.set("parameters", parameters_array_1);
-    action_plc_json.set("priority", priority);
+    action_plc_json.set("priority", 2);
     action_plc_json.set("mission_id", mission_guid);
     action_plc_json.set("action_type", "set_plc_register");
 
@@ -2616,7 +2616,6 @@ bool yf::ugv::mir::PostActionWhile(const std::string &mission_guid, const int &p
 
     std::ostringstream oss;
     Poco::JSON::Stringifier::stringify( content_array, oss);
-
     std::string str = oss.str();
     // mission_guid (done)
     // action_type (done)  "while"
