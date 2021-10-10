@@ -765,11 +765,18 @@ void yf::ugv::mir::PostActions(const int& model_config_id)
                     this->PostActionMove(position_guid, mission_guid, priority);
                     priority++;
 
+                    this->PostActionSetPLC(14,"set",n,mission_guid,priority);
+                    priority++;
+
                     // get rmove_length!!!
                     auto rmove_length = sql_ptr_->GetUgvMissionConfigRMoveLength(model_config_id,mission_count);
 
                     this->PostRMoveActions(rmove_length, mission_guid, priority);
                 }
+
+                this->PostActionSetPLC(14,"set",0,mission_guid,priority);
+                priority++;
+
                 break;
             }
         }
