@@ -158,7 +158,7 @@ namespace yf
             bool PostMissionForDebugTest(const int& model_config_id);
             void PostActionsForDebugTest(const int& model_config_id);
 
-            bool PostActionSetPLC(const int& plc_register, const float& value, const std::string& mission_guid, const int& priority, const std::string& scope_reference = "");
+            bool PostActionSetPLC(const int& plc_register, const std::string& action, const float& value, const std::string& mission_guid, const int& priority, const std::string& scope_reference = "");
             bool PostActionWaitPLC(const int& plc_register, const float& value, const std::string& mission_guid, const int& priority, const std::string& scope_reference = "");
             bool PostActionMove(const std::string& position_guid, const std::string &mission_guid, const int &priority, const std::string& scope_reference = "");
             bool PostActionAdjustLocalization(const std::string &mission_guid, const int &priority);
@@ -166,15 +166,24 @@ namespace yf
             bool PostActionDocking(const std::string& docking_position_guid, const std::string &mission_guid, const int &priority);
             bool PostActionCharging(const std::string &mission_guid, const int &priority);
 
-            // for relative move
+            /// for relative move
             bool PostActionWhile(const int& register_, const std::string& operator_, const int& value_,
                                  const std::string& mission_guid, const int& priority, const std::string& scope_reference = "");
-            std::string GetContentGuid();
+            std::string GetWhileContentGuid();
 
-            bool PostActionRelativeMove(const std::string& mission_guid, const int& priority, const std::string& scope_reference = "");
-            bool PostActionIf(const std::string& mission_guid, const int& priority, const std::string& scope_reference = "");
+            bool PostActionIf(const int& register_, const std::string& operator_, const int& value_,
+                              const std::string& mission_guid, const int& priority, const std::string& scope_reference = "");
+            std::string GetIfTrueGuid();
+            std::string GetIfFalseGuid();
 
-            bool PostActionsRelativeMove(const std::string& mission_guid, int& priority);
+            bool PostActionRelativeMove(const float& x, const float& y, const float& orientation,
+                                        const float& max_linear_speed, const float& max_angular_speed,
+                                        const bool& collision_detection,
+                                        const std::string& mission_guid, const int& priority, const std::string& scope_reference = "");
+
+            bool PostActionBreak(const std::string& mission_guid, const int& priority, const std::string& scope_reference = "");
+
+            /// charge
 
             bool PostMissionForCharging();
             void PostActionsForCharging();
@@ -677,15 +686,15 @@ void yf::ugv::mir::PostActions(const int& model_config_id)
     int priority = 1;
 
     /// (1) Set Ugv Mission Start Flag
-    this->PostActionSetPLC(4,1,mission_guid,priority);
+    this->PostActionSetPLC(4,"set", 1,mission_guid,priority);
     priority++;
 
     /// (2) Initialization Stage
-    this->PostActionSetPLC(1,0,mission_guid,priority);
+    this->PostActionSetPLC(1,"set",0,mission_guid,priority);
     priority++;
-    this->PostActionSetPLC(2,0,mission_guid,priority);
+    this->PostActionSetPLC(2,"set",0,mission_guid,priority);
     priority++;
-    this->PostActionSetPLC(3,0,mission_guid,priority);
+    this->PostActionSetPLC(3,"set",0,mission_guid,priority);
     priority++;
 
     /// Initialization Ugv Properties
@@ -712,16 +721,16 @@ void yf::ugv::mir::PostActions(const int& model_config_id)
         //
         //@@ input: position_guid, mission_guid(done)
         //
-        this->PostActionSetPLC(2,mission_count,mission_guid,priority);
+        this->PostActionSetPLC(2,"set",mission_count,mission_guid,priority);
         priority++;
 
-        this->PostActionSetPLC(3,1,mission_guid,priority);
+        this->PostActionSetPLC(3,"set",1,mission_guid,priority);
         priority++;
 
         this->PostActionMove(position_guid, mission_guid, priority);
         priority++;
 
-        this->PostActionSetPLC(1,1,mission_guid,priority);
+        this->PostActionSetPLC(1,"set",1,mission_guid,priority);
         priority++;
 
         this->PostActionWaitPLC(1,0,mission_guid,priority);
@@ -731,11 +740,11 @@ void yf::ugv::mir::PostActions(const int& model_config_id)
 
     /// (4) Set Ugv Mission Finish Flag
     //
-    this->PostActionSetPLC(4,2,mission_guid,priority);
+    this->PostActionSetPLC(4,"set",2,mission_guid,priority);
     priority++;
 }
 
-bool yf::ugv::mir::PostActionSetPLC(const int &plc_register, const float &value, const std::string& mission_guid, const int& priority, const std::string& scope_reference)
+bool yf::ugv::mir::PostActionSetPLC(const int &plc_register, const std::string& action, const float &value, const std::string& mission_guid, const int& priority, const std::string& scope_reference)
 {
     int value_i = static_cast<int>(value);
 
@@ -755,7 +764,7 @@ bool yf::ugv::mir::PostActionSetPLC(const int &plc_register, const float &value,
         registry_json.set("value",plc_register);
         registry_json.set("id","register");
 
-        action_json.set("value","set");
+        action_json.set("value",action);
         action_json.set("id","action");
 
         value_json.set("value",value_i);
@@ -1969,81 +1978,82 @@ void yf::ugv::mir::PostActionsForDebugTest(const int &model_config_id)
     int total_position_num = sql_ptr_->GetUgvMissionConfigNum(model_config_id);
     int priority = 1;
     // b. init_2
-    std::string while_1_content_guid;
+    std::string while_plc006_content_guid;
+    std::string while_plc008_content_guid;
+
+    std::string if_plc006_1_true_guid;
+    std::string if_plc006_3_true_guid;
+    std::string if_plc011_1_true_guid;
+    std::string if_plc011_2_true_guid;
+
+    // c. details
+
+    this->PostActionSetPLC(5, "set", 1, mission_guid, priority);
+    priority++;
+
+    this->PostActionSetPLC(6, "set", 1, mission_guid, priority);
+    priority++;
+
 
     this->PostActionWhile(6,"!=", 0,mission_guid,priority);
     priority++;
+    while_plc006_content_guid = this->GetWhileContentGuid();
 
-    while_1_content_guid = this->GetContentGuid();
-
-    this->PostActionSetPLC(1,1,mission_guid,priority, while_1_content_guid);
-    priority++;
-
-    this->PostActionWaitPLC(1,0,mission_guid,priority, while_1_content_guid);
-    priority++;
-
-
-
-#if 0
-    /// (1) Set Ugv Mission Start Flag
-    this->PostActionSetPLC(4,1,mission_guid,priority);
-    priority++;
-
-    /// (2) Initialization Stage
-    this->PostActionSetPLC(1,0,mission_guid,priority);
-    priority++;
-    this->PostActionSetPLC(2,0,mission_guid,priority);
-    priority++;
-    this->PostActionSetPLC(3,0,mission_guid,priority);
-    priority++;
-
-    /// Initialization Ugv Properties
-    // speed
-    this->PostActionSpeed(0.6,mission_guid,priority);
-    priority++;
-    // adjust localization
-    this->PostActionAdjustLocalization(mission_guid,priority);
-    priority++;
-
-    /// (3) For loop, mission details
-    //
-    // get mission_name from REST. mission_order from db
-    for (int mission_count = 1; mission_count <= total_position_num; mission_count++)
-    {
-        /// a. get position name.
-        std::string position_name = position_names[mission_count-1];
-
-        /// b. position_guid
-        std::string position_guid = this->GetPositionGUID(map_guid,position_name);
-
-        //1. get ugv_mission_config_id, based on mission_count,
-        // prepare: mission_config_id
-        //
-        //@@ input: position_guid, mission_guid(done)
-        //
-        this->PostActionSetPLC(2,mission_count,mission_guid,priority);
+        this->PostActionSetPLC(1, "set", 1, mission_guid, priority, while_plc006_content_guid);
         priority++;
 
-        this->PostActionSetPLC(3,1,mission_guid,priority);
+        this->PostActionWaitPLC(1, 0, mission_guid, priority, while_plc006_content_guid);
         priority++;
 
-        this->PostActionMove(position_guid, mission_guid, priority);
+        this->PostActionIf(6, "==", 1, mission_guid, priority, while_plc006_content_guid);
         priority++;
+        if_plc006_1_true_guid  = this->GetIfTrueGuid();
 
-        this->PostActionSetPLC(1,1,mission_guid,priority);
+            this->PostActionSetPLC(7, "add", 1, mission_guid, priority, if_plc006_1_true_guid);
+            priority++;
+
+            this->PostActionWhile(8,"!=", 0,mission_guid,priority);
+            priority++;
+            while_plc008_content_guid = this->GetWhileContentGuid();
+
+                this->PostActionIf(11, "==", 1, mission_guid, priority, while_plc008_content_guid);
+                priority++;
+                if_plc011_1_true_guid  = this->GetIfTrueGuid();
+
+                    this->PostActionRelativeMove(0, 0, 1, 0.1, 0.2, true, mission_guid, priority, if_plc011_1_true_guid);
+                    priority++;
+
+                    this->PostActionSetPLC(8, "subtract", 1, mission_guid, priority, if_plc011_1_true_guid);
+                    priority++;
+
+                this->PostActionIf(11, "==", 2, mission_guid, priority, while_plc008_content_guid);
+                priority++;
+                if_plc011_2_true_guid  = this->GetIfTrueGuid();
+
+                    this->PostActionRelativeMove(0, 0, -1, 0.1, 0.2, true, mission_guid, priority, if_plc011_1_true_guid);
+                    priority++;
+
+                    this->PostActionSetPLC(8, "subtract", 1, mission_guid, priority, if_plc011_1_true_guid);
+                    priority++;
+
+        this->PostActionIf(6, "==", 3, mission_guid, priority, while_plc006_content_guid);
         priority++;
+        if_plc006_3_true_guid  = this->GetIfTrueGuid();
 
-        this->PostActionWaitPLC(1,0,mission_guid,priority);
-        priority++;
+            this->PostActionRelativeMove(2, 0, 0, 0.1, 0.2, true, mission_guid, priority, if_plc006_3_true_guid);
+            priority++;
 
-    }
+            this->PostActionSetPLC(6, "set", 4, mission_guid, priority, if_plc006_3_true_guid);
+            priority++;
 
-    /// (4) Set Ugv Mission Finish Flag
-    //
-    this->PostActionSetPLC(4,2,mission_guid,priority);
+            this->PostActionBreak(mission_guid, priority, if_plc006_3_true_guid);
+            priority++;
+
+    this->PostActionSetPLC(5, "set", 2, mission_guid, priority);
     priority++;
 
-#endif
+    this->PostActionWaitPLC(1, 0, mission_guid, priority);
+    priority++;
 }
 
 bool yf::ugv::mir::PostActionAdjustLocalization(const std::string &mission_guid, const int &priority)
@@ -2457,15 +2467,15 @@ void yf::ugv::mir::PostRedoActions(const int& origin_model_config_id, const std:
     int priority = 1;
 
     /// (1) Set Ugv Mission Start Flag
-    this->PostActionSetPLC(4,1,mission_guid,priority);
+    this->PostActionSetPLC(4,"set",1,mission_guid,priority);
     priority++;
 
     /// (2) Initialization Stage
-    this->PostActionSetPLC(1,0,mission_guid,priority);
+    this->PostActionSetPLC(1,"set",0,mission_guid,priority);
     priority++;
-    this->PostActionSetPLC(2,0,mission_guid,priority);
+    this->PostActionSetPLC(2,"set",0,mission_guid,priority);
     priority++;
-    this->PostActionSetPLC(3,0,mission_guid,priority);
+    this->PostActionSetPLC(3,"set",0,mission_guid,priority);
     priority++;
 
     /// Initialization Ugv Properties
@@ -2494,16 +2504,16 @@ void yf::ugv::mir::PostRedoActions(const int& origin_model_config_id, const std:
         //
         //@@ input: position_guid, mission_guid(done)
         //
-        this->PostActionSetPLC(2,mission_count,mission_guid,priority);
+        this->PostActionSetPLC(2,"set",mission_count,mission_guid,priority);
         priority++;
 
-        this->PostActionSetPLC(3,1,mission_guid,priority);
+        this->PostActionSetPLC(3,"set",1,mission_guid,priority);
         priority++;
 
         this->PostActionMove(position_guid, mission_guid, priority);
         priority++;
 
-        this->PostActionSetPLC(1,1,mission_guid,priority);
+        this->PostActionSetPLC(1,"set",1,mission_guid,priority);
         priority++;
 
         this->PostActionWaitPLC(1,0,mission_guid,priority);
@@ -2513,7 +2523,7 @@ void yf::ugv::mir::PostRedoActions(const int& origin_model_config_id, const std:
 
     /// (4) Set Ugv Mission Finish Flag
     //
-    this->PostActionSetPLC(4,2,mission_guid,priority);
+    this->PostActionSetPLC(4,"set",2,mission_guid,priority);
     priority++;
 }
 
@@ -2705,7 +2715,7 @@ bool yf::ugv::mir::PostActionWhile(const int& register_, const std::string& oper
     return PostMethod(sub_path, action_while_json);
 }
 
-std::string yf::ugv::mir::GetContentGuid()
+std::string yf::ugv::mir::GetWhileContentGuid()
 {
     Poco::JSON::Parser parser;
     Poco::Dynamic::Var result = parser.parse(request_result_);
@@ -2744,16 +2754,268 @@ std::string yf::ugv::mir::GetContentGuid()
     }
 }
 
-bool yf::ugv::mir::PostActionsRelativeMove(const std::string &mission_guid, int &priority)
+bool
+yf::ugv::mir::PostActionIf(const int& register_, const std::string& operator_, const int& value_,
+                           const std::string &mission_guid, const int &priority, const std::string &scope_reference)
 {
-    /// 1. create a while loop action first!!!
-    PostActionWhile(6, "!=", 0, mission_guid,priority);
-    priority++;
+    // mission_guid (done)
+    // action_type (done)  "while"
+    // parameters (?)   {compare    }
+    //                  {module     }
+    //                  {io_port    }
+    //                  {register   }
+    //                  {operator   }
+    //                  {value      }
+    //                  {content    }
+    // priority (done)
 
-    std::string content_guid = this->GetContentGuid();
+    Poco::JSON::Object action_if_json;
 
-    return false;
+    Poco::JSON::Object compare_json;
+    Poco::JSON::Object module_json;
+    Poco::JSON::Object io_port_json;
+    Poco::JSON::Object register_json;
+    Poco::JSON::Object operator_json;
+    Poco::JSON::Object value_json;
+    Poco::JSON::Object true_json;
+    Poco::JSON::Object false_json;
 
+
+    compare_json.set("value", "plc_register");
+    compare_json.set("id", "compare");
+
+    module_json.set("value", {});
+    module_json.set("id", "module");
+
+    io_port_json.set("value", 0);
+    io_port_json.set("id", "io_port");
+
+    register_json.set("value", register_);
+    register_json.set("id", "register");
+
+    operator_json.set("value", operator_);
+    operator_json.set("id", "operator");
+
+    value_json.set("value", value_);
+    value_json.set("id", "value");
+
+    true_json.set("value", "");
+    true_json.set("id", "true");
+
+    false_json.set("value", "");
+    false_json.set("id", "false");
+
+    Poco::JSON::Array parameters_array;
+    parameters_array.set(0, compare_json);
+    parameters_array.set(1, module_json);
+    parameters_array.set(2, io_port_json);
+    parameters_array.set(3, register_json);
+    parameters_array.set(4, operator_json);
+    parameters_array.set(5, value_json);
+    parameters_array.set(6, true_json);
+    parameters_array.set(7, false_json);
+
+    action_if_json.set("parameters", parameters_array);
+    action_if_json.set("priority", priority);
+    action_if_json.set("mission_id", mission_guid);
+    action_if_json.set("action_type", "if");
+
+    /// tackle scope_reference.
+    if(!scope_reference.empty())
+    {
+        action_if_json.set("scope_reference", scope_reference);
+    }
+
+    /// (4) fine tune the sub_path
+
+    std::string sub_path = "/api/v2.0.0/missions/" + mission_guid + "/actions";
+
+    return PostMethod(sub_path, action_if_json);
+}
+
+std::string yf::ugv::mir::GetIfTrueGuid()
+{
+    Poco::JSON::Parser parser;
+    Poco::Dynamic::Var result = parser.parse(request_result_);
+
+    Poco::JSON::Object::Ptr obj = result.extract<Poco::JSON::Object::Ptr>();
+
+    std::string str_params = obj->getValue<std::string>("parameters");
+
+    Poco::Dynamic::Var result_params = parser.parse(str_params);
+    Poco::JSON::Array::Ptr  array_params = result_params.extract<Poco::JSON::Array::Ptr>();
+
+    std::string true_guid;
+
+    bool found_flag = false;
+
+    for (Poco::JSON::Array::ConstIterator it= array_params->begin(); it != array_params->end(); ++it)
+    {
+        if(found_flag == false)
+        {
+            // iteration, find the position_name here.
+            Poco::JSON::Object::Ptr obj = it->extract<Poco::JSON::Object::Ptr>();
+
+            std::string str_id = obj->getValue<std::string>("id");
+
+            if( str_id == "true")
+            {
+                // 1. set found flag
+                found_flag = true;
+
+                // 2. get the position guid.
+                true_guid = obj->getValue<std::string>("guid");
+
+                return true_guid;
+            }
+        }
+    }
+}
+
+std::string yf::ugv::mir::GetIfFalseGuid()
+{
+    Poco::JSON::Parser parser;
+    Poco::Dynamic::Var result = parser.parse(request_result_);
+
+    Poco::JSON::Object::Ptr obj = result.extract<Poco::JSON::Object::Ptr>();
+
+    std::string str_params = obj->getValue<std::string>("parameters");
+
+    Poco::Dynamic::Var result_params = parser.parse(str_params);
+    Poco::JSON::Array::Ptr  array_params = result_params.extract<Poco::JSON::Array::Ptr>();
+
+    std::string true_guid;
+
+    bool found_flag = false;
+
+    for (Poco::JSON::Array::ConstIterator it= array_params->begin(); it != array_params->end(); ++it)
+    {
+        if(found_flag == false)
+        {
+            // iteration, find the position_name here.
+            Poco::JSON::Object::Ptr obj = it->extract<Poco::JSON::Object::Ptr>();
+
+            std::string str_id = obj->getValue<std::string>("id");
+
+            if( str_id == "false")
+            {
+                // 1. set found flag
+                found_flag = true;
+
+                // 2. get the position guid.
+                true_guid = obj->getValue<std::string>("guid");
+
+                return true_guid;
+            }
+        }
+    }
+}
+
+bool yf::ugv::mir::PostActionRelativeMove(const float& x, const float& y, const float& orientation,
+                                          const float& max_linear_speed, const float& max_angular_speed,
+                                          const bool& collision_detection,
+                                          const std::string &mission_guid, const int &priority,
+                                          const std::string &scope_reference)
+{
+    // mission_guid (done)
+    // action_type (done)  "while"
+    // parameters (?)   {compare    }
+    //                  {module     }
+    //                  {io_port    }
+    //                  {register   }
+    //                  {operator   }
+    //                  {value      }
+    //                  {content    }
+    // priority (done)
+
+    Poco::JSON::Object action_rmove_json;
+
+    Poco::JSON::Object x_json;
+    Poco::JSON::Object y_json;
+    Poco::JSON::Object orientation_json;
+    Poco::JSON::Object max_linear_speed_json;
+    Poco::JSON::Object max_angular_speed_json;
+    Poco::JSON::Object collision_detection_json;
+
+
+    x_json.set("value", x);
+    x_json.set("id", "x");
+
+    y_json.set("value", y);
+    y_json.set("id", "y");
+
+    orientation_json.set("value", orientation);
+    orientation_json.set("id", "orientation");
+
+    max_linear_speed_json.set("value", max_linear_speed);
+    max_linear_speed_json.set("id", "max_linear_speed");
+
+    max_angular_speed_json.set("value", max_angular_speed);
+    max_angular_speed_json.set("id", "max_angular_speed");
+
+    collision_detection_json.set("value", collision_detection);
+    collision_detection_json.set("id", "collision_detection");
+
+    Poco::JSON::Array parameters_array;
+    parameters_array.set(0, x_json);
+    parameters_array.set(1, y_json);
+    parameters_array.set(2, orientation_json);
+    parameters_array.set(3, max_linear_speed_json);
+    parameters_array.set(4, max_angular_speed_json);
+    parameters_array.set(5, collision_detection_json);
+
+    action_rmove_json.set("parameters", parameters_array);
+    action_rmove_json.set("priority", priority);
+    action_rmove_json.set("mission_id", mission_guid);
+    action_rmove_json.set("action_type", "relative_move");
+
+    /// tackle scope_reference.
+    if(!scope_reference.empty())
+    {
+        action_rmove_json.set("scope_reference", scope_reference);
+    }
+
+    /// (4) fine tune the sub_path
+
+    std::string sub_path = "/api/v2.0.0/missions/" + mission_guid + "/actions";
+
+    return PostMethod(sub_path, action_rmove_json);
+}
+
+bool
+yf::ugv::mir::PostActionBreak(const std::string &mission_guid, const int &priority, const std::string &scope_reference)
+{
+    // mission_guid (done)
+    // action_type (done)  "while"
+    // parameters (?)   {compare    }
+    //                  {module     }
+    //                  {io_port    }
+    //                  {register   }
+    //                  {operator   }
+    //                  {value      }
+    //                  {content    }
+    // priority (done)
+
+    Poco::JSON::Object action_break_json;
+
+    Poco::JSON::Array parameters_array;
+
+    action_break_json.set("parameters", parameters_array);
+    action_break_json.set("priority", priority);
+    action_break_json.set("mission_id", mission_guid);
+    action_break_json.set("action_type", "break");
+
+    /// tackle scope_reference.
+    if(!scope_reference.empty())
+    {
+        action_break_json.set("scope_reference", scope_reference);
+    }
+
+    /// (4) fine tune the sub_path
+
+    std::string sub_path = "/api/v2.0.0/missions/" + mission_guid + "/actions";
+
+    return PostMethod(sub_path, action_break_json);
 }
 
 
