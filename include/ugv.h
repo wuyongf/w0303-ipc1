@@ -158,9 +158,9 @@ namespace yf
             bool PostMissionForDebugTest(const int& model_config_id);
             void PostActionsForDebugTest(const int& model_config_id);
 
-            bool PostActionSetPLC(const int& plc_register, const float& value, const std::string& mission_guid, const int& priority);
-            bool PostActionWaitPLC(const int& plc_register, const float& value, const std::string& mission_guid, const int& priority);
-            bool PostActionMove(const std::string& position_guid, const std::string &mission_guid, const int &priority);
+            bool PostActionSetPLC(const int& plc_register, const float& value, const std::string& mission_guid, const int& priority, const std::string& scope_reference = "");
+            bool PostActionWaitPLC(const int& plc_register, const float& value, const std::string& mission_guid, const int& priority, const std::string& scope_reference = "");
+            bool PostActionMove(const std::string& position_guid, const std::string &mission_guid, const int &priority, const std::string& scope_reference = "");
             bool PostActionAdjustLocalization(const std::string &mission_guid, const int &priority);
             bool PostActionSpeed(const float& speed, const std::string &mission_guid, const int &priority);
             bool PostActionDocking(const std::string& docking_position_guid, const std::string &mission_guid, const int &priority);
@@ -170,6 +170,9 @@ namespace yf
             bool PostActionWhile(const int& register_, const std::string& operator_, const int& value_,
                                  const std::string& mission_guid, const int& priority, const std::string& scope_reference = "");
             std::string GetContentGuid();
+
+            bool PostActionRelativeMove(const std::string& mission_guid, const int& priority, const std::string& scope_reference = "");
+            bool PostActionIf(const std::string& mission_guid, const int& priority, const std::string& scope_reference = "");
 
             bool PostActionsRelativeMove(const std::string& mission_guid, int& priority);
 
@@ -732,10 +735,8 @@ void yf::ugv::mir::PostActions(const int& model_config_id)
     priority++;
 }
 
-bool yf::ugv::mir::PostActionSetPLC(const int &plc_register, const float &value, const std::string& mission_guid, const int& priority)
+bool yf::ugv::mir::PostActionSetPLC(const int &plc_register, const float &value, const std::string& mission_guid, const int& priority, const std::string& scope_reference)
 {
-    sleep.ms(50);
-
     int value_i = static_cast<int>(value);
 
     if (plc_register <= 100)
@@ -770,6 +771,12 @@ bool yf::ugv::mir::PostActionSetPLC(const int &plc_register, const float &value,
         action_plc_json.set("mission_id", mission_guid);
         action_plc_json.set("action_type", "set_plc_register");
 
+        /// tackle scope_reference.
+        if(!scope_reference.empty())
+        {
+            action_plc_json.set("scope_reference", scope_reference);
+        }
+
         /// (4) fine tune the sub_path
 
         std::string sub_path = "/api/v2.0.0/missions/" + mission_guid + "/actions";
@@ -782,7 +789,6 @@ bool yf::ugv::mir::PostActionSetPLC(const int &plc_register, const float &value,
         // action_type (done)
         // parameters (?)  2 set 1  "register" "action" "value"
         // priority (1)
-
 
         std::string action_type =  "set_plc_register";
 
@@ -811,6 +817,12 @@ bool yf::ugv::mir::PostActionSetPLC(const int &plc_register, const float &value,
         action_plc_json.set("mission_id", mission_guid);
         action_plc_json.set("action_type", "set_plc_register");
 
+        /// tackle scope_reference.
+        if(!scope_reference.empty())
+        {
+            action_plc_json.set("scope_reference", scope_reference);
+        }
+
         /// (4) fine tune the sub_path
 
         std::string sub_path = "/api/v2.0.0/missions/" + mission_guid + "/actions";
@@ -821,7 +833,7 @@ bool yf::ugv::mir::PostActionSetPLC(const int &plc_register, const float &value,
 }
 
 bool yf::ugv::mir::PostActionWaitPLC(const int &plc_register, const float &value, const std::string &mission_guid,
-                                     const int &priority)
+                                     const int &priority, const std::string& scope_reference)
 {
     int value_i = static_cast<int>(value);
 
@@ -858,6 +870,12 @@ bool yf::ugv::mir::PostActionWaitPLC(const int &plc_register, const float &value
         action_plc_json.set("mission_id", mission_guid);
         action_plc_json.set("action_type", "wait_for_plc_register");
 
+        /// tackle scope_reference.
+        if(!scope_reference.empty())
+        {
+            action_plc_json.set("scope_reference", scope_reference);
+        }
+
         /// (4) fine tune the sub_path
 
         std::string sub_path = "/api/v2.0.0/missions/" + mission_guid + "/actions";
@@ -896,6 +914,12 @@ bool yf::ugv::mir::PostActionWaitPLC(const int &plc_register, const float &value
         action_plc_json.set("mission_id", mission_guid);
         action_plc_json.set("action_type", "wait_for_plc_register");
 
+        /// tackle scope_reference.
+        if(!scope_reference.empty())
+        {
+            action_plc_json.set("scope_reference", scope_reference);
+        }
+
         /// (4) fine tune the sub_path
 
         std::string sub_path = "/api/v2.0.0/missions/" + mission_guid + "/actions";
@@ -913,7 +937,7 @@ bool yf::ugv::mir::PostActionWaitPLC(const int &plc_register, const float &value
 //
 //@@ input: position_guid, mission_id(guid), priority
 //
-bool yf::ugv::mir::PostActionMove(const std::string& position_guid, const std::string &mission_guid, const int &priority)
+bool yf::ugv::mir::PostActionMove(const std::string& position_guid, const std::string &mission_guid, const int &priority, const std::string& scope_reference)
 {
     // mission_guid (done)
     // action_type (done)  "move"
@@ -970,6 +994,13 @@ bool yf::ugv::mir::PostActionMove(const std::string& position_guid, const std::s
     action_move_json.set("priority", priority);
     action_move_json.set("mission_id", mission_guid);
     action_move_json.set("action_type", "move");
+
+    /// tackle scope_reference.
+    if(!scope_reference.empty())
+    {
+        action_move_json.set("scope_reference", scope_reference);
+    }
+
 
     /// (4) fine tune the sub_path
 
@@ -1933,19 +1964,25 @@ void yf::ugv::mir::PostActionsForDebugTest(const int &model_config_id)
     std::deque<int>         amc_ids_count   = sql_ptr_->GetArmMissionConfigIdsCount(model_config_id);
 
     /// Actions details
+
+    // a. init_1
     int total_position_num = sql_ptr_->GetUgvMissionConfigNum(model_config_id);
     int priority = 1;
+    // b. init_2
+    std::string while_1_content_guid;
 
     this->PostActionWhile(6,"!=", 0,mission_guid,priority);
     priority++;
 
-    std::string content_guid = this->GetContentGuid();
+    while_1_content_guid = this->GetContentGuid();
 
-    this->PostActionWhile(5,"!=", 5,mission_guid,priority, content_guid);
+    this->PostActionSetPLC(1,1,mission_guid,priority, while_1_content_guid);
     priority++;
 
-//    this->PostActionSetPLC(4,1,mission_guid,priority);
-//    priority++;
+    this->PostActionWaitPLC(1,0,mission_guid,priority, while_1_content_guid);
+    priority++;
+
+
 
 #if 0
     /// (1) Set Ugv Mission Start Flag
