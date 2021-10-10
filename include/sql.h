@@ -294,6 +294,7 @@ namespace yf
             std::deque<int> GetArmMissionConfigIdsCount(const int& model_config_id);
             std::deque<int> GetUgvMissionConfigMissionType(const int& model_config_id);
 
+            float GetUgvMissionConfigRMoveLength(const int& model_config_id, const int& mission_order);
 
             ///
             /// Phase2 Related
@@ -4962,6 +4963,46 @@ std::deque<int> yf::sql::sql_server::GetUgvMissionConfigMissionType(const int &m
 
         return mission_types;
     }
+}
+
+float yf::sql::sql_server::GetUgvMissionConfigRMoveLength(const int &model_config_id, const int &mission_order)
+{
+    // query string
+    std::string query_update;
+
+    // input
+    std::string model_config_id_str = std::to_string(model_config_id);
+    std::string mission_order_str = std::to_string(mission_order);
+
+    // output
+    float rmove_length;
+
+    //"SELECT position_name FROM data_ugv_mission_config where model_config_id = 1 ORDER BY mission_order"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT relative_move_length FROM data_ugv_mission_config where model_config_id = " + model_config_id_str + " AND mission_order = " + mission_order_str ;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            auto rmove_length = result.get<float>(0);
+        }
+
+        Disconnect();
+
+        return rmove_length;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return 0;
+    };
 }
 
 

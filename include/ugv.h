@@ -167,6 +167,8 @@ namespace yf
             bool PostActionCharging(const std::string &mission_guid, const int &priority);
 
             /// for relative move
+            void PostRMoveActions(const float& rmove_x, const std::string &mission_guid, int& priority);
+
             bool PostActionWhile(const int& register_, const std::string& operator_, const int& value_,
                                  const std::string& mission_guid, const int& priority, const std::string& scope_reference = "");
             std::string GetWhileContentGuid();
@@ -678,8 +680,8 @@ void yf::ugv::mir::PostActions(const int& model_config_id)
     std::deque<std::string> position_names  = sql_ptr_->GetUgvMissionConfigPositionNames(model_config_id);
 
     // 4. for relative move
-    std::deque<int>         mission_types   = sql_ptr_->GetUgvMissionConfigMissionType(model_config_id);
-    std::deque<int>         amc_ids_count   = sql_ptr_->GetArmMissionConfigIdsCount(model_config_id);
+    std::deque<int>  mission_types = sql_ptr_->GetUgvMissionConfigMissionType(model_config_id);
+    std::deque<int>  amc_ids_count = sql_ptr_->GetArmMissionConfigIdsCount(model_config_id);
 
     /// Actions details
     int total_position_num = sql_ptr_->GetUgvMissionConfigNum(model_config_id);
@@ -695,6 +697,19 @@ void yf::ugv::mir::PostActions(const int& model_config_id)
     this->PostActionSetPLC(2,"set",0,mission_guid,priority);
     priority++;
     this->PostActionSetPLC(3,"set",0,mission_guid,priority);
+    priority++;
+    // rmove related
+    this->PostActionSetPLC(5,"set",0,mission_guid,priority);
+    priority++;
+    this->PostActionSetPLC(6,"set",0,mission_guid,priority);
+    priority++;
+    this->PostActionSetPLC(7,"set",0,mission_guid,priority);
+    priority++;
+    this->PostActionSetPLC(8,"set",0,mission_guid,priority);
+    priority++;
+    this->PostActionSetPLC(11,"set",0,mission_guid,priority);
+    priority++;
+    this->PostActionSetPLC(14,"set",0,mission_guid,priority);
     priority++;
 
     /// Initialization Ugv Properties
@@ -727,15 +742,37 @@ void yf::ugv::mir::PostActions(const int& model_config_id)
         this->PostActionSetPLC(3,"set",1,mission_guid,priority);
         priority++;
 
-        this->PostActionMove(position_guid, mission_guid, priority);
-        priority++;
+        /// Tackle Each Mission Type
+        switch (mission_types[mission_count-1])
+        {
+            case 1: // fixed position
+            {
+                this->PostActionMove(position_guid, mission_guid, priority);
+                priority++;
 
-        this->PostActionSetPLC(1,"set",1,mission_guid,priority);
-        priority++;
+                this->PostActionSetPLC(1,"set",1,mission_guid,priority);
+                priority++;
 
-        this->PostActionWaitPLC(1,0,mission_guid,priority);
-        priority++;
+                this->PostActionWaitPLC(1,0,mission_guid,priority);
+                priority++;
 
+                break;
+            }
+            case 2: // relative move
+            {
+                for (int n = 0; n < amc_ids_count[mission_count-1]; n++)
+                {
+                    this->PostActionMove(position_guid, mission_guid, priority);
+                    priority++;
+
+                    // get rmove_length!!!
+                    auto rmove_length = sql_ptr_->GetUgvMissionConfigRMoveLength(model_config_id,mission_count);
+
+                    this->PostRMoveActions(rmove_length, mission_guid, priority);
+                }
+                break;
+            }
+        }
     }
 
     /// (4) Set Ugv Mission Finish Flag
@@ -1966,93 +2003,114 @@ void yf::ugv::mir::PostActionsForDebugTest(const int &model_config_id)
     std::string mission_guid = this->GetCurMissionGUID();
 
     // 3. get position_names from DB, based on model_config_id
-    std::deque<std::string> position_names = sql_ptr_->GetUgvMissionConfigPositionNames(model_config_id);
+    std::deque<std::string> position_names  = sql_ptr_->GetUgvMissionConfigPositionNames(model_config_id);
 
     // 4. for relative move
-    std::deque<int>         mission_types   = sql_ptr_->GetUgvMissionConfigMissionType(model_config_id);
-    std::deque<int>         amc_ids_count   = sql_ptr_->GetArmMissionConfigIdsCount(model_config_id);
+    std::deque<int>  mission_types = sql_ptr_->GetUgvMissionConfigMissionType(model_config_id);
+    std::deque<int>  amc_ids_count = sql_ptr_->GetArmMissionConfigIdsCount(model_config_id);
 
     /// Actions details
-
-    // a. init_1
     int total_position_num = sql_ptr_->GetUgvMissionConfigNum(model_config_id);
     int priority = 1;
-    // b. init_2
-    std::string while_plc006_content_guid;
-    std::string while_plc008_content_guid;
 
-    std::string if_plc006_1_true_guid;
-    std::string if_plc006_3_true_guid;
-    std::string if_plc011_1_true_guid;
-    std::string if_plc011_2_true_guid;
-
-    // c. details
-
-    this->PostActionSetPLC(5, "set", 1, mission_guid, priority);
+    /// (1) Set Ugv Mission Start Flag
+    this->PostActionSetPLC(4,"set", 1,mission_guid,priority);
     priority++;
 
-    this->PostActionSetPLC(6, "set", 1, mission_guid, priority);
+    /// (2) Initialization Stage
+    this->PostActionSetPLC(1,"set",0,mission_guid,priority);
+    priority++;
+    this->PostActionSetPLC(2,"set",0,mission_guid,priority);
+    priority++;
+    this->PostActionSetPLC(3,"set",0,mission_guid,priority);
+    priority++;
+    // rmove related
+    this->PostActionSetPLC(5,"set",0,mission_guid,priority);
+    priority++;
+    this->PostActionSetPLC(6,"set",0,mission_guid,priority);
+    priority++;
+    this->PostActionSetPLC(7,"set",0,mission_guid,priority);
+    priority++;
+    this->PostActionSetPLC(8,"set",0,mission_guid,priority);
+    priority++;
+    this->PostActionSetPLC(11,"set",0,mission_guid,priority);
+    priority++;
+    this->PostActionSetPLC(14,"set",0,mission_guid,priority);
     priority++;
 
-
-    this->PostActionWhile(6,"!=", 0,mission_guid,priority);
+    /// Initialization Ugv Properties
+    // speed
+    this->PostActionSpeed(0.6,mission_guid,priority);
     priority++;
-    while_plc006_content_guid = this->GetWhileContentGuid();
+    // adjust localization
+    this->PostActionAdjustLocalization(mission_guid,priority);
+    priority++;
 
-        this->PostActionSetPLC(1, "set", 1, mission_guid, priority, while_plc006_content_guid);
+    /// (3) For loop, mission details
+    //
+    // get mission_name from REST. mission_order from db
+    for (int mission_count = 1; mission_count <= total_position_num; mission_count++)
+    {
+        /// a. get position name.
+        std::string position_name = position_names[mission_count-1];
+
+        /// b. position_guid
+        std::string position_guid = this->GetPositionGUID(map_guid,position_name);
+
+        //1. get ugv_mission_config_id, based on mission_count,
+        // prepare: mission_config_id
+        //
+        //@@ input: position_guid, mission_guid(done)
+        //
+        this->PostActionSetPLC(2,"set",mission_count,mission_guid,priority);
         priority++;
 
-        this->PostActionWaitPLC(1, 0, mission_guid, priority, while_plc006_content_guid);
+        this->PostActionSetPLC(3,"set",1,mission_guid,priority);
         priority++;
 
-        this->PostActionIf(6, "==", 1, mission_guid, priority, while_plc006_content_guid);
-        priority++;
-        if_plc006_1_true_guid  = this->GetIfTrueGuid();
-
-            this->PostActionSetPLC(7, "add", 1, mission_guid, priority, if_plc006_1_true_guid);
-            priority++;
-
-            this->PostActionWhile(8,"!=", 0,mission_guid,priority, if_plc006_1_true_guid);
-            priority++;
-            while_plc008_content_guid = this->GetWhileContentGuid();
-
-                this->PostActionIf(11, "==", 1, mission_guid, priority, while_plc008_content_guid);
+        /// Tackle Each Mission Type
+        switch (mission_types[mission_count-1])
+        {
+            case 1: // fixed position
+            {
+                this->PostActionMove(position_guid, mission_guid, priority);
                 priority++;
-                if_plc011_1_true_guid  = this->GetIfTrueGuid();
 
-                    this->PostActionRelativeMove(0, 0, 1, 0.1, 0.2, true, mission_guid, priority, if_plc011_1_true_guid);
-                    priority++;
-
-                    this->PostActionSetPLC(8, "subtract", 1, mission_guid, priority, if_plc011_1_true_guid);
-                    priority++;
-
-                this->PostActionIf(11, "==", 2, mission_guid, priority, while_plc008_content_guid);
+                this->PostActionSetPLC(1,"set",1,mission_guid,priority);
                 priority++;
-                if_plc011_2_true_guid  = this->GetIfTrueGuid();
 
-                    this->PostActionRelativeMove(0, 0, -1, 0.1, 0.2, true, mission_guid, priority, if_plc011_2_true_guid);
+                this->PostActionWaitPLC(1,0,mission_guid,priority);
+                priority++;
+
+                break;
+            }
+            case 2: // relative move
+            {
+                for (int n = 0; n < amc_ids_count[mission_count-1]; n++)
+                {
+                    this->PostActionMove(position_guid, mission_guid, priority);
                     priority++;
 
-                    this->PostActionSetPLC(8, "subtract", 1, mission_guid, priority, if_plc011_2_true_guid);
+                    this->PostActionSetPLC(14,"set",n,mission_guid,priority);
                     priority++;
 
-        this->PostActionIf(6, "==", 3, mission_guid, priority, while_plc006_content_guid);
-        priority++;
-        if_plc006_3_true_guid  = this->GetIfTrueGuid();
+                    // get rmove_length!!!
+                    auto rmove_length = sql_ptr_->GetUgvMissionConfigRMoveLength(model_config_id,mission_count);
 
-            this->PostActionRelativeMove(2, 0, 0, 0.1, 0.2, true, mission_guid, priority, if_plc006_3_true_guid);
-            priority++;
+                    this->PostRMoveActions(rmove_length, mission_guid, priority);
+                }
 
-            this->PostActionSetPLC(6, "set", 4, mission_guid, priority, if_plc006_3_true_guid);
-            priority++;
+                this->PostActionSetPLC(14,"set",0,mission_guid,priority);
+                priority++;
 
-            this->PostActionBreak(mission_guid, priority, if_plc006_3_true_guid);
-            priority++;
+                break;
+            }
+        }
+    }
 
-    this->PostActionSetPLC(5, "set", 2, mission_guid, priority);
-    priority++;
-
-    this->PostActionWaitPLC(1, 0, mission_guid, priority);
+    /// (4) Set Ugv Mission Finish Flag
+    //
+    this->PostActionSetPLC(4,"set",2,mission_guid,priority);
     priority++;
 }
 
@@ -3016,6 +3074,89 @@ yf::ugv::mir::PostActionBreak(const std::string &mission_guid, const int &priori
     std::string sub_path = "/api/v2.0.0/missions/" + mission_guid + "/actions";
 
     return PostMethod(sub_path, action_break_json);
+}
+
+void yf::ugv::mir::PostRMoveActions(const float& rmove_x, const std::string &mission_guid, int& priority)
+{
+    /// Actions details
+    // 1. init
+    std::string while_plc006_content_guid;
+    std::string while_plc008_content_guid;
+
+    std::string if_plc006_1_true_guid;
+    std::string if_plc006_3_true_guid;
+    std::string if_plc011_1_true_guid;
+    std::string if_plc011_2_true_guid;
+
+    // 2. details
+
+    this->PostActionSetPLC(5, "set", 1, mission_guid, priority);
+    priority++;
+
+    this->PostActionSetPLC(6, "set", 1, mission_guid, priority);
+    priority++;
+
+
+    this->PostActionWhile(6,"!=", 0,mission_guid,priority);
+    priority++;
+    while_plc006_content_guid = this->GetWhileContentGuid();
+
+    this->PostActionSetPLC(1, "set", 1, mission_guid, priority, while_plc006_content_guid);
+    priority++;
+
+    this->PostActionWaitPLC(1, 0, mission_guid, priority, while_plc006_content_guid);
+    priority++;
+
+    this->PostActionIf(6, "==", 1, mission_guid, priority, while_plc006_content_guid);
+    priority++;
+    if_plc006_1_true_guid  = this->GetIfTrueGuid();
+
+    this->PostActionSetPLC(7, "add", 1, mission_guid, priority, if_plc006_1_true_guid);
+    priority++;
+
+    this->PostActionWhile(8,"!=", 0,mission_guid,priority, if_plc006_1_true_guid);
+    priority++;
+    while_plc008_content_guid = this->GetWhileContentGuid();
+
+    this->PostActionIf(11, "==", 1, mission_guid, priority, while_plc008_content_guid);
+    priority++;
+    if_plc011_1_true_guid  = this->GetIfTrueGuid();
+
+    this->PostActionRelativeMove(0, 0, 1, 0.1, 0.2, true, mission_guid, priority, if_plc011_1_true_guid);
+    priority++;
+
+    this->PostActionSetPLC(8, "subtract", 1, mission_guid, priority, if_plc011_1_true_guid);
+    priority++;
+
+    this->PostActionIf(11, "==", 2, mission_guid, priority, while_plc008_content_guid);
+    priority++;
+    if_plc011_2_true_guid  = this->GetIfTrueGuid();
+
+    this->PostActionRelativeMove(0, 0, -1, 0.1, 0.2, true, mission_guid, priority, if_plc011_2_true_guid);
+    priority++;
+
+    this->PostActionSetPLC(8, "subtract", 1, mission_guid, priority, if_plc011_2_true_guid);
+    priority++;
+
+    this->PostActionIf(6, "==", 3, mission_guid, priority, while_plc006_content_guid);
+    priority++;
+    if_plc006_3_true_guid  = this->GetIfTrueGuid();
+
+        /// Relative Move!!!
+        this->PostActionRelativeMove(rmove_x, 0, 0, 0.1, 0.2, true, mission_guid, priority, if_plc006_3_true_guid);
+        priority++;
+
+        this->PostActionSetPLC(6, "set", 4, mission_guid, priority, if_plc006_3_true_guid);
+        priority++;
+
+    this->PostActionBreak(mission_guid, priority, if_plc006_3_true_guid);
+    priority++;
+
+    this->PostActionSetPLC(5, "set", 2, mission_guid, priority);
+    priority++;
+
+    this->PostActionWaitPLC(1, 0, mission_guid, priority);
+    priority++;
 }
 
 
