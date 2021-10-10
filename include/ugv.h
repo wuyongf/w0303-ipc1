@@ -1938,6 +1938,12 @@ void yf::ugv::mir::PostActionsForDebugTest(const int &model_config_id)
 
     this->PostActionWhile(6,"!=", 0,mission_guid,priority);
     priority++;
+
+    std::string content_guid = this->GetContentGuid();
+
+    this->PostActionWhile(5,"!=", 5,mission_guid,priority, content_guid);
+    priority++;
+
 //    this->PostActionSetPLC(4,1,mission_guid,priority);
 //    priority++;
 
