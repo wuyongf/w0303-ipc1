@@ -4982,14 +4982,14 @@ float yf::sql::sql_server::GetUgvMissionConfigRMoveLength(const int &model_confi
     {
         Connect();
 
-        query_update = "SELECT relative_move_length FROM data_ugv_mission_config where model_config_id = " + model_config_id_str + " AND mission_order = " + mission_order_str ;
+        query_update = "SELECT relative_move_length FROM data_ugv_mission_config where model_config_id = " + model_config_id_str + " and mission_order = " + mission_order_str ;
 
         auto result = nanodbc::execute(conn_,query_update);
 
         // if there are new schedules available, sql module will mark down all the available schedule ids
         while(result.next())
         {
-            auto rmove_length = result.get<float>(0);
+            rmove_length = result.get<float>(0);
         }
 
         Disconnect();
