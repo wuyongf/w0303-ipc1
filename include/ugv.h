@@ -774,6 +774,9 @@ void yf::ugv::mir::PostActions(const int& model_config_id)
                     this->PostRMoveActions(rmove_length, mission_guid, priority);
                 }
 
+                this->PostActionSetPLC(7,"set",0,mission_guid,priority);
+                priority++;
+
                 this->PostActionSetPLC(14,"set",0,mission_guid,priority);
                 priority++;
 
@@ -2106,6 +2109,9 @@ void yf::ugv::mir::PostActionsForDebugTest(const int &model_config_id)
 
                     this->PostRMoveActions(rmove_length, mission_guid, priority);
                 }
+
+                this->PostActionSetPLC(7,"set",0,mission_guid,priority);
+                priority++;
 
                 this->PostActionSetPLC(14,"set",0,mission_guid,priority);
                 priority++;
