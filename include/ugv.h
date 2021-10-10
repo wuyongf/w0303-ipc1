@@ -2012,7 +2012,7 @@ void yf::ugv::mir::PostActionsForDebugTest(const int &model_config_id)
             this->PostActionSetPLC(7, "add", 1, mission_guid, priority, if_plc006_1_true_guid);
             priority++;
 
-            this->PostActionWhile(8,"!=", 0,mission_guid,priority);
+            this->PostActionWhile(8,"!=", 0,mission_guid,priority, if_plc006_1_true_guid);
             priority++;
             while_plc008_content_guid = this->GetWhileContentGuid();
 
@@ -2030,10 +2030,10 @@ void yf::ugv::mir::PostActionsForDebugTest(const int &model_config_id)
                 priority++;
                 if_plc011_2_true_guid  = this->GetIfTrueGuid();
 
-                    this->PostActionRelativeMove(0, 0, -1, 0.1, 0.2, true, mission_guid, priority, if_plc011_1_true_guid);
+                    this->PostActionRelativeMove(0, 0, -1, 0.1, 0.2, true, mission_guid, priority, if_plc011_2_true_guid);
                     priority++;
 
-                    this->PostActionSetPLC(8, "subtract", 1, mission_guid, priority, if_plc011_1_true_guid);
+                    this->PostActionSetPLC(8, "subtract", 1, mission_guid, priority, if_plc011_2_true_guid);
                     priority++;
 
         this->PostActionIf(6, "==", 3, mission_guid, priority, while_plc006_content_guid);
