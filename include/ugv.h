@@ -97,6 +97,7 @@ namespace yf
             bool PostMethod(const std::string& sub_path, const Poco::JSON::Object& obj);
             bool DeleteMethod(const std::string& sub_path);
 
+            /// properties
             Poco::Mutex _mutex;
 
         public:
@@ -166,7 +167,11 @@ namespace yf
             bool PostActionCharging(const std::string &mission_guid, const int &priority);
 
             // for relative move
-            bool PostActionWhile(const std::string& mission_guid, const int& priority);
+            bool PostActionWhile(const int& register_, const std::string& operator_, const int& value_,
+                                 const std::string& mission_guid, const int& priority, const std::string& scope_reference = "");
+            std::string GetContentGuid();
+
+            bool PostActionsRelativeMove(const std::string& mission_guid, int& priority);
 
             bool PostMissionForCharging();
             void PostActionsForCharging();
@@ -181,7 +186,7 @@ namespace yf
             std::deque<std::string> GetMapNameList(const std::string& session_name);
             std::deque<std::string> GetPositionNameList(const std::string& session_name, const std::string& map_name);
 
-        private:
+        public:
             std::string GetSessionGUID(const std::string& session_name);
             std::string GetMapGUID(const std::string& session_name, const std::string& map_name);
 
@@ -1931,10 +1936,10 @@ void yf::ugv::mir::PostActionsForDebugTest(const int &model_config_id)
     int total_position_num = sql_ptr_->GetUgvMissionConfigNum(model_config_id);
     int priority = 1;
 
-    this->PostActionWhile(mission_guid,priority);
+    this->PostActionWhile(6,"!=", 0,mission_guid,priority);
     priority++;
-    this->PostActionSetPLC(4,1,mission_guid,priority);
-    priority++;
+//    this->PostActionSetPLC(4,1,mission_guid,priority);
+//    priority++;
 
 #if 0
     /// (1) Set Ugv Mission Start Flag
@@ -2584,39 +2589,9 @@ void yf::ugv::mir::UpdateUgvMissionStatus(const yf::data::ugv::Status &status)
     }
 }
 
-bool yf::ugv::mir::PostActionWhile(const std::string &mission_guid, const int &priority)
+bool yf::ugv::mir::PostActionWhile(const int& register_, const std::string& operator_, const int& value_,
+                                   const std::string &mission_guid, const int &priority, const std::string& scope_reference)
 {
-    Poco::JSON::Object action_plc_json;
-
-    Poco::JSON::Object registry_json;
-    Poco::JSON::Object action_json;
-    Poco::JSON::Object value_json_1;
-
-    registry_json.set("value",1);
-    registry_json.set("id","register");
-
-    action_json.set("value","set");
-    action_json.set("id","action");
-
-    value_json_1.set("value",0);
-    value_json_1.set("id","value");
-
-    Poco::JSON::Array parameters_array_1;
-    parameters_array_1.set(0,registry_json);
-    parameters_array_1.set(1,action_json);
-    parameters_array_1.set(2,value_json_1);
-
-    action_plc_json.set("parameters", parameters_array_1);
-    action_plc_json.set("priority", 2);
-    action_plc_json.set("mission_id", mission_guid);
-    action_plc_json.set("action_type", "set_plc_register");
-
-    Poco::JSON::Array content_array;
-    content_array.set(0, action_plc_json);
-
-    std::ostringstream oss;
-    Poco::JSON::Stringifier::stringify( content_array, oss);
-    std::string str = oss.str();
     // mission_guid (done)
     // action_type (done)  "while"
     // parameters (?)   {compare    }
@@ -2648,16 +2623,16 @@ bool yf::ugv::mir::PostActionWhile(const std::string &mission_guid, const int &p
     io_port_json.set("value", 0);
     io_port_json.set("id", "io_port");
 
-    register_json.set("value", 6);
+    register_json.set("value", register_);
     register_json.set("id", "register");
 
-    operator_json.set("value", "!=");
+    operator_json.set("value", operator_);
     operator_json.set("id", "operator");
 
-    value_json.set("value", 0);
+    value_json.set("value", value_);
     value_json.set("id", "value");
 
-    content_json.set("value", str);
+    content_json.set("value", "");
     content_json.set("id", "content");
 
     Poco::JSON::Array parameters_array;
@@ -2674,11 +2649,66 @@ bool yf::ugv::mir::PostActionWhile(const std::string &mission_guid, const int &p
     action_while_json.set("mission_id", mission_guid);
     action_while_json.set("action_type", "while");
 
+    /// tackle scope_reference.
+    if(!scope_reference.empty())
+    {
+        action_while_json.set("scope_reference", scope_reference);
+    }
+
     /// (4) fine tune the sub_path
 
     std::string sub_path = "/api/v2.0.0/missions/" + mission_guid + "/actions";
 
     return PostMethod(sub_path, action_while_json);
+}
+
+std::string yf::ugv::mir::GetContentGuid()
+{
+    Poco::JSON::Parser parser;
+    Poco::Dynamic::Var result = parser.parse(request_result_);
+
+    Poco::JSON::Object::Ptr obj = result.extract<Poco::JSON::Object::Ptr>();
+
+    std::string str_params = obj->getValue<std::string>("parameters");
+
+    Poco::Dynamic::Var result_params = parser.parse(str_params);
+    Poco::JSON::Array::Ptr  array_params = result_params.extract<Poco::JSON::Array::Ptr>();
+
+    std::string content_guid;
+
+    bool found_flag = false;
+
+    for (Poco::JSON::Array::ConstIterator it= array_params->begin(); it != array_params->end(); ++it)
+    {
+        if(found_flag == false)
+        {
+            // iteration, find the position_name here.
+            Poco::JSON::Object::Ptr obj = it->extract<Poco::JSON::Object::Ptr>();
+
+            std::string str_id = obj->getValue<std::string>("id");
+
+            if( str_id == "content")
+            {
+                // 1. set found flag
+                found_flag = true;
+
+                // 2. get the position guid.
+                content_guid = obj->getValue<std::string>("guid");
+
+                return content_guid;
+            }
+        }
+    }
+}
+
+bool yf::ugv::mir::PostActionsRelativeMove(const std::string &mission_guid, int &priority)
+{
+    /// 1. create a while loop action first!!!
+    PostActionWhile(mission_guid,priority);
+    priority++;
+
+    std::string content_guid = this->GetContentGuid();
+
 }
 
 

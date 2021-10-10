@@ -227,6 +227,49 @@ bool PostMethod(URI& uri, const std::string& sub_path, const Poco::JSON::Object&
 
 int main(int argc, char** argv)
 {
+    std::string str_result = "{\"priority\": 1, \"allowed_methods\": [\"PUT\", \"GET\", \"DELETE\"], \"scope_reference\": null, \"parameters\": [{\"value\": \"plc_register\", \"input_name\": null, \"guid\": \"28951cec-290f-11ec-81ff-00012978eb45\", \"id\": \"compare\"}, {\"value\": null, \"input_name\": null, \"guid\": \"289548ee-290f-11ec-81ff-00012978eb45\", \"id\": \"module\"}, {\"value\": \"0\", \"input_name\": null, \"guid\": \"2895748f-290f-11ec-81ff-00012978eb45\", \"id\": \"io_port\"}, {\"value\": \"6\", \"input_name\": null, \"guid\": \"2895a19c-290f-11ec-81ff-00012978eb45\", \"id\": \"register\"}, {\"value\": \"!=\", \"input_name\": null, \"guid\": \"2895d1ea-290f-11ec-81ff-00012978eb45\", \"id\": \"operator\"}, {\"value\": 0.0, \"input_name\": null, \"guid\": \"2895fc30-290f-11ec-81ff-00012978eb45\", \"id\": \"value\"}, {\"value\": \"\", \"input_name\": null, \"guid\": \"2896242c-290f-11ec-81ff-00012978eb45\", \"id\": \"content\"}], \"created_by_name\": \"Distributor\", \"mission_id\": \"284c584c-290f-11ec-81ff-00012978eb45\", \"action_type\": \"while\", \"created_by_id\": \"mirconst-guid-0000-0004-users0000000\", \"guid\": \"28949cbf-290f-11ec-81ff-00012978eb45\"}";
+
+    Poco::JSON::Parser parser;
+    Poco::Dynamic::Var result = parser.parse(str_result);
+
+    Poco::JSON::Object::Ptr obj = result.extract<Poco::JSON::Object::Ptr>();
+
+    std::string str_params = obj->getValue<std::string>("parameters");
+
+    Poco::Dynamic::Var result_params = parser.parse(str_params);
+    Poco::JSON::Array::Ptr  array_params = result_params.extract<Poco::JSON::Array::Ptr>();
+
+    std::string content_guid;
+
+    bool found_flag = false;
+
+    for (Poco::JSON::Array::ConstIterator it= array_params->begin(); it != array_params->end(); ++it)
+    {
+        if(found_flag == false)
+        {
+            // iteration, find the position_name here.
+            Poco::JSON::Object::Ptr obj = it->extract<Poco::JSON::Object::Ptr>();
+
+            std::string str_id = obj->getValue<std::string>("id");
+
+            if( str_id == "content")
+            {
+                // 1. set found flag
+                found_flag = true;
+
+                // 2. get the position guid.
+                content_guid = obj->getValue<std::string>("guid");
+            }
+        }
+    }
+
+    std::cout << "content_guid: " << content_guid << std::endl;
+    std::cout << "content_guid: " << content_guid << std::endl;
+
+
+
+
+#if 0
     URI uri("http://192.168.2.111");
     std::string sub_path  = "/api/v2.0.0/registers/102";
 
@@ -240,6 +283,9 @@ int main(int argc, char** argv)
 //    PostMethod(uri,sub_path,Register);
 
     Request_Post(uri,sub_path,Register);
+
+#endif
+
 #if 0
     try
     {
