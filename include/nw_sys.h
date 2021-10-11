@@ -50,7 +50,7 @@ namespace yf
             /// Methods for two main functions
 
             void DoJobs(const int& cur_schedule_id);
-            void DoTasks(const int& cur_job_id, const int& task_group_id);
+            void DoTasks(const int& last_job_id, const int& cur_job_id, const int& task_group_id);
 
             void DoJobUgvBackToChargingStation();
             void DoJobArmBackToHomePos();
@@ -91,12 +91,19 @@ namespace yf
             // properties
             bool rmove_start_flag_ = false;
 
+            bool get_rmove_start_flag();
+
             // methods
-            void thread_RMoveForceNode(const yf::data::arm::ToolAngle &tool_angle);
+            void thread_RMoveForceNode();
 
             std::thread th_rmove_ForceNode_;
 
             bool WaitForArmRMoveForceFlag(const int& value, const int& timeout_min);
+
+            // mutex lock
+
+            std::mutex mux_Blocking_RMoveForceNode;
+            std::condition_variable cv_Blocking_RMoveForceNode;
 
         public:
             /// Ugv Method: based on REST API
@@ -285,6 +292,9 @@ void yf::sys::nw_sys::Start()
 
     /// 3. Web Status Manager
     th_web_status_manager_ = std::thread(&nw_sys::thread_WebStatusManager, this);
+
+    /// 5. RMove Thread.
+    th_rmove_ForceNode_ = std::thread(&nw_sys::thread_RMoveForceNode, this);
 
     /// 4. Do Schedule and Wait Schedule
     th_do_schedules_ = std::thread(&nw_sys::thread_DoSchedules, this);
@@ -628,12 +638,20 @@ void yf::sys::nw_sys::DoJobs(const int &cur_schedule_id)
 
     // if there is any Job
     //
-    while (q_job_ids.size() != 0)
+    for(int n = 0; n < q_job_ids.size(); n++)
     {
-        int cur_job_id;
+        int cur_job_id, last_job_id;
 
-        cur_job_id = q_job_ids.front();
-        q_job_ids.pop_front();
+        cur_job_id = q_job_ids[n];
+
+        if(n == 0)
+        {
+            last_job_id = cur_job_id;
+        }
+        else
+        {
+            last_job_id = q_job_ids[n-1];
+        }
 
         nw_status_ptr_->db_cur_job_id = cur_job_id;
 
@@ -653,7 +671,7 @@ void yf::sys::nw_sys::DoJobs(const int &cur_schedule_id)
         sql_ptr_->UpdateJobLogTaskGroupId(nw_status_ptr_->db_cur_job_log_id, nw_status_ptr_->db_cur_task_group_id);
 
         /// Execute Each job!
-        DoTasks(cur_job_id, nw_status_ptr_->db_cur_task_group_id);
+        DoTasks(last_job_id, cur_job_id, nw_status_ptr_->db_cur_task_group_id);
 
         /// Job Result Handler
         //  a. Break the loop or not?
@@ -675,7 +693,7 @@ void yf::sys::nw_sys::DoJobs(const int &cur_schedule_id)
         }
 
         bool arm_program_stop_status = nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::Error ||
-                                         nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::EStop;
+                                       nw_status_ptr_->arm_mission_status == yf::data::common::MissionStatus::EStop;
 
         if( nw_status_ptr_->arm_connection_status == data::common::ConnectionStatus::Disconnected || arm_program_stop_status )
         {
@@ -700,6 +718,16 @@ void yf::sys::nw_sys::DoJobs(const int &cur_schedule_id)
     if(nw_status_ptr_->arm_mission_status == data::common::MissionStatus::Idle)
     {
         LOG(INFO) << "All jobs are done";
+
+        // 2. ugv creates its charging mission.
+        mir100_ptr_->PostMissionForCharging();
+        mir100_ptr_->PostActionsForCharging();
+
+        // 3. ugv goes to charging station
+        cur_mission_guid_ = mir100_ptr_->GetCurMissionGUID();
+        mir100_ptr_->PostMissionQueue(cur_mission_guid_);
+        sleep.ms(200);
+        mir100_ptr_->Play();
     }
     else
     {
@@ -707,7 +735,7 @@ void yf::sys::nw_sys::DoJobs(const int &cur_schedule_id)
     }
 }
 
-void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
+void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, const int& task_group_id)
 {
     /// 0. Initialization --- flow control
     //
@@ -997,7 +1025,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
 
                                                     if(change_pad_flag)
                                                     {
-                                                        this->ArmRemovePad(cur_job_id);
+                                                        this->ArmRemovePad(last_job_id);
                                                         sleep.ms(200);
                                                         this->ArmPickPad(cur_job_id);
                                                         sleep.ms(200);
@@ -1018,7 +1046,7 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                     tm5.set_remove_tool_flag(true);
                                                 }
 
-                                                #if 0 //disable for testing
+                                                #if 1 //disable for testing
                                                 this->ArmAbsorbWater();
                                                 #endif
 
@@ -1520,6 +1548,10 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                 }
                                             }
 
+                                            // a.
+                                            tm5.ArmTask("Post arm_back_to_safety");
+                                            sleep.ms(200);
+
                                             break;
                                         }
 
@@ -1567,17 +1599,14 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                                     case 1:
                                                                     {
                                                                         /// a. move to standby_position
-                                                                        if(n == 0)
-                                                                        {
-                                                                            // a.1 move to standby_position
-                                                                            auto standby_point = arm_mission_configs[n].standby_position;
-                                                                            std::string standby_point_str = this->ArmGetPointStr(standby_point);
-                                                                            tm5.ArmTask("Set standby_p0 = "+standby_point_str);
-                                                                            tm5.ArmTask("Move_to standby_p0");
+                                                                        // a.1 move to standby_position
+                                                                        auto standby_point = arm_mission_configs[n].standby_position;
+                                                                        std::string standby_point_str = this->ArmGetPointStr(standby_point);
+                                                                        tm5.ArmTask("Set standby_p0 = "+standby_point_str);
+                                                                        tm5.ArmTask("Move_to standby_p0");
 
-                                                                            // a.2. check&set tool_angle
-                                                                            this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
-                                                                        }
+                                                                        // a.2. check&set tool_angle
+                                                                        this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
 
                                                                         /// b. vision job initialization
                                                                         ///   b.1: for None: do nothing
@@ -1763,9 +1792,13 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                                         tm5.SetRMoveForceFlag(0);
 
                                                                         /// 2.5 awake the thread_RMoveForceNode
-                                                                        th_rmove_ForceNode_ = std::thread(&nw_sys::thread_RMoveForceNode, this, std::ref(arm_mission_configs[n].tool_angle));
-                                                                        sleep.ms(200);
+                                                                        cur_tool_angle_ = arm_mission_configs[n].tool_angle;
                                                                         rmove_start_flag_ = true;
+                                                                        sleep.ms(200);
+                                                                        //notify
+                                                                        std::unique_lock<std::mutex> ull(mux_Blocking_RMoveForceNode);
+                                                                        cv_Blocking_RMoveForceNode.notify_one();
+                                                                        sleep.ms(200);
 
                                                                         if(this->WaitForArmRMoveForceFlag(1,1))
                                                                         {
@@ -1821,14 +1854,18 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                                                                 /// notice arm to stop force node
                                                                                 tm5.SetRMoveForceFlag(0);
 
-                                                                                // wait for thread to join
-                                                                                LOG(INFO) << "wait for th_rmove_ForceNode_ to join...";
-                                                                                th_rmove_ForceNode_.join();
-                                                                                LOG(INFO) << "th_rmove_ForceNode_ joined.";
+                                                                                // wait for thread to finish
+                                                                                LOG(INFO) << "wait for th_rmove_ForceNode_ to finish...";
+                                                                                while(this->get_rmove_start_flag() != false)
+                                                                                {
+                                                                                    sleep.ms(500);
+                                                                                }
+                                                                                LOG(INFO) << "th_rmove_ForceNode_ finished.";
 
                                                                                 /// return standby position
                                                                                 tm5.ArmTask("Move_to standby_p1");
                                                                                 tm5.ArmTask("Move_to standby_p0");
+                                                                                tm5.ArmTask("Post arm_back_to_safety");
 
                                                                                 /// STOP The RMove Mission
                                                                                 mir100_ptr_->SetPLCRegisterIntValue(6,0);
@@ -1878,16 +1915,11 @@ void yf::sys::nw_sys::DoTasks(const int &cur_job_id, const int& task_group_id)
                                         }
                                     }
 
-
                                     sleep.ms(200);
 
                                     ///\ (4) Finish Current Arm Mission
-                                    ///\    a. For Normal orders: Return 'Safety Position'.
+                                    ///\    (Done Above)a. For Normal orders: Return 'Safety Position'.
                                     ///\    b. For Last order: Place the tool and then return 'Home Position'
-
-                                    // a.
-                                    tm5.ArmTask("Post arm_back_to_safety");
-                                    sleep.ms(500);
 
                                     // b.
                                     if(cur_order == cur_last_valid_order_)
@@ -3423,7 +3455,7 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
                                             this->ArmUpdatePadNo();
 
                                             sleep.ms(200);
-#if 0 /// Disable For Testing
+#if 1 /// Disable For Testing
                                             this->ArmAbsorbWater();
 #endif
                                         }
@@ -4255,6 +4287,16 @@ void yf::sys::nw_sys::WaitSchedulesInitialCheck()
                     LOG(INFO) << "[thread_WaitSchedules]: 1.3.2.3 Please switch to Recovery Mode..."; // Ask for recovery mode
                     sql_ptr_->UpdateSysAdvice(16);
 
+#if 0 // recovery testing-1
+                    tm5.WaitForConnection();
+                    // Get Status and update to SQL
+                    tm5.GetConnectionStatus();
+                    tm5.GetMissionStatus();
+
+                    sql_ptr_->UpdateSysAdvice(17);
+                    LOG(INFO) << "[thread_WaitSchedules]: 1.3.2 check arm   [Complete]";
+#endif
+#if 1 // recovery testing-2
                     if(nw_status_ptr_->sys_control_mode_ == data::common::SystemMode::Recovery)
                     {
                         LOG(INFO) << "[thread_WaitSchedules]: 1.3.2.4 Please play arm project..."; // Ask for recovery mode
@@ -4268,6 +4310,7 @@ void yf::sys::nw_sys::WaitSchedulesInitialCheck()
                         sql_ptr_->UpdateSysAdvice(17);
                         LOG(INFO) << "[thread_WaitSchedules]: 1.3.2 check arm   [Complete]";
                     }
+#endif
                 }
             }
 
@@ -4413,26 +4456,40 @@ void yf::sys::nw_sys::ArmPlaceToolSafety()
     }
 }
 
-void yf::sys::nw_sys::thread_RMoveForceNode(const yf::data::arm::ToolAngle &tool_angle)
+void yf::sys::nw_sys::thread_RMoveForceNode()
 {
-    while(!rmove_start_flag_)
+    while(schedule_flag_)
     {
-        // sleep 200ms
-        sleep.ms(200);
-    }
+        while(!rmove_start_flag_)
+        {
+            sleep.ms(200);
+//            LOG(INFO) << "flag -1";
+//
+//            std::unique_lock<std::mutex> ull(mux_Blocking_RMoveForceNode);
+//            cv_Blocking_RMoveForceNode.wait(ull);
+//
+//            LOG(INFO) << "flag 0";
+        }
 
-    switch (tool_angle)
-    {
-        case data::arm::ToolAngle::Zero:
+        LOG(INFO) << "flag 1";
+
+        switch (cur_tool_angle_)
         {
-            tm5.ArmTask("Post via0_RMove");
-            break;
+            case data::arm::ToolAngle::Zero:
+            {
+                tm5.ArmTask("Post via0_RMove");
+                break;
+            }
+            case data::arm::ToolAngle::FortyFive:
+            {
+                tm5.ArmTask("Post via45_RMove");
+                break;
+            }
         }
-        case data::arm::ToolAngle::FortyFive:
-        {
-            tm5.ArmTask("Post via45_RMove");
-            break;
-        }
+
+        LOG(INFO) << "flag 3";
+
+        rmove_start_flag_ = false;
     }
 }
 
@@ -4464,6 +4521,11 @@ bool yf::sys::nw_sys::WaitForArmRMoveForceFlag(const int &value, const int &time
     }
 
     return true;
+}
+
+bool yf::sys::nw_sys::get_rmove_start_flag()
+{
+    return rmove_start_flag_;
 }
 
 
