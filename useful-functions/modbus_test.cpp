@@ -63,7 +63,7 @@ int main(void) {
     auto force_flag = tm_modbus.get_RMove_ForceFlag();
 
 
-    auto result = tm_modbus.set_RMove_ForceFlag(1);
+    auto result = tm_modbus.set_RMove_ForceFlag(0);
 
     auto force_flag1 = tm_modbus.get_RMove_ForceFlag();
 

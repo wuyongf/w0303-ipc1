@@ -1851,13 +1851,13 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                                             {
                                                                                 rmove_continue_flag = false;
 
-                                                                                /// notice arm to stop force node
-                                                                                tm5.SetRMoveForceFlag(0);
-
                                                                                 // wait for thread to finish
                                                                                 LOG(INFO) << "wait for th_rmove_ForceNode_ to finish...";
                                                                                 while(this->get_rmove_start_flag() != false)
                                                                                 {
+                                                                                    /// notice arm to stop force node
+                                                                                    tm5.SetRMoveForceFlag(0);
+
                                                                                     sleep.ms(500);
                                                                                 }
                                                                                 LOG(INFO) << "th_rmove_ForceNode_ finished.";
