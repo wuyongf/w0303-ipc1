@@ -85,6 +85,8 @@ namespace yf
 
             std::string ArmGetPointStr(const yf::data::arm::Point3d& point);
 
+            bool IsArmAtHomePos();
+
         private:
             /// Arm: RMove
 
@@ -499,13 +501,13 @@ void yf::sys::nw_sys::thread_DoSchedules()
                     case data::schedule::ScheduleCommand::RedoCleaningJobErrorPart:
                     {
                         // redo job
-                        RedoJob(cur_schedule_id,nw_status_ptr_->db_cur_schedule_command_);
+                        // RedoJob(cur_schedule_id,nw_status_ptr_->db_cur_schedule_command_);
 
                         break;
                     }
                     case data::schedule::ScheduleCommand::RedoCleaningJobWhole:
                     {
-                        RedoJob(cur_schedule_id,nw_status_ptr_->db_cur_schedule_command_);
+                        // RedoJob(cur_schedule_id,nw_status_ptr_->db_cur_schedule_command_);
                         break;
                     }
                     case data::schedule::ScheduleCommand::CustomPlan:
@@ -1722,7 +1724,7 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                                                     sleep.ms(200);
 
                                                                                     /// STOP The RMove Mission
-                                                                                    LOG(INFO) << "Stop RMove Mission!";
+                                                                                    LOG(INFO) << "Stop Current RMove Mission!";
 
                                                                                     mir100_ptr_->SetPLCRegisterIntValue(6,0);
                                                                                     mir100_ptr_->SetPLCRegisterIntValue(5,3);
@@ -1810,6 +1812,7 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                                             // get current time.
                                                                             start = std::chrono::high_resolution_clock::now();
                                                                         }
+
 
                                                                         bool rmove_continue_flag = true;
                                                                         while (rmove_continue_flag)
@@ -1904,10 +1907,28 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                 }
 
                                                 /// II: Check the Robot Status & RMove result
-                                                if(mir100_ptr_->GetPLCRegisterIntValue(5) == 3)
+                                                /// II.1 Check Arm Status First.
+                                                if( nw_status_ptr_->arm_mission_status == data::common::MissionStatus::Error ||
+                                                    nw_status_ptr_->arm_mission_status == data::common::MissionStatus::EStop)
                                                 {
-                                                    LOG(INFO) << "RMove Mission Failed! Please Check!";
+                                                    LOG(INFO) << "RMove: Arm has Error! Please Check!";
+
+                                                    // 1. Stop The Ugv for safety concern.
+                                                    mir100_ptr_->Pause();
+                                                    // 2. Stop the whole mission.
+                                                    mir100_ptr_->SetPLCRegisterIntValue(4,3);
+                                                    // 3. Break the RMove Mission.
+                                                    mir100_ptr_->SetPLCRegisterIntValue(6,0);
+                                                    // 4. RMove Mission Failed.
+                                                    mir100_ptr_->SetPLCRegisterIntValue(5,3);
+
                                                     break;
+                                                }
+                                                /// II.2 RMove result
+                                                if(mir100_ptr_->GetPLCRegisterIntValue(5) == 3 )
+                                                {
+                                                    LOG(INFO) << "RMove Result: Mission Failed! Please Check!";
+                                                    continue;
                                                 }
                                             }
 
@@ -2590,8 +2611,6 @@ void yf::sys::nw_sys::ArmSetViaPoints(const std::deque<yf::data::arm::Point3d>& 
             break;
         }
     }
-
-    return;
 }
 
 void yf::sys::nw_sys::ArmSetApproachPoint(const yf::data::arm::Point3d& approach_point, const yf::data::arm::ToolAngle &tool_angle)
@@ -4463,15 +4482,7 @@ void yf::sys::nw_sys::thread_RMoveForceNode()
         while(!rmove_start_flag_)
         {
             sleep.ms(200);
-//            LOG(INFO) << "flag -1";
-//
-//            std::unique_lock<std::mutex> ull(mux_Blocking_RMoveForceNode);
-//            cv_Blocking_RMoveForceNode.wait(ull);
-//
-//            LOG(INFO) << "flag 0";
         }
-
-        LOG(INFO) << "flag 1";
 
         switch (cur_tool_angle_)
         {
@@ -4526,6 +4537,15 @@ bool yf::sys::nw_sys::WaitForArmRMoveForceFlag(const int &value, const int &time
 bool yf::sys::nw_sys::get_rmove_start_flag()
 {
     return rmove_start_flag_;
+}
+
+bool yf::sys::nw_sys::IsArmAtHomePos()
+{
+    bool isArmAtHomePos = false;
+
+    // check if the arm is at home pos.
+
+    return isArmAtHomePos;
 }
 
 
