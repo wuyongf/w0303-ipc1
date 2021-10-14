@@ -318,6 +318,8 @@ namespace yf
 
             bool CheckChangePadFlag(const int& cur_model_config_id);
 
+            bool CheckPadAbsorbWaterFlag(const int& arm_con);
+
         };
     }
 }
