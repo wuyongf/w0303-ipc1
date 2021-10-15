@@ -528,6 +528,11 @@ bool yf::algorithm::arm_path::RecordCurRealPC(const std::string &abs_directory, 
     int resolution = 30;
     double input_pt[30000][3];
 
+    /// Record the current Point Cloud
+    /// 1. get standard(ref) point_no
+    /// 2. record current point cloud
+    /// 3. if the point no is not large enough. re-record!
+
     auto point_no = this->RecordRealPCArray(resolution, input_pt);
 
     if(point_no <= 0)
