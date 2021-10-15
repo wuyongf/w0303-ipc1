@@ -936,6 +936,7 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                 // 1. find last valid order
                                 // input: cur_order, which is the cur_valid_order!
                                 // 2. get cur_valid_order & last_valid_order
+                                std::vector<int>::iterator cur_valid_index_index;
 
                                 if(cur_order == cur_first_valid_order_)
                                 {
@@ -943,7 +944,7 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                 }
                                 else
                                 {
-                                    std::vector<int>::iterator cur_valid_index_index = std::find(cur_valid_indexes_.begin(), cur_valid_indexes_.end(), cur_order-1);
+                                    cur_valid_index_index = std::find(cur_valid_indexes_.begin(), cur_valid_indexes_.end(), cur_order-1);
 
                                     auto last_valid_order_index = cur_valid_index_index - cur_valid_indexes_.begin() - 1;
 
@@ -1058,7 +1059,7 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                     }
 
                                     ///\ (2) For each order, move to safety position first.
-                                    //
+                                    // before moving to the safety position, we need to check whether absorbing water or not.
                                     if(cur_order == cur_first_valid_order_ )
                                     {
                                         this->ArmSetOperationArea(cur_operation_area_);
@@ -1066,13 +1067,29 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                     }
                                     else
                                     {
+                                        auto cur_valid_order_index = cur_valid_index_index - cur_valid_indexes_.begin();
+
                                         // if cur_operation_area is not equal to last one, move to safety position first.
                                         if(cur_operation_area_ != last_operation_area)
                                         {
                                             tm5.ArmTask("Post arm_safety_to_front_p1");
 
+                                            if(cur_valid_order_index % 3 == 0)
+                                            {
+                                                this->ArmAbsorbWater();
+                                            }
+
                                             this->ArmSetOperationArea(cur_operation_area_);
                                             tm5.ArmTask("Post arm_home_to_safety");
+                                        }
+                                        else
+                                        {
+                                            if(cur_valid_order_index % 3 == 0)
+                                            {
+                                                tm5.ArmTask("Post arm_safety_to_home");
+                                                this->ArmAbsorbWater();
+                                                tm5.ArmTask("Post arm_home_to_safety");
+                                            }
                                         }
                                     }
 
