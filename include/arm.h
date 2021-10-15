@@ -2187,8 +2187,8 @@ bool yf::arm::tm::IsRSPosDeviationRMove(const double &angle_diff)
     float std_error_rz = 1;
 
     // consider x, y, rz ...
-    float deviation_x, deviation_y, deviation_z;
-    float deviation_rx, deviation_ry, deviation_rz;
+    float deviation_x = 0, deviation_y = 0, deviation_z = 0;
+    float deviation_rx = 0, deviation_ry = 0, deviation_rz = 0;
 
     deviation_rz = angle_diff*180/PI;
 
@@ -2214,7 +2214,7 @@ bool yf::arm::tm::IsRSPosDeviationRMove(const double &angle_diff)
         } else if ( -180 < deviation_rz && deviation_rz <= 0)
         {
             // counterclockwise (PLC 011 = 1)
-            this->set_PLC_int_value(11,1);
+            this->set_PLC_int_value(11,2);
 
             // iteration_no PLC 008
             deviation_rz = std::abs(deviation_rz);
@@ -2227,7 +2227,7 @@ bool yf::arm::tm::IsRSPosDeviationRMove(const double &angle_diff)
         } else if (  0 < deviation_rz && deviation_rz <= 180 )
         {
             // clockwise (PLC 011 = 2)
-            this->set_PLC_int_value(11,2);
+            this->set_PLC_int_value(11,1);
 
             // iteration_no PLC 008
 

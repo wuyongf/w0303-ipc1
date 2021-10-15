@@ -1049,7 +1049,7 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                     tm5.set_remove_tool_flag(true);
                                                 }
 
-                                                #if 1 //disable for testing
+                                                #if 0 //disable for testing
                                                 this->ArmAbsorbWater();
                                                 #endif
 
@@ -2007,6 +2007,9 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                                                                 arm_mission_configs[n].vision_success_flag = tm5.Phase2GetTMat4Handle(real_pc_file,ref_pos_tf_file);
                                                                                                 arm_mission_configs[n].TMat = tm5.get_TMat();
                                                                                                 arm_mission_configs[n].angle_diff = tm5.get_angle_diff();
+
+                                                                                                LOG(INFO) << "RS:TMat: " << std::endl << arm_mission_configs[n].TMat << std::endl;
+                                                                                                LOG(INFO) << "RS: angle_diff: " << arm_mission_configs[n].angle_diff;
                                                                                             }
                                                                                         }
 
@@ -2069,13 +2072,23 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
 
                                                                                         amc_deviation_skip_flag = false;
                                                                                     }
-                                                                                    LOG(INFO) << "RS: vision_job success!!";
-                                                                                    amc_deviation_skip_flag = false;
                                                                                 }
                                                                                 else
                                                                                 {
-                                                                                    LOG(INFO) << "RS: vision_job failed!!";
-                                                                                    amc_deviation_skip_flag = true;
+                                                                                    LOG(INFO) << "Cannot find BBox! Skip cur_arm_mission_config!!";
+
+                                                                                    arm_sub_mission_success_flag = false;
+
+                                                                                    LOG(INFO) << "Skip the whole arm mission configs!";
+
+                                                                                    ///TIME
+                                                                                    sleep.ms(200);
+
+                                                                                    /// STOP The RMove Mission
+                                                                                    LOG(INFO) << "Stop Current RMove Mission!";
+
+                                                                                    mir100_ptr_->SetPLCRegisterIntValue(6,0);
+                                                                                    mir100_ptr_->SetPLCRegisterIntValue(5,3);
                                                                                 }
 
                                                                                 break;
@@ -3833,7 +3846,7 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
                                             this->ArmUpdatePadNo();
 
                                             sleep.ms(200);
-#if 1 /// Disable For Testing
+#if 0 /// Disable For Testing
                                             this->ArmAbsorbWater();
 #endif
                                         }

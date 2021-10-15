@@ -144,7 +144,7 @@ namespace yf
 
             Eigen::Matrix4f TMat_;
 
-            double* angle_diff_;
+            double angle_diff_;
 
         public:
 
@@ -530,7 +530,7 @@ bool yf::algorithm::arm_path::RecordCurRealPC(const std::string &abs_directory, 
 
     auto point_no = this->RecordRealPCArray(resolution, input_pt);
 
-    if(point_no <= 0 )
+    if(point_no <= 0)
     {
         return false;
     }
@@ -676,7 +676,7 @@ int yf::algorithm::arm_path::Phase2GetTMat4Handle(std::string& real_pc_file, std
     double location_box[2][6];
     double ref_position[2];
     double ref_angle;
-    double para[5];
+    double para[10];
 
     // hard code for now
 
@@ -704,19 +704,19 @@ int yf::algorithm::arm_path::Phase2GetTMat4Handle(std::string& real_pc_file, std
     location_box[1][4] = -0.9;
     location_box[1][5] = 0.62;
 
-    ref_position[0] = -0.13264;
+    ref_position[0] = -0.135264;
     ref_position[1] = -0.949172;
 
     ref_angle = 0.0275649;
 
-    para[0] = -1.43;
+    para[0] = -1.39;
     para[1] = 0.98;
     para[2] = 1.3;
     para[3] = 0.5;
     para[4] = 3;
     para[5] = 0.025;
 
-    auto n = find_current_transformation(&real_pc_file[0], &ref_pos_tf_file[0], translation, rotation, plane_box, no_of_location_box, location_box, ref_position, ref_angle, para, angle_diff_);
+    auto n = find_current_transformation(&real_pc_file[0], &ref_pos_tf_file[0], translation, rotation, plane_box, no_of_location_box, location_box, ref_position, ref_angle, para, &angle_diff_);
 
     if(n == 1)
     {
@@ -742,8 +742,10 @@ int yf::algorithm::arm_path::Phase2GetTMat4Handle(std::string& real_pc_file, std
         LOG(INFO) << "TMat: " << std::endl << TMat_ ;
         std::cout << "TMat: " << std::endl << TMat_ << std::endl;
 
-        LOG(INFO) << "angle_diff: " << std::endl << *angle_diff_ ;
-        std::cout << "angle_diff: " << std::endl << *angle_diff_ << std::endl;
+        LOG(INFO) << "angle_diff: " << std::endl << angle_diff_ ;
+        std::cout << "angle_diff: " << std::endl << angle_diff_ << std::endl;
+
+        LOG(INFO) << "translation: " << translation[0] << ", " << translation[1] << ", " << translation[2];
     }
     else
     {
@@ -795,7 +797,7 @@ Eigen::Matrix4f yf::algorithm::arm_path::get_TMat()
 
 double yf::algorithm::arm_path::get_angle_diff()
 {
-    return *angle_diff_;
+    return angle_diff_;
 }
 
 
