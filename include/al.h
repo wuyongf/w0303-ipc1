@@ -144,9 +144,13 @@ namespace yf
 
             Eigen::Matrix4f TMat_;
 
+            double* angle_diff_;
+
         public:
 
             Eigen::Matrix4f get_TMat();
+
+            double get_angle_diff();
         };
 
         class TimeSleep
@@ -645,7 +649,7 @@ int yf::algorithm::arm_path::Phase2GetTMat4Handle(std::string& real_pc_file, std
     typedef int (*door_handle_identification )(char pcd_name[],char pcd_transform[],
                                                double delta_dist[],double transformation[][2],
                                                double plane_box[],int no_of_location_box,double location_box[][6],
-                                               double ref_position[],double ref_angle,double para[]);
+                                               double ref_position[],double ref_angle,double para[], double* angle_diff);
 
     // get 2d TMat
     char filename1[] = "cloud_viewer.dll";
@@ -659,8 +663,8 @@ int yf::algorithm::arm_path::Phase2GetTMat4Handle(std::string& real_pc_file, std
         return -2;
     }
 
-    door_handle_identification door_plane_corner_line_processing;
-    door_plane_corner_line_processing = (door_handle_identification)GetProcAddress(hinstLib1, "door_plane_corner_line_processing");
+    door_handle_identification find_current_transformation;
+    find_current_transformation = (door_handle_identification)GetProcAddress(hinstLib1, "find_current_transformation");
 
 
     double translation[3];
@@ -677,14 +681,14 @@ int yf::algorithm::arm_path::Phase2GetTMat4Handle(std::string& real_pc_file, std
     // hard code for now
 
     // for 11221
-    plane_box[0] = 0;
-    plane_box[1] = -1.1;
-    plane_box[2] = 0.63;
-    plane_box[3] = 0.1;
-    plane_box[4] = -0.9;
-    plane_box[5] = 0.67;
+    plane_box[0] = 0.4;
+    plane_box[1] = -1.2;
+    plane_box[2] = 0.7;
+    plane_box[3] = 0.5;
+    plane_box[4] = -0.8;
+    plane_box[5] = 0.8;
 
-    no_of_location_box = 2;
+    no_of_location_box = 0;
 
     location_box[0][0] = 0.2;
     location_box[0][1] = -1.3;
@@ -700,15 +704,19 @@ int yf::algorithm::arm_path::Phase2GetTMat4Handle(std::string& real_pc_file, std
     location_box[1][4] = -0.9;
     location_box[1][5] = 0.62;
 
-    ref_position[0] = 0.290253;
-    ref_position[1] = -0.889795;
+    ref_position[0] = -0.13264;
+    ref_position[1] = -0.949172;
 
-    ref_angle = -0.0724364;
+    ref_angle = 0.0275649;
 
-    para[0] = 0.135;
-    para[4] = 1;
+    para[0] = -1.43;
+    para[1] = 0.98;
+    para[2] = 1.3;
+    para[3] = 0.5;
+    para[4] = 3;
+    para[5] = 0.025;
 
-    auto n = door_plane_corner_line_processing(&real_pc_file[0],&ref_pos_tf_file[0],translation,rotation,plane_box,no_of_location_box,location_box,ref_position,ref_angle,para);
+    auto n = find_current_transformation(&real_pc_file[0], &ref_pos_tf_file[0], translation, rotation, plane_box, no_of_location_box, location_box, ref_position, ref_angle, para, angle_diff_);
 
     if(n == 1)
     {
@@ -732,7 +740,10 @@ int yf::algorithm::arm_path::Phase2GetTMat4Handle(std::string& real_pc_file, std
         TMat_(2, 2) = 1;
 
         LOG(INFO) << "TMat: " << std::endl << TMat_ ;
-        std::cout <<    "TMat: " << std::endl << TMat_ << std::endl;
+        std::cout << "TMat: " << std::endl << TMat_ << std::endl;
+
+        LOG(INFO) << "angle_diff: " << std::endl << *angle_diff_ ;
+        std::cout << "angle_diff: " << std::endl << *angle_diff_ << std::endl;
     }
     else
     {
@@ -780,6 +791,11 @@ std::deque<yf::data::arm::Point3d> yf::algorithm::arm_path::ExportRealPathByRS(c
 Eigen::Matrix4f yf::algorithm::arm_path::get_TMat()
 {
     return TMat_;
+}
+
+double yf::algorithm::arm_path::get_angle_diff()
+{
+    return *angle_diff_;
 }
 
 

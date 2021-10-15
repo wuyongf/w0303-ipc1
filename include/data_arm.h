@@ -281,6 +281,8 @@ namespace  yf
 
                 bool vision_success_flag = 0;
 
+                double angle_diff;
+
             };
         }
     }

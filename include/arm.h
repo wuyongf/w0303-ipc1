@@ -188,6 +188,8 @@ namespace yf
 
             Eigen::Matrix4f get_TMat();
 
+            double get_angle_diff();
+
         public:
             /// Safety Methods
             bool IsLMPosDeviation(const yf::data::arm::Point3d& ref_landmark_pos,
@@ -200,6 +202,8 @@ namespace yf
             /// Relative Move Methods
             bool IsLMPosDeviationRMove(const yf::data::arm::Point3d& ref_landmark_pos,
                                   const yf::data::arm::Point3d& real_landmark_pos);
+
+            bool IsRSPosDeviationRMove(const double& angle_diff);
 
         private:
 
@@ -2167,6 +2171,134 @@ void yf::arm::tm::SetRMoveForceFlag(const int &value)
 int yf::arm::tm::GetRMoveForceFlag()
 {
     return tm_modbus.get_RMove_ForceFlag();
+}
+
+double yf::arm::tm::get_angle_diff()
+{
+    return al_arm_path.get_angle_diff();
+}
+
+bool yf::arm::tm::IsRSPosDeviationRMove(const double &angle_diff)
+{
+    // error tolerance /resolution
+    float std_error_x = 20;
+    float std_error_y = 150;
+
+    float std_error_rz = 1;
+
+    // consider x, y, rz ...
+    float deviation_x, deviation_y, deviation_z;
+    float deviation_rx, deviation_ry, deviation_rz;
+
+    deviation_rz = angle_diff*180/PI;
+
+    LOG(INFO) << "RS: deviation_rz: " << deviation_rz;
+    std::cout << "RS: deviation_rz: " << deviation_rz << std::endl;
+
+    if(std::abs(deviation_rz) > std_error_rz)
+    {
+        /// rz
+        if( deviation_rz <= -180)
+        {
+            // clockwise (PLC 011 = 2)
+            this->set_PLC_int_value(11,2);
+
+            // iteration_no PLC 008
+            deviation_rz = std::abs(std::abs(deviation_rz)- 360);
+
+            int iteration_no_z = std::round(deviation_rz/ std_error_rz);
+            LOG(INFO) << "iteration_no_z: " << iteration_no_z;
+
+            this->set_PLC_int_value(8,iteration_no_z);
+
+        } else if ( -180 < deviation_rz && deviation_rz <= 0)
+        {
+            // counterclockwise (PLC 011 = 1)
+            this->set_PLC_int_value(11,1);
+
+            // iteration_no PLC 008
+            deviation_rz = std::abs(deviation_rz);
+
+            int iteration_no_z = std::round(deviation_rz/ std_error_rz);
+            LOG(INFO) << "iteration_no_z: " << iteration_no_z;
+
+            this->set_PLC_int_value(8,iteration_no_z);
+
+        } else if (  0 < deviation_rz && deviation_rz <= 180 )
+        {
+            // clockwise (PLC 011 = 2)
+            this->set_PLC_int_value(11,2);
+
+            // iteration_no PLC 008
+
+            int iteration_no_z = std::round(deviation_rz/ std_error_rz);
+            LOG(INFO) << "iteration_no_z: " << iteration_no_z;
+
+            this->set_PLC_int_value(8,iteration_no_z);
+
+        }else if( 180 < deviation_rz)
+        {
+            // counterclockwise (PLC 011 = 1)
+            this->set_PLC_int_value(11,1);
+
+            // iteration_no PLC 008
+            deviation_rz = std::abs(deviation_rz- 360);
+
+            int iteration_no_z = std::round(deviation_rz/ std_error_rz);
+            LOG(INFO) << "iteration_no_z: " << iteration_no_z;
+
+            this->set_PLC_int_value(8,iteration_no_z);
+        }
+    } else
+    {
+        // reset (PLC 011 = 0)
+        this->set_PLC_int_value(11,0);
+        this->set_PLC_int_value(8,0);
+    }
+
+#if 0 /// disable for now
+    if(std::abs(deviation_x) > std_error_x)
+    {
+        /// x
+        // if error is still too significant
+        if(deviation_x < 0)
+        {
+            // vehicle move forward (PLC 012 = 1)
+            this->set_PLC_int_value(12,1);
+
+            // iteration_no_x PLC 009
+            int iteration_no_x = std::round(std::abs(deviation_x)/ std_error_x);
+            this->set_PLC_int_value(9,iteration_no_x);
+        } else
+        {
+            // vehicle move backward (PLC 012 = 2)
+            this->set_PLC_int_value(12,2);
+
+            // iteration_no_x PLC 009
+            int iteration_no_x = std::round(std::abs(deviation_x)/ std_error_x);
+            this->set_PLC_int_value(9,iteration_no_x);
+        }
+    } else
+    {
+        // reset
+        this->set_PLC_int_value(12,0);
+        this->set_PLC_int_value(9,0);
+    }
+#endif
+
+    if( std::abs(deviation_rz) > std_error_rz )
+    {
+        // for debug
+        sql_ptr_->InsertNewArmLMError(deviation_x,deviation_y,deviation_z,deviation_rx,deviation_ry,deviation_rz,1,2);
+        return true;
+    }
+    else
+    {
+        // for debug
+        sql_ptr_->InsertNewArmLMError(deviation_x,deviation_y,deviation_z,deviation_rx,deviation_ry,deviation_rz,0,2);
+
+        return false;
+    }
 }
 
 
