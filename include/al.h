@@ -695,7 +695,8 @@ int yf::algorithm::arm_path::Phase2GetTMat4Handle(std::string& real_pc_file, std
 
     // hard code for now
 
-    // for 11221
+    /// for model_config_id: 8068
+#if 0
     plane_box[0] = 0.4;
     plane_box[1] = -1.2;
     plane_box[2] = 0.7;
@@ -724,12 +725,37 @@ int yf::algorithm::arm_path::Phase2GetTMat4Handle(std::string& real_pc_file, std
 
     ref_angle = 0.0275649;
 
-    para[0] = -1.42;
+    para[0] = -1.43;
     para[1] = 0.98;
     para[2] = 1.3;
     para[3] = 0.5;
     para[4] = 3;
     para[5] = 0.025;
+#endif
+
+    /// for model_config_id: 8065
+
+    plane_box[0] = 0.1;
+    plane_box[1] = -1.2;
+    plane_box[2] = 0.6;
+    plane_box[3] = 0.2;
+    plane_box[4] = -0.8;
+    plane_box[5] = 0.7;
+
+    no_of_location_box = 0;
+
+    ref_position[0] = -0.165081;
+    ref_position[1] = -0.801717;
+
+    ref_angle = -0.00932819;
+
+    para[0] = 0.02;
+    para[1] = 0.87;
+    para[2] = -0.1;
+    para[3] = 0;
+    para[4] = 5;
+    para[5] = 0.06;
+
 
     auto n = find_current_transformation(&real_pc_file[0], &ref_pos_tf_file[0], translation, rotation, plane_box, no_of_location_box, location_box, ref_position, ref_angle, para, &angle_diff_);
 
@@ -813,6 +839,11 @@ Eigen::Matrix4f yf::algorithm::arm_path::get_TMat()
 double yf::algorithm::arm_path::get_angle_diff()
 {
     return angle_diff_;
+}
+
+int yf::algorithm::arm_path::get_point_no()
+{
+    return point_no_;
 }
 
 

@@ -41,11 +41,14 @@ int main()
 //    std::cout << "T_deltaa" << std::endl << T_deltaa << std::endl;
 
 /// demo handle testing
-    std::string real_pc_file = "..\\data\\point_clouds\\real\\arm_mission_config_11425\\task_group_9444\\point_cloud\\9444-11425-1-1-protective_wall.pcd";
-    std::string ref_pos_tf_file = "..\\data\\point_clouds\\real\\arm_mission_config_11425\\task_group_9444\\tf\\9444-11425-1-1-protective_wall-tf.txt";
+    // std::string real_pc_file = "..\\data\\point_clouds\\real\\arm_mission_config_11425\\task_group_9444\\point_cloud\\9444-11425-1-1-protective_wall.pcd";
+    // std::string ref_pos_tf_file = "..\\data\\point_clouds\\real\\arm_mission_config_11425\\task_group_9444\\tf\\9444-11425-1-1-protective_wall-tf.txt";
+
+    std::string real_pc_file = "C:\\temp\\arm_mission_config_11423\\point-cloud\\11423-1-1-handrail_lower.pcd";
+    std::string ref_pos_tf_file = "C:\\temp\\arm_mission_config_11423\\tf\\11423-1-1-handrail_lower-tf.txt";
 
 //    auto TMat3 = al.Phase2GetTMat4Handle(real_pc_file,ref_pos_tf_file);
-    auto TMat2 = al.Phase2GetTMat4Handle(real_pc_file,ref_pos_tf_file);
+//    auto TMat2 = al.Phase2GetTMat4Handle(real_pc_file,ref_pos_tf_file);
     auto TMat1 = al.Phase2GetTMat4Handle(real_pc_file,ref_pos_tf_file);
 
 //    Eigen::Matrix4f TMat1;
