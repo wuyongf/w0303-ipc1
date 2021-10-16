@@ -1049,7 +1049,7 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                     tm5.set_remove_tool_flag(true);
                                                 }
 
-                                                #if 0 //disable for testing
+                                                #if 1 //disable for testing
                                                 this->ArmAbsorbWater();
                                                 #endif
 
@@ -1076,6 +1076,7 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
 
                                             if(cur_valid_order_index % 3 == 0)
                                             {
+                                                tm5.ArmTask("Post tool_angle_0");
                                                 this->ArmAbsorbWater();
                                             }
 
@@ -1286,7 +1287,7 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                                     //todo: 2. save the real_point_cloud file
                                                                     LOG(INFO) << "Vision Job [Start]" << std::endl;
                                                                     // ....
-                                                                    auto result = tm5.RecordCurRealPointCloud(pc_dir, real_pc_file_name);
+                                                                    auto result = tm5.RecordCurRealPointCloud(pc_dir, real_pc_file_name, arm_mission_configs[n].id, set+1, view+1);
                                                                     // wait for vision_job done
                                                                     LOG(INFO) << "Vision Job [Running]" << std::endl;
                                                                     LOG(INFO) << "Vision Job [Finish]" << std::endl;
@@ -1848,7 +1849,7 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                                                         //todo: 2. save the real_point_cloud file
                                                                                         LOG(INFO) << "Vision Job [Start]" << std::endl;
                                                                                         // ....
-                                                                                        auto result = tm5.RecordCurRealPointCloud(pc_dir, real_pc_file_name);
+                                                                                        auto result = tm5.RecordCurRealPointCloud(pc_dir, real_pc_file_name, arm_mission_configs[n].id, set+1, view+1);
                                                                                         // wait for vision_job done
                                                                                         LOG(INFO) << "Vision Job [Running]" << std::endl;
                                                                                         LOG(INFO) << "Vision Job [Finish]" << std::endl;
@@ -4059,7 +4060,7 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
                                                             //todo: 2. save the real_point_cloud file
                                                             LOG(INFO) << "Vision Job [Start]" << std::endl;
                                                             // ....
-                                                            auto result = tm5.RecordCurRealPointCloud(pc_dir, real_pc_file_name);
+                                                            auto result = tm5.RecordCurRealPointCloud(pc_dir, real_pc_file_name, arm_mission_configs[n].id, set+1, view+1);
                                                             // wait for vision_job done
                                                             LOG(INFO) << "Vision Job [Running]" << std::endl;
                                                             LOG(INFO) << "Vision Job [Finish]" << std::endl;

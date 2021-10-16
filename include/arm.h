@@ -149,7 +149,8 @@ namespace yf
             std::vector<std::vector<std::string>> GetRefPCFileNames(const int& arm_mission_config_id);
             std::vector<int> GetFeatureTypeIds(const int& arm_mission_config_id);
 
-            bool RecordCurRealPointCloud(const std::string& abs_directory, const std::string& file_name);
+            bool RecordCurRealPointCloud(const std::string& abs_directory, const std::string& file_name,
+                                         const int& amc_id, const int& set_no, const int& view_no);
 
             bool WriteTMatFile(const Eigen::Matrix4f& TMat,
                                const std::string &abs_directory,
@@ -1766,14 +1767,43 @@ std::vector<std::vector<Eigen::Matrix4f>> yf::arm::tm::GetRefTcpPosTFs(const std
     return ref_pc_pos_tfs;
 }
 
-bool yf::arm::tm::RecordCurRealPointCloud(const std::string &abs_directory, const std::string &file_name)
+bool yf::arm::tm::RecordCurRealPointCloud(const std::string &abs_directory, const std::string &file_name,
+                                          const int& amc_id, const int& set_no, const int& view_no)
 {
-    if(al_arm_path.RecordCurRealPC(abs_directory,file_name))
+    bool keep_record_flag = true;
+
+    auto ref_point_no = sql_ptr_->GetEachViewRefPointNo(amc_id,set_no,view_no);
+
+    int failed_time = 0;
+
+    while (keep_record_flag)
+    {
+        al_arm_path.RecordCurRealPC(abs_directory, file_name);
+        auto point_no = al_arm_path.get_point_no();
+
+        if (point_no > ref_point_no * 0.7)
+        {
+            keep_record_flag = false;
+        } else
+        {
+            failed_time++;
+        }
+
+        if (failed_time == 3)
+        {
+            break;
+        }
+    }
+
+    if(!keep_record_flag)
     {
         return true;
     }
     else
+    {
+        LOG(INFO) << "RS: Point Number is not large enough!!! Please Check.";
         return false;
+    }
 }
 
 bool

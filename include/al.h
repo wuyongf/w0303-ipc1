@@ -124,6 +124,16 @@ namespace yf
             /// for phase 2 office demo
             int Phase2GetTMat4Handle(std::string& real_pc_file, std::string& ref_pos_tf_file);
 
+        private:
+
+            int point_no_;
+            int resolution_;
+
+        public:
+
+            int get_point_no();
+            void set_resolution();
+
         public:
 
             float d2r(const float& degree);
@@ -533,9 +543,9 @@ bool yf::algorithm::arm_path::RecordCurRealPC(const std::string &abs_directory, 
     /// 2. record current point cloud
     /// 3. if the point no is not large enough. re-record!
 
-    auto point_no = this->RecordRealPCArray(resolution, input_pt);
+    point_no_ = this->RecordRealPCArray(resolution, input_pt);
 
-    if(point_no <= 0)
+    if(point_no_ <= 0)
     {
         return false;
     }
@@ -557,13 +567,13 @@ bool yf::algorithm::arm_path::RecordCurRealPC(const std::string &abs_directory, 
             myfile << "SIZE 4 4 4\n";
             myfile << "TYPE F F F\n";
             myfile << "COUNT 1 1 1\n";
-            myfile << "WIDTH " << point_no << "\n";
+            myfile << "WIDTH " << point_no_ << "\n";
             myfile << "HEIGHT 1\n";
             myfile << "VIEWPOINT 0 0 0 1 0 0 0\n";
-            myfile << "POINTS " << point_no << "\n";
+            myfile << "POINTS " << point_no_ << "\n";
             myfile << "DATA ascii\n";
 
-            for(int count = 0; count < point_no; count ++)
+            for(int count = 0; count < point_no_; count ++)
             {
                 for (int index = 0 ; index < 3; index++)
                 {
@@ -714,7 +724,7 @@ int yf::algorithm::arm_path::Phase2GetTMat4Handle(std::string& real_pc_file, std
 
     ref_angle = 0.0275649;
 
-    para[0] = -1.39;
+    para[0] = -1.42;
     para[1] = 0.98;
     para[2] = 1.3;
     para[3] = 0.5;

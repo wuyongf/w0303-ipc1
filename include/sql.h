@@ -329,6 +329,8 @@ namespace yf
 
             std::vector<std::string> GetRealFileNames();
 
+            int GetEachViewRefPointNo(const int& arm_mission_config_id, const int& set_no, const int& view_no);
+
         private:
             bool static IsOne(int x){return x == 1;}
         public:
@@ -4995,6 +4997,48 @@ float yf::sql::sql_server::GetUgvMissionConfigRMoveLength(const int &model_confi
         Disconnect();
 
         return rmove_length;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return 0;
+    };
+}
+
+int yf::sql::sql_server::GetEachViewRefPointNo(const int &arm_mission_config_id, const int &set_no, const int &view_no)
+{
+    // SELECT max(set_no) AS current_set_number FROM data_arm_mc_ref_pc where arm_mission_config_id = 11167
+
+    // query string
+    std::string query_update;
+
+    // input
+    std::string arm_mission_config_id_str = std::to_string(arm_mission_config_id);
+    std::string set_no_str = std::to_string(set_no);
+    std::string view_no_str = std::to_string(view_no);
+
+    // output
+    int ref_tcp_pos_id;
+
+    try
+    {
+        Connect();
+
+        query_update = "SELECT ref_point_no FROM data_arm_mc_ref_pc where arm_mission_config_id = " + arm_mission_config_id_str + "AND set_no = " + set_no_str + "AND view_no = " + view_no_str ;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            ref_tcp_pos_id = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return ref_tcp_pos_id;
     }
     catch (std::exception& e)
     {
