@@ -2225,6 +2225,17 @@ bool yf::arm::tm::IsRSPosDeviationRMove(const double &angle_diff)
     LOG(INFO) << "RS: deviation_rz: " << deviation_rz;
     std::cout << "RS: deviation_rz: " << deviation_rz << std::endl;
 
+    // if error too significant, just repeat vision landmark once more.
+    if(std::abs(deviation_rz) > 15)
+    {
+        // reset (PLC 011 = 0)
+        this->set_PLC_int_value(11,0);
+        this->set_PLC_int_value(8,0);
+
+        sql_ptr_->InsertNewArmLMError(deviation_x,deviation_y,deviation_z,deviation_rx,deviation_ry,deviation_rz,1,2);
+        return true;
+    }
+
     if(std::abs(deviation_rz) > std_error_rz)
     {
         /// rz

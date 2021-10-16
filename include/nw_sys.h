@@ -1049,7 +1049,7 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                     tm5.set_remove_tool_flag(true);
                                                 }
 
-                                                #if 0 //disable for testing
+                                                #if 1 //disable for testing
                                                 this->ArmAbsorbWater();
                                                 #endif
 
@@ -2974,26 +2974,18 @@ yf::sys::nw_sys::ArmSetToolAngle(const yf::data::arm::TaskMode &task_mode, const
         {
             case data::arm::ToolAngle::Zero:
             {
-                if(cur_tool_angle_ == data::arm::ToolAngle::FortyFive)
-                {
-                    tm5.ArmTask("Post tool_angle_0");
-                    cur_tool_angle_ = data::arm::ToolAngle::Zero;
-                }
+                tm5.ArmTask("Post tool_angle_0");
+                cur_tool_angle_ = data::arm::ToolAngle::Zero;
                 break;
             }
             case data::arm::ToolAngle::FortyFive:
             {
-                if(cur_tool_angle_ == data::arm::ToolAngle::Zero)
-                {
-                    tm5.ArmTask("Post tool_angle_45");
-                    cur_tool_angle_ = data::arm::ToolAngle::FortyFive;
-                }
+                tm5.ArmTask("Post tool_angle_45");
+                cur_tool_angle_ = data::arm::ToolAngle::FortyFive;
                 break;
             }
         }
     }
-
-    return;
 }
 
 void yf::sys::nw_sys::ArmSetViaPoints(const std::deque<yf::data::arm::Point3d>& via_points,
