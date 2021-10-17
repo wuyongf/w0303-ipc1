@@ -44,8 +44,8 @@ int main()
     // std::string real_pc_file = "..\\data\\point_clouds\\real\\arm_mission_config_11425\\task_group_9444\\point_cloud\\9444-11425-1-1-protective_wall.pcd";
     // std::string ref_pos_tf_file = "..\\data\\point_clouds\\real\\arm_mission_config_11425\\task_group_9444\\tf\\9444-11425-1-1-protective_wall-tf.txt";
 
-    std::string real_pc_file = "C:\\temp\\arm_mission_config_11423\\point-cloud\\11423-1-1-handrail_lower.pcd";
-    std::string ref_pos_tf_file = "C:\\temp\\arm_mission_config_11423\\tf\\11423-1-1-handrail_lower-tf.txt";
+    std::string real_pc_file    = "C:\\dev\\w0303-ipc1\\data\\point_clouds\\real\\arm_mission_config_11433\\task_group_9485\\point_cloud\\9485-11433-1-1-nurse_station.pcd";
+    std::string ref_pos_tf_file = "C:\\dev\\w0303-ipc1\\data\\point_clouds\\real\\arm_mission_config_11433\\task_group_9485\\tf\\9485-11433-1-1-nurse_station-tf.txt";
 
 //    auto TMat3 = al.Phase2GetTMat4Handle(real_pc_file,ref_pos_tf_file);
 //    auto TMat2 = al.Phase2GetTMat4Handle(real_pc_file,ref_pos_tf_file);

@@ -1789,7 +1789,7 @@ bool yf::arm::tm::RecordCurRealPointCloud(const std::string &abs_directory, cons
             failed_time++;
         }
 
-        if (failed_time == 3)
+        if (failed_time == 5)
         {
             break;
         }
@@ -2210,11 +2210,15 @@ double yf::arm::tm::get_angle_diff()
 
 bool yf::arm::tm::IsRSPosDeviationRMove(const double &angle_diff)
 {
-    // error tolerance /resolution
+    // error tolerance
     float std_error_x = 20;
     float std_error_y = 150;
 
-    float std_error_rz = 1;
+    float std_error_rz = 1.0;
+
+    // rotation resolution
+
+    float resolution_rz = 1.0;
 
     // consider x, y, rz ...
     float deviation_x = 0, deviation_y = 0, deviation_z = 0;
@@ -2247,7 +2251,7 @@ bool yf::arm::tm::IsRSPosDeviationRMove(const double &angle_diff)
             // iteration_no PLC 008
             deviation_rz = std::abs(std::abs(deviation_rz)- 360);
 
-            int iteration_no_z = std::round(deviation_rz/ std_error_rz);
+            int iteration_no_z = std::round(deviation_rz/ resolution_rz);
             LOG(INFO) << "iteration_no_z: " << iteration_no_z;
 
             this->set_PLC_int_value(8,iteration_no_z);
@@ -2260,7 +2264,7 @@ bool yf::arm::tm::IsRSPosDeviationRMove(const double &angle_diff)
             // iteration_no PLC 008
             deviation_rz = std::abs(deviation_rz);
 
-            int iteration_no_z = std::round(deviation_rz/ std_error_rz);
+            int iteration_no_z = std::round(deviation_rz/ resolution_rz);
             LOG(INFO) << "iteration_no_z: " << iteration_no_z;
 
             this->set_PLC_int_value(8,iteration_no_z);
@@ -2272,7 +2276,7 @@ bool yf::arm::tm::IsRSPosDeviationRMove(const double &angle_diff)
 
             // iteration_no PLC 008
 
-            int iteration_no_z = std::round(deviation_rz/ std_error_rz);
+            int iteration_no_z = std::round(deviation_rz/ resolution_rz);
             LOG(INFO) << "iteration_no_z: " << iteration_no_z;
 
             this->set_PLC_int_value(8,iteration_no_z);
@@ -2285,7 +2289,7 @@ bool yf::arm::tm::IsRSPosDeviationRMove(const double &angle_diff)
             // iteration_no PLC 008
             deviation_rz = std::abs(deviation_rz- 360);
 
-            int iteration_no_z = std::round(deviation_rz/ std_error_rz);
+            int iteration_no_z = std::round(deviation_rz/ resolution_rz);
             LOG(INFO) << "iteration_no_z: " << iteration_no_z;
 
             this->set_PLC_int_value(8,iteration_no_z);

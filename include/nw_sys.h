@@ -1049,7 +1049,7 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                     tm5.set_remove_tool_flag(true);
                                                 }
 
-                                                #if 1 //disable for testing
+                                                #if 0 //disable for testing
                                                 this->ArmAbsorbWater();
                                                 #endif
 
@@ -1407,6 +1407,53 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                                 case data::arm::ModelType::ProtectiveWall:
                                                                 {
                                                                     auto feature_type = "protective_wall";
+                                                                    auto feature_type_id = sql_ptr_->GetFeatureTypeId(feature_type);
+
+                                                                    std::vector<int> protective_wall_sets;
+
+                                                                    // find the corresponding files
+                                                                    for (int m =0; m < arm_mission_configs[n].feature_type_ids.size(); m++)
+                                                                    {
+                                                                        if(arm_mission_configs[n].feature_type_ids[m] == feature_type_id)
+                                                                        {
+                                                                            protective_wall_sets.push_back(m);
+                                                                        }
+                                                                    }
+
+                                                                    /// for 1 set 1 view algorithm
+                                                                    if(protective_wall_sets.size() == 1)
+                                                                    {
+                                                                        auto set_no  = protective_wall_sets[0];
+
+                                                                        auto cur_set_view_no = arm_mission_configs[n].ref_pc_file_names[set_no].size();
+
+                                                                        if (cur_set_view_no == 1)
+                                                                        {
+                                                                            // get the file name;
+                                                                            auto ref_pc_file_name = arm_mission_configs[n].ref_pc_file_names[set_no][0];
+
+                                                                            auto real_pc_file_name = std::to_string(task_group_id) + "-" + ref_pc_file_name;
+
+                                                                            std::string real_pc_file =   "..\\data\\point_clouds\\real\\arm_mission_config_" + std::to_string(arm_mission_configs[n].id)
+                                                                                                         + "\\task_group_" + std::to_string(task_group_id) + "\\point_cloud\\" + real_pc_file_name + ".pcd";
+
+                                                                            std::string ref_pos_tf_file = "..\\data\\point_clouds\\real\\arm_mission_config_" + std::to_string(arm_mission_configs[n].id)
+                                                                                                          + "\\task_group_" + std::to_string(task_group_id) + "\\tf\\" + real_pc_file_name + "-tf.txt";
+
+                                                                            arm_mission_configs[n].real_pc_file = real_pc_file;
+                                                                            arm_mission_configs[n].ref_pos_tf_file = ref_pos_tf_file;
+
+                                                                            arm_mission_configs[n].vision_success_flag = tm5.Phase2GetTMat4Handle(real_pc_file,ref_pos_tf_file);
+                                                                            arm_mission_configs[n].TMat = tm5.get_TMat();
+                                                                            arm_mission_configs[n].angle_diff = tm5.get_angle_diff();
+                                                                        }
+                                                                    }
+
+                                                                    break;
+                                                                }
+                                                                case data::arm::ModelType::NurseStation:
+                                                                {
+                                                                    auto feature_type = "nurse_station";
                                                                     auto feature_type_id = sql_ptr_->GetFeatureTypeId(feature_type);
 
                                                                     std::vector<int> protective_wall_sets;
@@ -2065,6 +2112,53 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
 
                                                                                                 LOG(INFO) << "RS:TMat: " << std::endl << arm_mission_configs[n].TMat << std::endl;
                                                                                                 LOG(INFO) << "RS: angle_diff: " << arm_mission_configs[n].angle_diff;
+                                                                                            }
+                                                                                        }
+
+                                                                                        break;
+                                                                                    }
+                                                                                    case data::arm::ModelType::NurseStation:
+                                                                                    {
+                                                                                        auto feature_type = "nurse_station";
+                                                                                        auto feature_type_id = sql_ptr_->GetFeatureTypeId(feature_type);
+
+                                                                                        std::vector<int> protective_wall_sets;
+
+                                                                                        // find the corresponding files
+                                                                                        for (int m =0; m < arm_mission_configs[n].feature_type_ids.size(); m++)
+                                                                                        {
+                                                                                            if(arm_mission_configs[n].feature_type_ids[m] == feature_type_id)
+                                                                                            {
+                                                                                                protective_wall_sets.push_back(m);
+                                                                                            }
+                                                                                        }
+
+                                                                                        /// for 1 set 1 view algorithm
+                                                                                        if(protective_wall_sets.size() == 1)
+                                                                                        {
+                                                                                            auto set_no  = protective_wall_sets[0];
+
+                                                                                            auto cur_set_view_no = arm_mission_configs[n].ref_pc_file_names[set_no].size();
+
+                                                                                            if (cur_set_view_no == 1)
+                                                                                            {
+                                                                                                // get the file name;
+                                                                                                auto ref_pc_file_name = arm_mission_configs[n].ref_pc_file_names[set_no][0];
+
+                                                                                                auto real_pc_file_name = std::to_string(task_group_id) + "-" + ref_pc_file_name;
+
+                                                                                                std::string real_pc_file =   "..\\data\\point_clouds\\real\\arm_mission_config_" + std::to_string(arm_mission_configs[n].id)
+                                                                                                                             + "\\task_group_" + std::to_string(task_group_id) + "\\point_cloud\\" + real_pc_file_name + ".pcd";
+
+                                                                                                std::string ref_pos_tf_file = "..\\data\\point_clouds\\real\\arm_mission_config_" + std::to_string(arm_mission_configs[n].id)
+                                                                                                                              + "\\task_group_" + std::to_string(task_group_id) + "\\tf\\" + real_pc_file_name + "-tf.txt";
+
+                                                                                                arm_mission_configs[n].real_pc_file = real_pc_file;
+                                                                                                arm_mission_configs[n].ref_pos_tf_file = ref_pos_tf_file;
+
+                                                                                                arm_mission_configs[n].vision_success_flag = tm5.Phase2GetTMat4Handle(real_pc_file,ref_pos_tf_file);
+                                                                                                arm_mission_configs[n].TMat = tm5.get_TMat();
+                                                                                                arm_mission_configs[n].angle_diff = tm5.get_angle_diff();
                                                                                             }
                                                                                         }
 
