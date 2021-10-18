@@ -758,7 +758,7 @@ int yf::algorithm::arm_path::Phase2GetTMat4Handle(std::string& real_pc_file, std
 #endif
 
     /// for model_config_id: 8071
-
+#if 1
     plane_box[0] = -0.5;
     plane_box[1] = 0.5;
     plane_box[2] = -0.1;
@@ -779,7 +779,7 @@ int yf::algorithm::arm_path::Phase2GetTMat4Handle(std::string& real_pc_file, std
     para[3] = 0.32;
     para[4] = 7;
     para[5] = -0.27;
-
+#endif
 
 
     auto n = find_current_transformation(&real_pc_file[0], &ref_pos_tf_file[0], translation, rotation, plane_box, no_of_location_box, location_box, ref_position, ref_angle, para, &angle_diff_);
