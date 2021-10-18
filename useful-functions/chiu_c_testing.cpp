@@ -70,6 +70,30 @@ typedef int (*door_handle_identification )(char [],char [],double [],double [][2
 
 typedef void (*calculate_exact_bounding_box)(double[][3], unsigned int, double[], double[], double[], double[], double[][3]);
 
+/// New method to record Point Cloud
+
+struct pc_data
+{
+public:
+    double pt[3];
+    pc_data* ptr_to_next_pt;
+};
+
+struct pc_data_list
+{
+public:
+    pc_data* start, * end;
+    int no_of_pt;
+
+    pc_data_list()
+    {
+        start = NULL;
+        end = NULL;
+        no_of_pt = 0;
+    }
+};
+
+typedef int (*get_point_cloud_from_camera_linked_list)(int, pc_data_list*);
 
 int main()
 {
@@ -107,9 +131,28 @@ int main()
                                                 translation,rotation);
 #endif
 
-#if 1
-    // Get the Point Clouds
+    /// New Method
+    int i,resolution=1;
+    char filename2[] = "rs-pointcloud.dll";
+    wchar_t wtext2[100];
+    mbstowcs(wtext2, filename2, strlen(filename2) + 1);
+    LPWSTR ptr2 = wtext2;
+    HINSTANCE hinstLib2 = LoadLibraryW(ptr2);
+    if (hinstLib2 == NULL)
+    {
+        return 1;
+    }
+    get_point_cloud_from_camera_linked_list get_point_cloud;
+    get_point_cloud = (get_point_cloud_from_camera_linked_list)GetProcAddress(hinstLib2, "get_point_cloud_from_camera_linked_list");
 
+    pc_data_list pc_list;
+    i = get_point_cloud(resolution,&pc_list);
+    pc_data* pointer;
+    cout << "List no of point:" <<pc_list.no_of_pt<< endl;
+
+
+    /// old method: Get the Point Clouds
+#if 0
     double input_pt[30000][3];
 
     char filename2[] = "rs-pointcloud.dll"; // in debug file
@@ -129,6 +172,7 @@ int main()
     int m;
     int resolution = 6;
     m=get_point_cloud(resolution, input_pt);
+#endif
 
     // write the point cloud file
     ///\param file_name
@@ -144,20 +188,20 @@ int main()
         myfile << "SIZE 4 4 4\n";
         myfile << "TYPE F F F\n";
         myfile << "COUNT 1 1 1\n";
-        myfile << "WIDTH " << m << "\n";
+        myfile << "WIDTH " << pc_list.no_of_pt << "\n";
         myfile << "HEIGHT 1\n";
         myfile << "VIEWPOINT 0 0 0 1 0 0 0\n";
-        myfile << "POINTS " << m << "\n";
+        myfile << "POINTS " << pc_list.no_of_pt << "\n";
         myfile << "DATA ascii\n";
 
-        for(int count = 0; count < m; count ++)
+        pointer = pc_list.start;
+        for (i = 0;i < pc_list.no_of_pt;i++)
         {
-            for (int index = 0 ; index < 3; index++)
-            {
-                myfile << input_pt[count][index] << " " ;
-            }
-            myfile << std::endl ;
+            myfile << pointer->pt[0] << " " << pointer->pt[1] << " " << pointer->pt[2] << std::endl;
+
+            pointer = pointer->ptr_to_next_pt;
         }
+
         myfile.close();
     }
     else cout << "Unable to open file";
@@ -201,6 +245,8 @@ int main()
     pt[4][2] = 0;
 #endif
 
+
+#if 0
     ///yf: Initialization
     yf::data::arm::Point3d p1,p2,p3,p4,p5;
 

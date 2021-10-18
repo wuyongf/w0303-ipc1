@@ -122,7 +122,7 @@ namespace yf
             int RecordRealPCArray(int &resolution, double (&input_pt)[30000][3]);
 
             /// for phase 2 office demo
-            int Phase2GetTMat4Handle(std::string& real_pc_file, std::string& ref_pos_tf_file);
+            int Phase2GetTMat4Handle(std::string& real_pc_file, std::string& ref_pos_tf_file, const yf::data::arm::ModelType& model_type);
 
         private:
 
@@ -657,7 +657,7 @@ yf::algorithm::arm_path::GetRealPointByRS(const Eigen::Matrix4f &TMat, const yf:
     return real_point;
 }
 
-int yf::algorithm::arm_path::Phase2GetTMat4Handle(std::string& real_pc_file, std::string& ref_pos_tf_file)
+int yf::algorithm::arm_path::Phase2GetTMat4Handle(std::string& real_pc_file, std::string& ref_pos_tf_file, const yf::data::arm::ModelType& model_type)
 {
     TMat_.setZero();
 
@@ -695,91 +695,107 @@ int yf::algorithm::arm_path::Phase2GetTMat4Handle(std::string& real_pc_file, std
 
     // hard code for now
 
-    /// for model_config_id: 8068
-#if 0
-    plane_box[0] = 0.4;
-    plane_box[1] = -1.2;
-    plane_box[2] = 0.7;
-    plane_box[3] = 0.5;
-    plane_box[4] = -0.8;
-    plane_box[5] = 0.8;
+    switch(model_type)
+    {
+        case data::arm::ModelType::ProtectiveWall:
+        {
 
-    no_of_location_box = 0;
+            /// for model_config_id: 8068
 
-    location_box[0][0] = 0.2;
-    location_box[0][1] = -1.3;
-    location_box[0][2] = 0.1;
-    location_box[0][3] = 0.4;
-    location_box[0][4] = -0.9;
-    location_box[0][5] = 0.2;
+            plane_box[0] = 0.4;
+            plane_box[1] = -1.2;
+            plane_box[2] = 0.7;
+            plane_box[3] = 0.5;
+            plane_box[4] = -0.8;
+            plane_box[5] = 0.8;
 
-    location_box[1][0] = 0.2;
-    location_box[1][1] = -1.3;
-    location_box[1][2] = 0.58;
-    location_box[1][3] = 0.4;
-    location_box[1][4] = -0.9;
-    location_box[1][5] = 0.62;
+            no_of_location_box = 0;
 
-    ref_position[0] = -0.135264;
-    ref_position[1] = -0.949172;
+            location_box[0][0] = 0.2;
+            location_box[0][1] = -1.3;
+            location_box[0][2] = 0.1;
+            location_box[0][3] = 0.4;
+            location_box[0][4] = -0.9;
+            location_box[0][5] = 0.2;
 
-    ref_angle = 0.0275649;
+            location_box[1][0] = 0.2;
+            location_box[1][1] = -1.3;
+            location_box[1][2] = 0.58;
+            location_box[1][3] = 0.4;
+            location_box[1][4] = -0.9;
+            location_box[1][5] = 0.62;
 
-    para[0] = -1.43;
-    para[1] = 0.98;
-    para[2] = 1.3;
-    para[3] = 0.5;
-    para[4] = 3;
-    para[5] = 0.025;
-#endif
+            ref_position[0] = -0.135264;
+            ref_position[1] = -0.949172;
 
-    /// for model_config_id: 8065
-#if 0
-    plane_box[0] = 0.1;
-    plane_box[1] = -1.2;
-    plane_box[2] = 0.6;
-    plane_box[3] = 0.2;
-    plane_box[4] = -0.8;
-    plane_box[5] = 0.7;
+            ref_angle = 0.0275649;
 
-    no_of_location_box = 0;
+            para[0] = -1.43;
+            para[1] = 0.98;
+            para[2] = 1.3;
+            para[3] = 0.5;
+            para[4] = 3;
+            para[5] = -0.025;
 
-    ref_position[0] = -0.166294;
-    ref_position[1] = -0.931711;
+            break;
+        }
 
-    ref_angle = -0.00932819;
+        case data::arm::ModelType::Handrail:
+        {
+            /// for model_config_id: 8065
 
-    para[0] = 0.02;
-    para[1] = 0.87;
-    para[2] = -0.1;
-    para[3] = 0;
-    para[4] = 5;
-    para[5] = -0.07;
-#endif
+            plane_box[0] = 0.1;
+            plane_box[1] = -1.2;
+            plane_box[2] = 0.6;
+            plane_box[3] = 0.2;
+            plane_box[4] = -0.8;
+            plane_box[5] = 0.7;
 
-    /// for model_config_id: 8071
-#if 1
-    plane_box[0] = -0.5;
-    plane_box[1] = 0.5;
-    plane_box[2] = -0.1;
-    plane_box[3] = -0.4;
-    plane_box[4] = 1;
-    plane_box[5] = 0;
+            no_of_location_box = 0;
 
-    no_of_location_box = 0;
+            ref_position[0] = -0.166294;
+            ref_position[1] = -0.931711;
 
-    ref_position[0] = -0.608983;
-    ref_position[1] = 0.803239;
+            ref_angle = -0.00932819;
 
-    ref_angle = 0.037628;
+            para[0] = 0.02;
+            para[1] = 0.87;
+            para[2] = -0.1;
+            para[3] = 0;
+            para[4] = 5;
+            para[5] = -0.07;
 
-    para[0] = -0.33;
-    para[1] = -1.13;
-    para[2] = -0.3;
-    para[3] = 0.32;
-    para[4] = 7;
-    para[5] = -0.27;
-#endif
+            break;
+        }
+
+        case data::arm::ModelType::NurseStation:
+        {
+            /// for model_config_id: 8071
+
+            plane_box[0] = -0.5;
+            plane_box[1] = 0.5;
+            plane_box[2] = -0.2;
+            plane_box[3] = -0.2;
+            plane_box[4] = 1;
+            plane_box[5] = 0.1;
+
+            no_of_location_box = 0;
+
+            ref_position[0] = -0.608983;
+            ref_position[1] = 0.803239;
+
+            ref_angle = 0.037628;
+
+            para[0] = -0.33;
+            para[1] = -1.13;
+            para[2] = -0.3;
+            para[3] = 0.32;
+            para[4] = 7;
+            para[5] = -0.27;
+
+            break;
+        }
+    }
 
 
     auto n = find_current_transformation(&real_pc_file[0], &ref_pos_tf_file[0], translation, rotation, plane_box, no_of_location_box, location_box, ref_position, ref_angle, para, &angle_diff_);

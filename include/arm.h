@@ -185,7 +185,7 @@ namespace yf
             yf::data::arm::Point3d GetRealPointByRS(const Eigen::Matrix4f & TMat,
                                                     const yf::data::arm::Point3d& ref_tcp_pos);
 
-            int Phase2GetTMat4Handle(std::string& real_pc_file, std::string& ref_pos_tf_file);
+            int Phase2GetTMat4Handle(std::string& real_pc_file, std::string& ref_pos_tf_file, const yf::data::arm::ModelType& model_type);
 
             Eigen::Matrix4f get_TMat();
 
@@ -1844,9 +1844,9 @@ yf::arm::tm::GetRealPointByRS(const Eigen::Matrix4f &TMat, const yf::data::arm::
     return al_arm_path.GetRealPointByRS(TMat,ref_tcp_pos);
 }
 
-int yf::arm::tm::Phase2GetTMat4Handle(std::string &real_pc_file, std::string &ref_pos_tf_file)
+int yf::arm::tm::Phase2GetTMat4Handle(std::string &real_pc_file, std::string &ref_pos_tf_file, const yf::data::arm::ModelType& model_type)
 {
-    return al_arm_path.Phase2GetTMat4Handle(real_pc_file,ref_pos_tf_file);
+    return al_arm_path.Phase2GetTMat4Handle(real_pc_file,ref_pos_tf_file, model_type);
 }
 
 std::deque<yf::data::arm::Point3d> yf::arm::tm::GetRealViaPointsByRS(const Eigen::Matrix4f &TMat,
