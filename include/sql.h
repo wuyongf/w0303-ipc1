@@ -331,6 +331,14 @@ namespace yf
 
             int GetEachViewRefPointNo(const int& arm_mission_config_id, const int& set_no, const int& view_no);
 
+            ///
+            /// Phase2: DEMO
+            ///
+
+            // custom button 6 --- clear all executing jobs
+            void ClearDBRunningJobs();
+
+
         private:
             bool static IsOne(int x){return x == 1;}
         public:
@@ -5047,6 +5055,27 @@ int yf::sql::sql_server::GetEachViewRefPointNo(const int &arm_mission_config_id,
 
         return 0;
     };
+}
+
+void yf::sql::sql_server::ClearDBRunningJobs()
+{
+    std::string query_update;
+
+    try
+    {
+        Connect();
+
+        query_update = "Update sys_schedule_job set status = 5 where status = 2";
+
+        nanodbc::execute(conn_,query_update);
+
+        Disconnect();
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+    }
 }
 
 

@@ -514,7 +514,7 @@ void yf::sys::nw_sys::thread_DoSchedules()
                     {
                         /// Testing
 
-                        #if 0
+                        #if 1
                         /// custom_plan: 1-6
                         auto plan_no = sql_ptr_->GetAvailableCustomPlan();
 
@@ -522,13 +522,15 @@ void yf::sys::nw_sys::thread_DoSchedules()
                         {
                             case 1:
                             {
-                                tm5.ArmTask("Post demo1");
+                                /// Publish a new schedule 1... To Mopping?
+
                                 sql_ptr_->ResetCustomPlan(1);
                                 break;
                             }
                             case 2:
                             {
-                                tm5.ArmTask("Post demo2");
+                                /// Publish a new schedule 2... To Scanning?
+
                                 sql_ptr_->ResetCustomPlan(2);
                                 break;
                             }
@@ -549,6 +551,8 @@ void yf::sys::nw_sys::thread_DoSchedules()
                             }
                             case 6:
                             {
+                                /// clear running jobs
+                                sql_ptr_->ClearDBRunningJobs();
                                 sql_ptr_->ResetCustomPlan(6);
                                 break;
                             }
