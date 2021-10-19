@@ -1049,7 +1049,7 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                     tm5.set_remove_tool_flag(true);
                                                 }
 
-                                                #if 0 //disable for testing
+                                                #if 1 //disable for testing
                                                 this->ArmAbsorbWater();
                                                 #endif
 
@@ -3787,7 +3787,7 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
                                             this->ArmUpdatePadNo();
 
                                             sleep.ms(200);
-#if 0 /// Disable For Testing
+#if 1 /// Disable For Testing
                                             this->ArmAbsorbWater();
 #endif
                                         }
