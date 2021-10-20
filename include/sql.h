@@ -335,19 +335,15 @@ namespace yf
             /// Phase2: DEMO
             ///
 
-            // custom button 1 --- clear all executing jobs
-            void CreateNewSchedule(const int& schedule_id);
+            // custom button 1 --- Onsite setup: Get Schedule Ready.
+            void OSGetScheduleReady(const int& schedule_id, const int& seconds_later_from_now);
 
             // custom button 6 --- clear all executing jobs
             void ClearDBRunningJobs();
 
-
         private:
             bool static IsOne(int x){return x == 1;}
-        public:
 
-            /// Onsite setup
-            void OSGetScheduleReady(const int& schedule_id, const int& seconds_later_from_now);
 
         private: /// Onsite Setup: method 1: stl time ---> db time
 
@@ -5081,26 +5077,7 @@ void yf::sql::sql_server::ClearDBRunningJobs()
     }
 }
 
-void yf::sql::sql_server::CreateNewSchedule(const int &schedule_id)
-{
-    std::string query_update;
 
-    try
-    {
-        Connect();
-
-        query_update = "Update sys_schedule set status = 1 and planned_start = ' "+ this->TimeNow()+"' where ID = " + std::to_string(schedule_id);
-
-        nanodbc::execute(conn_,query_update);
-
-        Disconnect();
-    }
-    catch (std::exception& e)
-    {
-        std::cerr << e.what() << std::endl;
-        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
-    }
-}
 
 
 

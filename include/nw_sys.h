@@ -523,7 +523,7 @@ void yf::sys::nw_sys::thread_DoSchedules()
                             case 1:
                             {
                                 /// Publish a new schedule 1... Protective Wall
-
+                                sql_ptr_->OSGetScheduleReady(25210,4);
 
                                 sql_ptr_->ResetCustomPlan(1);
                                 break;
@@ -531,12 +531,16 @@ void yf::sys::nw_sys::thread_DoSchedules()
                             case 2:
                             {
                                 /// Publish a new schedule 2... Rectangle Desk
+                                sql_ptr_->OSGetScheduleReady(25216,4);
 
                                 sql_ptr_->ResetCustomPlan(2);
                                 break;
                             }
                             case 3:
                             {
+                                /// Publish a new schedule 3... Both Protective Wall & Rectangle Desk
+                                sql_ptr_->OSGetScheduleReady(25217,4);
+
                                 sql_ptr_->ResetCustomPlan(3);
                                 break;
                             }
@@ -552,9 +556,14 @@ void yf::sys::nw_sys::thread_DoSchedules()
                             }
                             case 6:
                             {
-                                /// clear running jobs
+                                /// clear all running jobs
                                 sql_ptr_->ClearDBRunningJobs();
                                 sql_ptr_->ResetCustomPlan(6);
+                                break;
+                            }
+                            case 7:
+                            {
+                                sql_ptr_->ResetCustomPlan(7);
                                 break;
                             }
                         }
