@@ -522,14 +522,15 @@ void yf::sys::nw_sys::thread_DoSchedules()
                         {
                             case 1:
                             {
-                                /// Publish a new schedule 1... To Mopping?
+                                /// Publish a new schedule 1... Protective Wall
+
 
                                 sql_ptr_->ResetCustomPlan(1);
                                 break;
                             }
                             case 2:
                             {
-                                /// Publish a new schedule 2... To Scanning?
+                                /// Publish a new schedule 2... Rectangle Desk
 
                                 sql_ptr_->ResetCustomPlan(2);
                                 break;
@@ -1053,7 +1054,7 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                     tm5.set_remove_tool_flag(true);
                                                 }
 
-                                                #if 1 //disable for testing
+                                                #if 0 //disable for testing
                                                 this->ArmAbsorbWater();
                                                 #endif
 
