@@ -546,11 +546,35 @@ void yf::sys::nw_sys::thread_DoSchedules()
                             }
                             case 4:
                             {
+                                /// Move to a specific position. For Demo
+
+                                // 1. construct a mission
+                                mir100_ptr_->PostMissionMove();
+                                mir100_ptr_->PostActionsMove("protective_wall_7044 _10077_via1");
+
+                                // 2. go to a specific position
+                                cur_mission_guid_ = mir100_ptr_->GetCurMissionGUID();
+                                mir100_ptr_->PostMissionQueue(cur_mission_guid_);
+                                sleep.ms(200);
+                                mir100_ptr_->Play();
+
                                 sql_ptr_->ResetCustomPlan(4);
                                 break;
                             }
                             case 5:
                             {
+                                /// Go back to ChargingStation. For Demo only.
+
+                                // 1. ugv creates its charging mission.
+                                mir100_ptr_->PostMissionForCharging();
+                                mir100_ptr_->PostActionsForCharging();
+
+                                // 2. ugv goes to charging station
+                                cur_mission_guid_ = mir100_ptr_->GetCurMissionGUID();
+                                mir100_ptr_->PostMissionQueue(cur_mission_guid_);
+                                sleep.ms(200);
+                                mir100_ptr_->Play();
+
                                 sql_ptr_->ResetCustomPlan(5);
                                 break;
                             }
@@ -558,11 +582,16 @@ void yf::sys::nw_sys::thread_DoSchedules()
                             {
                                 /// clear all running jobs
                                 sql_ptr_->ClearDBRunningJobs();
+
                                 sql_ptr_->ResetCustomPlan(6);
                                 break;
                             }
                             case 7:
                             {
+                                tm5.SetWaterPumpHigh();
+                                sleep.sec(5);
+                                tm5.SetWaterPumpLow();
+
                                 sql_ptr_->ResetCustomPlan(7);
                                 break;
                             }
@@ -735,6 +764,7 @@ void yf::sys::nw_sys::DoJobs(const int &cur_schedule_id)
     {
         LOG(INFO) << "All jobs are done";
 
+#if 0
         // 2. ugv creates its charging mission.
         mir100_ptr_->PostMissionForCharging();
         mir100_ptr_->PostActionsForCharging();
@@ -744,6 +774,7 @@ void yf::sys::nw_sys::DoJobs(const int &cur_schedule_id)
         mir100_ptr_->PostMissionQueue(cur_mission_guid_);
         sleep.ms(200);
         mir100_ptr_->Play();
+#endif
     }
     else
     {
@@ -1063,7 +1094,7 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                     tm5.set_remove_tool_flag(true);
                                                 }
 
-                                                #if 0 //disable for testing
+                                                #if 1 //disable for testing
                                                 this->ArmAbsorbWater();
                                                 #endif
 
@@ -1395,6 +1426,11 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                                 case data::arm::ModelType::NurseStation:
                                                                 {
                                                                     feature_type = "nurse_station";
+                                                                    break;
+                                                                }
+                                                                case data::arm::ModelType::DeskRectangle:
+                                                                {
+                                                                    feature_type = "rectangle_desk";
                                                                     break;
                                                                 }
                                                             }
@@ -1934,6 +1970,11 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                                                     case data::arm::ModelType::NurseStation:
                                                                                     {
                                                                                         feature_type = "nurse_station";
+                                                                                        break;
+                                                                                    }
+                                                                                    case data::arm::ModelType::DeskRectangle:
+                                                                                    {
+                                                                                        feature_type = "rectangle_desk";
                                                                                         break;
                                                                                     }
                                                                                 }

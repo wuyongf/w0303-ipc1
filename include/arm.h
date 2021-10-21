@@ -48,6 +48,9 @@ namespace yf
             void SetMotorHigh();
             void SetMotorLow();
 
+            void SetWaterPumpHigh();
+            void SetWaterPumpLow();
+
             void SetRMoveForceFlag(const int& value);
             int GetRMoveForceFlag();
 
@@ -2345,6 +2348,18 @@ bool yf::arm::tm::IsRSPosDeviationRMove(const double &angle_diff)
         return false;
     }
 }
+
+void yf::arm::tm::SetWaterPumpHigh()
+{
+    tm_modbus.set_control_box_DO(2,1);
+}
+
+void yf::arm::tm::SetWaterPumpLow()
+{
+    tm_modbus.set_control_box_DO(2,0);
+}
+
+
 
 
 

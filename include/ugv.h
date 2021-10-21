@@ -200,6 +200,10 @@ namespace yf
             std::deque<std::string> GetMapNameList(const std::string& session_name);
             std::deque<std::string> GetPositionNameList(const std::string& session_name, const std::string& map_name);
 
+            /// demo
+            bool PostMissionMove();
+            void PostActionsMove(const std::string& position_name);
+
         public:
             std::string GetSessionGUID(const std::string& session_name);
             std::string GetMapGUID(const std::string& session_name, const std::string& map_name);
@@ -3170,6 +3174,90 @@ void yf::ugv::mir::PostRMoveActions(const float& rmove_x, const std::string &mis
 
     this->PostActionWaitPLC(1, 0, mission_guid, priority);
     priority++;
+}
+
+void yf::ugv::mir::PostActionsMove(const std::string& position_name)
+{
+    /// prerequisite
+    // 1. get mission_guid from REST
+    std::string mission_guid = this->GetCurMissionGUID();
+
+    // 2. map_guid
+    auto map_name = sql_ptr_->GetMapNameFromMapStatus();
+    std::string map_guid = this->GetMapGUID(map_name);
+
+    // 3. position_guid
+    std::string position_guid = this->GetPositionGUID(map_guid,position_name);
+
+    /// Actions detail
+    //
+    int priority = 1;
+
+    /// Initialization Ugv Properties
+    // speed
+    this->PostActionSpeed(0.6,mission_guid,priority);
+    priority++;
+    // go to position
+    this->PostActionMove(position_guid,mission_guid,priority);
+    priority++;
+}
+
+bool yf::ugv::mir::PostMissionMove()
+{
+    /// 1. get site_id, building_id, floor_id
+    auto site_id        = sql_ptr_->GetSiteIdFromMapStatus();
+    auto building_id    = sql_ptr_->GetBuildingIdFromMapStatus();
+    auto floor_id       = sql_ptr_->GetFloorIdFromMapStatus();
+    /// 2. get site_info, building_info, floor_info
+    auto site_info      = sql_ptr_->GetSiteInfoFromSiteId(site_id);
+    auto building_info  = sql_ptr_->GetBuildingInfoFromBuildingId(building_id);
+    auto floor_info     = sql_ptr_->GetFloorInfoFromFromFloorId(floor_id);
+
+    /// 4. get time
+    sql_ptr_->UpdateTime();
+    auto time_year = sql_ptr_->get_time_element("year");
+    auto time_month = sql_ptr_->get_time_element("month");
+    auto time_day = sql_ptr_->get_time_element("day");
+    auto time_hour = sql_ptr_->get_time_element("hour");
+    auto time_min = sql_ptr_->get_time_element("minute");
+    auto time_sec = sql_ptr_->get_time_element("sec");
+
+    auto time = time_year + time_month + time_day + "_" + time_hour + time_min + "_" + time_sec;
+
+    /// (1) set cur_mission_name
+    cur_mission_name_ = building_info + "_" + floor_info + "/F_UgvMoveToPosition_" + time;
+
+    /// (2) get session_id
+
+    if(site_info == "hkstp")
+    {
+        cur_session_guid_ = session_guid_HKSTP_;
+    }
+    else if(site_info == "emsd")
+    {
+        cur_session_guid_ = session_guid_EMSD_;
+    }
+    else if(site_info == "ha")
+    {
+        cur_session_guid_ = session_guid_HA_;
+    }
+
+    /// (3) mission creation
+    //@@ input:
+    //   (1) name,       done    12w_2f_handrail_001_20210406_1020
+    //   (2) session_id, done    hkstp  guid: 7aa0de9c-8579-11eb-9840-00012978eb45
+    //   (3) hidden,     done    false
+    //   (4) group_id,   done    Missions guid: mirconst-guid-0000-0011-missiongroup
+
+    Poco::JSON::Object mission;
+
+    mission.set("session_id",cur_session_guid_);
+    mission.set("name",cur_mission_name_);
+
+    mission.set("hidden", hidden_flag_);
+    mission.set("group_id", group_id_);
+
+    return PostMethod("/api/v2.0.0/missions", mission);
 }
 
 
