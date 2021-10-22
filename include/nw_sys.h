@@ -1189,7 +1189,9 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                     tm5.ArmTask("Move_to standby_p0");
 
                                                     // a.2.
+                                                    #if 1 /// disable for demo
                                                     this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
+                                                    #endif
 
                                                     /// b. vision job initialization
                                                     ///   b.1: for None: do nothing
@@ -1615,8 +1617,9 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                         tm5.ArmTask("Move_to standby_p1");
 
                                                         // 2.1.2 check&set tool_angle
+#if 0 /// Disable for Demo
                                                         this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
-
+#endif
                                                         /// 2.3 Fire the task and then return to standby_p1 ---> standby_p0
 
                                                         // 2.3.1 assign n_via_points.
@@ -1698,7 +1701,10 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
 
                                                                         // a.2. check&set tool_angle
 //                                                                        this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
+
+                                                                        #if 0 /// disable for demo
                                                                         tm5.ArmTask("Post tool_angle_45");
+                                                                        #endif
 
                                                                         /// b. vision job initialization
                                                                         ///   b.1: for None: do nothing
