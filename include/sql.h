@@ -3009,8 +3009,6 @@ int yf::sql::sql_server::GetScheduleCommand(const int &id)
         {
             return 0;
         }
-
-
     }
     catch (std::exception& e)
     {

@@ -25,8 +25,6 @@ void thread_IPCServerStartup(std::shared_ptr<IPCServer>& server_ptr, bool& serve
     }
 
     server_ptr->Stop();
-
-    return;
 }
 
 
