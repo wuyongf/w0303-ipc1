@@ -1194,7 +1194,7 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                     tm5.ArmTask("Move_to standby_p0");
 
                                                     // a.2.
-                                                    #if 1 ///
+                                                    #if 1 /// disable for demo
                                                     this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
                                                     #endif
 
@@ -1622,7 +1622,7 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                         tm5.ArmTask("Move_to standby_p1");
 
                                                         // 2.1.2 check&set tool_angle
-#if 1
+#if 0 /// Disable for Demo
                                                         this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
 #endif
                                                         /// 2.3 Fire the task and then return to standby_p1 ---> standby_p0
@@ -1707,7 +1707,7 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                                         // a.2. check&set tool_angle
 //                                                                        this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
 
-                                                                        #if 1
+                                                                        #if 0 /// disable for demo
                                                                         tm5.ArmTask("Post tool_angle_45");
                                                                         #endif
 
@@ -3284,7 +3284,7 @@ void yf::sys::nw_sys::ArmAbsorbWater()
     std::string absorb_type_command = "Set absorb_type = " + std::to_string(absorb_type);
     tm5.ArmTask(absorb_type_command);
 
-//    sleep.ms(200);
+    sleep.ms(200);
 
     tm5.ArmTask("Post arm_absorb_water");
 }
@@ -4944,6 +4944,8 @@ void yf::sys::nw_sys::thread_RMoveForceNode()
             }
         }
 
+        LOG(INFO) << "flag 3";
+
         rmove_start_flag_ = false;
     }
 }
@@ -5261,7 +5263,7 @@ void yf::sys::nw_sys::DoTasksForDemo(const int &last_job_id, const int &cur_job_
                                                 {
                                                     // if there is any tool attaching on the arm, place it first
                                                     this->ArmPlaceToolSafety();
-//                                                    sleep.ms(200);
+                                                    sleep.ms(200);
 
                                                     this->ArmPickTool(cur_task_mode_);
 
@@ -5284,16 +5286,16 @@ void yf::sys::nw_sys::DoTasksForDemo(const int &last_job_id, const int &cur_job_
                                                 {
                                                     // if there is any tool attaching on the arm, place it first
                                                     this->ArmPlaceToolSafety();
-//                                                    sleep.ms(200);
+                                                    sleep.ms(200);
 
                                                     this->ArmPickTool(cur_task_mode_);
-//                                                    sleep.ms(200);
+                                                    sleep.ms(200);
 
                                                     this->ArmPickPad(cur_job_id);
-//                                                    sleep.ms(200);
+                                                    sleep.ms(200);
 
                                                     this->ArmUpdatePadNo();
-//                                                    sleep.ms(200);
+                                                    sleep.ms(200);
 
                                                     // for remove_tool
                                                     tm5.set_remove_tool_flag(false);
@@ -5307,11 +5309,11 @@ void yf::sys::nw_sys::DoTasksForDemo(const int &last_job_id, const int &cur_job_
                                                     if(change_pad_flag)
                                                     {
                                                         this->ArmRemovePad(last_job_id);
-//                                                        sleep.ms(200);
+                                                        sleep.ms(200);
                                                         this->ArmPickPad(cur_job_id);
-//                                                        sleep.ms(200);
+                                                        sleep.ms(200);
                                                         this->ArmUpdatePadNo();
-//                                                        sleep.ms(200);
+                                                        sleep.ms(200);
 
                                                         // for remove_tool
                                                         tm5.set_remove_tool_flag(false);
@@ -5423,8 +5425,7 @@ void yf::sys::nw_sys::DoTasksForDemo(const int &last_job_id, const int &cur_job_
 
                                                     // a.2.
 #if 1 /// disable for demo
-                                                    if(cur_model_config_id_ != 8072)
-                                                        this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
+                                                    this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
 #endif
 
                                                     /// b. vision job initialization
@@ -5878,7 +5879,7 @@ void yf::sys::nw_sys::DoTasksForDemo(const int &last_job_id, const int &cur_job_
 
                                             // a.
                                             tm5.ArmTask("Post arm_back_to_safety");
-//                                            sleep.ms(200);
+                                            sleep.ms(200);
 
                                             break;
                                         }
@@ -6362,8 +6363,7 @@ void yf::sys::nw_sys::DoTasksForDemo(const int &last_job_id, const int &cur_job_
                                                                         tm5.ArmTask("Move_to standby_p1");
 
                                                                         // 2.2 check&set tool_angle
-                                                                        if(cur_model_config_id_ != 8072)
-                                                                            this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
+                                                                        this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
 
                                                                         // 2.3 via_approach_point
 
@@ -6413,11 +6413,11 @@ void yf::sys::nw_sys::DoTasksForDemo(const int &last_job_id, const int &cur_job_
                                                                         /// 2.5 awake the thread_RMoveForceNode
                                                                         cur_tool_angle_ = arm_mission_configs[n].tool_angle;
                                                                         rmove_start_flag_ = true;
-//                                                                        sleep.ms(200);
-//                                                                        //notify
-//                                                                        std::unique_lock<std::mutex> ull(mux_Blocking_RMoveForceNode);
-//                                                                        cv_Blocking_RMoveForceNode.notify_one();
-//                                                                        sleep.ms(200);
+                                                                        sleep.ms(200);
+                                                                        //notify
+                                                                        std::unique_lock<std::mutex> ull(mux_Blocking_RMoveForceNode);
+                                                                        cv_Blocking_RMoveForceNode.notify_one();
+                                                                        sleep.ms(200);
 
                                                                         if(this->WaitForArmRMoveForceFlag(1,1))
                                                                         {
@@ -6453,9 +6453,9 @@ void yf::sys::nw_sys::DoTasksForDemo(const int &last_job_id, const int &cur_job_
                                                                             end = std::chrono::high_resolution_clock::now();
                                                                             duration = end - start;
                                                                             float min = duration.count() / 60.0f;
-                                                                            if( min > 15 )
+                                                                            if( min > 5 )
                                                                             {
-                                                                                LOG(INFO) << "RMove: already last 15 min. Timeout!";
+                                                                                LOG(INFO) << "RMove: already last 5 min. Timeout!";
 
                                                                                 rmove_continue_flag = false;
                                                                                 /// STOP The RMove Mission
@@ -6719,7 +6719,7 @@ void yf::sys::nw_sys::DoTasksForDemo(const int &last_job_id, const int &cur_job_
         nw_status_ptr_->cur_job_success_flag = false;
     }
 
-//    mir100_ptr_->Pause();
+    mir100_ptr_->Pause();
 
 }
 
