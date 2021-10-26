@@ -721,7 +721,7 @@ void yf::sys::nw_sys::DoJobs(const int &cur_schedule_id)
         sql_ptr_->UpdateJobLogTaskGroupId(nw_status_ptr_->db_cur_job_log_id, nw_status_ptr_->db_cur_task_group_id);
 
         /// Execute Each job!
-        DoTasksForDemo(last_job_id, cur_job_id, nw_status_ptr_->db_cur_task_group_id);
+        DoTasks(last_job_id, cur_job_id, nw_status_ptr_->db_cur_task_group_id);
 
         /// Job Result Handler
         //  a. Break the loop or not?
