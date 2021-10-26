@@ -925,7 +925,7 @@ bool yf::arm::tm::InitialStatusCheckForMission(const int& timeout_min)
 
         if (nw_status_ptr_->arm_mission_status != yf::data::common::MissionStatus::Idle)
         {
-            std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
         }
         else
         {
