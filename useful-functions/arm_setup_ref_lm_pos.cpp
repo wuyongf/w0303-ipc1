@@ -15,6 +15,7 @@
 // IPC2
 #include "../include/ipc2.h"
 
+
 void thread_IPCServerStartup(std::shared_ptr<IPCServer>& server_ptr, bool& server_flag)
 {
     server_ptr->Start();
