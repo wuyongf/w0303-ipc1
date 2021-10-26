@@ -5423,7 +5423,8 @@ void yf::sys::nw_sys::DoTasksForDemo(const int &last_job_id, const int &cur_job_
 
                                                     // a.2.
 #if 1 /// disable for demo
-                                                    this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
+                                                    if(cur_model_config_id_ != 8072)
+                                                        this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
 #endif
 
                                                     /// b. vision job initialization
@@ -6361,7 +6362,8 @@ void yf::sys::nw_sys::DoTasksForDemo(const int &last_job_id, const int &cur_job_
                                                                         tm5.ArmTask("Move_to standby_p1");
 
                                                                         // 2.2 check&set tool_angle
-                                                                        this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
+                                                                        if(cur_model_config_id_ != 8072)
+                                                                            this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
 
                                                                         // 2.3 via_approach_point
 
