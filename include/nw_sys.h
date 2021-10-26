@@ -1194,7 +1194,7 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                     tm5.ArmTask("Move_to standby_p0");
 
                                                     // a.2.
-                                                    #if 1
+                                                    #if 1 ///
                                                     this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
                                                     #endif
 
