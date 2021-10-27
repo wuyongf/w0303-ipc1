@@ -340,6 +340,7 @@ protected:
                 LOG(INFO) << "[IPC1 <--- Arm]: " << latest_msg ;
             }
 
+
             // 2. Arm msg flag
             // 2.1 Status
             auto index_error    = latest_msg.find("Arm Error");
