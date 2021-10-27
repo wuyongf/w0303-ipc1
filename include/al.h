@@ -122,7 +122,7 @@ namespace yf
             int RecordRealPCArray(int &resolution, double (&input_pt)[30000][3]);
 
             /// for phase 2 office demo
-            int Phase2GetTMat4Handle(std::string& real_pc_file, std::string& ref_pos_tf_file, const yf::data::arm::ModelType& model_type);
+            int Phase2GetTMat4Handle(std::string& real_pc_file, std::string& ref_pos_tf_file, const int& arm_mission_config_id);
 
         private:
 
@@ -657,7 +657,7 @@ yf::algorithm::arm_path::GetRealPointByRS(const Eigen::Matrix4f &TMat, const yf:
     return real_point;
 }
 
-int yf::algorithm::arm_path::Phase2GetTMat4Handle(std::string& real_pc_file, std::string& ref_pos_tf_file, const yf::data::arm::ModelType& model_type)
+int yf::algorithm::arm_path::Phase2GetTMat4Handle(std::string& real_pc_file, std::string& ref_pos_tf_file, const int& arm_mission_config_id)
 {
     TMat_.setZero();
 
@@ -695,13 +695,10 @@ int yf::algorithm::arm_path::Phase2GetTMat4Handle(std::string& real_pc_file, std
 
     // hard code for now
 
-    switch(model_type)
+    switch(arm_mission_config_id)
     {
-        case data::arm::ModelType::ProtectiveWall:
+        case 11425: /// for model_config_id: 8068
         {
-
-            /// for model_config_id: 8068
-
             plane_box[0] = 0.4;
             plane_box[1] = -1.2;
             plane_box[2] = 0.7;
@@ -740,10 +737,8 @@ int yf::algorithm::arm_path::Phase2GetTMat4Handle(std::string& real_pc_file, std
             break;
         }
 
-        case data::arm::ModelType::Handrail:
+        case 11423: /// for model_config_id: 8065
         {
-            /// for model_config_id: 8065
-
             plane_box[0] = 0.1;
             plane_box[1] = -1.2;
             plane_box[2] = 0.6;
@@ -768,10 +763,8 @@ int yf::algorithm::arm_path::Phase2GetTMat4Handle(std::string& real_pc_file, std
             break;
         }
 
-        case data::arm::ModelType::NurseStation:
+        case 11433: /// for model_config_id: 8071
         {
-            /// for model_config_id: 8071
-
             plane_box[0] = -0.5;
             plane_box[1] = 0.5;
             plane_box[2] = -0.2;
@@ -795,8 +788,106 @@ int yf::algorithm::arm_path::Phase2GetTMat4Handle(std::string& real_pc_file, std
 
             break;
         }
+
     }
 
+    /// hard code!!!
+
+    if(arm_mission_config_id == 11460)
+    {
+        no_of_location_box = 0;
+
+        plane_box[0] = -0.75;
+        plane_box[1] = -1;
+        plane_box[2] = 0.5;
+        plane_box[3] = -0.55;
+        plane_box[4] = -0.6;
+        plane_box[5] = 0.7;
+
+        ref_position[0] = -0.429523;
+        ref_position[1] = -0.694562;
+
+        ref_angle = -0.0174084;
+
+        para[0] = 0;
+        para[1] = 0.7;
+        para[2] = -0.4;
+        para[3] = 0.6;
+        para[4] = 10;
+        para[5] = 0;
+    }
+
+    if(arm_mission_config_id == 11462)
+    {
+        no_of_location_box = 0;
+
+        plane_box[0] = -0.75;
+        plane_box[1] = -1;
+        plane_box[2] = 0.5;
+        plane_box[3] = -0.55;
+        plane_box[4] = -0.6;
+        plane_box[5] = 0.7;
+
+        ref_position[0] = -0.559504;
+        ref_position[1] = -0.692299;
+
+        ref_angle = -0.0174084;
+
+        para[0] = -0.13;
+        para[1] = 0.7;
+        para[2] = -0.4;
+        para[3] = 0.6;
+        para[4] = 10;
+        para[5] = 0;
+    }
+
+    if(arm_mission_config_id == 11468)
+    {
+        no_of_location_box = 0;
+
+        plane_box[0] = -0.45;
+        plane_box[1] = -1;
+        plane_box[2] = 0.27;
+        plane_box[3] = 0;
+        plane_box[4] = 0;
+        plane_box[5] = 0.37;
+
+        ref_position[0] = -0.602815;
+        ref_position[1] = -0.717261;
+
+        ref_angle = -0.000204535;
+
+        para[0] = 0;
+        para[1] = 0;
+        para[2] = 0;
+        para[3] = 0;
+        para[4] = 11;
+        para[5] = 0;
+    }
+
+    if(arm_mission_config_id == 11456 || arm_mission_config_id == 11458)
+    {
+        no_of_location_box = 0;
+
+        plane_box[0] = -0.23;
+        plane_box[1] = -0.49;
+        plane_box[2] = 0.15;
+        plane_box[3] = -0.03;
+        plane_box[4] = -0.29;
+        plane_box[5] = 0.25;
+
+        ref_position[0] = -0.428705;
+        ref_position[1] = -0.405945;
+
+        ref_angle = 0.0126139;
+
+        para[0] = 0;
+        para[1] = -0.7;
+        para[2] = -0.45;
+        para[3] = 0.5;
+        para[4] = 12;
+        para[5] = 0;
+    }
 
     auto n = find_current_transformation(&real_pc_file[0], &ref_pos_tf_file[0], translation, rotation, plane_box, no_of_location_box, location_box, ref_position, ref_angle, para, &angle_diff_);
 
@@ -831,7 +922,7 @@ int yf::algorithm::arm_path::Phase2GetTMat4Handle(std::string& real_pc_file, std
     }
     else
     {
-        LOG(INFO) << "No TMat! Can Find the BBox?" ;
+        LOG(INFO) << "No TMat! Can Find the BBox? n: " << n ;
     }
 
     return n;

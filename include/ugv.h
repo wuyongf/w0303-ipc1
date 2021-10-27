@@ -764,6 +764,9 @@ void yf::ugv::mir::PostActions(const int& model_config_id)
             }
             case 2: // relative move
             {
+                this->PostActionSetPLC(1,"set",1,mission_guid,priority);
+                priority++;
+
                 for (int n = 0; n < amc_ids_count[mission_count-1]; n++)
                 {
                     this->PostActionMove(position_guid, mission_guid, priority);
@@ -782,6 +785,9 @@ void yf::ugv::mir::PostActions(const int& model_config_id)
                 priority++;
 
                 this->PostActionSetPLC(14,"set",0,mission_guid,priority);
+                priority++;
+
+                this->PostActionWaitPLC(1,0,mission_guid,priority);
                 priority++;
 
                 break;
@@ -1277,7 +1283,7 @@ bool yf::ugv::mir::MissionStatusCheck(const int& timeout_min)
             inner_mission_flag = true;
         }
 
-        if(plc_004_value == 3) // mission has error
+        if(plc_004_value == 3 || plc_004_value == 2) // mission has error
         {
             return false;
         }
