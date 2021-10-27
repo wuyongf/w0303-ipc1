@@ -2100,6 +2100,9 @@ void yf::ugv::mir::PostActionsForDebugTest(const int &model_config_id)
             }
             case 2: // relative move
             {
+                this->PostActionSetPLC(1,"set",1,mission_guid,priority);
+                priority++;
+
                 for (int n = 0; n < amc_ids_count[mission_count-1]; n++)
                 {
                     this->PostActionMove(position_guid, mission_guid, priority);
@@ -2118,6 +2121,9 @@ void yf::ugv::mir::PostActionsForDebugTest(const int &model_config_id)
                 priority++;
 
                 this->PostActionSetPLC(14,"set",0,mission_guid,priority);
+                priority++;
+
+                this->PostActionWaitPLC(1,0,mission_guid,priority);
                 priority++;
 
                 break;
@@ -3118,10 +3124,10 @@ void yf::ugv::mir::PostRMoveActions(const float& rmove_x, const std::string &mis
     priority++;
     while_plc006_content_guid = this->GetWhileContentGuid();
 
-    this->PostActionSetPLC(1, "set", 1, mission_guid, priority, while_plc006_content_guid);
+    this->PostActionSetPLC(15, "set", 1, mission_guid, priority, while_plc006_content_guid);
     priority++;
 
-    this->PostActionWaitPLC(1, 0, mission_guid, priority, while_plc006_content_guid);
+    this->PostActionWaitPLC(15, 0, mission_guid, priority, while_plc006_content_guid);
     priority++;
 
     this->PostActionIf(6, "==", 1, mission_guid, priority, while_plc006_content_guid);
@@ -3172,7 +3178,7 @@ void yf::ugv::mir::PostRMoveActions(const float& rmove_x, const std::string &mis
     this->PostActionSetPLC(5, "set", 2, mission_guid, priority);
     priority++;
 
-    this->PostActionWaitPLC(1, 0, mission_guid, priority);
+    this->PostActionWaitPLC(15, 0, mission_guid, priority);
     priority++;
 }
 

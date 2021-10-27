@@ -1670,9 +1670,9 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                 /// I:  RMove Details
 
                                                 /// I.1. Wait for flag to execute rmove_missions.
-                                                LOG(INFO) << "RMove: cur_arm_mission_config_no: " << n  << ". Wait for PLC 001 == 1...";
+                                                LOG(INFO) << "RMove: cur_arm_mission_config_no: " << n  << ". Wait for PLC 015 == 1...";
 
-                                                if(this->WaitForUgvPLCRegisterInt(1,1,5))
+                                                if(this->WaitForUgvPLCRegisterInt(15,1,5))
                                                 {
                                                     while(mir100_ptr_->GetPLCRegisterIntValue(6) != 0 )
                                                     {
@@ -1691,7 +1691,7 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                             // a. get the PLC 006 value. PLC_006/ rmove_mission_flag
                                                             auto PLC_006 = mir100_ptr_->GetPLCRegisterIntValue(6);
 
-                                                            if(this->WaitForUgvPLCRegisterInt(1,1,5))
+                                                            if(this->WaitForUgvPLCRegisterInt(15,1,5))
                                                             {
                                                                 switch (PLC_006)
                                                                 {
@@ -2118,8 +2118,8 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
 
                                                                         tm5.ArmTask("Move_to standby_p0");
 
-                                                                        /// d. set PLC 001 = 0. Handover the Mission.
-                                                                        mir100_ptr_->SetPLCRegisterIntValue(1,0);
+                                                                        /// d. set PLC 015 = 0. Handover the Mission.
+                                                                        mir100_ptr_->SetPLCRegisterIntValue(15,0);
 
                                                                         break;
                                                                     }
@@ -2192,9 +2192,9 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                                         if(this->WaitForArmRMoveForceFlag(1,1))
                                                                         {
                                                                             // set PLC 006 = 3. notice ugv
-                                                                            // set PLC 001 = 0. notice ugv
+                                                                            // set PLC 015 = 0. notice ugv
                                                                             mir100_ptr_->SetPLCRegisterIntValue(6,3);
-                                                                            mir100_ptr_->SetPLCRegisterIntValue(1,0);
+                                                                            mir100_ptr_->SetPLCRegisterIntValue(15,0);
 
                                                                             // get current time.
                                                                             start = std::chrono::high_resolution_clock::now();
@@ -2263,7 +2263,12 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                                                 /// Reset PLC registers
                                                                                 mir100_ptr_->SetPLCRegisterIntValue(7,0);
 
-                                                                                mir100_ptr_->SetPLCRegisterIntValue(1,0);
+                                                                                mir100_ptr_->SetPLCRegisterIntValue(15,0);
+
+                                                                                if(n == arm_mission_configs.size()-1)
+                                                                                {
+                                                                                    mir100_ptr_->SetPLCRegisterIntValue(1,0);
+                                                                                }
                                                                             }
                                                                         }
                                                                         break;
@@ -2272,7 +2277,7 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                             }
                                                             else
                                                             {
-                                                                LOG(INFO) << "Failed at RMove Start. Cannot set PLC 001 = 1? Please Check.";
+                                                                LOG(INFO) << "Failed at RMove Start. Cannot set PLC 015 = 1? Please Check.";
 
                                                                 /// STOP The RMove Mission
                                                                 mir100_ptr_->Pause();
@@ -2284,7 +2289,7 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                 }
                                                 else
                                                 {
-                                                    LOG(INFO) << "Failed at RMove Start. Cannot set PLC 001 = 1? Please Check.";
+                                                    LOG(INFO) << "Failed at RMove Start. Cannot set PLC 015 = 1? Please Check.";
 
                                                     /// STOP The RMove Mission
                                                     mir100_ptr_->Pause();
