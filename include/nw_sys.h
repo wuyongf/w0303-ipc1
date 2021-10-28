@@ -721,7 +721,8 @@ void yf::sys::nw_sys::DoJobs(const int &cur_schedule_id)
         sql_ptr_->UpdateJobLogTaskGroupId(nw_status_ptr_->db_cur_job_log_id, nw_status_ptr_->db_cur_task_group_id);
 
         /// Execute Each job!
-        DoTasksForDemo2(last_job_id, cur_job_id, nw_status_ptr_->db_cur_task_group_id);
+//        DoTasksForDemo2(last_job_id, cur_job_id, nw_status_ptr_->db_cur_task_group_id);
+        DoTasks(last_job_id, cur_job_id, nw_status_ptr_->db_cur_task_group_id);
 
         /// Job Result Handler
         //  a. Break the loop or not?
@@ -1599,6 +1600,7 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
 
                                                     if(!tm5.IsArmOutOfRange(arm_mission_configs[n].via_points, arm_mission_configs[n].task_mode))
                                                     {
+                                                        LOG(INFO) << "Out Of Range!!";
                                                         amc_range_skip_flag = false;
                                                     }
 
@@ -4181,6 +4183,11 @@ void yf::sys::nw_sys::RedoJob(const int &cur_schedule_id, const yf::data::schedu
                                                             feature_type = "nurse_station";
                                                             break;
                                                         }
+                                                        case data::arm::ModelType::DeskRectangle:
+                                                        {
+                                                            feature_type = "rectangle_desk";
+                                                            break;
+                                                        }
                                                     }
 
                                                     auto feature_type_id = sql_ptr_->GetFeatureTypeId(feature_type);
@@ -5360,6 +5367,10 @@ void yf::sys::nw_sys::DoTasksForDemo2(const int& last_job_id, const int &cur_job
                                     {
                                         // do nothing
                                         this->ArmSetOperationArea(cur_operation_area_);
+
+                                        //
+                                        tm5.ArmTask("Post tool_angle_45");
+                                        cur_tool_angle_ = data::arm::ToolAngle::FortyFive;
                                     }
                                     else
                                     {
@@ -5450,7 +5461,7 @@ void yf::sys::nw_sys::DoTasksForDemo2(const int& last_job_id, const int &cur_job
 
                                                         // a.2.
 #if 1 /// disable for demo
-                                                        if(cur_model_config_id_ !=  8072)
+                                                        if(cur_model_config_id_ !=  8072 || cur_model_config_id_ !=  8073)
                                                             this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
 #endif
 
@@ -5459,9 +5470,10 @@ void yf::sys::nw_sys::DoTasksForDemo2(const int& last_job_id, const int &cur_job
                                                         ///   b.2: for Landmark: scan landmark, mark down the record
                                                         ///   b.3: for D455: record the point clouds, mark down the record.
 
-                                                        if(cur_model_config_id_ ==  8073)
+                                                        if(cur_model_config_id_ ==  8074)
                                                         {
                                                             // do nothing
+                                                            amc_deviation_skip_flag = false;
                                                         }
                                                         else
                                                         {

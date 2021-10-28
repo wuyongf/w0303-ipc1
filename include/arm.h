@@ -1989,7 +1989,8 @@ bool yf::arm::tm::IsArmOutOfRange(const std::deque<yf::data::arm::Point3d> &real
 
                 if(point.z < 550)
                 {
-                    range_y = 950;
+//                    range_y = 950;
+                    range_y = 980;
                 }
 
                 if(std::abs(point.y) > range_y)
