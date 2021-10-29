@@ -64,7 +64,6 @@ namespace yf
             void JobsFilter(std::deque<int>& q_ids);
 
 
-
         public:
             /// Arm Methods: based on tm5.ArmTask();
 
@@ -111,6 +110,10 @@ namespace yf
 
             std::mutex mux_Blocking_RMoveForceNode;
             std::condition_variable cv_Blocking_RMoveForceNode;
+
+        private:
+            /// Phase2: Point Cloud: Get TMat logistic
+            void GetTMatLogistic(std::deque<yf::data::arm::MissionConfig>& arm_mission_configs, int& n, const int& task_group_id);
 
         public:
             /// Ugv Method: based on REST API
@@ -1291,197 +1294,44 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                         }
                                                         case data::arm::VisionType::D455:
                                                         {
-                                                            ///  b.2 find the TF!
-
-                                                            // 0. data management
-                                                            auto arm_mission_config_dir = "../data/point_clouds/real/arm_mission_config_" + std::to_string(arm_mission_configs[n].id);
-                                                            std::filesystem::create_directory(arm_mission_config_dir);
-
-                                                            auto task_group_dir = arm_mission_config_dir + "/task_group_" + std::to_string(task_group_id);
-                                                            std::filesystem::create_directory(task_group_dir);
-
-                                                            auto pc_dir = task_group_dir + "/point_cloud/";
-                                                            std::filesystem::create_directory(pc_dir);
-
-                                                            auto tf_dir = task_group_dir + "/tf/";
-                                                            std::filesystem::create_directory(tf_dir);
-
-                                                            // 1. retrieve point cloud data in real time and then assign the value
-                                                            //  1.1 move to several points.
-                                                            //  1.2 record the point clouds. (several sets....)
-                                                            //  1.3 save the real_pc_files.
-
-                                                            std::vector<std::vector<std::string>> real_pc_file_names;
-
-                                                            std::vector<std::string> each_set_real_pc_pos_names;
-
-                                                            for(int set = 0 ; set < arm_mission_configs[n].ref_tcp_pos_ids.size() ; set ++)
+                                                            /// Check Inheritance_Type
+                                                            switch (arm_mission_configs[n].inheritance_type)
                                                             {
-                                                                each_set_real_pc_pos_names.clear();
-
-                                                                for(int view = 0 ; view < arm_mission_configs[n].ref_tcp_pos_ids[set].size() ; view++)
+                                                                case data::arm::InheritanceType::Null:
                                                                 {
-                                                                    // get the point
-                                                                    auto point_str = this->ArmGetPointStr(sql_ptr_->GetArmPoint(arm_mission_configs[n].ref_tcp_pos_ids[set][view]));
-                                                                    // set the point
-                                                                    tm5.ArmTask("Set ref_tcp_pos = " + point_str);
-                                                                    // move!
-                                                                    tm5.ArmTask("Move_to ref_tcp_pos");
-
-                                                                    //  1. define the name
-                                                                    std::string id_str = std::to_string(arm_mission_configs[n].id);
-                                                                    std::string set_no_str = std::to_string(set+1);
-                                                                    std::string view_no_str = std::to_string(view+1);
-                                                                    std::string feature_type_name = sql_ptr_->GetFeatureTypeName(arm_mission_configs[n].feature_type_ids[set]);
-
-                                                                    // note: without ".pcd"
-                                                                    auto real_pc_file_name = std::to_string(task_group_id) + "-" + id_str + "-" + set_no_str + "-" + view_no_str + "-" + feature_type_name;
-
-                                                                    //todo: 1. record the real point cloud.
-                                                                    //todo: 2. save the real_point_cloud file
-                                                                    LOG(INFO) << "Vision Job [Start]" << std::endl;
-                                                                    // ....
-                                                                    auto result = tm5.RecordCurRealPointCloud(pc_dir, real_pc_file_name, arm_mission_configs[n].id, set+1, view+1);
-                                                                    // wait for vision_job done
-                                                                    LOG(INFO) << "Vision Job [Running]" << std::endl;
-                                                                    LOG(INFO) << "Vision Job [Finish]" << std::endl;
-
-                                                                    /// for debug
-                                                                    auto tf_file_name = real_pc_file_name +"-tf.txt";
-                                                                    auto tf_result = tm5.WriteTMatFile(arm_mission_configs[n].ref_tcp_pos_tfs[set][view],tf_dir, tf_file_name);
-
-                                                                    // push back
-                                                                    each_set_real_pc_pos_names.push_back(real_pc_file_name);
-
-                                                                    // for safety concern.
-                                                                    tm5.ArmTask("Move_to standby_p0");
-                                                                }
-
-                                                                real_pc_file_names.push_back(each_set_real_pc_pos_names);
-                                                            }
-
-                                                            //todo: 2. compare!
-                                                            // ...
-                                                            // ...
-                                                            // 3. get the TF!
-                                                            /// 3.1
-                                                            std::string feature_type;
-
-                                                            switch (arm_mission_configs[n].model_type)
-                                                            {
-                                                                case data::arm::ModelType::Handle:
-                                                                {
-                                                                    feature_type = "planar";
+                                                                    // find the TF
+                                                                    GetTMatLogistic(arm_mission_configs, n, task_group_id);
                                                                     break;
                                                                 }
-                                                                case data::arm::ModelType::Handrail:
+                                                                case data::arm::InheritanceType::Source:
                                                                 {
-                                                                    /// for handrail_higher
-                                                                    #if 0
-                                                                    auto feature_type = "handrail_higher";
-                                                                                        auto feature_type_id = sql_ptr_->GetFeatureTypeId(feature_type);
+                                                                    // find the TF
+                                                                    GetTMatLogistic(arm_mission_configs, n, task_group_id);
 
-                                                                                        std::vector<int> handrail_higher_sets;
+                                                                    // Save Inheritance Result
+                                                                    tm5._inheritance_source_id = arm_mission_configs[n].id;
 
-                                                                                        // find the corresponding files
-                                                                                        for (int m =0; m < arm_mission_configs[n].feature_type_ids.size(); m++)
-                                                                                        {
-                                                                                            if(arm_mission_configs[n].feature_type_ids[m] == feature_type_id)
-                                                                                            {
-                                                                                                handrail_higher_sets.push_back(m);
-                                                                                            }
-                                                                                        }
+                                                                    tm5._inheritance_vision_success_flag = arm_mission_configs[n].vision_success_flag;
+                                                                    tm5._inheritance_TMat = arm_mission_configs[n].TMat;
+                                                                    tm5._inheritance_angle_diff = arm_mission_configs[n].angle_diff;
 
-                                                                                        /// for 1 set 1 view algorithm
-                                                                                        if(handrail_higher_sets.size() == 1)
-                                                                                        {
-                                                                                            auto set_no  = handrail_higher_sets[0];
-
-                                                                                            auto cur_set_view_no = arm_mission_configs[n].ref_pc_file_names[set_no].size();
-
-                                                                                            if (cur_set_view_no == 1)
-                                                                                            {
-                                                                                                // get the file name;
-                                                                                                auto ref_pc_file_name = arm_mission_configs[n].ref_pc_file_names[set_no][0];
-
-                                                                                                auto real_pc_file_name = std::to_string(task_group_id) + "-" + ref_pc_file_name;
-
-                                                                                                std::string real_pc_file =   "..\\data\\point_clouds\\real\\arm_mission_config_" + std::to_string(arm_mission_configs[n].id)
-                                                                                                                             + "\\task_group_" + std::to_string(task_group_id) + "\\point_cloud\\" + real_pc_file_name + ".pcd";
-
-                                                                                                std::string ref_pos_tf_file = "..\\data\\point_clouds\\real\\arm_mission_config_" + std::to_string(arm_mission_configs[n].id)
-                                                                                                                              + "\\task_group_" + std::to_string(task_group_id) + "\\tf\\" + real_pc_file_name + "-tf.txt";
-
-                                                                                                arm_mission_configs[n].real_pc_file = real_pc_file;
-                                                                                                arm_mission_configs[n].ref_pos_tf_file = ref_pos_tf_file;
-
-                                                                                                arm_mission_configs[n].vision_success_flag = tm5.Phase2GetTMat4Handle(real_pc_file,ref_pos_tf_file);
-                                                                                                arm_mission_configs[n].TMat = tm5.get_TMat();
-                                                                                            }
-                                                                                        }
-
-                                                                                        break;
-                                                                    #endif
-                                                                    /// for handrail_lower
-                                                                    feature_type = "handrail_lower";
                                                                     break;
                                                                 }
-                                                                case data::arm::ModelType::ProtectiveWall:
+                                                                case data::arm::InheritanceType::Target:
                                                                 {
-                                                                    feature_type = "protective_wall";
+                                                                    // grab the previous result.
+                                                                    if(arm_mission_configs[n].inheritance_source_id == tm5._inheritance_source_id)
+                                                                    {
+                                                                        arm_mission_configs[n].vision_success_flag = tm5._inheritance_vision_success_flag;
+                                                                        arm_mission_configs[n].TMat = tm5._inheritance_TMat;
+                                                                        arm_mission_configs[n].angle_diff = tm5._inheritance_angle_diff;
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        arm_mission_configs[n].vision_success_flag = 0;
+                                                                    }
+
                                                                     break;
-                                                                }
-                                                                case data::arm::ModelType::NurseStation:
-                                                                {
-                                                                    feature_type = "nurse_station";
-                                                                    break;
-                                                                }
-                                                                case data::arm::ModelType::DeskRectangle:
-                                                                {
-                                                                    feature_type = "rectangle_desk";
-                                                                    break;
-                                                                }
-                                                            }
-
-                                                            auto feature_type_id = sql_ptr_->GetFeatureTypeId(feature_type);
-
-                                                            std::vector<int> point_cloud_sets;
-
-                                                            // find the corresponding files
-                                                            for (int m =0; m < arm_mission_configs[n].feature_type_ids.size(); m++)
-                                                            {
-                                                                if(arm_mission_configs[n].feature_type_ids[m] == feature_type_id)
-                                                                {
-                                                                    point_cloud_sets.push_back(m);
-                                                                }
-                                                            }
-
-                                                            /// 3.2 for 1 set 1 view algorithm
-                                                            if(point_cloud_sets.size() == 1)
-                                                            {
-                                                                auto set_no  = point_cloud_sets[0];
-
-                                                                auto cur_set_view_no = arm_mission_configs[n].ref_pc_file_names[set_no].size();
-
-                                                                if (cur_set_view_no == 1)
-                                                                {
-                                                                    // get the file name;
-                                                                    auto ref_pc_file_name = arm_mission_configs[n].ref_pc_file_names[set_no][0];
-
-                                                                    auto real_pc_file_name = std::to_string(task_group_id) + "-" + ref_pc_file_name;
-
-                                                                    std::string real_pc_file =   "..\\data\\point_clouds\\real\\arm_mission_config_" + std::to_string(arm_mission_configs[n].id)
-                                                                                                 + "\\task_group_" + std::to_string(task_group_id) + "\\point_cloud\\" + real_pc_file_name + ".pcd";
-
-                                                                    std::string ref_pos_tf_file = "..\\data\\point_clouds\\real\\arm_mission_config_" + std::to_string(arm_mission_configs[n].id)
-                                                                                                  + "\\task_group_" + std::to_string(task_group_id) + "\\tf\\" + real_pc_file_name + "-tf.txt";
-
-                                                                    arm_mission_configs[n].real_pc_file = real_pc_file;
-                                                                    arm_mission_configs[n].ref_pos_tf_file = ref_pos_tf_file;
-
-                                                                    arm_mission_configs[n].vision_success_flag = tm5.Phase2GetTMat4Handle(real_pc_file,ref_pos_tf_file,arm_mission_configs[n].id);
-                                                                    arm_mission_configs[n].TMat = tm5.get_TMat();
-                                                                    arm_mission_configs[n].angle_diff = tm5.get_angle_diff();
                                                                 }
                                                             }
 
@@ -1570,7 +1420,7 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
 
                                                             std::deque<yf::data::arm::Point3d> real_via_points;
 
-                                                            real_via_points = tm5.GetRealViaPointsByRS(arm_mission_configs[0].TMat, arm_mission_configs[n].via_points);
+                                                            real_via_points = tm5.GetRealViaPointsByRS(arm_mission_configs[n].TMat, arm_mission_configs[n].via_points);
 
                                                             arm_mission_configs[n].via_points.clear();
 
@@ -1578,7 +1428,7 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
 
                                                             // 2.2 calculate the real approach point
 
-                                                            auto real_via_approach_point = tm5.GetRealPointByRS(arm_mission_configs[0].TMat,arm_mission_configs[n].via_approach_pos);
+                                                            auto real_via_approach_point = tm5.GetRealPointByRS(arm_mission_configs[n].TMat,arm_mission_configs[n].via_approach_pos);
 
                                                             arm_mission_configs[n].via_approach_pos.x  = real_via_approach_point.x;
                                                             arm_mission_configs[n].via_approach_pos.y  = real_via_approach_point.y;
@@ -6788,6 +6638,200 @@ void yf::sys::nw_sys::DoTasksForDemo2(const int& last_job_id, const int &cur_job
 
     mir100_ptr_->Pause();
 
+}
+
+void yf::sys::nw_sys::GetTMatLogistic(std::deque<yf::data::arm::MissionConfig>& arm_mission_configs, int& n, const int& task_group_id)
+{
+    auto arm_mission_config_dir = "../data/point_clouds/real/arm_mission_config_" + std::to_string(arm_mission_configs[n].id);
+    std::filesystem::create_directory(arm_mission_config_dir);
+
+    auto task_group_dir = arm_mission_config_dir + "/task_group_" + std::to_string(task_group_id);
+    std::filesystem::create_directory(task_group_dir);
+
+    auto pc_dir = task_group_dir + "/point_cloud/";
+    std::filesystem::create_directory(pc_dir);
+
+    auto tf_dir = task_group_dir + "/tf/";
+    std::filesystem::create_directory(tf_dir);
+
+    // 1. retrieve point cloud data in real time and then assign the value
+    //  1.1 move to several points.
+    //  1.2 record the point clouds. (several sets....)
+    //  1.3 save the real_pc_files.
+
+    std::vector<std::vector<std::string>> real_pc_file_names;
+
+    std::vector<std::string> each_set_real_pc_pos_names;
+
+    for(int set = 0 ; set < arm_mission_configs[n].ref_tcp_pos_ids.size() ; set ++)
+    {
+        each_set_real_pc_pos_names.clear();
+
+        for(int view = 0 ; view < arm_mission_configs[n].ref_tcp_pos_ids[set].size() ; view++)
+        {
+            // get the point
+            auto point_str = this->ArmGetPointStr(sql_ptr_->GetArmPoint(arm_mission_configs[n].ref_tcp_pos_ids[set][view]));
+            // set the point
+            tm5.ArmTask("Set ref_tcp_pos = " + point_str);
+            // move!
+            tm5.ArmTask("Move_to ref_tcp_pos");
+
+            //  1. define the name
+            std::string id_str = std::to_string(arm_mission_configs[n].id);
+            std::string set_no_str = std::to_string(set+1);
+            std::string view_no_str = std::to_string(view+1);
+            std::string feature_type_name = sql_ptr_->GetFeatureTypeName(arm_mission_configs[n].feature_type_ids[set]);
+
+            // note: without ".pcd"
+            auto real_pc_file_name = std::to_string(task_group_id) + "-" + id_str + "-" + set_no_str + "-" + view_no_str + "-" + feature_type_name;
+
+            //todo: 1. record the real point cloud.
+            //todo: 2. save the real_point_cloud file
+            LOG(INFO) << "Vision Job [Start]" << std::endl;
+            // ....
+            auto result = tm5.RecordCurRealPointCloud(pc_dir, real_pc_file_name, arm_mission_configs[n].id, set+1, view+1);
+            // wait for vision_job done
+            LOG(INFO) << "Vision Job [Running]" << std::endl;
+            LOG(INFO) << "Vision Job [Finish]" << std::endl;
+
+            /// for debug
+            auto tf_file_name = real_pc_file_name +"-tf.txt";
+            auto tf_result = tm5.WriteTMatFile(arm_mission_configs[n].ref_tcp_pos_tfs[set][view],tf_dir, tf_file_name);
+
+            // push back
+            each_set_real_pc_pos_names.push_back(real_pc_file_name);
+
+            // for safety concern.
+            tm5.ArmTask("Move_to standby_p0");
+        }
+
+        real_pc_file_names.push_back(each_set_real_pc_pos_names);
+    }
+
+    //todo: 2. compare!
+    // ...
+    // ...
+    // 3. get the TF!
+    /// 3.1
+    std::string feature_type;
+
+    switch (arm_mission_configs[n].model_type)
+    {
+        case data::arm::ModelType::Handle:
+        {
+            feature_type = "planar";
+            break;
+        }
+        case data::arm::ModelType::Handrail:
+        {
+            /// for handrail_higher
+#if 0
+            auto feature_type = "handrail_higher";
+                                                                                        auto feature_type_id = sql_ptr_->GetFeatureTypeId(feature_type);
+
+                                                                                        std::vector<int> handrail_higher_sets;
+
+                                                                                        // find the corresponding files
+                                                                                        for (int m =0; m < arm_mission_configs[n].feature_type_ids.size(); m++)
+                                                                                        {
+                                                                                            if(arm_mission_configs[n].feature_type_ids[m] == feature_type_id)
+                                                                                            {
+                                                                                                handrail_higher_sets.push_back(m);
+                                                                                            }
+                                                                                        }
+
+                                                                                        /// for 1 set 1 view algorithm
+                                                                                        if(handrail_higher_sets.size() == 1)
+                                                                                        {
+                                                                                            auto set_no  = handrail_higher_sets[0];
+
+                                                                                            auto cur_set_view_no = arm_mission_configs[n].ref_pc_file_names[set_no].size();
+
+                                                                                            if (cur_set_view_no == 1)
+                                                                                            {
+                                                                                                // get the file name;
+                                                                                                auto ref_pc_file_name = arm_mission_configs[n].ref_pc_file_names[set_no][0];
+
+                                                                                                auto real_pc_file_name = std::to_string(task_group_id) + "-" + ref_pc_file_name;
+
+                                                                                                std::string real_pc_file =   "..\\data\\point_clouds\\real\\arm_mission_config_" + std::to_string(arm_mission_configs[n].id)
+                                                                                                                             + "\\task_group_" + std::to_string(task_group_id) + "\\point_cloud\\" + real_pc_file_name + ".pcd";
+
+                                                                                                std::string ref_pos_tf_file = "..\\data\\point_clouds\\real\\arm_mission_config_" + std::to_string(arm_mission_configs[n].id)
+                                                                                                                              + "\\task_group_" + std::to_string(task_group_id) + "\\tf\\" + real_pc_file_name + "-tf.txt";
+
+                                                                                                arm_mission_configs[n].real_pc_file = real_pc_file;
+                                                                                                arm_mission_configs[n].ref_pos_tf_file = ref_pos_tf_file;
+
+                                                                                                arm_mission_configs[n].vision_success_flag = tm5.Phase2GetTMat4Handle(real_pc_file,ref_pos_tf_file);
+                                                                                                arm_mission_configs[n].TMat = tm5.get_TMat();
+                                                                                            }
+                                                                                        }
+
+                                                                                        break;
+#endif
+            /// for handrail_lower
+            feature_type = "handrail_lower";
+            break;
+        }
+        case data::arm::ModelType::ProtectiveWall:
+        {
+            feature_type = "protective_wall";
+            break;
+        }
+        case data::arm::ModelType::NurseStation:
+        {
+            feature_type = "nurse_station";
+            break;
+        }
+        case data::arm::ModelType::DeskRectangle:
+        {
+            feature_type = "rectangle_desk";
+            break;
+        }
+    }
+
+    auto feature_type_id = sql_ptr_->GetFeatureTypeId(feature_type);
+
+    std::vector<int> point_cloud_sets;
+
+    // find the corresponding files
+    for (int m =0; m < arm_mission_configs[n].feature_type_ids.size(); m++)
+    {
+        if(arm_mission_configs[n].feature_type_ids[m] == feature_type_id)
+        {
+            point_cloud_sets.push_back(m);
+        }
+    }
+
+    /// 3.2 for 1 set 1 view algorithm
+    if(point_cloud_sets.size() == 1)
+    {
+        auto set_no  = point_cloud_sets[0];
+
+        auto cur_set_view_no = arm_mission_configs[n].ref_pc_file_names[set_no].size();
+
+        if (cur_set_view_no == 1)
+        {
+            // get the file name;
+            auto ref_pc_file_name = arm_mission_configs[n].ref_pc_file_names[set_no][0];
+
+            auto real_pc_file_name = std::to_string(task_group_id) + "-" + ref_pc_file_name;
+
+            std::string real_pc_file =   "..\\data\\point_clouds\\real\\arm_mission_config_" + std::to_string(arm_mission_configs[n].id)
+                                         + "\\task_group_" + std::to_string(task_group_id) + "\\point_cloud\\" + real_pc_file_name + ".pcd";
+
+            std::string ref_pos_tf_file = "..\\data\\point_clouds\\real\\arm_mission_config_" + std::to_string(arm_mission_configs[n].id)
+                                          + "\\task_group_" + std::to_string(task_group_id) + "\\tf\\" + real_pc_file_name + "-tf.txt";
+
+            arm_mission_configs[n].real_pc_file = real_pc_file;
+            arm_mission_configs[n].ref_pos_tf_file = ref_pos_tf_file;
+
+            arm_mission_configs[n].vision_success_flag = tm5.Phase2GetTMat4Handle(real_pc_file,ref_pos_tf_file,arm_mission_configs[n].id);
+            arm_mission_configs[n].TMat = tm5.get_TMat();
+            arm_mission_configs[n].angle_diff = tm5.get_angle_diff();
+        }
+    }
 }
 
 

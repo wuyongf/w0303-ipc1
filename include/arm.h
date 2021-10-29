@@ -162,6 +162,11 @@ namespace yf
             /// Relative Move Related
             yf::data::arm::MissionType GetMissionType(const int& mission_type_id);
 
+            /// UVC Inheritance TMat Related
+            yf::data::arm::InheritanceType GetInheritanceType(const int& arm_mission_config_id);
+
+            int GetInheritanceSourceId(const int& arm_mission_config_id);
+
         public: // for nw_sys: each mission // retrieve data from Arm(tm5)
 
             bool GetFindLandmarkFlag();
@@ -304,7 +309,7 @@ namespace yf
             std::deque<yf::data::schedule::Job> schedule{};
             std::deque<int>  all_avaiable_schedule_ids;
 
-        public: // pad related
+        public: /// consumables: pad related
 
             yf::data::arm::PadType  cur_pad_type_;
             void set_cur_pad_type(const yf::data::arm::PadType& pad_type);
@@ -327,6 +332,16 @@ namespace yf
             bool CheckChangePadFlag(const int& cur_model_config_id);
 
             bool CheckPadAbsorbWaterFlag(const int& arm_con);
+
+        public: /// yf: UVC_Scanning: TMat Inheritance
+
+            int                     _inheritance_source_id;
+
+            bool                    _inheritance_vision_success_flag;
+
+            Eigen::Matrix4f         _inheritance_TMat;
+
+            double                  _inheritance_angle_diff;
 
         };
     }
@@ -1028,6 +1043,15 @@ std::deque<yf::data::arm::MissionConfig> yf::arm::tm::ConfigureArmMission(const 
                 // 1d vector for feature type
                 mission_config.feature_type_ids = this->GetFeatureTypeIds(arm_mission_config_id);
             }
+        }
+
+        /// 9. Inheritance Type
+        mission_config.inheritance_type = this->GetInheritanceType(arm_mission_config_id);
+
+        /// 10. Inheritance Source Id
+        if(mission_config.inheritance_type == data::arm::InheritanceType::Target)
+        {
+            mission_config.inheritance_source_id = this->GetInheritanceSourceId(arm_mission_config_id);
         }
 
         /// 11. (*required) via_approach_point
@@ -2358,6 +2382,32 @@ void yf::arm::tm::SetWaterPumpHigh()
 void yf::arm::tm::SetWaterPumpLow()
 {
     tm_modbus.set_control_box_DO(2,0);
+}
+
+yf::data::arm::InheritanceType yf::arm::tm::GetInheritanceType(const int &arm_mission_config_id)
+{
+    int inheritance_type = sql_ptr_->GetInheritanceType(arm_mission_config_id);
+
+    switch (inheritance_type)
+    {
+        case 0:
+        {
+            return data::arm::InheritanceType::Null;
+        }
+        case 1:
+        {
+            return data::arm::InheritanceType::Source;
+        }
+        case 2:
+        {
+            return data::arm::InheritanceType::Target;
+        }
+    }
+}
+
+int yf::arm::tm::GetInheritanceSourceId(const int &arm_mission_config_id)
+{
+    return sql_ptr_->GetInheritanceSourceId(arm_mission_config_id);
 }
 
 

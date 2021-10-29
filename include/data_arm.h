@@ -212,6 +212,13 @@ namespace  yf
                 D435        =   3
             };
 
+            enum class InheritanceType
+            {
+                Null        =   0,
+                Source      =   1,
+                Target      =   2
+            };
+
             enum class MissionType
             {
                 FixedPosition       =   1,
@@ -279,9 +286,14 @@ namespace  yf
                 std::string real_pc_file;
                 std::string ref_pos_tf_file;
 
-                bool vision_success_flag = 0;
+                bool vision_success_flag = false;
 
                 double angle_diff;
+
+                /// yf: for phase2: for UVC inheritance TMat
+
+                InheritanceType inheritance_type;
+                int             inheritance_source_id;
 
             };
         }
