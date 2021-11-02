@@ -5117,7 +5117,7 @@ void yf::sys::nw_sys::DoTasksForDemo2(const int& last_job_id, const int &cur_job
                                 arm_config_stage_success_flag = true; // no use now?
 
                                 /// 3. Wait for flag for executing all arm_mission_configs
-                                arm_wait_plc001_success_flag = this->WaitForUgvPLCRegisterInt(1,1,5);
+                                arm_wait_plc001_success_flag = this->WaitForUgvPLCRegisterInt(1,1,30);
 
                                 /// 4. Check the flag result
                                 if(arm_wait_plc001_success_flag)
