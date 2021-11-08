@@ -1002,7 +1002,7 @@ std::deque<yf::data::arm::MissionConfig> yf::arm::tm::ConfigureArmMission(const 
         /// 5. tool_angel
         mission_config.tool_angle = this->GetToolAngle(arm_mission_config_id);
 
-        /// 6. motion_type
+        /// 6.1 motion_type
         mission_config.motion_type = this->GetMotionType(arm_mission_config_id);
 
         /// 7.1 standby_position
@@ -2409,6 +2409,7 @@ int yf::arm::tm::GetInheritanceSourceId(const int &arm_mission_config_id)
 {
     return sql_ptr_->GetInheritanceSourceId(arm_mission_config_id);
 }
+
 
 
 

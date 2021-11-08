@@ -205,6 +205,8 @@ namespace yf
             int GetMotionType(const int& arm_mission_config_id);
             int GetArmForceTypeId(const int& arm_mission_config_id);
 
+            int GetArmConfigIsMotionValid(const int& arm_mission_config_id);
+
 
             // retrieve point(x,y,z,rx,ry,rz) from table "data_arm_points"
             int GetStandbyPositionId(const int& arm_config_id);
@@ -5135,6 +5137,38 @@ int yf::sql::sql_server::GetInheritanceSourceId(const int &arm_mission_config_id
         Disconnect();
 
         return output_int;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+        return 0;
+    }
+}
+
+int yf::sql::sql_server::GetArmConfigIsMotionValid(const int &arm_config_id)
+{
+    std::string query_update;
+
+    //"SELECT ID FROM schedule_table where status=1 AND planned_start > '2021-02-06 11:10:08.000'"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT is_motion_valid FROM data_arm_config where ID = "+std::to_string(arm_config_id);
+
+        int task_mode;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        while(result.next())
+        {
+            task_mode = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        return task_mode;
     }
     catch (std::exception& e)
     {
