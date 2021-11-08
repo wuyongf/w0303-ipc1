@@ -56,7 +56,7 @@ endif ()
 
 ## for w0303
 
-add_executable(w0303_main "src/w0303_main.cpp" "include/net_w0303_server.h")
+add_executable(w0303_main "src/w0303_main.cpp" "include/net_w0303_server.h" )
 target_link_libraries(w0303_main PUBLIC glog::glog nanodbc modbus Poco::Foundation Poco::Net Poco::XML Poco::Zip Poco::Data Poco::JSON)
 
 ## for testing

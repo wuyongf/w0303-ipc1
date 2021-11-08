@@ -1418,7 +1418,7 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
 
                                                             std::deque<yf::data::arm::Point3d> real_via_points;
 
-                                                            real_via_points = tm5.GetRealViaPointsByRS(arm_mission_configs[n].TMat, arm_mission_configs[n].via_points);
+                                                            real_via_points = tm5.GetRealViaPointsByRS(arm_mission_configs[0].TMat, arm_mission_configs[n].via_points);
 
                                                             arm_mission_configs[n].via_points.clear();
 
@@ -1426,7 +1426,7 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
 
                                                             // 2.2 calculate the real approach point
 
-                                                            auto real_via_approach_point = tm5.GetRealPointByRS(arm_mission_configs[n].TMat,arm_mission_configs[n].via_approach_pos);
+                                                            auto real_via_approach_point = tm5.GetRealPointByRS(arm_mission_configs[0].TMat,arm_mission_configs[n].via_approach_pos);
 
                                                             arm_mission_configs[n].via_approach_pos.x  = real_via_approach_point.x;
                                                             arm_mission_configs[n].via_approach_pos.y  = real_via_approach_point.y;
@@ -1448,7 +1448,7 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
 
                                                     if(!tm5.IsArmOutOfRange(arm_mission_configs[n].via_points, arm_mission_configs[n].task_mode))
                                                     {
-                                                        LOG(INFO) << "Out Of Range!!";
+                                                        LOG(INFO) << "Within the  Range!!";
                                                         amc_range_skip_flag = false;
                                                     }
 
@@ -4947,7 +4947,7 @@ void yf::sys::nw_sys::GetTMatLogistic(std::deque<yf::data::arm::MissionConfig>& 
     {
         case data::arm::ModelType::Handle:
         {
-            feature_type = "planar";
+            feature_type = "handle";
             break;
         }
         case data::arm::ModelType::Handrail:
@@ -5017,6 +5017,12 @@ void yf::sys::nw_sys::GetTMatLogistic(std::deque<yf::data::arm::MissionConfig>& 
             feature_type = "rectangle_desk";
             break;
         }
+        case data::arm::ModelType::LiftButton:
+        {
+            feature_type = "lift_button";
+            break;
+        }
+
     }
 
     auto feature_type_id = sql_ptr_->GetFeatureTypeId(feature_type);
@@ -5729,11 +5735,11 @@ void yf::sys::nw_sys::DoTasksTest(const int &last_job_id, const int &cur_job_id,
 
                                                     if(!tm5.IsArmOutOfRange(arm_mission_configs[n].via_points, arm_mission_configs[n].task_mode))
                                                     {
-                                                        LOG(INFO) << "Out Of Range!!";
+                                                        LOG(INFO) << "Within the Range!!";
                                                         amc_range_skip_flag = false;
                                                     }
 
-                                                    if(amc_deviation_skip_flag == false && amc_range_skip_flag == false)
+                                                    if(amc_deviation_skip_flag == false && amc_range_skip_flag == false && is_motion_valid == true)
                                                     {
                                                         amc_skip_flag = false;
                                                     }

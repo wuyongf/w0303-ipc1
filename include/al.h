@@ -889,6 +889,54 @@ int yf::algorithm::arm_path::Phase2GetTMat4Handle(std::string& real_pc_file, std
         para[5] = 0;
     }
 
+    if(arm_mission_config_id == 6089)
+    {
+        no_of_location_box = 0;
+
+        plane_box[0] = -1.2;
+        plane_box[1] = 0.8;
+        plane_box[2] = 0.8;
+        plane_box[3] = -0.8;
+        plane_box[4] = 0.9;
+        plane_box[5] = 0.9;
+
+        ref_position[0] = -0.969839;
+        ref_position[1] = -0.183799;
+
+        ref_angle = 3.58451e-06;
+
+        para[0] = -0.015;
+        para[1] = -0.95;
+        para[2] = -1;
+        para[3] = 0;
+        para[4] = 16;
+        para[5] = -1.15;
+    }
+
+    if(arm_mission_config_id == 6083)
+    {
+        no_of_location_box = 0;
+
+        plane_box[0] = -0.5;
+        plane_box[1] = -1.2;
+        plane_box[2] = 0.4;
+        plane_box[3] = -0.4;
+        plane_box[4] = -0.6;
+        plane_box[5] = 0.5;
+
+        ref_position[0] = 0.104683;
+        ref_position[1] = -0.910709;
+
+        ref_angle = -0.0846852;
+
+        para[0] = 0.31;
+        para[1] = 0.97;
+        para[2] = -0.15;
+        para[3] = 0.8;
+        para[4] = 14;
+        para[5] = 0.045;
+    }
+
     auto n = find_current_transformation(&real_pc_file[0], &ref_pos_tf_file[0], translation, rotation, plane_box, no_of_location_box, location_box, ref_position, ref_angle, para, &angle_diff_);
 
     if(n == 1)
