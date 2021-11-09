@@ -95,6 +95,8 @@ namespace yf
 
             void UpdateScheduleLog(const int& schedule_id, const int& schedule_status);
 
+            bool CheckScheduleCommandValid(const int& schedule_id);
+
             /// Job & JobLog
             //
             void UpdateJobTable(const int& cur_job_id, const int& job_status);
@@ -5176,6 +5178,52 @@ int yf::sql::sql_server::GetArmConfigIsMotionValid(const int &arm_config_id)
         std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
         return 0;
     }
+}
+
+bool yf::sql::sql_server::CheckScheduleCommandValid(const int &schedule_id)
+{
+    // query string
+    std::string query_update;
+
+    // input
+    std::string schedule_id_str = std::to_string(schedule_id);
+
+    // output
+    int schedule_command_no;
+
+    //"SELECT arm_config_id FROM data_ugv_mission_config where model_config_id = 1"
+    try
+    {
+        Connect();
+
+        query_update = "SELECT COUNT(1) FROM sys_schedule WHERE ID = " + schedule_id_str  ;
+
+        auto result = nanodbc::execute(conn_,query_update);
+
+        // if there are new schedules available, sql module will mark down all the available schedule ids
+        while(result.next())
+        {
+            schedule_command_no = result.get<int>(0);
+        };
+
+        Disconnect();
+
+        if(schedule_command_no == 1)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "EXIT_FAILURE: " << EXIT_FAILURE << std::endl;
+
+        return false;
+    };
 }
 
 

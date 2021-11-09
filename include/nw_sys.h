@@ -472,6 +472,15 @@ void yf::sys::nw_sys::thread_DoSchedules()
                 nw_status_ptr_->db_cur_schedule_id = cur_schedule_id;
 
                 // get schedule command
+                auto IsScheduleCommandValid = sql_ptr_->CheckScheduleCommandValid(cur_schedule_id);
+
+                while(!IsScheduleCommandValid)
+                {
+                    LOG(INFO) << "schedule_command is invalid...";
+                    sleep.ms(500);
+                    IsScheduleCommandValid = sql_ptr_->CheckScheduleCommandValid(cur_schedule_id);
+                }
+
                 this->GetScheduleCommand(cur_schedule_id);
 
                 // get execute time..
