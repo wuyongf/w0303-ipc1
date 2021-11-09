@@ -894,10 +894,10 @@ int yf::algorithm::arm_path::Phase2GetTMat4Handle(std::string& real_pc_file, std
         no_of_location_box = 0;
 
         plane_box[0] = -1.2;
-        plane_box[1] = 0.8;
+        plane_box[1] = 0.6;
         plane_box[2] = 0.8;
         plane_box[3] = -0.8;
-        plane_box[4] = 0.9;
+        plane_box[4] = 0.7;
         plane_box[5] = 0.9;
 
         ref_position[0] = -0.969839;
