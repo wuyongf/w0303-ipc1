@@ -1,112 +1,37 @@
 # W0303 Overview
 
-This program establishes communication among robotic arm(tm5-900), ugv(mir100) and database(sql server).
+## Introduction
 
-## Overall Components
+[WebGUI](https://robot.willsonic.com/) (not release to public. [Screenshot - 1](doc/resources/screenshot_publish_schedule.png))
 
-1. Schedule Module: Interact with Database & Arm & Ugv Module
-2. Arm Module (Motion/Action/Status)
-3. Ugv Module (Motion/Mission/Status)
-4. Database Module (detailed functions implementation)
-5. **Todo: Vision Module (Image Process/Status)** 
+[Onsite Trail Video - 1]() | [Onsite Trail Video - 2]()
+
+**This program aims to:**
+
+1. Establish a control system which can control mobile manipulator to handle cleaning & disinfection tasks.
+2. Interact with Web-based GUI via database(MSSQL).
+3. Perform Vision Algorithms(Point Cloud / QR Code) to adjust localization error caused by mobile robot.
+
+**The control system consists of several modules, including:**
+
+1. Schedule Module: system entry module, interacting with other modules.
+2. Arm Module: Motion Control Module & Status Manager for Robotic Arm([tm5-900](https://www.tm-robot.com/en/regular-payload/)).
+3. Ugv Module: Motion Control Module & Status Manager for Mobile Robot([mir100](https://www.mobile-industrial-robots.com/solutions/robots/mir100/)).
+4. Database Module: Detailed Functions Implementation
+5. Vision Module: Point Cloud/2d Image Processing Module
+6. Algorithms Module: robotic arm TCP transformation
+
+## Installation
+
+**Prerequisite**
+
+1. Language: C++
+2. Compiler: Cmake
+3. CPU Architecture: x64
+4. Package Manager: Vcpkg
+5. Libraries: opencv4/nanodbc/glog/libmodbus/poco/eigen3/boost/pcl/openni2
 
 ## Usage
-
-
-
-
-**Overall Functions**
-
-1. two main functions: 
-   
-    (1) DoSchedules()
-
-    (2) WaitSchedules()
-
-[comment]: <> (details template)
-<details open>
-<summary>Todo List</summary>
-
-1. Fine tune the program.
-2. Sort out an overall workflow
-3. workflow for vision_rs module.
-
-</details>
-
-[comment]: <> (draw a line)
-***
-
-<details open>
-<summary>Template</summary>
-
-Python >= 3.6.0 required with all [requirements.txt](https://github.com/ultralytics/yolov5/blob/master/requirements.txt) dependencies installed:
-<!-- $ sudo apt update && apt install -y libgl1-mesa-glx libsm6 libxext6 libxrender-dev -->
-```bash
-$ git clone https://github.com/ultralytics/yolov5
-$ cd yolov5
-$ pip install -r requirements.txt
-```
-
-```bash
-$ testing
-```
-
-</details>
-
-
-
-2021/03/15
-
-1. (done) for mir: how to create a mission based on database.
-
-2. (done) for arm: need to assign a mission in sequence.
-
-         workflow
-
-         (1) preparation
-   
-            a.   move to <vision_init_positon>
-            b.  execute vision job. 
-            c. update ref-points.
-   
-         (2) execute the mission
-
-
-***
-**TM-Flow Related**
-
-1. Force Control Node
-
-   (1) tool
-
-   (2) motion path
-
-***
-**CLion Configuration**
-
-1. vcpkg
-
-   (1) Search:
-   
-         .\vcpkg\vcpkg search [package name]
-
-   (2) Install: for x64
-
-         .\vcpkg\vcpkg install [package name]:x64-windows
-   
-   (3) Package list
-
-         .\vcpkg\vcpkg install glog:x64-windows
-
-         .\vcpkg\vcpkg install nanodbc:x64-windows
-
-         libmodbus
-
-         poco
-
-         eigen3
-
-         boost
 
 ## Contributing
 
