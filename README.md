@@ -2,9 +2,11 @@
 
 ## Introduction
 
-[WebGUI](https://robot.willsonic.com/) (not release to public. [Screenshot - 1](doc/resources/screenshot_publish_schedule.png))
+![RobotApperance](doc/resources/robot_apperance_1.jpg)
 
-[Onsite Trail Video - 1]() | [Onsite Trail Video - 2]()
+[WebGUI](https://robot.willsonic.com/) (not release to public. [Screenshot - 1](doc/resources/screenshot_publish_schedule.png) | [Screenshot - 2](doc/resources/screenshot_job_record.png)))
+
+[Onsite Trial Video - 1](https://youtu.be/3_yQ5s5oSw4) | [Onsite Trial Video - 2](https://youtu.be/yljeNZbJ-PU)
 
 **This program aims to:**
 
