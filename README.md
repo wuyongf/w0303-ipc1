@@ -4,9 +4,9 @@
 
 ![RobotApperance](doc/resources/robot_apperance_1.jpg)
 
-[WebGUI](https://robot.willsonic.com/) (not release to public. [Screenshot - 1](doc/resources/screenshot_publish_schedule.png) | [Screenshot - 2](doc/resources/screenshot_job_record.png)))
+[WebGUI](https://robot.willsonic.com/) (not release to public. [Screenshot - 1](doc/resources/screenshot_publish_schedule.png) | [Screenshot - 2](doc/resources/screenshot_job_record.png))
 
-[Onsite Trial Video - 1](https://youtu.be/3_yQ5s5oSw4) | [Onsite Trial Video - 2](https://youtu.be/yljeNZbJ-PU)
+[Onsite Trial Video - 1](https://youtu.be/3_yQ5s5oSw4) | [Onsite Trial Video - 2](https://youtu.be/yljeNZbJ-PU) | [Onsite Trial Video - 3](https://youtu.be/IBontb4xmpU)
 
 **This program aims to:**
 
@@ -17,11 +17,11 @@
 **The control system consists of several modules, including:**
 
 1. Schedule Module: system entry module, interacting with other modules.
-2. Arm Module: Motion Control Module & Status Manager for Robotic Arm([tm5-900](https://www.tm-robot.com/en/regular-payload/)).
-3. Ugv Module: Motion Control Module & Status Manager for Mobile Robot([mir100](https://www.mobile-industrial-robots.com/solutions/robots/mir100/)).
-4. Database Module: Detailed Functions Implementation
-5. Vision Module: Point Cloud/2d Image Processing Module
-6. Algorithms Module: robotic arm TCP transformation
+2. Arm Module: motion control module & status manager for robotic arm([tm5-900](https://www.tm-robot.com/en/regular-payload/)).
+3. Ugv Module: motion control module & status manager for mobile robot([mir100](https://www.mobile-industrial-robots.com/solutions/robots/mir100/)).
+4. Database Module: detailed functions implementation.
+5. Vision Module: point cloud/2d image processing module.
+6. Algorithms Module: robotic arm TCP transformation/ motion path generation module.
 
 ## Installation
 
