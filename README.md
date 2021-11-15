@@ -4,14 +4,12 @@
 
 ![RobotApperance](doc/resources/robot_apperance_1.jpg)
 
-[WebGUI](https://robot.willsonic.com/) (not release to public. [Screenshot - 1](doc/resources/screenshot_publish_schedule.png) | [Screenshot - 2](doc/resources/screenshot_job_record.png))
-
 [Onsite Trial Video - 1](https://youtu.be/3_yQ5s5oSw4) | [Onsite Trial Video - 2](https://youtu.be/yljeNZbJ-PU) | [Onsite Trial Video - 3](https://youtu.be/IBontb4xmpU)
 
 **This program aims to:**
 
 1. Establish a control system which can control mobile manipulator to handle cleaning & disinfection tasks.
-2. Interact with Web-based GUI via database(MSSQL).
+2. Interact with [Web-based GUI](https://robot.willsonic.com/) via database(MSSQL). (not release to public. [Screenshot - 1](doc/resources/screenshot_publish_schedule.png) | [Screenshot - 2](doc/resources/screenshot_job_record.png))
 3. Perform Vision Algorithms(Point Cloud / QR Code) to adjust localization error caused by mobile robot.
 
 **The control system consists of several modules, including:**
@@ -36,6 +34,5 @@
 ## Usage
 
 ## Contributing
-
 
 ## License
