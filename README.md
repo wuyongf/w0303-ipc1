@@ -8,9 +8,9 @@
 
 **This program aims to:**
 
-1. Establish a control system which can control mobile manipulator to handle cleaning & disinfection tasks.
+1. Establish a control system which can integrate both robotic arm and mobile robot as a mobile manipulator to handle cleaning & disinfection tasks.
 2. Interact with [Web-based GUI](https://robot.willsonic.com/) via database(MSSQL). (not release to public. [Screenshot - 1](doc/resources/screenshot_publish_schedule.png) | [Screenshot - 2](doc/resources/screenshot_job_record.png))
-3. Perform Vision Algorithms(Point Cloud / QR Code) to adjust localization error caused by mobile robot.
+3. Develop vision algorithms(both Point Cloud & QR Code) to adjust localization error caused by mobile robot.
 
 **The control system consists of several modules, including:**
 
