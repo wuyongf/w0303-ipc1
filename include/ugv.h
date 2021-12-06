@@ -208,6 +208,8 @@ namespace yf
             std::string GetSessionGUID(const std::string& session_name);
             std::string GetMapGUID(const std::string& session_name, const std::string& map_name);
 
+            void SetSessionGUID(const std::string site_info);
+
         public:
             // Getter: MiR Properties
             int     GetModeId();
@@ -267,6 +269,8 @@ namespace yf
             std::string session_guid_HKSTP_ = "7aa0de9c-8579-11eb-9840-00012978eb45";
             std::string session_guid_EMSD_  = "7f708490-8579-11eb-9840-00012978eb45";
             std::string session_guid_HA_    = "84c07703-8579-11eb-9840-00012978eb45";
+            std::string session_guid_UCH_   = "c8401320-568d-11ec-a9a3-00012978eb45";
+
 
             std::string group_id_           = "mirconst-guid-0000-0011-missiongroup";   // default group: mission group
             bool        hidden_flag_        = false;
@@ -633,18 +637,7 @@ bool yf::ugv::mir::PostMission(const int& model_config_id)
 
     /// (2) get session_id
 
-    if(session_info == "hkstp")
-    {
-        cur_session_guid_ = session_guid_HKSTP_;
-    }
-    else if(session_info == "emsd")
-    {
-        cur_session_guid_ = session_guid_EMSD_;
-    }
-    else if(session_info == "ha")
-    {
-        cur_session_guid_ = session_guid_HA_;
-    }
+    this->SetSessionGUID(session_info);
 
     /// (3) mission creation
     //@@ input:
@@ -1979,18 +1972,7 @@ bool yf::ugv::mir::PostMissionForDebugTest(const int &model_config_id)
 
     /// (2) get session_id
 
-    if(session_info == "hkstp")
-    {
-        cur_session_guid_ = session_guid_HKSTP_;
-    }
-    else if(session_info == "emsd")
-    {
-        cur_session_guid_ = session_guid_EMSD_;
-    }
-    else if(session_info == "ha")
-    {
-        cur_session_guid_ = session_guid_HA_;
-    }
+    this->SetSessionGUID(session_info);
 
     /// (3) mission creation
     //@@ input:
@@ -2408,18 +2390,7 @@ bool yf::ugv::mir::PostMissionForCharging()
 
     /// (2) get session_id
 
-    if(site_info == "hkstp")
-    {
-        cur_session_guid_ = session_guid_HKSTP_;
-    }
-    else if(site_info == "emsd")
-    {
-        cur_session_guid_ = session_guid_EMSD_;
-    }
-    else if(site_info == "ha")
-    {
-        cur_session_guid_ = session_guid_HA_;
-    }
+    this->SetSessionGUID(site_info);
 
     /// (3) mission creation
     //@@ input:
@@ -2501,18 +2472,7 @@ bool yf::ugv::mir::PostRedoMission(const int &origin_model_config_id)
 
     /// (2) get session_id
 
-    if(session_info == "hkstp")
-    {
-        cur_session_guid_ = session_guid_HKSTP_;
-    }
-    else if(session_info == "emsd")
-    {
-        cur_session_guid_ = session_guid_EMSD_;
-    }
-    else if(session_info == "ha")
-    {
-        cur_session_guid_ = session_guid_HA_;
-    }
+    this->SetSessionGUID(session_info);
 
     /// (3) mission creation
     //@@ input:
@@ -3241,18 +3201,7 @@ bool yf::ugv::mir::PostMissionMove()
 
     /// (2) get session_id
 
-    if(site_info == "hkstp")
-    {
-        cur_session_guid_ = session_guid_HKSTP_;
-    }
-    else if(site_info == "emsd")
-    {
-        cur_session_guid_ = session_guid_EMSD_;
-    }
-    else if(site_info == "ha")
-    {
-        cur_session_guid_ = session_guid_HA_;
-    }
+    this->SetSessionGUID(site_info);
 
     /// (3) mission creation
     //@@ input:
@@ -3270,6 +3219,26 @@ bool yf::ugv::mir::PostMissionMove()
     mission.set("group_id", group_id_);
 
     return PostMethod("/api/v2.0.0/missions", mission);
+}
+
+void yf::ugv::mir::SetSessionGUID(const std::string site_info)
+{
+    if(site_info == "hkstp")
+    {
+        cur_session_guid_ = session_guid_HKSTP_;
+    }
+    else if(site_info == "emsd")
+    {
+        cur_session_guid_ = session_guid_EMSD_;
+    }
+    else if(site_info == "ha")
+    {
+        cur_session_guid_ = session_guid_HA_;
+    }
+    else if(site_info == "uch")
+    {
+        cur_session_guid_ = session_guid_UCH_;
+    }
 }
 
 
