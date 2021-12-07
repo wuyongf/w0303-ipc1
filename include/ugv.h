@@ -3135,6 +3135,9 @@ void yf::ugv::mir::PostRMoveActions(const float& rmove_x, const std::string &mis
         this->PostActionRelativeMove(rmove_x, 0, 0, 0.1, 0.2, true, mission_guid, priority, if_plc006_3_true_guid);
         priority++;
 
+        this->PostActionRelativeMove(-rmove_x, 0, 0, 0.1, 0.2, true, mission_guid, priority, if_plc006_3_true_guid);
+        priority++;
+
         this->PostActionSetPLC(6, "set", 4, mission_guid, priority, if_plc006_3_true_guid);
         priority++;
 

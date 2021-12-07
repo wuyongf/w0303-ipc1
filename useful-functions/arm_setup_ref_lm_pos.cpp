@@ -75,7 +75,7 @@ int main()
     //
     // @@ input: arm_mission_config_id
 
-    int arm_mission_config_id = 11468;
+    int arm_mission_config_id = 11473;
 
     sql_ptr_->InsertRefLandmarkPos(arm_mission_config_id,lm_pos);
 
