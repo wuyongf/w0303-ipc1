@@ -1552,6 +1552,7 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
 
                                                             if(this->WaitForUgvPLCRegisterInt(15,1,5))
                                                             {
+                                                                /// original
                                                                 switch (PLC_006)
                                                                 {
                                                                     case 1:
@@ -1566,9 +1567,9 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                                         // a.2. check&set tool_angle
 //                                                                        this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
 
-                                                                        #if 1 /// disable for demo
+#if 1 /// disable for demo
                                                                         tm5.ArmTask("Post tool_angle_45");
-                                                                        #endif
+#endif
 
                                                                         /// b. vision job initialization
                                                                         ///   b.1: for None: do nothing
@@ -1782,7 +1783,7 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                                                     case data::arm::ModelType::Handrail:
                                                                                     {
                                                                                         /// for handrail_higher
-                                                                                        #if 0
+#if 0
                                                                                         auto feature_type = "handrail_higher";
                                                                                         auto feature_type_id = sql_ptr_->GetFeatureTypeId(feature_type);
 
@@ -1826,7 +1827,7 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                                                         }
 
                                                                                         break;
-                                                                                        #endif
+#endif
 
                                                                                         /// for handrail_lower
                                                                                         feature_type = "handrail_lower";
@@ -2124,6 +2125,10 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
 
                                                                                 mir100_ptr_->SetPLCRegisterIntValue(15,0);
                                                                             }
+
+                                                                            // ugv total_move_time:  3
+                                                                            // ugv cur_move_time: 1,2,3..
+
                                                                         }
                                                                         break;
                                                                     }

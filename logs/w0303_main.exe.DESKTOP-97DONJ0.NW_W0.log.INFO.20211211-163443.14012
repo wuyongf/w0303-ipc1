@@ -1,0 +1,617 @@
+Log file created at: 2021/12/11 16:34:43
+Running on machine: DESKTOP-97DONJ0
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I1211 16:34:43.300855 12664 arm.h:463] wait for arm connection...
+I1211 16:34:43.666607  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: TM5-900
+I1211 16:34:43.666607 12664 arm.h:465] arm connected.
+I1211 16:34:44.381348 12040 nw_sys.h:421] [thread_DoSchedules]: lock!
+I1211 16:34:44.895638 16320 nw_sys.h:363] [thread_WaitSchedules]: Start!
+I1211 16:34:44.911203 16320 nw_sys.h:365] [thread_WaitSchedules]: stage 1 --- Wait for Database Available Schedules
+I1211 16:34:44.926887 16320 nw_sys.h:372] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Start]
+I1211 16:34:44.942557 16320 nw_sys.h:4665] [thread_WaitSchedules]: 1.1 update sys control mode
+I1211 16:34:44.968608 16320 nw_sys.h:4668] [thread_WaitSchedules]: 1.2 update all devices status
+I1211 16:34:44.972613 16320 nw_sys.h:4670] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I1211 16:34:45.093905  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Get Status, Arm Idle
+I1211 16:34:45.124087 16320 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:34:45.139218 16320 arm.h:873] [IPC1 ---> Arm]: Get Status
+I1211 16:34:45.554857 16320 arm.h:729] arm is idle.
+I1211 16:34:45.566852 16320 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:34:45.582541 16320 nw_sys.h:4674] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I1211 16:34:45.597982 16320 nw_sys.h:4676] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I1211 16:34:45.612641 16320 nw_sys.h:4681] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I1211 16:34:45.637576 16320 nw_sys.h:4786] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I1211 16:34:45.642699 16320 nw_sys.h:4788] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I1211 16:34:45.657944 16320 nw_sys.h:4796] [thread_WaitSchedules]: 1.3.2 check arm   [Complete]
+I1211 16:34:45.673244 16320 nw_sys.h:4862] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I1211 16:34:45.688624 16320 nw_sys.h:4864] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I1211 16:34:45.704419 16320 nw_sys.h:4869] [thread_WaitSchedules]: 1.3.4 check consumables   [Start]
+I1211 16:34:45.777617 16320 nw_sys.h:4875] [thread_WaitSchedules]: 1.3.4 check consumables   [Complete]
+I1211 16:34:45.779610 16320 nw_sys.h:4896] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I1211 16:34:45.794406 16320 nw_sys.h:4911] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I1211 16:34:45.809406 16320 nw_sys.h:4912] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I1211 16:34:46.309871 16320 nw_sys.h:374] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Complete]
+I1211 16:34:46.324748 16320 nw_sys.h:377] [thread_wait_schedules]: wait for incoming schedules...
+I1211 16:34:46.870358 16320 nw_sys.h:372] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Start]
+I1211 16:34:46.885371 16320 nw_sys.h:4665] [thread_WaitSchedules]: 1.1 update sys control mode
+I1211 16:34:46.914379 16320 nw_sys.h:4668] [thread_WaitSchedules]: 1.2 update all devices status
+I1211 16:34:46.915429 16320 nw_sys.h:4670] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I1211 16:34:47.036988 16320 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:34:47.051754 16320 arm.h:873] [IPC1 ---> Arm]: Get Status
+I1211 16:34:47.432130 16320 arm.h:729] arm is idle.
+I1211 16:34:47.446132 16320 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:34:47.461596 16320 nw_sys.h:4674] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I1211 16:34:47.477160 16320 nw_sys.h:4676] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I1211 16:34:47.492161 16320 nw_sys.h:4681] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I1211 16:34:47.522847 16320 nw_sys.h:4786] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I1211 16:34:47.537847 16320 nw_sys.h:4788] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I1211 16:34:47.552515 16320 nw_sys.h:4796] [thread_WaitSchedules]: 1.3.2 check arm   [Complete]
+I1211 16:34:47.567513 16320 nw_sys.h:4862] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I1211 16:34:47.582513 16320 nw_sys.h:4864] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I1211 16:34:47.597513 16320 nw_sys.h:4869] [thread_WaitSchedules]: 1.3.4 check consumables   [Start]
+I1211 16:34:47.651666 16320 nw_sys.h:4875] [thread_WaitSchedules]: 1.3.4 check consumables   [Complete]
+I1211 16:34:47.657665 16320 nw_sys.h:4896] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I1211 16:34:47.672320 16320 nw_sys.h:4911] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I1211 16:34:47.687229 16320 nw_sys.h:4912] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I1211 16:34:48.200546 16320 nw_sys.h:374] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Complete]
+I1211 16:34:48.215488 16320 nw_sys.h:377] [thread_wait_schedules]: wait for incoming schedules...
+I1211 16:34:48.761247 16320 nw_sys.h:372] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Start]
+I1211 16:34:48.776258 16320 nw_sys.h:4665] [thread_WaitSchedules]: 1.1 update sys control mode
+I1211 16:34:48.802240 16320 nw_sys.h:4668] [thread_WaitSchedules]: 1.2 update all devices status
+I1211 16:34:48.806104 16320 nw_sys.h:4670] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I1211 16:34:48.958110 16320 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:34:48.972954 16320 arm.h:873] [IPC1 ---> Arm]: Get Status
+I1211 16:34:49.369426 16320 arm.h:729] arm is idle.
+I1211 16:34:49.381477 16320 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:34:49.396908 16320 nw_sys.h:4674] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I1211 16:34:49.411983 16320 nw_sys.h:4676] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I1211 16:34:49.427116 16320 nw_sys.h:4681] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I1211 16:34:49.452085 16320 nw_sys.h:4786] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I1211 16:34:49.458127 16320 nw_sys.h:4788] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I1211 16:34:49.473407 16320 nw_sys.h:4796] [thread_WaitSchedules]: 1.3.2 check arm   [Complete]
+I1211 16:34:49.488425 16320 nw_sys.h:4862] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I1211 16:34:49.503863 16320 nw_sys.h:4864] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I1211 16:34:49.518865 16320 nw_sys.h:4869] [thread_WaitSchedules]: 1.3.4 check consumables   [Start]
+I1211 16:34:49.571637 16320 nw_sys.h:4875] [thread_WaitSchedules]: 1.3.4 check consumables   [Complete]
+I1211 16:34:49.580328 16320 nw_sys.h:4896] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I1211 16:34:49.594410 16320 nw_sys.h:4911] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I1211 16:34:49.609459 16320 nw_sys.h:4912] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I1211 16:34:50.122735 16320 nw_sys.h:374] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Complete]
+I1211 16:34:50.137979 16320 nw_sys.h:377] [thread_wait_schedules]: wait for incoming schedules...
+I1211 16:34:50.668525 16320 nw_sys.h:372] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Start]
+I1211 16:34:50.683753 16320 nw_sys.h:4665] [thread_WaitSchedules]: 1.1 update sys control mode
+I1211 16:34:50.705922 16320 nw_sys.h:4668] [thread_WaitSchedules]: 1.2 update all devices status
+I1211 16:34:50.714918 16320 nw_sys.h:4670] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I1211 16:34:50.866722 16320 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:34:50.881587 16320 arm.h:873] [IPC1 ---> Arm]: Get Status
+I1211 16:34:51.264302 16320 arm.h:729] arm is idle.
+I1211 16:34:51.277720 16320 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:34:51.293032 16320 nw_sys.h:4674] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I1211 16:34:51.308007 16320 nw_sys.h:4676] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I1211 16:34:51.322945 16320 nw_sys.h:4681] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I1211 16:34:51.359982 16320 nw_sys.h:4786] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I1211 16:34:51.368273 16320 nw_sys.h:4788] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I1211 16:34:51.383227 16320 nw_sys.h:4796] [thread_WaitSchedules]: 1.3.2 check arm   [Complete]
+I1211 16:34:51.398144 16320 nw_sys.h:4862] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I1211 16:34:51.413512 16320 nw_sys.h:4864] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I1211 16:34:51.428349 16320 nw_sys.h:4869] [thread_WaitSchedules]: 1.3.4 check consumables   [Start]
+I1211 16:34:51.480799 16320 nw_sys.h:4875] [thread_WaitSchedules]: 1.3.4 check consumables   [Complete]
+I1211 16:34:51.488307 16320 nw_sys.h:4896] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I1211 16:34:51.503734 16320 nw_sys.h:4911] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I1211 16:34:51.519575 16320 nw_sys.h:4912] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I1211 16:34:52.035224 16320 nw_sys.h:374] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Complete]
+I1211 16:34:52.050858 16320 nw_sys.h:377] [thread_wait_schedules]: wait for incoming schedules...
+I1211 16:34:52.581051 16320 nw_sys.h:372] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Start]
+I1211 16:34:52.595958 16320 nw_sys.h:4665] [thread_WaitSchedules]: 1.1 update sys control mode
+I1211 16:34:52.618002 16320 nw_sys.h:4668] [thread_WaitSchedules]: 1.2 update all devices status
+I1211 16:34:52.626006 16320 nw_sys.h:4670] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I1211 16:34:52.779728 16320 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:34:52.795658 16320 arm.h:873] [IPC1 ---> Arm]: Get Status
+I1211 16:34:53.161661 16320 arm.h:729] arm is idle.
+I1211 16:34:53.174346 16320 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:34:53.189431 16320 nw_sys.h:4674] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I1211 16:34:53.204455 16320 nw_sys.h:4676] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I1211 16:34:53.219558 16320 nw_sys.h:4681] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I1211 16:34:53.248553 16320 nw_sys.h:4786] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I1211 16:34:53.249552 16320 nw_sys.h:4788] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I1211 16:34:53.264536 16320 nw_sys.h:4796] [thread_WaitSchedules]: 1.3.2 check arm   [Complete]
+I1211 16:34:53.279888 16320 nw_sys.h:4862] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I1211 16:34:53.295578 16320 nw_sys.h:4864] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I1211 16:34:53.310662 16320 nw_sys.h:4869] [thread_WaitSchedules]: 1.3.4 check consumables   [Start]
+I1211 16:34:53.393167 16320 nw_sys.h:4875] [thread_WaitSchedules]: 1.3.4 check consumables   [Complete]
+I1211 16:34:53.404368 16320 nw_sys.h:4896] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I1211 16:34:53.419515 16320 nw_sys.h:4911] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I1211 16:34:53.434587 16320 nw_sys.h:4912] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I1211 16:34:53.933558 16320 nw_sys.h:374] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Complete]
+I1211 16:34:53.948534 16320 nw_sys.h:377] [thread_wait_schedules]: wait for incoming schedules...
+I1211 16:34:54.493402 16320 nw_sys.h:372] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Start]
+I1211 16:34:54.508404 16320 nw_sys.h:4665] [thread_WaitSchedules]: 1.1 update sys control mode
+I1211 16:34:54.532769 16320 nw_sys.h:4668] [thread_WaitSchedules]: 1.2 update all devices status
+I1211 16:34:54.538770 16320 nw_sys.h:4670] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I1211 16:34:54.688769 16320 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:34:54.703769 16320 arm.h:873] [IPC1 ---> Arm]: Get Status
+I1211 16:34:55.071710 16320 arm.h:729] arm is idle.
+I1211 16:34:55.082706 16320 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:34:55.097750 16320 nw_sys.h:4674] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I1211 16:34:55.112751 16320 nw_sys.h:4676] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I1211 16:34:55.127750 16320 nw_sys.h:4681] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I1211 16:34:55.152361 16320 nw_sys.h:4786] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I1211 16:34:55.157939 16320 nw_sys.h:4788] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I1211 16:34:55.173018 16320 nw_sys.h:4796] [thread_WaitSchedules]: 1.3.2 check arm   [Complete]
+I1211 16:34:55.188114 16320 nw_sys.h:4862] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I1211 16:34:55.203830 16320 nw_sys.h:4864] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I1211 16:34:55.218829 16320 nw_sys.h:4869] [thread_WaitSchedules]: 1.3.4 check consumables   [Start]
+I1211 16:34:55.289743 16320 nw_sys.h:4875] [thread_WaitSchedules]: 1.3.4 check consumables   [Complete]
+I1211 16:34:55.294688 16320 nw_sys.h:4896] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I1211 16:34:55.310150 16320 nw_sys.h:4911] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I1211 16:34:55.325585 16320 nw_sys.h:4912] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I1211 16:34:55.839509 16320 nw_sys.h:374] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Complete]
+I1211 16:34:55.854441 16320 nw_sys.h:377] [thread_wait_schedules]: wait for incoming schedules...
+I1211 16:34:56.400061 16320 nw_sys.h:372] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Start]
+I1211 16:34:56.415607 16320 nw_sys.h:4665] [thread_WaitSchedules]: 1.1 update sys control mode
+I1211 16:34:56.437608 16320 nw_sys.h:4668] [thread_WaitSchedules]: 1.2 update all devices status
+I1211 16:34:56.445607 16320 nw_sys.h:4670] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I1211 16:34:56.612797 16320 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:34:56.628265 16320 arm.h:873] [IPC1 ---> Arm]: Get Status
+I1211 16:34:57.039280 16320 arm.h:729] arm is idle.
+I1211 16:34:57.052279 16320 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:34:57.067195 16320 nw_sys.h:4674] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I1211 16:34:57.082926 16320 nw_sys.h:4676] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I1211 16:34:57.098650 16320 nw_sys.h:4681] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I1211 16:34:57.130666 16320 nw_sys.h:4786] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I1211 16:34:57.143525 16320 nw_sys.h:4788] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I1211 16:34:57.159191 16320 nw_sys.h:4796] [thread_WaitSchedules]: 1.3.2 check arm   [Complete]
+I1211 16:34:57.174675 16320 nw_sys.h:4862] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I1211 16:34:57.190099 16320 nw_sys.h:4864] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I1211 16:34:57.205116 16320 nw_sys.h:4869] [thread_WaitSchedules]: 1.3.4 check consumables   [Start]
+I1211 16:34:57.260493 16320 nw_sys.h:4875] [thread_WaitSchedules]: 1.3.4 check consumables   [Complete]
+I1211 16:34:57.265416 16320 nw_sys.h:4896] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I1211 16:34:57.280267 16320 nw_sys.h:4911] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I1211 16:34:57.295630 16320 nw_sys.h:4912] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I1211 16:34:57.796216 16320 nw_sys.h:374] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Complete]
+I1211 16:34:57.811185 16320 nw_sys.h:377] [thread_wait_schedules]: wait for incoming schedules...
+I1211 16:34:58.353303 16320 nw_sys.h:372] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Start]
+I1211 16:34:58.367980 16320 nw_sys.h:4665] [thread_WaitSchedules]: 1.1 update sys control mode
+I1211 16:34:58.410351 16320 nw_sys.h:4668] [thread_WaitSchedules]: 1.2 update all devices status
+I1211 16:34:58.413466 16320 nw_sys.h:4670] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I1211 16:34:58.564524 16320 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:34:58.579527 16320 arm.h:873] [IPC1 ---> Arm]: Get Status
+I1211 16:34:58.959323 16320 arm.h:729] arm is idle.
+I1211 16:34:58.971010 16320 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:34:58.986371 16320 nw_sys.h:4674] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I1211 16:34:59.001627 16320 nw_sys.h:4676] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I1211 16:34:59.016780 16320 nw_sys.h:4681] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I1211 16:34:59.044261 16320 nw_sys.h:4786] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I1211 16:34:59.047488 16320 nw_sys.h:4788] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I1211 16:34:59.063185 16320 nw_sys.h:4796] [thread_WaitSchedules]: 1.3.2 check arm   [Complete]
+I1211 16:34:59.078181 16320 nw_sys.h:4862] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I1211 16:34:59.093181 16320 nw_sys.h:4864] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I1211 16:34:59.108184 16320 nw_sys.h:4869] [thread_WaitSchedules]: 1.3.4 check consumables   [Start]
+I1211 16:34:59.178077 16320 nw_sys.h:4875] [thread_WaitSchedules]: 1.3.4 check consumables   [Complete]
+I1211 16:34:59.183677 16320 nw_sys.h:4896] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I1211 16:34:59.199299 16320 nw_sys.h:4911] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I1211 16:34:59.214771 16320 nw_sys.h:4912] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I1211 16:34:59.729465 16320 nw_sys.h:374] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Complete]
+I1211 16:34:59.744464 16320 nw_sys.h:377] [thread_wait_schedules]: wait for incoming schedules...
+I1211 16:35:00.274953 16320 nw_sys.h:372] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Start]
+I1211 16:35:00.289867 16320 nw_sys.h:4665] [thread_WaitSchedules]: 1.1 update sys control mode
+I1211 16:35:00.321338 16320 nw_sys.h:4668] [thread_WaitSchedules]: 1.2 update all devices status
+I1211 16:35:00.335357 16320 nw_sys.h:4670] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I1211 16:35:00.485597 16320 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:35:00.500681 16320 arm.h:873] [IPC1 ---> Arm]: Get Status
+I1211 16:35:00.896826 16320 arm.h:729] arm is idle.
+I1211 16:35:00.910706 16320 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:35:00.926190 16320 nw_sys.h:4674] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I1211 16:35:00.941306 16320 nw_sys.h:4676] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I1211 16:35:00.956408 16320 nw_sys.h:4681] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I1211 16:35:00.981060 16320 nw_sys.h:4786] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I1211 16:35:00.987609 16320 nw_sys.h:4788] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I1211 16:35:01.002475 16320 nw_sys.h:4796] [thread_WaitSchedules]: 1.3.2 check arm   [Complete]
+I1211 16:35:01.017571 16320 nw_sys.h:4862] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I1211 16:35:01.033077 16320 nw_sys.h:4864] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I1211 16:35:01.048866 16320 nw_sys.h:4869] [thread_WaitSchedules]: 1.3.4 check consumables   [Start]
+I1211 16:35:01.118782 16320 nw_sys.h:4875] [thread_WaitSchedules]: 1.3.4 check consumables   [Complete]
+I1211 16:35:01.124868 16320 nw_sys.h:4896] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I1211 16:35:01.139875 16320 nw_sys.h:4911] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I1211 16:35:01.154975 16320 nw_sys.h:4912] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I1211 16:35:01.655004 16320 nw_sys.h:374] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Complete]
+I1211 16:35:01.670022 16320 nw_sys.h:377] [thread_wait_schedules]: wait for incoming schedules...
+I1211 16:35:02.201403 16320 nw_sys.h:372] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Start]
+I1211 16:35:02.216439 16320 nw_sys.h:4665] [thread_WaitSchedules]: 1.1 update sys control mode
+I1211 16:35:02.247493 16320 nw_sys.h:4668] [thread_WaitSchedules]: 1.2 update all devices status
+I1211 16:35:02.261819 16320 nw_sys.h:4670] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I1211 16:35:02.399212 16320 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:35:02.414228 16320 arm.h:873] [IPC1 ---> Arm]: Get Status
+I1211 16:35:02.782662 16320 arm.h:729] arm is idle.
+I1211 16:35:02.795696 16320 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:35:02.810547 16320 nw_sys.h:4674] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I1211 16:35:02.825582 16320 nw_sys.h:4676] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I1211 16:35:02.840435 16320 nw_sys.h:4681] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I1211 16:35:02.873684 16320 nw_sys.h:4786] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I1211 16:35:02.885702 16320 nw_sys.h:4788] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I1211 16:35:02.900705 16320 nw_sys.h:4796] [thread_WaitSchedules]: 1.3.2 check arm   [Complete]
+I1211 16:35:02.916465 16320 nw_sys.h:4862] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I1211 16:35:02.931406 16320 nw_sys.h:4864] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I1211 16:35:02.946538 16320 nw_sys.h:4869] [thread_WaitSchedules]: 1.3.4 check consumables   [Start]
+I1211 16:35:03.016925 16320 nw_sys.h:4875] [thread_WaitSchedules]: 1.3.4 check consumables   [Complete]
+I1211 16:35:03.021922 16320 nw_sys.h:4896] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I1211 16:35:03.036581 16320 nw_sys.h:4911] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I1211 16:35:03.051589 16320 nw_sys.h:4912] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I1211 16:35:03.548614 16320 nw_sys.h:374] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Complete]
+I1211 16:35:03.564244 16320 nw_sys.h:377] [thread_wait_schedules]: wait for incoming schedules...
+I1211 16:35:04.094316 16320 nw_sys.h:372] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Start]
+I1211 16:35:04.109434 16320 nw_sys.h:4665] [thread_WaitSchedules]: 1.1 update sys control mode
+I1211 16:35:04.131536 16320 nw_sys.h:4668] [thread_WaitSchedules]: 1.2 update all devices status
+I1211 16:35:04.139547 16320 nw_sys.h:4670] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I1211 16:35:04.292011 16320 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:35:04.307193 16320 arm.h:873] [IPC1 ---> Arm]: Get Status
+I1211 16:35:04.684617 16320 arm.h:729] arm is idle.
+I1211 16:35:04.698643 16320 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:35:04.714177 16320 nw_sys.h:4674] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I1211 16:35:04.729944 16320 nw_sys.h:4676] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I1211 16:35:04.745136 16320 nw_sys.h:4681] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I1211 16:35:04.773295 16320 nw_sys.h:4786] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I1211 16:35:04.775756 16320 nw_sys.h:4788] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I1211 16:35:04.791160 16320 nw_sys.h:4796] [thread_WaitSchedules]: 1.3.2 check arm   [Complete]
+I1211 16:35:04.806165 16320 nw_sys.h:4862] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I1211 16:35:04.821947 16320 nw_sys.h:4864] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I1211 16:35:04.837493 16320 nw_sys.h:4869] [thread_WaitSchedules]: 1.3.4 check consumables   [Start]
+I1211 16:35:04.906828 16320 nw_sys.h:4875] [thread_WaitSchedules]: 1.3.4 check consumables   [Complete]
+I1211 16:35:04.914523 16320 nw_sys.h:4896] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I1211 16:35:04.929523 16320 nw_sys.h:4911] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I1211 16:35:04.944523 16320 nw_sys.h:4912] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I1211 16:35:05.443682 16320 nw_sys.h:374] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Complete]
+I1211 16:35:05.458611 16320 nw_sys.h:377] [thread_wait_schedules]: wait for incoming schedules...
+I1211 16:35:05.987809 16320 nw_sys.h:372] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Start]
+I1211 16:35:06.003381 16320 nw_sys.h:4665] [thread_WaitSchedules]: 1.1 update sys control mode
+I1211 16:35:06.038753 16320 nw_sys.h:4668] [thread_WaitSchedules]: 1.2 update all devices status
+I1211 16:35:06.048691 16320 nw_sys.h:4670] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I1211 16:35:06.216778 16320 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:35:06.231768 16320 arm.h:873] [IPC1 ---> Arm]: Get Status
+I1211 16:35:06.611699 16320 arm.h:729] arm is idle.
+I1211 16:35:06.626158 16320 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:35:06.641278 16320 nw_sys.h:4674] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I1211 16:35:06.656328 16320 nw_sys.h:4676] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I1211 16:35:06.671339 16320 nw_sys.h:4681] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I1211 16:35:06.719395 16320 nw_sys.h:4786] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I1211 16:35:06.731385 16320 nw_sys.h:4788] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I1211 16:35:06.746383 16320 nw_sys.h:4796] [thread_WaitSchedules]: 1.3.2 check arm   [Complete]
+I1211 16:35:06.761027 16320 nw_sys.h:4862] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I1211 16:35:06.775947 16320 nw_sys.h:4864] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I1211 16:35:06.791651 16320 nw_sys.h:4869] [thread_WaitSchedules]: 1.3.4 check consumables   [Start]
+I1211 16:35:06.845803 16320 nw_sys.h:4875] [thread_WaitSchedules]: 1.3.4 check consumables   [Complete]
+I1211 16:35:06.853937 16320 nw_sys.h:4896] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I1211 16:35:06.867949 16320 nw_sys.h:4911] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I1211 16:35:06.883090 16320 nw_sys.h:4912] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I1211 16:35:07.381245 16320 nw_sys.h:374] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Complete]
+I1211 16:35:07.397038 16320 nw_sys.h:377] [thread_wait_schedules]: wait for incoming schedules...
+I1211 16:35:07.927098 16320 nw_sys.h:372] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Start]
+I1211 16:35:07.941998 16320 nw_sys.h:4665] [thread_WaitSchedules]: 1.1 update sys control mode
+I1211 16:35:07.972831 16320 nw_sys.h:4668] [thread_WaitSchedules]: 1.2 update all devices status
+I1211 16:35:07.986609 16320 nw_sys.h:4670] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I1211 16:35:08.154067 16320 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:35:08.169059 16320 arm.h:873] [IPC1 ---> Arm]: Get Status
+I1211 16:35:08.564705 16320 arm.h:729] arm is idle.
+I1211 16:35:08.578711 16320 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:35:08.593874 16320 nw_sys.h:4674] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I1211 16:35:08.608872 16320 nw_sys.h:4676] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I1211 16:35:08.624155 16320 nw_sys.h:4681] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I1211 16:35:08.648469 16320 nw_sys.h:4786] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I1211 16:35:08.653983 16320 nw_sys.h:4788] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I1211 16:35:08.668884 16320 nw_sys.h:4796] [thread_WaitSchedules]: 1.3.2 check arm   [Complete]
+I1211 16:35:08.684168 16320 nw_sys.h:4862] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I1211 16:35:08.699173 16320 nw_sys.h:4864] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I1211 16:35:08.714239 16320 nw_sys.h:4869] [thread_WaitSchedules]: 1.3.4 check consumables   [Start]
+I1211 16:35:08.770092 16320 nw_sys.h:4875] [thread_WaitSchedules]: 1.3.4 check consumables   [Complete]
+I1211 16:35:08.775954 16320 nw_sys.h:4896] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I1211 16:35:08.791504 16320 nw_sys.h:4911] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I1211 16:35:08.806520 16320 nw_sys.h:4912] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I1211 16:35:09.307173 16320 nw_sys.h:374] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Complete]
+I1211 16:35:09.322270 16320 nw_sys.h:377] [thread_wait_schedules]: wait for incoming schedules...
+I1211 16:35:09.851559 16320 nw_sys.h:372] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Start]
+I1211 16:35:09.867138 16320 nw_sys.h:4665] [thread_WaitSchedules]: 1.1 update sys control mode
+I1211 16:35:09.901921 16320 nw_sys.h:4668] [thread_WaitSchedules]: 1.2 update all devices status
+I1211 16:35:09.914297 16320 nw_sys.h:4670] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I1211 16:35:10.080837 16320 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:35:10.095837 16320 arm.h:873] [IPC1 ---> Arm]: Get Status
+I1211 16:35:10.491552 16320 arm.h:729] arm is idle.
+I1211 16:35:10.504552 16320 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:35:10.519575 16320 nw_sys.h:4674] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I1211 16:35:10.534736 16320 nw_sys.h:4676] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I1211 16:35:10.549741 16320 nw_sys.h:4681] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I1211 16:35:10.579804 16320 nw_sys.h:4786] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I1211 16:35:10.580806 16320 nw_sys.h:4788] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I1211 16:35:10.595804 16320 nw_sys.h:4796] [thread_WaitSchedules]: 1.3.2 check arm   [Complete]
+I1211 16:35:10.610895 16320 nw_sys.h:4862] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I1211 16:35:10.625901 16320 nw_sys.h:4864] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I1211 16:35:10.640681 16320 nw_sys.h:4869] [thread_WaitSchedules]: 1.3.4 check consumables   [Start]
+I1211 16:35:10.696050 16320 nw_sys.h:4875] [thread_WaitSchedules]: 1.3.4 check consumables   [Complete]
+I1211 16:35:10.703253 16320 nw_sys.h:4896] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I1211 16:35:10.717319 16320 nw_sys.h:4911] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I1211 16:35:10.732235 16320 nw_sys.h:4912] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I1211 16:35:11.245771 16320 nw_sys.h:374] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Complete]
+I1211 16:35:11.260771 16320 nw_sys.h:377] [thread_wait_schedules]: wait for incoming schedules...
+I1211 16:35:11.790949 16320 nw_sys.h:372] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Start]
+I1211 16:35:11.806267 16320 nw_sys.h:4665] [thread_WaitSchedules]: 1.1 update sys control mode
+I1211 16:35:11.833775 16320 nw_sys.h:4668] [thread_WaitSchedules]: 1.2 update all devices status
+I1211 16:35:11.836529 16320 nw_sys.h:4670] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I1211 16:35:11.941828 16320 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:35:11.957185 16320 arm.h:873] [IPC1 ---> Arm]: Get Status
+I1211 16:35:12.397075 16320 arm.h:729] arm is idle.
+I1211 16:35:12.411298 16320 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:35:12.426437 16320 nw_sys.h:4674] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I1211 16:35:12.441437 16320 nw_sys.h:4676] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I1211 16:35:12.456490 16320 nw_sys.h:4681] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I1211 16:35:12.483568 16320 nw_sys.h:4786] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I1211 16:35:12.487622 16320 nw_sys.h:4788] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I1211 16:35:12.503175 16320 nw_sys.h:4796] [thread_WaitSchedules]: 1.3.2 check arm   [Complete]
+I1211 16:35:12.518196 16320 nw_sys.h:4862] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I1211 16:35:12.533766 16320 nw_sys.h:4864] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I1211 16:35:12.549088 16320 nw_sys.h:4869] [thread_WaitSchedules]: 1.3.4 check consumables   [Start]
+I1211 16:35:12.622848 16320 nw_sys.h:4875] [thread_WaitSchedules]: 1.3.4 check consumables   [Complete]
+I1211 16:35:12.624845 16320 nw_sys.h:4896] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I1211 16:35:12.639844 16320 nw_sys.h:4911] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I1211 16:35:12.654844 16320 nw_sys.h:4912] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I1211 16:35:13.169118 16320 nw_sys.h:374] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Complete]
+I1211 16:35:13.184160 16320 nw_sys.h:377] [thread_wait_schedules]: wait for incoming schedules...
+I1211 16:35:13.729051 16320 nw_sys.h:372] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Start]
+I1211 16:35:13.744269 16320 nw_sys.h:4665] [thread_WaitSchedules]: 1.1 update sys control mode
+I1211 16:35:13.772804 16320 nw_sys.h:4668] [thread_WaitSchedules]: 1.2 update all devices status
+I1211 16:35:13.774884 16320 nw_sys.h:4670] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I1211 16:35:13.929069 16320 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:35:13.944626 16320 arm.h:873] [IPC1 ---> Arm]: Get Status
+I1211 16:35:14.308672 16320 arm.h:729] arm is idle.
+I1211 16:35:14.321669 16320 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:35:14.337222 16320 nw_sys.h:4674] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I1211 16:35:14.352051 16320 nw_sys.h:4676] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I1211 16:35:14.367151 16320 nw_sys.h:4681] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I1211 16:35:14.394572 16320 nw_sys.h:4786] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I1211 16:35:14.397568 16320 nw_sys.h:4788] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I1211 16:35:14.412568 16320 nw_sys.h:4796] [thread_WaitSchedules]: 1.3.2 check arm   [Complete]
+I1211 16:35:14.427567 16320 nw_sys.h:4862] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I1211 16:35:14.442569 16320 nw_sys.h:4864] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I1211 16:35:14.457567 16320 nw_sys.h:4869] [thread_WaitSchedules]: 1.3.4 check consumables   [Start]
+I1211 16:35:14.515569 16320 nw_sys.h:4875] [thread_WaitSchedules]: 1.3.4 check consumables   [Complete]
+I1211 16:35:14.517567 16320 nw_sys.h:4896] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I1211 16:35:14.532568 16320 nw_sys.h:4911] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I1211 16:35:14.547569 16320 nw_sys.h:4912] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I1211 16:35:15.046864 16320 nw_sys.h:374] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Complete]
+I1211 16:35:15.062208 16320 nw_sys.h:377] [thread_wait_schedules]: wait for incoming schedules...
+I1211 16:35:15.608987 16320 nw_sys.h:372] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Start]
+I1211 16:35:15.623813 16320 nw_sys.h:4665] [thread_WaitSchedules]: 1.1 update sys control mode
+I1211 16:35:15.647815 16320 nw_sys.h:4668] [thread_WaitSchedules]: 1.2 update all devices status
+I1211 16:35:15.653812 16320 nw_sys.h:4670] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I1211 16:35:15.819240 16320 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:35:15.834244 16320 arm.h:873] [IPC1 ---> Arm]: Get Status
+I1211 16:35:16.187295 16320 arm.h:729] arm is idle.
+I1211 16:35:16.197294 16320 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:35:16.212347 16320 nw_sys.h:4674] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I1211 16:35:16.227586 16320 nw_sys.h:4676] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I1211 16:35:16.243414 16320 nw_sys.h:4681] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I1211 16:35:16.267916 16320 nw_sys.h:4786] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I1211 16:35:16.273790 16320 nw_sys.h:4788] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I1211 16:35:16.288609 16320 nw_sys.h:4796] [thread_WaitSchedules]: 1.3.2 check arm   [Complete]
+I1211 16:35:16.304422 16320 nw_sys.h:4862] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I1211 16:35:16.319900 16320 nw_sys.h:4864] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I1211 16:35:16.335685 16320 nw_sys.h:4869] [thread_WaitSchedules]: 1.3.4 check consumables   [Start]
+I1211 16:35:16.406641 16320 nw_sys.h:4875] [thread_WaitSchedules]: 1.3.4 check consumables   [Complete]
+I1211 16:35:16.410792 16320 nw_sys.h:4896] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I1211 16:35:16.425791 16320 nw_sys.h:4911] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I1211 16:35:16.441238 16320 nw_sys.h:4912] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I1211 16:35:16.944131 16320 nw_sys.h:374] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Complete]
+I1211 16:35:16.959813 16320 nw_sys.h:377] [thread_wait_schedules]: wait for incoming schedules...
+I1211 16:35:17.503684 16320 nw_sys.h:372] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Start]
+I1211 16:35:17.518909 16320 nw_sys.h:4665] [thread_WaitSchedules]: 1.1 update sys control mode
+I1211 16:35:17.543962 16320 nw_sys.h:4668] [thread_WaitSchedules]: 1.2 update all devices status
+I1211 16:35:17.549078 16320 nw_sys.h:4670] [thread_WaitSchedules]: 1.2.1 update arm_connection_status and arm_mission_status
+I1211 16:35:17.686100 16320 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:35:17.701099 16320 arm.h:873] [IPC1 ---> Arm]: Get Status
+I1211 16:35:18.127838 16320 arm.h:729] arm is idle.
+I1211 16:35:18.141853 16320 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:35:18.157002 16320 nw_sys.h:4674] [thread_WaitSchedules]: 1.3 check functions   [Start]
+I1211 16:35:18.171845 16320 nw_sys.h:4676] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Start]
+I1211 16:35:18.186650 16320 nw_sys.h:4681] [thread_WaitSchedules]: 1.3.1.1 sys_control_mode: Auto
+I1211 16:35:18.210517 16320 nw_sys.h:4786] [thread_WaitSchedules]: 1.3.1 check sys_control_mode   [Complete]
+I1211 16:35:18.216945 16320 nw_sys.h:4788] [thread_WaitSchedules]: 1.3.2 check arm   [Start]
+I1211 16:35:18.231853 16320 nw_sys.h:4796] [thread_WaitSchedules]: 1.3.2 check arm   [Complete]
+I1211 16:35:18.246866 16320 nw_sys.h:4862] [thread_WaitSchedules]: 1.3.3 check ugv   [Start]
+I1211 16:35:18.261893 16320 nw_sys.h:4864] [thread_WaitSchedules]: 1.3.3 check ugv   [Complete]
+I1211 16:35:18.277472 16320 nw_sys.h:4869] [thread_WaitSchedules]: 1.3.4 check consumables   [Start]
+I1211 16:35:18.335355 16320 nw_sys.h:4875] [thread_WaitSchedules]: 1.3.4 check consumables   [Complete]
+I1211 16:35:18.337350 16320 nw_sys.h:4896] [thread_WaitSchedules]: 1.3 check functions   [Complete]
+I1211 16:35:18.352882 16320 nw_sys.h:4911] [thread_WaitSchedules]: 1.4 Update Status to SQL
+I1211 16:35:18.367910 16320 nw_sys.h:4912] [thread_WaitSchedules]: 1.4.1 Update Status to SQL: Arm
+I1211 16:35:18.881865 16320 nw_sys.h:374] [thread_WaitSchedules]: 1. --- Initial Devices Status Check [Complete]
+I1211 16:35:18.897464 16320 nw_sys.h:377] [thread_wait_schedules]: wait for incoming schedules...
+I1211 16:35:19.427276 16320 nw_sys.h:392] [thread_WaitSchedules]: notify thread_DoSchedules
+I1211 16:35:19.443159 12040 nw_sys.h:424] [thread_DoSchedules]: unlock!
+I1211 16:35:19.503306 16320 nw_sys.h:404] [thread_WaitSchedules]: lock!
+I1211 16:36:02.319449 12040 nw_sys.h:678] Do Jobs...
+I1211 16:36:07.707880 12040 ugv.h:1914] Wait for Mode Id == 7
+I1211 16:36:21.062747 12040 arm.h:729] arm is idle.
+I1211 16:36:22.849805 12040 nw_sys.h:2801] Wait for PLC Register 3 == 1
+I1211 16:36:28.716583 12040 nw_sys.h:919] current arm config is_valid:0
+I1211 16:36:28.813782 12040 nw_sys.h:2801] Wait for PLC Register 1 == 1
+I1211 16:36:44.826815 12040 nw_sys.h:2801] Wait for PLC Register 3 == 1
+I1211 16:36:47.410990 12040 nw_sys.h:919] current arm config is_valid:0
+I1211 16:36:47.497949 12040 nw_sys.h:2801] Wait for PLC Register 1 == 1
+I1211 16:36:48.198465 12040 nw_sys.h:2801] Wait for PLC Register 3 == 1
+I1211 16:36:49.701752 12040 nw_sys.h:919] current arm config is_valid:0
+I1211 16:36:49.786813 12040 nw_sys.h:2801] Wait for PLC Register 1 == 1
+I1211 16:36:54.845700 12040 nw_sys.h:2801] Wait for PLC Register 3 == 1
+I1211 16:36:56.346380 12040 nw_sys.h:919] current arm config is_valid:0
+I1211 16:36:56.431450 12040 nw_sys.h:2801] Wait for PLC Register 1 == 1
+I1211 16:37:00.373973 12040 nw_sys.h:2801] Wait for PLC Register 3 == 1
+I1211 16:37:01.873692 12040 nw_sys.h:919] current arm config is_valid:1
+I1211 16:37:01.877691 12040 nw_sys.h:991] configure arm mission   [Start!]
+I1211 16:37:04.810962 12040 nw_sys.h:993] configure arm mission   [Finished!]
+I1211 16:37:04.921614 12040 nw_sys.h:2801] Wait for PLC Register 1 == 1
+I1211 16:37:05.331732 12040 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:37:05.346560 12040 arm.h:873] [IPC1 ---> Arm]: Post pick_mop
+I1211 16:37:05.377805  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Post pick_mop, Arm Running
+I1211 16:37:05.679353  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Get Status, Arm Running
+I1211 16:37:53.640324  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Post pick_mop, Arm Finish
+I1211 16:37:53.722684 12040 arm.h:717] arm has finished.
+I1211 16:37:53.731496  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Get Status, Arm Idle
+I1211 16:37:53.792981 12040 arm.h:729] arm is idle.
+I1211 16:37:53.806985 12040 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:37:54.188731 12040 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:37:54.204440 12040 arm.h:873] [IPC1 ---> Arm]: Post pick_large_pad
+I1211 16:37:54.219548  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Post pick_large_pad, Arm Running
+I1211 16:37:54.599150  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Get Status, Arm Running
+I1211 16:38:02.878443  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Post pick_large_pad, Arm Finish
+I1211 16:38:02.969641  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Get Status, Arm Idle
+I1211 16:38:03.036034 12040 arm.h:729] arm is idle.
+I1211 16:38:03.047037 12040 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:38:03.408334 12040 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:38:03.423171 12040 arm.h:873] [IPC1 ---> Arm]: Post get_small_pad_no
+I1211 16:38:03.454305  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Post get_small_pad_no, Arm Running
+I1211 16:38:03.514868  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: small_pad_no = {5}
+I1211 16:38:03.560214  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Post get_small_pad_no, Arm Finish
+I1211 16:38:03.771116  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Get Status, Arm Idle
+I1211 16:38:03.862562 12040 arm.h:729] arm is idle.
+I1211 16:38:03.877177 12040 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:38:04.057183 12040 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:38:04.072182 12040 arm.h:873] [IPC1 ---> Arm]: Post get_large_pad_no
+I1211 16:38:04.117775  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Post get_large_pad_no, Arm Running
+I1211 16:38:04.163434  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: large_pad_no = {3}
+I1211 16:38:04.223886  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Post get_large_pad_no, Arm Finish
+I1211 16:38:04.390604  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Get Status, Arm Idle
+I1211 16:38:04.452610 12040 arm.h:729] arm is idle.
+I1211 16:38:04.465605 12040 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:38:04.818125 12040 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:38:04.833129 12040 arm.h:873] [IPC1 ---> Arm]: Set absorb_type = 0
+I1211 16:38:04.848861  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Set absorb_type = 0, Arm Running
+I1211 16:38:04.909150  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Set absorb_type = 0, Arm Finish
+I1211 16:38:05.150386  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Get Status, Arm Idle
+I1211 16:38:05.227135 12040 arm.h:729] arm is idle.
+I1211 16:38:05.240092 12040 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:38:05.619314 12040 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:38:05.634372 12040 arm.h:873] [IPC1 ---> Arm]: Post arm_absorb_water
+I1211 16:38:05.680303  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Post arm_absorb_water, Arm Running
+I1211 16:38:05.999884  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Get Status, Arm Running
+I1211 16:38:13.417901  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Post arm_absorb_water, Arm Finish
+I1211 16:38:13.508801  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Get Status, Arm Idle
+I1211 16:38:13.584861 12040 arm.h:729] arm is idle.
+I1211 16:38:13.598863 12040 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:38:13.735010 12040 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:38:13.750028 12040 arm.h:873] [IPC1 ---> Arm]: Set operation_area = 1
+I1211 16:38:13.781368  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Set operation_area = 1, Arm Running
+I1211 16:38:13.842541  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Set operation_area = 1, Arm Finish
+I1211 16:38:14.085013  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Get Status, Arm Idle
+I1211 16:38:14.163352 12040 arm.h:729] arm is idle.
+I1211 16:38:14.176616 12040 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:38:14.342798 12040 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:38:14.357795 12040 arm.h:873] [IPC1 ---> Arm]: Post arm_home_to_safety
+I1211 16:38:14.403002  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Post arm_home_to_safety, Arm Running
+I1211 16:38:14.720486  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Get Status, Arm Running
+I1211 16:38:18.237489  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Post arm_home_to_safety, Arm Finish
+I1211 16:38:18.389174  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Get Status, Arm Idle
+I1211 16:38:18.465485 12040 arm.h:729] arm is idle.
+I1211 16:38:18.479442 12040 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:38:18.509202 12040 nw_sys.h:1532] RMove: cur_arm_mission_config_no: 0. Wait for PLC 015 == 1...
+I1211 16:38:18.539412 12040 nw_sys.h:2801] Wait for PLC Register 15 == 1
+I1211 16:38:18.631562 12040 nw_sys.h:2801] Wait for PLC Register 15 == 1
+I1211 16:38:18.798615 12040 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:38:18.813618 12040 arm.h:873] [IPC1 ---> Arm]: Set standby_p0 = -511.428101,227.264603,472.046997,179.668900,26.899250,-89.207741
+I1211 16:38:18.858985  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Set standby_p0 = -511.428101,227.264603,472.046997,179.668900,26.899250,-89.207741, Arm Running
+I1211 16:38:18.904691  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Set standby_p0 = -511.428101,227.264603,472.046997,179.668900,26.899250,-89.207741, Arm Finish
+I1211 16:38:19.160889  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Get Status, Arm Idle
+I1211 16:38:19.252768 12040 arm.h:729] arm is idle.
+I1211 16:38:19.266326 12040 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:38:19.402252 12040 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:38:19.417253 12040 arm.h:873] [IPC1 ---> Arm]: Move_to standby_p0
+I1211 16:38:19.432255  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Move_to standby_p0, Arm Running
+I1211 16:38:19.735692  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Get Status, Arm Running
+I1211 16:38:23.930517  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Move_to standby_p0, Arm Finish
+I1211 16:38:24.036495  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Get Status, Arm Idle
+I1211 16:38:24.114048 12040 arm.h:729] arm is idle.
+I1211 16:38:24.128710 12040 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:38:24.280309 12040 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:38:24.295310 12040 arm.h:873] [IPC1 ---> Arm]: Post tool_angle_45
+I1211 16:38:24.340729  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Post tool_angle_45, Arm Running
+I1211 16:38:24.656608  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Get Status, Arm Running
+I1211 16:38:27.464828  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Post tool_angle_45, Arm Finish
+I1211 16:38:27.512812 12040 arm.h:717] arm has finished.
+I1211 16:38:27.556041  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Get Status, Arm Idle
+I1211 16:38:27.631954 12040 arm.h:729] arm is idle.
+I1211 16:38:27.645952 12040 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:38:27.767660 12040 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:38:27.783454 12040 arm.h:873] [IPC1 ---> Arm]: Set vision_lm_init_p0 = -531.480286,246.264999,167.240097,177.296402,82.472717,-93.195251
+I1211 16:38:27.798959  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Set vision_lm_init_p0 = -531.480286,246.264999,167.240097,177.296402,82.472717,-93.195251, Arm Running
+I1211 16:38:27.874456  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Set vision_lm_init_p0 = -531.480286,246.264999,167.240097,177.296402,82.472717,-93.195251, Arm Finish
+I1211 16:38:28.116679  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Get Status, Arm Idle
+I1211 16:38:28.164680 12040 arm.h:729] arm is idle.
+I1211 16:38:28.176678 12040 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:38:28.327967 12040 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:38:28.342934 12040 arm.h:873] [IPC1 ---> Arm]: Move_to vision_lm_init_p0
+I1211 16:38:28.387940  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Move_to vision_lm_init_p0, Arm Running
+I1211 16:38:28.689167  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Get Status, Arm Running
+I1211 16:38:29.865036  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Move_to vision_lm_init_p0, Arm Finish
+I1211 16:38:29.925016  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Get Status, Arm Idle
+I1211 16:38:29.941017 12040 arm.h:717] arm has finished.
+I1211 16:38:30.123287 12040 arm.h:729] arm is idle.
+I1211 16:38:30.137176 12040 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:38:30.301940 12040 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:38:30.318048 12040 arm.h:873] [IPC1 ---> Arm]: Post vision_find_landmark
+I1211 16:38:30.362509  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Post vision_find_landmark, Arm Running
+I1211 16:38:30.634580  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Get Status, Arm Running
+I1211 16:38:30.980630  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Post vision_find_landmark, Arm Finish
+I1211 16:38:31.041699  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Get Status, Arm Idle
+I1211 16:38:31.058758 12040 arm.h:717] arm has finished.
+I1211 16:38:31.290199 12040 arm.h:729] arm is idle.
+I1211 16:38:31.302516 12040 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:38:31.422760 12040 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:38:31.437759 12040 arm.h:873] [IPC1 ---> Arm]: Post get_find_landmark_flag
+I1211 16:38:31.453763  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Post get_find_landmark_flag, Arm Running
+I1211 16:38:31.512830  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: find_landmark_flag = true
+I1211 16:38:31.573542  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Post get_find_landmark_flag, Arm Finish
+I1211 16:38:31.771287  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Get Status, Arm Idle
+I1211 16:38:31.851281 12040 arm.h:729] arm is idle.
+I1211 16:38:31.863281 12040 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:38:31.878749 12040 nw_sys.h:1621] Find Landmark!
+I1211 16:38:32.044481 12040 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:38:32.059815 12040 arm.h:873] [IPC1 ---> Arm]: Post get_landmark_pos_str
+I1211 16:38:32.074826  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Post get_landmark_pos_str, Arm Running
+I1211 16:38:32.150085  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: landmark_pos_str = {-595.94,704.73,64.3,-90.4,-0.74,1.18}
+I1211 16:38:32.225777  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Post get_landmark_pos_str, Arm Finish
+I1211 16:38:32.390777  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Get Status, Arm Idle
+I1211 16:38:32.467778 12040 arm.h:729] arm is idle.
+I1211 16:38:32.480779 12040 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:38:32.508777 12040 nw_sys.h:1671] RMove: No Deviation!
+I1211 16:38:32.675609 12040 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:38:32.690627 12040 arm.h:873] [IPC1 ---> Arm]: Move_to standby_p0
+I1211 16:38:32.705775  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Move_to standby_p0, Arm Running
+I1211 16:38:33.024717  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Get Status, Arm Running
+I1211 16:38:34.893965  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Move_to standby_p0, Arm Finish
+I1211 16:38:35.000407  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Get Status, Arm Idle
+I1211 16:38:35.049970 12040 arm.h:729] arm is idle.
+I1211 16:38:35.061076 12040 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:38:35.213882 12040 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:38:35.229032 12040 arm.h:873] [IPC1 ---> Arm]: Set standby_p1 = -511.428101,227.264603,472.046997,179.668900,26.899250,-89.207741
+I1211 16:38:35.274576  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Set standby_p1 = -511.428101,227.264603,472.046997,179.668900,26.899250,-89.207741, Arm Running
+I1211 16:38:35.321157  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Set standby_p1 = -511.428101,227.264603,472.046997,179.668900,26.899250,-89.207741, Arm Finish
+I1211 16:38:35.563827  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Get Status, Arm Idle
+I1211 16:38:35.656817 12040 arm.h:729] arm is idle.
+I1211 16:38:35.668721 12040 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:38:35.804551 12040 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:38:35.819562 12040 arm.h:873] [IPC1 ---> Arm]: Move_to standby_p1
+I1211 16:38:35.835238  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Move_to standby_p1, Arm Running
+I1211 16:38:35.941330  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Move_to standby_p1, Arm Finish
+I1211 16:38:36.137620  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Get Status, Arm Idle
+I1211 16:38:36.200821 12040 arm.h:729] arm is idle.
+I1211 16:38:36.214483 12040 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:38:36.334221 12040 nw_sys.h:2801] Wait for PLC Register 15 == 1
+I1211 16:38:37.653968 12040 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:38:37.669489 12040 arm.h:873] [IPC1 ---> Arm]: Post tool_angle_0
+I1211 16:38:37.699904  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Post tool_angle_0, Arm Running
+I1211 16:38:37.990288  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Get Status, Arm Running
+I1211 16:38:40.826550  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Post tool_angle_0, Arm Finish
+I1211 16:38:40.872531  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Get Status, Arm Idle
+I1211 16:38:40.889180 12040 arm.h:717] arm has finished.
+I1211 16:38:41.041235 12040 arm.h:729] arm is idle.
+I1211 16:38:41.054562 12040 arm.h:97] [ArmTask]: modbus_thread check finished...
+I1211 16:38:41.221289 12040 arm.h:89] [ArmTask]: modbus_thread check start...
+I1211 16:38:41.236271 12040 arm.h:873] [IPC1 ---> Arm]: Set 0_approach_point = -549.344788,345.032776,70.946709,109.586624,62.128899,-161.255264
+I1211 16:38:41.282114  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Set 0_approach_point = -549.344788,345.032776,70.946709,109.586624,62.128899,-161.255264, Arm Running
+I1211 16:38:41.328126  3136 net_w0303_server.h:340] [IPC1 <--- Arm]: Set 0_approach_point = -549.344788,345.032776,70.946709,109.586624,62.128899,-161.255264, Arm Finish
+I1211 16:38:41.584928  3136 net_w

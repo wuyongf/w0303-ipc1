@@ -1344,6 +1344,18 @@ yf::algorithm::cleaning_motion::get_mop_via_points( const yf::data::arm::ModelTy
         default:
         {
             via_points = ref_path_init_points;
+
+            /// 2. add on reverse via points
+
+            auto via_points_reverse = via_points;
+
+            std::reverse(via_points_reverse.begin(),via_points_reverse.end());
+
+            for(int n = 0 ; n < via_points_reverse.size() ; n++)
+            {
+                via_points.push_back(via_points_reverse[n]);
+            }
+
             break;
         }
     }

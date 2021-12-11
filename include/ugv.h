@@ -762,6 +762,12 @@ void yf::ugv::mir::PostActions(const int& model_config_id)
 
                 for (int n = 0; n < amc_ids_count[mission_count-1]; n++)
                 {
+//                    if(n == 0)
+//                    {
+//                        this->PostActionMove(position_guid, mission_guid, priority);
+//                        priority++;
+//                    }
+
                     this->PostActionMove(position_guid, mission_guid, priority);
                     priority++;
 
