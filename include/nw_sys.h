@@ -1993,7 +1993,18 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                                         tm5.ArmTask("Move_to standby_p1");
 
                                                                         // 2.2 check&set tool_angle
-                                                                        this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
+                                                                        switch (cur_task_mode_)
+                                                                        {
+                                                                            case data::arm::TaskMode::UVCScanning:
+                                                                            {
+                                                                                break;
+                                                                            }
+                                                                            case data::arm::TaskMode::Mopping:
+                                                                            {
+                                                                                this->ArmSetToolAngle(cur_task_mode_,arm_mission_configs[n].tool_angle);
+                                                                                break;
+                                                                            }
+                                                                        }
 
                                                                         // 2.3 via_approach_point
 
@@ -2021,19 +2032,34 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                                         arm_mission_configs[n].via_approach_pos.rz = real_via_approach_point.rz;
 
                                                                         this->ArmSetApproachPoint(arm_mission_configs[n].via_approach_pos, arm_mission_configs[n].tool_angle);
-                                                                        switch (arm_mission_configs[n].tool_angle)
+
+                                                                        switch (cur_task_mode_)
                                                                         {
-                                                                            case data::arm::ToolAngle::Zero:
+                                                                            case data::arm::TaskMode::UVCScanning:
                                                                             {
                                                                                 tm5.ArmTask("Move_to via0_approach_point");
                                                                                 break;
                                                                             }
-                                                                            case data::arm::ToolAngle::FortyFive:
+                                                                            case data::arm::TaskMode::Mopping:
                                                                             {
-                                                                                tm5.ArmTask("Move_to via45_approach_point");
+                                                                                switch (arm_mission_configs[n].tool_angle)
+                                                                                {
+                                                                                    case data::arm::ToolAngle::Zero:
+                                                                                    {
+                                                                                        tm5.ArmTask("Move_to via0_approach_point");
+                                                                                        break;
+                                                                                    }
+                                                                                    case data::arm::ToolAngle::FortyFive:
+                                                                                    {
+                                                                                        tm5.ArmTask("Move_to via45_approach_point");
+                                                                                        break;
+                                                                                    }
+                                                                                }
                                                                                 break;
                                                                             }
                                                                         }
+
+
 
                                                                         /// 2.4 rmove_param_init
                                                                         std::chrono::time_point<std::chrono::steady_clock> start,end;
@@ -2041,7 +2067,10 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                                         tm5.SetRMoveForceFlag(0);
 
                                                                         /// 2.5 awake the thread_RMoveForceNode
-                                                                        cur_tool_angle_ = arm_mission_configs[n].tool_angle;
+                                                                        if (cur_task_mode_ == data::arm::TaskMode::Mopping)
+                                                                        {
+                                                                            cur_tool_angle_ = arm_mission_configs[n].tool_angle;
+                                                                        }
                                                                         rmove_start_flag_ = true;
                                                                         sleep.ms(200);
                                                                         //notify
@@ -2064,6 +2093,8 @@ void yf::sys::nw_sys::DoTasks(const int& last_job_id, const int &cur_job_id, con
                                                                         bool rmove_continue_flag = true;
                                                                         while (rmove_continue_flag)
                                                                         {
+                                                                            tm5.GetMissionStatus();
+
                                                                             // 1. check arm status first.
                                                                             if(nw_status_ptr_->arm_mission_status == data::common::MissionStatus::Error ||
                                                                                nw_status_ptr_->arm_mission_status == data::common::MissionStatus::EStop)
@@ -2877,9 +2908,36 @@ void yf::sys::nw_sys::ArmSetViaPoints(const std::deque<yf::data::arm::Point3d>& 
 
 void yf::sys::nw_sys::ArmSetApproachPoint(const yf::data::arm::Point3d& approach_point, const yf::data::arm::ToolAngle &tool_angle)
 {
-    switch (tool_angle)
+    switch(cur_task_mode_)
     {
-        case data::arm::ToolAngle::Zero:
+        case data::arm::TaskMode::Mopping:
+        {
+            switch (tool_angle)
+            {
+                case data::arm::ToolAngle::Zero:
+                {
+                    std::string approach_point_str = this->ArmGetPointStr(approach_point);
+
+                    std::string command = "Set 0_approach_point = " + approach_point_str;
+
+                    tm5.ArmTask(command);
+
+                    break;
+                }
+                case data::arm::ToolAngle::FortyFive:
+                {
+                    std::string approach_point_str = this->ArmGetPointStr(approach_point);
+
+                    std::string command = "Set 45_approach_point = " + approach_point_str;
+
+                    tm5.ArmTask(command);
+
+                    break;
+                }
+            }
+            break;
+        }
+        case data::arm::TaskMode::UVCScanning:
         {
             std::string approach_point_str = this->ArmGetPointStr(approach_point);
 
@@ -2889,17 +2947,9 @@ void yf::sys::nw_sys::ArmSetApproachPoint(const yf::data::arm::Point3d& approach
 
             break;
         }
-        case data::arm::ToolAngle::FortyFive:
-        {
-            std::string approach_point_str = this->ArmGetPointStr(approach_point);
-
-            std::string command = "Set 45_approach_point = " + approach_point_str;
-
-            tm5.ArmTask(command);
-
-            break;
-        }
     }
+
+
 
     return;
 }
@@ -4818,16 +4868,29 @@ void yf::sys::nw_sys::thread_RMoveForceNode()
             sleep.ms(200);
         }
 
-        switch (cur_tool_angle_)
+
+        switch(cur_task_mode_)
         {
-            case data::arm::ToolAngle::Zero:
+            case data::arm::TaskMode::Mopping:
             {
-                tm5.ArmTask("Post via0_RMove");
+                switch (cur_tool_angle_)
+                {
+                    case data::arm::ToolAngle::Zero:
+                    {
+                        tm5.ArmTask("Post via0_RMove");
+                        break;
+                    }
+                    case data::arm::ToolAngle::FortyFive:
+                    {
+                        tm5.ArmTask("Post via45_RMove");
+                        break;
+                    }
+                }
                 break;
             }
-            case data::arm::ToolAngle::FortyFive:
+            case data::arm::TaskMode::UVCScanning:
             {
-                tm5.ArmTask("Post via45_RMove");
+                tm5.ArmTask("Post uvc_RMove");
                 break;
             }
         }
